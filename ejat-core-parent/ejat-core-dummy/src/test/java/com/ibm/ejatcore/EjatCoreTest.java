@@ -3,8 +3,6 @@ package ejatcore;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-import java.beans.Transient;
-
 public class EjatCoreTest{
     
     @Test
