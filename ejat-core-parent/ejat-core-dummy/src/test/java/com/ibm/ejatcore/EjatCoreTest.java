@@ -16,4 +16,9 @@ public class EjatCoreTest{
     public void test_method_2() {
         assertTrue(true);
     }
+
+    @Test
+    public void test_method_3() {
+        assertEquals(1,1);
+    }
 }
