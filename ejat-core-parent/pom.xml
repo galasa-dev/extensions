@@ -16,6 +16,7 @@
 		<module>ejat-config-etcd3</module>		
 		<module>ejat-resarc-couchdb</module>
 		<module>ejat-core-obr</module>
+		<module>ejat-core-dummy</module>
 	</modules>
 	
 	<properties>
@@ -35,6 +36,14 @@
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>3.5.0</version>
 					<extensions>true</extensions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.1</version>
+					<configuration>
+						<useSystemClassLoader>false</useSystemClassLoader>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -73,6 +82,11 @@
 			<artifactId>org.osgi.service.obr</artifactId>
 			<version>1.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13-beta-1</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-	
 </project>
