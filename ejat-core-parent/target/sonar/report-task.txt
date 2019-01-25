@@ -1,6 +1,0 @@
-projectKey=ejat-core:ejat-core-parent
-serverUrl=http://localhost:9000
-serverVersion=7.4.0.18908
-dashboardUrl=http://localhost:9000/dashboard?id=ejat-core%3Aejat-core-parent
-ceTaskId=AWiAs_snsJw43VZLkUlD
-ceTaskUrl=http://localhost:9000/api/ce/task?id=AWiAs_snsJw43VZLkUlD
