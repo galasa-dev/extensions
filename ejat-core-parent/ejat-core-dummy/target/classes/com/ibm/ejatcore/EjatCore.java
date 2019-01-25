@@ -1,6 +1,6 @@
 package ejatcore;
 
-public class EjatCore2{
+public class EjatCore{
 
     public static String dummyMethod() {
         String line = "Hello World!";

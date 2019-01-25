@@ -3,11 +3,11 @@ package ejatcore;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-public class EjatCoreTest{
+public class EjatCore2Test{
     
     @Test
     public void test_method() {
-        assertNotNull(EjatCore.dummyMethod());
+        assertNotNull(EjatCore2.dummyMethod());
     }
 
     @Test
