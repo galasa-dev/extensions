@@ -17,6 +17,7 @@
 		<module>ejat-resarc-couchdb</module>
 		<module>ejat-core-obr</module>
 		<module>ejat-core-dummy</module>
+		<module>ejat-core-dummy2</module>
 	</modules>
 	
 	<properties>
