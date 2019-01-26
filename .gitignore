@@ -1,9 +1,8 @@
-*.settings
-
-*.DS_Store
-
-*.classpath
-
-*.project
-
-*/target/*
+target/
+.settings/
+.project
+.classpath
+.factorypath
+.apt_generated/
+.apt_generated_tests/
+.DS_Store
