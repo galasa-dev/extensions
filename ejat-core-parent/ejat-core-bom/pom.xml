@@ -9,6 +9,8 @@
 	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
+	<name>eJAT Core Bill of Materials</name>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
