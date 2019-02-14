@@ -23,7 +23,6 @@
 				<groupId>ejat-core</groupId>
 				<artifactId>etcd3-manager</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
-				<type>bundle</type>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
