@@ -12,6 +12,25 @@
 
 	<artifactId>ejat-core-obr</artifactId>
 	<version>3.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<packaging>ejat-obr</packaging>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>ejat-core</groupId>
+				<artifactId>ejat-core-bom</artifactId>
+				<version>3.0.0-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>ejat-core</groupId>
+			<artifactId>etcd3-manager</artifactId>
+		</dependency>
+	</dependencies>
 
 </project>
