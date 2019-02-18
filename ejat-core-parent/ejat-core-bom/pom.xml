@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>ejat-core</groupId>
 		<artifactId>ejat-core-parent</artifactId>
-		<version>3.0.0-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>ejat-core</groupId>
 	<artifactId>ejat-core-bom</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>eJAT Core Bill of Materials</name>
@@ -22,7 +22,7 @@
 			<dependency>
 				<groupId>ejat-core</groupId>
 				<artifactId>etcd3-manager</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>0.2.0-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
