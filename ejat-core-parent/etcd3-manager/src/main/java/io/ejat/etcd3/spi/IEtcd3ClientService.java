@@ -1,10 +1,10 @@
-package io.ejat.core.etcd3.spi;
+package io.ejat.etcd3.spi;
 
 import java.net.URI;
 
 import javax.validation.constraints.NotNull;
 
-import io.ejat.core.etcd3.Etcd3ManagerException;
+import io.ejat.etcd3.Etcd3ManagerException;
 
 /**
  * The service to obtain an Etcd3 Client.

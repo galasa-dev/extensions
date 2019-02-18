@@ -1,4 +1,4 @@
-package io.ejat.core.etcd3.internal;
+package io.ejat.etcd3.internal;
 
 import javax.validation.constraints.NotNull;
 

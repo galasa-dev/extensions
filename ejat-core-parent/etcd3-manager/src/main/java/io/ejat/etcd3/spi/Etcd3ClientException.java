@@ -1,6 +1,6 @@
-package io.ejat.core.etcd3.spi;
+package io.ejat.etcd3.spi;
 
-import io.ejat.core.etcd3.Etcd3ManagerException;
+import io.ejat.etcd3.Etcd3ManagerException;
 
 public class Etcd3ClientException extends Etcd3ManagerException {
 	private static final long serialVersionUID = 1L;

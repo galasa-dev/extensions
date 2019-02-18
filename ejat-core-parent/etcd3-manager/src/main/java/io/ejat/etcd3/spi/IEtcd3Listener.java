@@ -1,4 +1,4 @@
-package io.ejat.core.etcd3.spi;
+package io.ejat.etcd3.spi;
 
 import java.util.UUID;
 

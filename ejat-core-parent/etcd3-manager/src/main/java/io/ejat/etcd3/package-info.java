@@ -1,4 +1,4 @@
 /**
  * etcd3 Manager - TPI
  */
-package io.ejat.core.etcd3;
+package io.ejat.etcd3;

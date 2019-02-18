@@ -3,7 +3,7 @@ package test.force.codecoverage;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.ejat.core.etcd3.internal.Etcd3ConfigurationPropertyStore;
+import io.ejat.etcd3.internal.Etcd3ConfigurationPropertyStore;
 import io.ejat.framework.spi.ConfigurationPropertyStoreException;
 
 public class Ectd3CpsTest {

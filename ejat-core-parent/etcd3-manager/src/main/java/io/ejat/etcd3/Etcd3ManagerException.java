@@ -1,4 +1,4 @@
-package io.ejat.core.etcd3;
+package io.ejat.etcd3;
 
 public class Etcd3ManagerException extends Exception {
 	private static final long serialVersionUID = 1L;

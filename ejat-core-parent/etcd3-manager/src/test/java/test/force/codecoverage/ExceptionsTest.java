@@ -3,8 +3,8 @@ package test.force.codecoverage;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.ejat.core.etcd3.Etcd3ManagerException;
-import io.ejat.core.etcd3.spi.Etcd3ClientException;
+import io.ejat.etcd3.Etcd3ManagerException;
+import io.ejat.etcd3.spi.Etcd3ClientException;
 
 public class ExceptionsTest {
 	

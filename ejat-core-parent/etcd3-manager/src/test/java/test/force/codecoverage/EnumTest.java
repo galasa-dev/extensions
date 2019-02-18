@@ -3,7 +3,7 @@ package test.force.codecoverage;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.ejat.core.etcd3.spi.IEtcd3Listener.Event;
+import io.ejat.etcd3.spi.IEtcd3Listener.Event;
 
 public class EnumTest {
 	
