@@ -1,6 +1,7 @@
 package io.ejat.etcd3.internal;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -15,6 +16,11 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 	public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
 			throws ConfigurationPropertyStoreException {
 		System.out.println("here");
+	}
+
+	@Override
+	public @Null String getProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
+		return null;
 	}
 
 }
