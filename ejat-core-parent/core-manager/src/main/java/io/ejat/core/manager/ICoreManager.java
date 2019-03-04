@@ -29,6 +29,6 @@ public interface ICoreManager {
      *
      * @return Unique Test Run name
      */
-    public @NotNull String getRunName();
+    @NotNull String getRunName();
 
 }
