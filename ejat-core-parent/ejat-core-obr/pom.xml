@@ -29,6 +29,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>ejat-core</groupId>
+			<artifactId>core-manager</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ejat-core</groupId>
 			<artifactId>etcd3-manager</artifactId>
 		</dependency>
 	</dependencies>
