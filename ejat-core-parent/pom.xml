@@ -21,6 +21,7 @@
 		<module>etcd3-manager</module>
 		<module>ejat-resarc-couchdb</module>
 		<module>ejat-core-obr</module>
+		<module>core-manager</module>
 	</modules>
 
 	<dependencyManagement>
