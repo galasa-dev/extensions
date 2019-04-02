@@ -1,8 +1,8 @@
+package io.ejat.etcd3.internal;
+
+import java.net.URI;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-
-import io.etcd.jetcd.ByteSequence;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -16,6 +16,14 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
 	@Override
 	public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
 			throws ConfigurationPropertyStoreException {
-		System.out.println("here");
-	}
+            URI cps = frameworkInitialisation.getBootstrapConfigurationPropertyStore();
+
+            if (isHttpUri(cps)){
+                frameworkInitialisation.registerConfigurationPropertyStore(new Etcd3ConfigurationPropertyStore(cps));
+            } 
+    }
+    
+    public static boolean isHttpUri(URI uri) {
+        return "http".equals(uri.getScheme());
+    }
 }
