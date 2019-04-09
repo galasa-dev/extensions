@@ -9,8 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 
-import javax.validation.constraints.AssertTrue;
-
 import java.util.ArrayList;
 
 import org.junit.Assert;
@@ -72,7 +70,6 @@ public class Ectd3CpsTest {
 		ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
 
 		GetResponse response1 = Mockito.mock(GetResponse.class);
-		KeyValue kv = Mockito.mock(KeyValue.class);
 
 		when(response1.getKvs()).thenReturn(new ArrayList<>());
 		
@@ -89,7 +86,7 @@ public class Ectd3CpsTest {
         FrameworkInitialisation fi = Mockito.mock(FrameworkInitialisation.class);
 		Etcd3ConfigurationPropertyRegistration regi = new Etcd3ConfigurationPropertyRegistration();
 		
-		when(fi.getBootstrapConfigurationPropertyStore()).thenReturn(new URI("http://thisIsALie"));
+		when(fi.getBootstrapConfigurationPropertyStore()).thenReturn(new URI("etcd:http://thisIsALie"));
 		regi.initialise(fi);
 		
 		assertTrue("dummy", true);

@@ -18,15 +18,30 @@ import io.etcd.jetcd.kv.GetResponse;
 import io.ejat.framework.spi.ConfigurationPropertyStoreException;
 import io.ejat.framework.spi.IConfigurationPropertyStore;
 
-
+/**
+ * This class impletements the CPS for etcd using the JETCD client.
+ * 
+ * @author James Davies
+ */
 public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {
 	private KV kvClient;
 
+	/**
+	 * This constructor create a priate KVClient from JETCD for store interactions.
+	 * 
+	 * @param cpsUri - location of the etcd
+	 */
 	public Etcd3ConfigurationPropertyStore(URI cpsUri) {
 		Client client = Client.builder().endpoints(cpsUri).build();
 		kvClient = client.getKVClient();
 	}
 
+	/**
+	 * This is the only method for CPS as managers should only need to gegt properties from the CPS and
+	 * not set or watch any.
+	 * 
+	 * @param 
+	 */
 	@Override
 	public @Null String getProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
 		ByteSequence bsKey = ByteSequence.from(key, UTF_8);
