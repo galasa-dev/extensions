@@ -22,7 +22,7 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
     /**
      * This intialise method is a overide that registers the correct store to the framework.
      * 
-     * The URI is collected from the Intialisation. If the URI is a http scheme then it registers it as a etcd.
+     * The URI is collected from the Intialisation. If the URI is a etcd scheme then it registers it as a etcd.
      * 
      * @param frameworkIntialisation - gives the registrtion access to the correct URI for the cps
      */
