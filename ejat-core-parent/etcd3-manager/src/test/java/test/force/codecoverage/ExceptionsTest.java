@@ -1,10 +1,19 @@
 package test.force.codecoverage;
 
+import java.beans.Transient;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
+
+import javax.validation.constraints.AssertTrue;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import io.ejat.etcd3.Etcd3ManagerException;
+import io.ejat.etcd3.internal.Etcd3ConfigurationPropertyStore;
 import io.ejat.etcd3.spi.Etcd3ClientException;
+import io.ejat.framework.spi.ConfigurationPropertyStoreException;
 
 public class ExceptionsTest {
 	
@@ -28,5 +37,18 @@ public class ExceptionsTest {
 		Assert.assertTrue("dummy",true);
 	}
 	
-	
+	@Test
+	public void testCatchingException() throws URISyntaxException{
+		boolean caught = false;
+
+		try {
+			URI testUri = new URI("http://test.com");
+			Etcd3ConfigurationPropertyStore cps = new Etcd3ConfigurationPropertyStore(testUri);
+			cps.getProperty("NoKey");
+		} catch (ConfigurationPropertyStoreException e) {
+			caught = true;
+		}
+
+		Assert.assertTrue("Exception not caught", caught);
+	}	
 }
