@@ -32,7 +32,7 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
             URI cps = frameworkInitialisation.getBootstrapConfigurationPropertyStore();
 
 
-            if (isHttpUri(cps)){
+            if (isEtcdUri(cps)){
                 try {
                     URI uri = new URI(cps.toString().replace("etcd:", ""));
                     frameworkInitialisation.registerConfigurationPropertyStore(new Etcd3ConfigurationPropertyStore(uri));
@@ -48,7 +48,7 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
      * @param uri - the uri for the cps.
      * @return - if etcd is applicable.
      */
-    public static boolean isHttpUri(URI uri) {
+    public static boolean isEtcdUri(URI uri) {
         return "etcd".equals(uri.getScheme());
     }
 }
