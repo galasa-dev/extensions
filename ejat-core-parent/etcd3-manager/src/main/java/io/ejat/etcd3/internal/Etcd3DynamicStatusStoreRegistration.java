@@ -8,7 +8,6 @@ import javax.validation.constraints.NotNull;
 import org.osgi.service.component.annotations.Component;
 
 import io.ejat.framework.spi.DynamicStatusStoreException;
-import io.ejat.framework.spi.IConfigurationPropertyStoreRegistration;
 import io.ejat.framework.spi.IDynamicStatusStoreRegistration;
 import io.ejat.framework.spi.IFrameworkInitialisation;
 
@@ -17,7 +16,7 @@ import io.ejat.framework.spi.IFrameworkInitialisation;
  * 
  * @author James Davies
  */
-@Component(service= {IConfigurationPropertyStoreRegistration.class})
+@Component(service= {IDynamicStatusStoreRegistration.class})
 public class Etcd3DynamicStatusStoreRegistration implements IDynamicStatusStoreRegistration {
 
     /**
