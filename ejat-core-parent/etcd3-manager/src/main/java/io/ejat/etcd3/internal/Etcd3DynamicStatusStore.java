@@ -86,7 +86,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 
         CompletableFuture<PutResponse> response = kvClient.put(bsKey, bsValue);
         try {
-             response.get();
+            response.get();
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new DynamicStatusStoreException("Could not put key-value", e);

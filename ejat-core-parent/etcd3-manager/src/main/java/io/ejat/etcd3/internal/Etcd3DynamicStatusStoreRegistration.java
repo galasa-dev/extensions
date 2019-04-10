@@ -40,6 +40,7 @@ public class Etcd3DynamicStatusStoreRegistration implements IDynamicStatusStoreR
                 }
             } 
     }
+    
     /**
      * A simple check of the scheme to make sure it realtes to a Etcd store
      * @param uri - location of etcd store

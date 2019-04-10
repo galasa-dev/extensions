@@ -9,8 +9,10 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -35,8 +37,10 @@ import io.etcd.jetcd.kv.DeleteResponse;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.kv.PutResponse;
 import io.etcd.jetcd.kv.TxnResponse;
+import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
+import io.etcd.jetcd.options.PutOption;
 
 /**
  * This test class is a for testing the implementation of the JETD client is correct and behaving as expected.
@@ -278,6 +282,26 @@ public class Etcd3DssTest {
     }
 
     /**
+     * This test does a simple get a new key from etcd (mocked) of a single k-v pair.
+     * 
+     * @throws DynamicStatusStoreException
+     */
+    @Test
+    public void testGetSimpleWithNew() throws DynamicStatusStoreException {
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
+        
+		GetResponse response = Mockito.mock(GetResponse.class);
+        when(response.getKvs()).thenReturn(new ArrayList<KeyValue>());
+		
+		CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
+
+		when(mockKvCLient.get(bsKey)).thenReturn(futureResponse);
+
+		String out = mockDss.get("foo");
+		assertEquals("Unexpected Response" , null, out);
+    }
+
+    /**
      * This test method does a get for serveral keys using a prefix.
      * 
      * @throws DynamicStatusStoreException
@@ -306,6 +330,34 @@ public class Etcd3DssTest {
         String out = map.get("foo");
 
         assertEquals("Incorrect Value", "bar", out);
+    }
+
+    /**
+     * This test method does a get for serveral keys using a prefix, but no eksy exsist.
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testGetprefixWithoKeys() throws DynamicStatusStoreException, InterruptedException, ExecutionException{
+        ByteSequence bsPrefix = ByteSequence.from("foo", UTF_8);
+        ByteSequence bsValue = ByteSequence.from("bar", UTF_8);
+
+        GetResponse response = Mockito.mock(GetResponse.class);
+
+        when(response.getKvs()).thenReturn(new ArrayList<KeyValue>());
+
+        CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
+
+		when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
+        
+        Map<String, String> map = mockDss.getPrefix("foo");
+        assertEquals("Map was the wrong size",0 , map.size());
+
+        String out = map.get("foo");
+
+        assertEquals("Incorrect Value", null, out);
     }
 
     /**
@@ -374,8 +426,8 @@ public class Etcd3DssTest {
 
         when(mockKvCLient.delete(Mockito.eq(bsKeyPrefix), any(DeleteOption.class))).thenReturn(futureResponse);
 
-        mockDss.deletePrefix("foo"
-        );
+        mockDss.deletePrefix("foo");
+
         assertTrue("dummy", true);
     }
 
@@ -409,9 +461,281 @@ public class Etcd3DssTest {
         FrameworkInitialisation fi = Mockito.mock(FrameworkInitialisation.class);
 		Etcd3DynamicStatusStoreRegistration regi = new Etcd3DynamicStatusStoreRegistration();
 		
-		when(fi.getDynamicStatusStoreUri()).thenReturn(new URI("file:///blah"));
+        when(fi.getDynamicStatusStoreUri()).thenReturn(new URI("file:///blah"));
+        
 		regi.initialise(fi);
 		
 		assertTrue("dummy", true);
-	}
+    }
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     */
+    @Test
+    public void testDynamicResource() throws DynamicStatusStoreException {
+        mockDss.getDynamicResource("This doesnt matter");
+        assertTrue("dummy", true);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     */
+    @Test
+    public void testDynamicRun() throws DynamicStatusStoreException {
+        mockDss.getDynamicRun();
+        assertTrue("dummy", true);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     */
+    @Test
+    public void testPutExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
+        ByteSequence bsValue = ByteSequence.from("bar", UTF_8);   
+
+        CompletableFuture<PutResponse> response = Mockito.mock(CompletableFuture.class);
+        when(mockKvCLient.put(bsKey, bsValue)).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.put("foo","bar");
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testPutMapExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        Map<String, String> kvs = new HashMap<>();
+
+        kvs.put("foo", "bar");
+        kvs.put("foo-er", "bar-er");   
+
+        CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
+        Txn mocktxn = Mockito.mock(Txn.class);
+        when(mockKvCLient.txn()).thenReturn(mocktxn);
+        Txn request = Mockito.mock(Txn.class);
+        when(mocktxn.Then(any(Op.class))).thenReturn(request);
+        when(request.commit()).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.put(kvs);
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testPutSwapExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        String key = "foo";
+        String oldValue = "notBar";
+        String newValue = "bar";  
+
+        CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
+        Txn mocktxn = Mockito.mock(Txn.class);
+        when(mockKvCLient.txn()).thenReturn(mocktxn);
+        Txn check = Mockito.mock(Txn.class);
+        when(mocktxn.If(any())).thenReturn(check);
+        Txn request = Mockito.mock(Txn.class);
+        when(check.Then(any(Op.class))).thenReturn(request);
+        when(request.commit()).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+            mockDss.putSwap(key, oldValue, newValue);
+
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testPutSwapMapExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        String key = "foo";
+        String oldValue = "notBar";
+        String newValue = "bar";  
+
+        Map<String,String> otherKvs = new HashMap<>();
+
+        otherKvs.put("marco", "pollo");
+        otherKvs.put("Tom", "Jerry");
+
+        CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
+        Txn mocktxn = Mockito.mock(Txn.class);
+        when(mockKvCLient.txn()).thenReturn(mocktxn);
+        Txn check = Mockito.mock(Txn.class);
+        when(mocktxn.If(any())).thenReturn(check);
+        Txn request = Mockito.mock(Txn.class);
+        when(check.Then(any(Op.class))).thenReturn(request);
+        when(request.commit()).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+            mockDss.putSwap(key, oldValue, newValue, otherKvs);
+
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testGetExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+
+        CompletableFuture<GetResponse> response = Mockito.mock(CompletableFuture.class);
+        when(mockKvCLient.get(bsKey)).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.get("foo");
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testGetPrefixException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+
+        CompletableFuture<GetResponse> response = Mockito.mock(CompletableFuture.class);
+        when(mockKvCLient.get(Mockito.eq(bsKey), any(GetOption.class))).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.getPrefix("foo");
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testDeleteException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+
+        CompletableFuture<DeleteResponse> response = Mockito.mock(CompletableFuture.class);
+        when(mockKvCLient.delete(Mockito.eq(bsKey))).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.delete("foo");
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown correctly
+     *  
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testDeleteSetExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        Set<String> keys = new HashSet<>();
+        keys.add("foo");
+        keys.add("bar");
+    
+        CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
+        Txn mocktxn = Mockito.mock(Txn.class);
+        when(mockKvCLient.txn()).thenReturn(mocktxn);
+        Txn request = Mockito.mock(Txn.class);
+        when(mocktxn.Then(any(Op.class))).thenReturn(request);
+        when(request.commit()).thenReturn(response);
+
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.delete(keys);
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
+    /**
+     * Tests the exception is thrown for the delete Prefix
+     * 
+     * @throws DynamicStatusStoreException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
+    @Test
+    public void testDeletePrefixException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+        Boolean caught = false;
+        ByteSequence bsPrefixKey = ByteSequence.from("foo", UTF_8); 
+
+        CompletableFuture<DeleteResponse> response = Mockito.mock(CompletableFuture.class);
+        when(mockKvCLient.delete(Mockito.eq(bsPrefixKey), any(DeleteOption.class))).thenReturn(response);
+        try{ 
+            when(response.get()).thenThrow(new InterruptedException());
+
+            mockDss.deletePrefix("foo");
+        } catch (DynamicStatusStoreException e) {
+            caught = true;
+        }
+        assertTrue("Exception was not caught", caught);
+    }
+
 }
