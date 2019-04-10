@@ -108,7 +108,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         for (String key: keyValues.keySet()) {
             ByteSequence obsKey = ByteSequence.from(key, UTF_8);
             ByteSequence obsValue = ByteSequence.from(keyValues.get(key), UTF_8);
-            ops.add(io.etcd.jetcd.op.Op.put(obsKey, obsValue, options));
+            ops.add(Op.put(obsKey, obsValue, options));
         }
         Txn request = txn.Then(ops.toArray(new Op[ops.size()]));
         CompletableFuture<TxnResponse> response = request.commit();
@@ -141,10 +141,10 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 
         Cmp cmp = null;
         if (oldValue == null) {
-            cmp = new Cmp(bsKey, io.etcd.jetcd.op.Cmp.Op.EQUAL, CmpTarget.version(0));
+            cmp = new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.version(0));
         } else {
             ByteSequence bsOldValue = ByteSequence.from(oldValue, UTF_8);
-            cmp = new Cmp(bsKey, io.etcd.jetcd.op.Cmp.Op.EQUAL, CmpTarget.value(bsOldValue));
+            cmp = new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.value(bsOldValue));
         }
 
         PutOption option = PutOption.DEFAULT;
@@ -183,10 +183,10 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 
         Cmp cmp = null;
         if (oldValue == null) {
-            cmp = new Cmp(bsKey, io.etcd.jetcd.op.Cmp.Op.EQUAL, CmpTarget.version(0));
+            cmp = new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.version(0));
         } else {
             ByteSequence bsOldValue = ByteSequence.from(oldValue, UTF_8);
-            cmp = new Cmp(bsKey, io.etcd.jetcd.op.Cmp.Op.EQUAL, CmpTarget.value(bsOldValue));
+            cmp = new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.value(bsOldValue));
         }
 
         ArrayList<Op> ops = new ArrayList<>();
@@ -301,7 +301,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         ArrayList<Op> ops = new ArrayList<>();
         for (String key: keys) {
             ByteSequence obsKey = ByteSequence.from(key, UTF_8);
-            ops.add(io.etcd.jetcd.op.Op.delete(obsKey, options));
+            ops.add(Op.delete(obsKey, options));
         }
 
         CompletableFuture<TxnResponse> response = txn.Then(ops.toArray(new Op[ops.size()])).commit();

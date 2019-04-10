@@ -301,9 +301,11 @@ public class Etcd3DssTest {
 		when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
         
         Map<String, String> map = mockDss.getPrefix("foo");
-        assertEquals(map.size(), 1);
+        assertEquals("Map was the wrong size",1 , map.size());
+
         String out = map.get("foo");
-        assertEquals("bar", out);
+
+        assertEquals("Incorrect Value", "bar", out);
     }
 
     /**
@@ -372,7 +374,9 @@ public class Etcd3DssTest {
 
         when(mockKvCLient.delete(Mockito.eq(bsKeyPrefix), any(DeleteOption.class))).thenReturn(futureResponse);
 
-        mockDss.deletePrefix("foo");
+        mockDss.deletePrefix("foo"
+        );
+        assertTrue("dummy", true);
     }
 
     /**
