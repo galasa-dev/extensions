@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +39,7 @@ import io.etcd.jetcd.kv.TxnResponse;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
-import io.etcd.jetcd.options.PutOption;
+
 
 /**
  * This test class is a for testing the implementation of the JETD client is correct and behaving as expected.
