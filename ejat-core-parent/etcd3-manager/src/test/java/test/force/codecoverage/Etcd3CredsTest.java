@@ -81,7 +81,7 @@ public class Etcd3CredsTest {
 
         ICredentials out = credsStore.getCredentials("foo");
 
-        assertEquals(null, out);
+        assertEquals("Not null as expected. ",null, out);
     }
 
     /**
@@ -101,7 +101,7 @@ public class Etcd3CredsTest {
 
         CredentialsToken out = (CredentialsToken)credsStore.getCredentials("foo");
 
-        assertEquals("bar", out.getToken());
+        assertEquals("Inccorect token.","bar", out.getToken());
     }
 
     /**
@@ -131,7 +131,7 @@ public class Etcd3CredsTest {
 
         CredentialsUsername out = (CredentialsUsername)credsStore.getCredentials("foo");
 
-        assertEquals("bar", out.getUsername());
+        assertEquals("Inncorrect username.","bar", out.getUsername());
     }
 
     /**
@@ -169,8 +169,8 @@ public class Etcd3CredsTest {
 
         CredentialsUsernamePassword out = (CredentialsUsernamePassword)credsStore.getCredentials("foo");
 
-        assertEquals("bar", out.getUsername());
-        assertEquals("SuperSecretPassword", out.getPassword());
+        assertEquals("Incorect username recieved.","bar", out.getUsername());
+        assertEquals("Incorrect password recieved","SuperSecretPassword", out.getPassword());
     }
 
     /**
