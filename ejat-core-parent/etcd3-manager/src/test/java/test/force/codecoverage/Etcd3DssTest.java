@@ -470,28 +470,6 @@ public class Etcd3DssTest {
     /**
      * Tests the exception is thrown correctly
      * 
-     * @throws DynamicStatusStoreException
-     */
-    @Test
-    public void testDynamicResource() throws DynamicStatusStoreException {
-        mockDss.getDynamicResource("This doesnt matter");
-        assertTrue("dummy", true);
-    }
-
-    /**
-     * Tests the exception is thrown correctly
-     * 
-     * @throws DynamicStatusStoreException
-     */
-    @Test
-    public void testDynamicRun() throws DynamicStatusStoreException {
-        mockDss.getDynamicRun();
-        assertTrue("dummy", true);
-    }
-
-    /**
-     * Tests the exception is thrown correctly
-     * 
      */
     @Test
     public void testPutExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {

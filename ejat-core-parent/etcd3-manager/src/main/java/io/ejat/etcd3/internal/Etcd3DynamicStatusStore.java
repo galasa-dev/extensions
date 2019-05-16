@@ -1,34 +1,30 @@
 package io.ejat.etcd3.internal;
 
+import static com.google.common.base.Charsets.UTF_8;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import javax.validation.constraints.NotNull;
 
-import static com.google.common.base.Charsets.UTF_8;
-
-import io.ejat.framework.internal.dss.FrameworkDynamicResource;
-import io.ejat.framework.internal.dss.FrameworkDynamicRun;
 import io.ejat.framework.spi.DynamicStatusStoreException;
-import io.ejat.framework.spi.IDynamicResource;
-import io.ejat.framework.spi.IDynamicRun;
 import io.ejat.framework.spi.IDynamicStatusStore;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.Txn;
-import io.etcd.jetcd.kv.PutResponse;
-import io.etcd.jetcd.kv.TxnResponse;
 import io.etcd.jetcd.kv.DeleteResponse;
 import io.etcd.jetcd.kv.GetResponse;
+import io.etcd.jetcd.kv.PutResponse;
+import io.etcd.jetcd.kv.TxnResponse;
 import io.etcd.jetcd.op.Cmp;
 import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
@@ -56,22 +52,6 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 		kvClient = client.getKVClient();
     }
     
-    /**
-     *  NEEDS TO BE IMPLEMENTED ONCE DESIGNED
-     */
-    @Override
-    public IDynamicResource getDynamicResource(String resourceKey) throws DynamicStatusStoreException {
-        return new FrameworkDynamicResource();
-        }
-
-    /**
-     * NEEDS TO BE IMPLEMENTED ONCE DESIGNED
-     */
-    @Override
-    public IDynamicRun getDynamicRun() throws DynamicStatusStoreException {
-        return new FrameworkDynamicRun();
-    }
-
     /**
      * A simple put class that adds a single key value in etcd key value store.
      * 
