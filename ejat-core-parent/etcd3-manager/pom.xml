@@ -20,16 +20,18 @@
 		<dependency>
 			<groupId>ejat</groupId>
 			<artifactId>ejat-framework</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.etcd</groupId>
 			<artifactId>jetcd-core</artifactId>
 			<version>0.3.0</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.25.1</version>
+			<scope>test</scope>
 		</dependency>	
 	</dependencies>
 
@@ -42,7 +44,15 @@
 				<configuration>
 					<supportedProjectTypes>bundle</supportedProjectTypes>
 					<instructions>
-						<Bundle-SymbolicName>io.ejat.etcd3.manager</Bundle-SymbolicName>
+						<Bundle-SymbolicName>etcd3.manager</Bundle-SymbolicName>
+						<Embed-Dependency>*;scope=compile;artifactId=!log4j</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+						<Import-Package>
+						                io.ejat.etcd3,
+						                io.ejat.framework.spi,
+						                javax.net.ssl,
+						                javax.security.cert
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
