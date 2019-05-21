@@ -386,7 +386,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 				KeyValue eventKey  = event.getKeyValue();
 				KeyValue eventPrev = event.getPrevKV();
 				
-				if (eventType == null || (eventKey == null && eventPrev == null)) {
+				if (eventType == null || eventKey == null) {
 					continue;
 				}
 				
