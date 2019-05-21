@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -16,11 +17,16 @@ import javax.validation.constraints.NotNull;
 
 import io.ejat.framework.spi.DynamicStatusStoreException;
 import io.ejat.framework.spi.IDynamicStatusStore;
+import io.ejat.framework.spi.IDynamicStatusStoreWatcher;
+import io.ejat.framework.spi.IDynamicStatusStoreWatcher.Event;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.Txn;
+import io.etcd.jetcd.Watch;
+import io.etcd.jetcd.Watch.Listener;
+import io.etcd.jetcd.Watch.Watcher;
 import io.etcd.jetcd.kv.DeleteResponse;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.kv.PutResponse;
@@ -31,6 +37,10 @@ import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.options.WatchOption;
+import io.etcd.jetcd.watch.WatchEvent;
+import io.etcd.jetcd.watch.WatchEvent.EventType;
+import io.etcd.jetcd.watch.WatchResponse;
 
 /**
  * This class implements the DSS store for the use of etcd3 as the k-v store. It is interacting with the Jetcd Client
@@ -40,6 +50,9 @@ import io.etcd.jetcd.options.PutOption;
  */
 public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
     private KV kvClient;
+	private Watch watchClient;
+	
+	private final HashMap<UUID, PassthroughWatcher> watchers = new HashMap<>();
 
     /**
      * The constructure sets up a private KVClient that can be used by this class to interact with the etcd3 cluster.
@@ -50,6 +63,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
     public Etcd3DynamicStatusStore (URI dssUri) {
         Client client = Client.builder().endpoints(dssUri).build();
 		kvClient = client.getKVClient();
+		this.watchClient = client.getWatchClient();
     }
     
     /**
@@ -312,5 +326,116 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 			throw new DynamicStatusStoreException("Could not delete key(s).", e);
 		}
     }
+
+    //TODO Test and document
+	@Override
+	public UUID watch(IDynamicStatusStoreWatcher watcher, String key) throws DynamicStatusStoreException {
+		ByteSequence bsKey = ByteSequence.from(key, UTF_8);
+		PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
+		passWatcher.setEtcdWatcher(watchClient.watch(bsKey, passWatcher));
+		watchers.put(passWatcher.getID(), passWatcher);
+		return passWatcher.getID();
+	}
+
+    //TODO Test and document
+	@Override
+	public UUID watchPrefix(IDynamicStatusStoreWatcher watcher, String keyPrefix) throws DynamicStatusStoreException {
+		ByteSequence bsKey = ByteSequence.from(keyPrefix, UTF_8);
+		PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
+		WatchOption watchOption = WatchOption.newBuilder().withPrefix(bsKey).build();
+		Watcher etcdWatcher = watchClient.watch(bsKey, watchOption, passWatcher);
+		passWatcher.setEtcdWatcher(etcdWatcher);
+		watchers.put(passWatcher.getID(), passWatcher);
+		return passWatcher.getID();
+	}
+
+    //TODO Test and document
+	@Override
+	public void unwatch(UUID watchId) throws DynamicStatusStoreException {
+		PassthroughWatcher passWatcher = watchers.remove(watchId);
+		if (passWatcher == null) {
+			return;
+		}
+				
+		passWatcher.getEtcdWatcher().close();
+	}
+	
+	private class PassthroughWatcher implements Listener {
+		
+		private final UUID id = UUID.randomUUID();
+		private final IDynamicStatusStoreWatcher watcher;
+		private Watcher etcdWatcher;
+		
+		public PassthroughWatcher(IDynamicStatusStoreWatcher watcher) {
+			this.watcher = watcher;
+		}
+
+		@Override
+		public void onNext(WatchResponse response) {
+			if (response == null) {
+				return;
+			}
+			
+			List<WatchEvent> events = response.getEvents();
+			if (events == null) {
+				return;
+			}
+			
+			for(WatchEvent event : events) {
+				EventType eventType = event.getEventType();
+				KeyValue eventKey  = event.getKeyValue();
+				KeyValue eventPrev = event.getPrevKV();
+				
+				if (eventType == null || eventKey == null) {
+					continue;
+				}
+				
+				switch(eventType) {
+				case DELETE:
+					watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
+							Event.DELETE, 
+							null, 
+							null);
+					break;
+				case PUT:
+					if (eventPrev != null) {
+						watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
+								Event.MODIFIED, 
+								eventPrev.getValue().toString(UTF_8), 
+								eventKey.getValue().toString(UTF_8));
+					} else {
+						watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
+								Event.NEW, 
+								null, 
+								eventKey.getValue().toString(UTF_8));
+					}
+					break;
+				case UNRECOGNIZED:
+				default:
+					continue;
+				}
+			}
+		}
+
+		@Override
+		public void onError(Throwable throwable) {
+		}
+
+		@Override
+		public void onCompleted() {
+		}
+		
+		public UUID getID() {
+			return this.id;
+		}
+		
+		public void setEtcdWatcher(Watcher etcdWatcher) {
+			this.etcdWatcher = etcdWatcher;			
+		}
+		
+		public Watcher getEtcdWatcher() {
+			return this.etcdWatcher;			
+		}
+	}
     
 }
