@@ -1,4 +1,4 @@
 /**
  * eJAT Core Manager - Internal Implementation
  */
-package io.ejat.core.manager.internal;
+package io.ejat.core.internal;

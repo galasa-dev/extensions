@@ -1,4 +1,4 @@
-package io.ejat.core.manager.internal;
+package io.ejat.core.internal;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
