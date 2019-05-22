@@ -1,4 +1,4 @@
 /**
  * eJAT Core Manager - TPI
  */
-package io.ejat.core.manager;
+package io.ejat.core;

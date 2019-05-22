@@ -1,4 +1,4 @@
-package io.ejat.core.manager;
+package io.ejat.core;
 
 import javax.validation.constraints.NotNull;
 

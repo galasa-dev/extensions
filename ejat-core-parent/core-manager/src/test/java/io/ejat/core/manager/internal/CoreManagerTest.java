@@ -15,10 +15,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import io.ejat.core.manager.ICoreManager;
-import io.ejat.core.manager.Logger;
-import io.ejat.core.manager.RunName;
-import io.ejat.core.manager.StoredArtifactRoot;
+import io.ejat.core.ICoreManager;
+import io.ejat.core.Logger;
+import io.ejat.core.RunName;
+import io.ejat.core.StoredArtifactRoot;
+import io.ejat.core.internal.CoreManager;
 import io.ejat.framework.spi.IFramework;
 import io.ejat.framework.spi.IManager;
 import io.ejat.framework.spi.IResultArchiveStore;
@@ -77,7 +78,7 @@ public class CoreManagerTest {
     
     
     public static class TestClass {
-        @io.ejat.core.manager.CoreManager
+        @io.ejat.core.CoreManager
         public ICoreManager coreManager;
         
         @Logger

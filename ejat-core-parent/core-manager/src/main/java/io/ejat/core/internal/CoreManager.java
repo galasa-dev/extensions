@@ -1,4 +1,4 @@
-package io.ejat.core.manager.internal;
+package io.ejat.core.internal;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -11,10 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 
-import io.ejat.core.manager.ICoreManager;
-import io.ejat.core.manager.Logger;
-import io.ejat.core.manager.RunName;
-import io.ejat.core.manager.StoredArtifactRoot;
+import io.ejat.core.ICoreManager;
+import io.ejat.core.Logger;
+import io.ejat.core.RunName;
+import io.ejat.core.StoredArtifactRoot;
 import io.ejat.framework.spi.AbstractManager;
 import io.ejat.framework.spi.GenerateAnnotatedField;
 import io.ejat.framework.spi.IFramework;
@@ -64,7 +64,7 @@ public class CoreManager extends AbstractManager implements ICoreManager {
      * @param annotations All the Manager annotations associated with the field
      * @return The Object the field needs to be filled with
      */
-    @GenerateAnnotatedField(annotation = io.ejat.core.manager.CoreManager.class)
+    @GenerateAnnotatedField(annotation = io.ejat.core.CoreManager.class)
     public ICoreManager createICoreManager(Field field, List<Annotation> annotations) {
         return this;
     }
