@@ -2,8 +2,11 @@ package io.ejat.core.internal.resourcemanagement.runs;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 
+import io.ejat.framework.spi.FrameworkException;
 import io.ejat.framework.spi.IConfigurationPropertyStoreService;
 import io.ejat.framework.spi.IDynamicStatusStoreService;
 import io.ejat.framework.spi.IFramework;
@@ -13,7 +16,7 @@ import io.ejat.framework.spi.ResourceManagerException;
 
 @Component(service= {IResourceManagementProvider.class})
 public class RunResourceManagement implements IResourceManagementProvider {
-	
+	private final Log                          logger = LogFactory.getLog(getClass());	
 	private IFramework                         framework;
 	private IResourceManagement                resourceManagement;
 	private IDynamicStatusStoreService         dss;
@@ -35,10 +38,15 @@ public class RunResourceManagement implements IResourceManagementProvider {
 
 	@Override
 	public void start() {
-		this.resourceManagement.getScheduledExecutorService().scheduleWithFixedDelay(new RunDeadHeartbeatMonitor(this.framework, this.resourceManagement, this.dss, this,cps), 
-				this.framework.getRandom().nextInt(20), 
-				20, 
-				TimeUnit.SECONDS);
+
+		try {
+			this.resourceManagement.getScheduledExecutorService().scheduleWithFixedDelay(new RunDeadHeartbeatMonitor(this.framework, this.resourceManagement, this.dss, this,cps), 
+					this.framework.getRandom().nextInt(20), 
+					20, 
+					TimeUnit.SECONDS);
+		} catch (FrameworkException e) {
+			logger.error("Unable to initialise Run Dead Heartbeat monitor",e);
+		}
 	}
 
 	@Override
