@@ -47,6 +47,14 @@ public class RunResourceManagement implements IResourceManagementProvider {
 		} catch (FrameworkException e) {
 			logger.error("Unable to initialise Run Dead Heartbeat monitor",e);
 		}
+		try {
+			this.resourceManagement.getScheduledExecutorService().scheduleWithFixedDelay(new RunFinishedRuns(this.framework, this.resourceManagement, this.dss, this,cps), 
+					this.framework.getRandom().nextInt(20), 
+					20, 
+					TimeUnit.SECONDS);
+		} catch (FrameworkException e) {
+			logger.error("Unable to initialise Finished Run monitor",e);
+		}
 	}
 
 	@Override
