@@ -21,20 +21,16 @@
 		<dependency>
 			<groupId>ejat</groupId>
 			<artifactId>ejat</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>ejat</groupId>
 			<artifactId>ejat-framework</artifactId>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>6.0.0</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	
