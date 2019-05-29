@@ -35,6 +35,10 @@
 			<groupId>ejat-core</groupId>
 			<artifactId>etcd3-manager</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ejat-core</groupId>
+			<artifactId>cirillo-ras-couchdb</artifactId>
+		</dependency>
 	</dependencies>
 
 </project>

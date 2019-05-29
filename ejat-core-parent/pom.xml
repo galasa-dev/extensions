@@ -19,9 +19,9 @@
 	<modules>
 		<module>ejat-core-bom</module>
 		<module>etcd3-manager</module>
-		<module>ejat-resarc-couchdb</module>
 		<module>ejat-core-obr</module>
 		<module>core-manager</module>
+		<module>cirillo-ras-couchdb</module>
 	</modules>
 
 	<dependencyManagement>
