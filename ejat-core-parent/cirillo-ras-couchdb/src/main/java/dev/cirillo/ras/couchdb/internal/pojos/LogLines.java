@@ -4,9 +4,9 @@ import java.util.List;
 
 public class LogLines {
 	
-	public String runId;
-	public String runName;
-	public long order;
-	public List<String> lines;
+	public String runId;  // NOSONAR
+	public String runName;  // NOSONAR
+	public long order;  // NOSONAR
+	public List<String> lines;  // NOSONAR
 
 }
