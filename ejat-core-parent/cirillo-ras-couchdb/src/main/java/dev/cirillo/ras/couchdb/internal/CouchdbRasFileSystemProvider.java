@@ -1,8 +1,12 @@
 package dev.cirillo.ras.couchdb.internal;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileStore;
+import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -17,12 +21,28 @@ import io.ejat.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
 
 	private final HashMap<Path, ResultArchiveStoreContentType> contentTypes = new HashMap<>();
-	
+
+	private final HashSet<CouchdbArtifactPath> paths = new HashSet<>();
+
 	private final CouchdbRasStore couchdbRasStore;
 
 	protected CouchdbRasFileSystemProvider(FileStore fileSystemStore, CouchdbRasStore couchdbRasStore) {
-		super(fileSystemStore);
+		super(fileSystemStore, null);
+		fileSystem = new CouchdbFileSystem(this);
 		this.couchdbRasStore = couchdbRasStore;
+		paths.add(new CouchdbArtifactPath(fileSystem, "/"));
+	}
+	
+	protected void addPath(CouchdbArtifactPath path) {
+		path = path.toAbsolutePath();
+		paths.add(path);
+		
+		CouchdbArtifactPath parentPath = (CouchdbArtifactPath) path.getParent();
+		while(parentPath != null && !paths.contains(parentPath)) {
+			paths.add(parentPath);
+			parentPath = parentPath.getParent();
+		}
+		
 	}
 
 
@@ -31,11 +51,6 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 			throws IOException {
 
 		boolean write = options.contains(StandardOpenOption.WRITE);
-
-		if (!write) {
-			throw new IOException("Does not support read yet");
-		}
-
 
 		if (write) {
 			Path absolute = path.toAbsolutePath();
@@ -49,15 +64,37 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 			if (contentType == null) {
 				contentType = contentTypes.get(absolute);
 			}
-			
+
 			HashSet<OpenOption> passThroughOptions = new HashSet<>();
 			passThroughOptions.add(StandardOpenOption.WRITE);
 			passThroughOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
 
-			return new CouchdbRasByteChannel(this.couchdbRasStore, absolute, contentType, passThroughOptions, attrs);
+			return new CouchdbRasWriteByteChannel(this.couchdbRasStore, absolute, contentType, passThroughOptions, attrs);
+		} else {
+			CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
+			Path cachePath = Files.createTempFile("cirillo_couchdb", "temp");
+			try {
+				couchdbRasStore.retrieveArtifact(cdbPath, cachePath);
+			} catch (CouchdbRasException e) {
+				throw new IOException("Unable to retrieve artifact", e);
+			}
+			return new CouchdbRasReadByteChannel(cachePath);
 		}
+	}
 
-		return null;
+
+	public Path getRoot() {
+		return new CouchdbArtifactPath(this.getActualFileSystem(), "/");
+	}
+	
+	@Override
+	public Path getPath(URI uri) {
+		return new CouchdbArtifactPath(this.getActualFileSystem(), uri.toString());
+	}
+	
+	@Override
+	public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
+		return new CouchdbDirectoryStream(dir, filter, paths);		
 	}
 
 }
