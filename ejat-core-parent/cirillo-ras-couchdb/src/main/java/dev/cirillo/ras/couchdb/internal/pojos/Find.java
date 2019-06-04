@@ -7,6 +7,6 @@ public class Find {
 	public Integer    limit; // NOSONAR
 	public Integer    skip; // NOSONAR
 	public Boolean    execution_stats; // NOSONAR
-	public String bookmark;
+	public String bookmark;// NOSONAR
 
 }

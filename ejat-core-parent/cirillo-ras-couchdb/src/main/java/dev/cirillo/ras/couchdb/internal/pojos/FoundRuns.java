@@ -4,10 +4,10 @@ import java.util.List;
 
 public class FoundRuns {
 	
-	public List<TestStructureCouchdb> docs;
+	public List<TestStructureCouchdb> docs; // NOSONAR
 	
-	public String bookmark;
+	public String bookmark;// NOSONAR
 	
-	public String warning;
+	public String warning;// NOSONAR
 
 }
