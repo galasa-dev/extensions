@@ -31,9 +31,9 @@ import io.ejat.ResultArchiveStoreContentType;
  * @author Michael Baylis
  *
  */
-public class CouchdbRasByteChannel implements SeekableByteChannel {
+public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
-	private final static Log logger = LogFactory.getLog(CouchdbRasByteChannel.class);
+	private final static Log logger = LogFactory.getLog(CouchdbRasWriteByteChannel.class);
 
 	private static final Charset           UTF8 = Charset.forName("utf-8");
 
@@ -45,7 +45,7 @@ public class CouchdbRasByteChannel implements SeekableByteChannel {
 	private final CouchdbRasStore couchdbRasStore;
 
 
-	CouchdbRasByteChannel(CouchdbRasStore couchdbRasStore, Path remotePath, ResultArchiveStoreContentType remoteContentType, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) throws IOException {
+	CouchdbRasWriteByteChannel(CouchdbRasStore couchdbRasStore, Path remotePath, ResultArchiveStoreContentType remoteContentType, Set<? extends OpenOption> options, FileAttribute<?>[] attrs) throws IOException {
 		this.couchdbRasStore     = couchdbRasStore;
 		this.remotePath          = remotePath;
 

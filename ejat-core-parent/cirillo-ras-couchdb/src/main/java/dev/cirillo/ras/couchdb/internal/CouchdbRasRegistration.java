@@ -12,6 +12,7 @@ import org.osgi.service.component.annotations.Component;
 import io.ejat.framework.spi.IFramework;
 import io.ejat.framework.spi.IFrameworkInitialisation;
 import io.ejat.framework.spi.IResultArchiveStoreService;
+import io.ejat.framework.spi.IRunResult;
 import io.ejat.framework.spi.ResultArchiveStoreException;
 import io.ejat.framework.spi.teststructure.TestStructure;
 
@@ -80,4 +81,12 @@ public class CouchdbRasRegistration implements IResultArchiveStoreService {
 	@Override
 	public void shutdown() {
 	}
+	
+	@Override
+	public List<IRunResult> getRuns(String runName) throws ResultArchiveStoreException {
+		throw new UnsupportedOperationException("Should not have been called");  //  temporary until convert to proper registration
+	}
+
+
+
 }
