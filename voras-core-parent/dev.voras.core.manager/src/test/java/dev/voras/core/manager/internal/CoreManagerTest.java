@@ -15,15 +15,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import dev.voras.ManagerException;
 import dev.voras.core.manager.ICoreManager;
 import dev.voras.core.manager.Logger;
 import dev.voras.core.manager.RunName;
 import dev.voras.core.manager.StoredArtifactRoot;
-import dev.voras.core.manager.internal.CoreManager;
 import dev.voras.framework.spi.IFramework;
 import dev.voras.framework.spi.IManager;
 import dev.voras.framework.spi.IResultArchiveStore;
-import dev.voras.framework.spi.ManagerException;
 import dev.voras.framework.spi.ResourceUnavailableException;
 
 @RunWith(MockitoJUnitRunner.class)
