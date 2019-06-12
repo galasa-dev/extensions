@@ -10,9 +10,9 @@ import javax.validation.constraints.AssertTrue;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dev.vorus.core.cps.etcd.Etcd3ManagerException;
-import dev.vorus.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
-import dev.vorus.core.cps.etcd.spi.Etcd3ClientException;
+import dev.voras.core.cps.etcd.Etcd3ManagerException;
+import dev.voras.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
+import dev.voras.core.cps.etcd.spi.Etcd3ClientException;
 import dev.voras.framework.spi.ConfigurationPropertyStoreException;
 
 public class ExceptionsTest {

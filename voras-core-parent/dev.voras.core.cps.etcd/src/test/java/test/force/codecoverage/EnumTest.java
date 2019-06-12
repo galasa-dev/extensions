@@ -3,7 +3,7 @@ package test.force.codecoverage;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dev.vorus.core.cps.etcd.spi.IEtcd3Listener.Event;
+import dev.voras.core.cps.etcd.spi.IEtcd3Listener.Event;
 
 public class EnumTest {
 	
