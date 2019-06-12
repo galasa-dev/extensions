@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import dev.vorus.core.cps.etcd.internal.Etcd3ConfigurationPropertyRegistration;
-import dev.vorus.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
+import dev.voras.core.cps.etcd.internal.Etcd3ConfigurationPropertyRegistration;
+import dev.voras.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
 import dev.voras.framework.FrameworkInitialisation;
 import dev.voras.framework.spi.ConfigurationPropertyStoreException;
 import io.etcd.jetcd.ByteSequence;

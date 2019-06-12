@@ -25,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import dev.vorus.core.cps.etcd.internal.Etcd3DynamicStatusStore;
-import dev.vorus.core.cps.etcd.internal.Etcd3DynamicStatusStoreRegistration;
+import dev.voras.core.cps.etcd.internal.Etcd3DynamicStatusStore;
+import dev.voras.core.cps.etcd.internal.Etcd3DynamicStatusStoreRegistration;
 import dev.voras.framework.FrameworkInitialisation;
 import dev.voras.framework.spi.DynamicStatusStoreException;
 import io.etcd.jetcd.ByteSequence;
