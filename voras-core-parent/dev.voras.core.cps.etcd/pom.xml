@@ -44,8 +44,8 @@
 						<Embed-Dependency>*;scope=compile;artifactId=!log4j</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
-						                io.ejat.etcd3,
-						                io.ejat.framework.spi,
+						                dev.voras.core.cps.etcd,
+						                dev.voras.framework.spi,
 						                javax.net.ssl,
 						                javax.security.cert
 						</Import-Package>
