@@ -15,7 +15,7 @@
 	<packaging>pom</packaging>
 
 	<name>Voras Core area</name>
-	
+
 	<properties>
 		<dev.voras.core.manager>0.3.0-SNAPSHOT</dev.voras.core.manager>
 		<dev.voras.core.cps.etcd>0.3.0-SNAPSHOT</dev.voras.core.cps.etcd>
@@ -29,5 +29,14 @@
 		<module>dev.voras.core.ras.couchdb</module>
 		<module>dev.voras.core.obr</module>
 	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${commons-logging}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 </project>
