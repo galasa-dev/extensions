@@ -24,6 +24,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>dev.voras</groupId>
+			<artifactId>dev.voras</artifactId>
+			<version>${dev.voras}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>io.etcd</groupId>
 			<artifactId>jetcd-core</artifactId>
 			<version>0.3.0</version>
@@ -45,7 +51,9 @@
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
 						                dev.voras.core.cps.etcd,
+						                dev.voras,
 						                dev.voras.framework.spi,
+						                dev.voras.framework.spi.creds,
 						                javax.net.ssl,
 						                javax.security.cert
 						</Import-Package>
