@@ -1,0 +1,52 @@
+package dev.voras.core.cps.etcd.internal;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.validation.constraints.NotNull;
+
+import org.osgi.service.component.annotations.Component;
+
+import dev.voras.framework.spi.IFrameworkInitialisation;
+import dev.voras.framework.spi.creds.CredentialsException;
+import dev.voras.framework.spi.creds.ICredentialsStoreRegistration;
+
+/**
+ * This Class is a small OSGI bean that registers the Credentials store as a ETCD cluster or quietly fails.
+ * 
+ * @author James Davies
+ */
+@Component(service= {ICredentialsStoreRegistration.class})
+public class Etcd3CredentialsStoreRegistration implements ICredentialsStoreRegistration {
+    
+    /**
+     * This intialise method is a overide that registers the correct store to the framework.
+     * 
+     * The URI is collected from the Intialisation. If the URI is a etcd scheme then it registers it as a etcd.
+     * 
+     * @param frameworkIntialisation - gives the registrtion access to the correct URI for the credentials store
+     */
+    @Override
+    public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation) throws CredentialsException {
+        URI creds = frameworkInitialisation.getCredentialsStoreUri();
+        
+        if(isEtcdUri(creds)) {
+        	try {
+        		URI uri = new URI(creds.toString().replace("etcd:", ""));
+                frameworkInitialisation.registerCredentialsStore(new Etcd3CredentialsStore(uri));
+        	} catch (URISyntaxException e) {
+        		throw new CredentialsException("Could not find etcd creds store", e);
+        	}
+        }
+    }
+    
+    /**
+     * Small method to check the URI for the correct type for etcd.
+     * 
+     * @param uri - the uri for the cps.
+     * @return - if etcd is applicable.
+     */
+    public static boolean isEtcdUri(URI uri) {
+        return "etcd".equals(uri.getScheme());
+    }
+}
