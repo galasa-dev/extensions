@@ -33,7 +33,7 @@ public class Etcd3CredentialsStoreRegistration implements ICredentialsStoreRegis
         if(isEtcdUri(creds)) {
         	try {
         		URI uri = new URI(creds.toString().replace("etcd:", ""));
-                frameworkInitialisation.registerCredentialsStore(new Etcd3CredentialsStore(uri));
+                frameworkInitialisation.registerCredentialsStore(new Etcd3CredentialsStore(frameworkInitialisation.getFramework(), uri));
         	} catch (URISyntaxException e) {
         		throw new CredentialsException("Could not find etcd creds store", e);
         	}

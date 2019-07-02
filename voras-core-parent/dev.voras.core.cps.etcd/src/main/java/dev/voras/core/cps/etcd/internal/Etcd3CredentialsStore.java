@@ -2,16 +2,24 @@ package dev.voras.core.cps.etcd.internal;
 
 import static com.google.common.base.Charsets.UTF_8;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import javax.crypto.spec.SecretKeySpec;
+
 import dev.voras.ICredentials;
+import dev.voras.framework.spi.IConfigurationPropertyStoreService;
+import dev.voras.framework.spi.IFramework;
 import dev.voras.framework.spi.creds.CredentialsException;
 import dev.voras.framework.spi.creds.CredentialsToken;
 import dev.voras.framework.spi.creds.CredentialsUsername;
 import dev.voras.framework.spi.creds.CredentialsUsernamePassword;
+import dev.voras.framework.spi.creds.CredentialsUsernameToken;
 import dev.voras.framework.spi.creds.ICredentialsStore;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -28,7 +36,8 @@ import io.etcd.jetcd.kv.GetResponse;
  * @author James Davies
  */
 public class Etcd3CredentialsStore implements ICredentialsStore {
-	private KV kvClient;
+	private final KV kvClient;
+	private final SecretKeySpec key;
 
 	/**
 	 * This constructor instantiates the Key value client that can retrieve values from the etcd
@@ -36,9 +45,21 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 	 * 
 	 * @param etcd - URI location of ETCD store.
 	 */
-	public Etcd3CredentialsStore(URI etcd) {
+	public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
+		try {
 			Client client = Client.builder().endpoints(etcd).build();
 			kvClient = client.getKVClient();
+			
+			IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService("secure");         
+			String encryptionKey = cpsService.getProperty("credentials.file", "encryption.key");
+			if (encryptionKey != null) {
+				key = createKey(encryptionKey);
+			} else {
+				key = null;
+			}
+		} catch(Exception e) {
+			throw new CredentialsException("Unable to initialise the etcd credentials store", e);
+		}
 	}
 	
 	/**
@@ -53,20 +74,26 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 	public ICredentials getCredentials(String credentialsId) throws CredentialsException {
 		String token = get("secure.credentials." + credentialsId + ".token");
 		if (token != null) {
-			return new CredentialsToken(token);       
+			String username = get("secure.credentials." + credentialsId + ".username");
+
+			if (username != null) {
+				return new CredentialsUsernameToken(key, username, token);       
+			}
+			return new CredentialsToken(key, token);       
 		}
 
 		String username = get("secure.credentials." + credentialsId + ".username");
 		String password = get("secure.credentials." + credentialsId + ".password");
-		
+
 		if (username == null) {
 			return null;
 		}
 
 		if (password == null) {
-			return new CredentialsUsername(username);
+			return new CredentialsUsername(key, username);
 		}
-		return new CredentialsUsernamePassword(username, password);
+
+		return new CredentialsUsernamePassword(key, username, password);
 	}	
 
 	/**
@@ -91,5 +118,13 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 			throw new CredentialsException("Could not retrieve key.", e);
 		}
 	}
+	
+	private static SecretKeySpec createKey(String secret) throws UnsupportedEncodingException, NoSuchAlgorithmException {	
+		byte[] key = secret.getBytes("UTF-8");
+		MessageDigest sha = MessageDigest.getInstance("SHA-256");
+		key = sha.digest(key);
+		return new SecretKeySpec(key, "AES");
+	}
+
 	
 }
