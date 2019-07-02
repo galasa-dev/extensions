@@ -40,7 +40,7 @@ public class CoreManagerTest {
     public void setup() {
         when(framework.getTestRunName()).thenReturn(runName);
         when(framework.getResultArchiveStore()).thenReturn(ras);
-        when(ras.getStoredArtifactsRoot()).thenReturn(Paths.get("/a/root/dir"));
+        when(ras.getStoredArtifactsRoot()).thenReturn(Paths.get("a", "root", "dir"));
     }
     
     @Test
@@ -72,7 +72,7 @@ public class CoreManagerTest {
         Assert.assertEquals("Core Manager field not valid", coreManager, testClass.coreManager);
         Assert.assertTrue("Logger field not valid", (testClass.logger instanceof Log));
         Assert.assertEquals("Core Manager field not valid", this.runName, testClass.runName);
-        Assert.assertEquals("Logger field not valid", "/a/root/dir", testClass.root.toString());
+        Assert.assertEquals("Logger field not valid", Paths.get("a", "root", "dir").toString(), testClass.root.toString());
     }
     
     
