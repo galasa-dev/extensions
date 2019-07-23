@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 
+import dev.voras.ICredentials;
 import dev.voras.ManagerException;
 import dev.voras.core.manager.CoreManagerException;
 import dev.voras.core.manager.ICoreManager;
@@ -25,6 +26,7 @@ import dev.voras.framework.spi.IConfigurationPropertyStoreService;
 import dev.voras.framework.spi.IFramework;
 import dev.voras.framework.spi.IManager;
 import dev.voras.framework.spi.ResourceUnavailableException;
+import dev.voras.framework.spi.creds.CredentialsException;
 
 @Component(service = { IManager.class })
 public class CoreManager extends AbstractManager implements ICoreManager {
@@ -143,6 +145,15 @@ public class CoreManager extends AbstractManager implements ICoreManager {
 	@Override
 	public @NotNull String getRunName() {
 		return getFramework().getTestRunName();
+	}
+
+	@Override
+	public ICredentials getCredentials(@NotNull String credentialsId) throws CoreManagerException {
+		try {
+			return getFramework().getCredentialsService().getCredentials(credentialsId);
+		} catch (CredentialsException e) {
+			throw new CoreManagerException("Unable to retrieve credentials for id " + credentialsId, e);
+		}
 	}
 
 }
