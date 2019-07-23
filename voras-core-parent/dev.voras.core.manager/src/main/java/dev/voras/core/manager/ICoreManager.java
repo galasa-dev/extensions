@@ -2,6 +2,8 @@ package dev.voras.core.manager;
 
 import javax.validation.constraints.NotNull;
 
+import dev.voras.ICredentials;
+
 /**
  * <p>
  * The Core Manager provides Tests with access to some of the most common
@@ -30,5 +32,14 @@ public interface ICoreManager {
      * @return Unique Test Run name
      */
     @NotNull String getRunName();
+    
+    /**
+     * Retrieve Credentials
+     * 
+     * @param credentialsId
+     * @return A credentials object or null if id not found
+     * @throws CoreManagerException If there is a problem accessing the credentials store
+     */
+    ICredentials getCredentials(@NotNull String credentialsId) throws CoreManagerException;
 
 }
