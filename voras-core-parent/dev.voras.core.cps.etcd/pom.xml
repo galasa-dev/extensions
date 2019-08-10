@@ -57,6 +57,7 @@
 						                javax.net.ssl,
 						                javax.security.cert
 						</Import-Package>
+						<_snapshot>${maven.build.timestamp}</_snapshot>
 					</instructions>
 				</configuration>
 			</plugin>

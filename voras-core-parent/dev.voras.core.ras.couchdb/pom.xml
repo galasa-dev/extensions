@@ -39,9 +39,15 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${commons-logging-eclipse}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>${gson}</version>
+			<version>${gson-eclipse}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
