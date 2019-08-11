@@ -49,8 +49,9 @@ import io.etcd.jetcd.watch.WatchResponse;
  * @author James Davies
  */
 public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
-    private KV kvClient;
-	private Watch watchClient;
+	private final Client client;
+    private final KV kvClient;
+	private final Watch watchClient;
 	
 	private final HashMap<UUID, PassthroughWatcher> watchers = new HashMap<>();
 
@@ -61,7 +62,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
      * @param dssUri - http:// uri for th etcd cluster.
      */
     public Etcd3DynamicStatusStore (URI dssUri) {
-        Client client = Client.builder().endpoints(dssUri).build();
+        client = Client.builder().endpoints(dssUri).build();
 		kvClient = client.getKVClient();
 		this.watchClient = client.getWatchClient();
     }
@@ -437,5 +438,14 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
 			return this.etcdWatcher;			
 		}
 	}
+	
+	@Override
+	public void shutdown() throws DynamicStatusStoreException {
+		watchClient.close();
+		kvClient.close();
+		client.close();
+	}
+
+
     
 }

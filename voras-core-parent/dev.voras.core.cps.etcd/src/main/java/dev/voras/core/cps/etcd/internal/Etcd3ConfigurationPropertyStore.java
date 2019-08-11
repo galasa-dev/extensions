@@ -1,5 +1,7 @@
 package dev.voras.core.cps.etcd.internal;
 
+import static com.google.common.base.Charsets.UTF_8;
+
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -8,15 +10,13 @@ import java.util.concurrent.ExecutionException;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
-import static com.google.common.base.Charsets.UTF_8;
-
+import dev.voras.framework.spi.ConfigurationPropertyStoreException;
+import dev.voras.framework.spi.IConfigurationPropertyStore;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.kv.GetResponse;
-import dev.voras.framework.spi.ConfigurationPropertyStoreException;
-import dev.voras.framework.spi.IConfigurationPropertyStore;
 
 /**
  * This class impletements the CPS for etcd using the JETCD client.
@@ -24,7 +24,8 @@ import dev.voras.framework.spi.IConfigurationPropertyStore;
  * @author James Davies
  */
 public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {
-	private KV kvClient;
+	private final Client client;
+	private final KV kvClient;
 
 	/**
 	 * This constructor create a priate KVClient from JETCD for store interactions.
@@ -32,7 +33,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 	 * @param cpsUri - location of the etcd
 	 */
 	public Etcd3ConfigurationPropertyStore(URI cpsUri) {
-		Client client = Client.builder().endpoints(cpsUri).build();
+		client = Client.builder().endpoints(cpsUri).build();
 		kvClient = client.getKVClient();
 	}
 
@@ -58,4 +59,12 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 			throw new ConfigurationPropertyStoreException("Could not retrieve key.", e);
 		}
 	}
+	
+	@Override
+	public void shutdown() throws ConfigurationPropertyStoreException {
+		kvClient.close();
+		client.close();
+	}
+
+
 }

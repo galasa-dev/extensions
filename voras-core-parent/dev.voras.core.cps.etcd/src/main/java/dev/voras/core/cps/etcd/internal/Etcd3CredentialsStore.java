@@ -36,6 +36,7 @@ import io.etcd.jetcd.kv.GetResponse;
  * @author James Davies
  */
 public class Etcd3CredentialsStore implements ICredentialsStore {
+	private final Client client;
 	private final KV kvClient;
 	private final SecretKeySpec key;
 
@@ -47,7 +48,7 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 	 */
 	public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
 		try {
-			Client client = Client.builder().endpoints(etcd).build();
+			client = Client.builder().endpoints(etcd).build();
 			kvClient = client.getKVClient();
 			
 			IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService("secure");         
@@ -124,6 +125,12 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 		MessageDigest sha = MessageDigest.getInstance("SHA-256");
 		key = sha.digest(key);
 		return new SecretKeySpec(key, "AES");
+	}
+
+	@Override
+	public void shutdown() throws CredentialsException {
+		kvClient.close();
+		client.close();
 	}
 
 	

@@ -22,6 +22,7 @@ public class CouchdbRasRegistration implements IResultArchiveStoreService {
 
 	private IFramework                     framework;                    
 	private URI                            rasUri;
+	private CouchdbRasStore                store;
 	
 	@Override
 	public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
@@ -33,7 +34,7 @@ public class CouchdbRasRegistration implements IResultArchiveStoreService {
 		final List<URI> rasUris = frameworkInitialisation.getResultArchiveStoreUris();
 		for (final URI uri : rasUris) {
 			if ("couchdb".equals(uri.getScheme())) {
-				if (this.rasUri != null) {
+				if (this.rasUri != null && !store.isShutdown()) {
 					throw new ResultArchiveStoreException(
 							"The CouchDB RAS currently does not support multiple instances of itself");
 				}
@@ -46,7 +47,6 @@ public class CouchdbRasRegistration implements IResultArchiveStoreService {
 		}
 
 		//*** Test we can contact the CouchDB server
-		CouchdbRasStore store;
 		try {
 			store = new CouchdbRasStore(framework, new URI(this.rasUri.toString().substring(8)));
 		} catch (URISyntaxException e) {
