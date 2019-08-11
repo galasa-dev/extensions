@@ -45,7 +45,6 @@ import dev.voras.core.ras.couchdb.internal.pojos.Selector;
 import dev.voras.core.ras.couchdb.internal.pojos.TestStructureCouchdb;
 import dev.voras.core.ras.couchdb.internal.pojos.Welcome;
 import dev.voras.framework.spi.IFramework;
-import dev.voras.framework.spi.IFrameworkInitialisation;
 import dev.voras.framework.spi.IResultArchiveStoreService;
 import dev.voras.framework.spi.IRun;
 import dev.voras.framework.spi.IRunResult;
@@ -166,10 +165,6 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 			throw new CouchdbRasException("Unable to store the artifacts document", e);
 		}
 	}
-
-	@Override
-	public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
-			throws ResultArchiveStoreException {}
 
 	@Override
 	public void writeLog(@NotNull String message) throws ResultArchiveStoreException {
