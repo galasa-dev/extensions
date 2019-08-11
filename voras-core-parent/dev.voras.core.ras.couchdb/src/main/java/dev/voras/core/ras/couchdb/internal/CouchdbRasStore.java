@@ -64,6 +64,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 	private final URI                            rasUri;
 
 	private final CloseableHttpClient            httpClient;
+	private boolean                              shutdown = false;
 
 	private final Gson                           gson = CirilloGsonBuilder.build();
 
@@ -495,6 +496,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
 	@Override
 	public void shutdown() {
+		this.shutdown = true;
 		try {
 			flushLogCache();
 		} catch (ResultArchiveStoreException e) {
@@ -505,6 +507,10 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 			this.httpClient.close();
 		} catch (IOException e) {
 		}
+	}
+	
+	protected boolean isShutdown() {
+		return this.shutdown;
 	}
 
 	public CloseableHttpClient getHttpClient() {
