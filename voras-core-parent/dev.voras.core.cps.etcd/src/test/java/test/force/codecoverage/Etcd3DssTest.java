@@ -12,18 +12,14 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import dev.voras.core.cps.etcd.internal.Etcd3DynamicStatusStore;
 import dev.voras.core.cps.etcd.internal.Etcd3DynamicStatusStoreRegistration;
@@ -40,7 +36,6 @@ import io.etcd.jetcd.kv.TxnResponse;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
-import io.etcd.jetcd.options.PutOption;
 
 /**
  * This test class is a for testing the implementation of the JETD client is correct and behaving as expected.
@@ -49,7 +44,7 @@ import io.etcd.jetcd.options.PutOption;
  * 
  * @author James Davies
  */
-@RunWith(MockitoJUnitRunner.class)
+//@RunWith(MockitoJUnitRunner.class)
 public class Etcd3DssTest {
 
     /**
