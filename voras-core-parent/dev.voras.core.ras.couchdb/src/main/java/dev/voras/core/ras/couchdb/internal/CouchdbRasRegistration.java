@@ -2,7 +2,6 @@ package dev.voras.core.ras.couchdb.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -11,14 +10,12 @@ import org.osgi.service.component.annotations.Component;
 
 import dev.voras.framework.spi.IFramework;
 import dev.voras.framework.spi.IFrameworkInitialisation;
-import dev.voras.framework.spi.IResultArchiveStoreService;
-import dev.voras.framework.spi.IRunResult;
+import dev.voras.framework.spi.IResultArchiveStoreRegistration;
 import dev.voras.framework.spi.ResultArchiveStoreException;
-import dev.voras.framework.spi.teststructure.TestStructure;
 
 
-@Component(service = { IResultArchiveStoreService.class })
-public class CouchdbRasRegistration implements IResultArchiveStoreService {
+@Component(service = { IResultArchiveStoreRegistration.class })
+public class CouchdbRasRegistration implements IResultArchiveStoreRegistration {
 
 	private IFramework                     framework;                    
 	private URI                            rasUri;
@@ -56,37 +53,5 @@ public class CouchdbRasRegistration implements IResultArchiveStoreService {
 		//*** All good, register it
 		frameworkInitialisation.registerResultArchiveStoreService(store);
 	}
-
-	@Override
-	public void writeLog(@NotNull String message) throws ResultArchiveStoreException {
-	}
-
-	@Override
-	public void writeLog(@NotNull List<String> messages) throws ResultArchiveStoreException {
-	}
-
-	@Override
-	public void updateTestStructure(@NotNull TestStructure testStructure) throws ResultArchiveStoreException {
-	}
-
-	@Override
-	public Path getStoredArtifactsRoot() {
-		return null;
-	}
-
-	@Override
-	public void flush() {
-	}
-
-	@Override
-	public void shutdown() {
-	}
-	
-	@Override
-	public List<IRunResult> getRuns(String runName) throws ResultArchiveStoreException {
-		throw new UnsupportedOperationException("Should not have been called");  //  temporary until convert to proper registration
-	}
-
-
 
 }
