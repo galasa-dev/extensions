@@ -11,9 +11,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -33,21 +30,15 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import dev.voras.core.ras.couchdb.internal.pojos.Artifacts;
-import dev.voras.core.ras.couchdb.internal.pojos.Find;
-import dev.voras.core.ras.couchdb.internal.pojos.FoundRuns;
 import dev.voras.core.ras.couchdb.internal.pojos.LogLines;
 import dev.voras.core.ras.couchdb.internal.pojos.PutPostResponse;
-import dev.voras.core.ras.couchdb.internal.pojos.Selector;
-import dev.voras.core.ras.couchdb.internal.pojos.TestStructureCouchdb;
 import dev.voras.core.ras.couchdb.internal.pojos.Welcome;
 import dev.voras.framework.spi.IFramework;
+import dev.voras.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.voras.framework.spi.IResultArchiveStoreService;
 import dev.voras.framework.spi.IRun;
-import dev.voras.framework.spi.IRunResult;
 import dev.voras.framework.spi.ResultArchiveStoreException;
 import dev.voras.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.voras.framework.spi.teststructure.TestStructure;
@@ -286,123 +277,123 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 		}
 	}
 
-	@Override
-	public List<IRunResult> getRuns(String runName) throws ResultArchiveStoreException {
-		Objects.requireNonNull(runName);
+//	@Override
+//	public List<IRunResult> getRuns(String runName) throws ResultArchiveStoreException {
+//		Objects.requireNonNull(runName);
+//
+//		ArrayList<IRunResult> runs = new ArrayList<>();
+//
+//		HttpPost httpPost = new HttpPost(this.rasUri + "/cirillo_run/_find");
+//		Find find = new Find();
+//		find.selector = new Selector();
+//		find.selector.runName = runName;
+//		find.execution_stats = true;
+//
+//		httpPost.addHeader("Accept", "application/json");
+//		httpPost.addHeader("Content-Type", "application/json");
+//
+//
+//		while(true) {
+//			String requestContent = gson.toJson(find);
+//			httpPost.setEntity(new StringEntity(requestContent, UTF8));
+//
+//			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+//				StatusLine statusLine = response.getStatusLine();
+//				if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+//					throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
+//				}
+//
+//				HttpEntity entity = response.getEntity();
+//				String responseEntity = EntityUtils.toString(entity);
+//				FoundRuns found = gson.fromJson(responseEntity, FoundRuns.class);
+//				if (found.docs == null) {
+//					throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
+//				}
+//
+//				if (found.warning != null) {
+//					logger.warn("CouchDB warning detected - " + found.warning);
+//				}
+//
+//				if (found.docs.isEmpty()) {
+//					break;
+//				}
+//
+//				for(TestStructureCouchdb ts : found.docs ) {
+//					Path runArtifactPath = getRunArtifactPath(ts);
+//
+//					//*** Add this run to the results
+//					CouchdbRunResult cdbrr = new CouchdbRunResult(this, ts, runArtifactPath);
+//					runs.add(cdbrr);
+//				}
+//
+//				//*** find the next batch of runs
+//				find.bookmark = found.bookmark;
+//			} catch(CouchdbRasException e) {
+//				throw e;
+//			} catch(Exception e) {
+//				throw new ResultArchiveStoreException("Unable to find runs", e);
+//			}
+//
+//
+//		}
+//
+//
+//		return runs;
+//
+//	}
 
-		ArrayList<IRunResult> runs = new ArrayList<>();
-
-		HttpPost httpPost = new HttpPost(this.rasUri + "/cirillo_run/_find");
-		Find find = new Find();
-		find.selector = new Selector();
-		find.selector.runName = runName;
-		find.execution_stats = true;
-
-		httpPost.addHeader("Accept", "application/json");
-		httpPost.addHeader("Content-Type", "application/json");
 
 
-		while(true) {
-			String requestContent = gson.toJson(find);
-			httpPost.setEntity(new StringEntity(requestContent, UTF8));
-
-			try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-					throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
-				}
-
-				HttpEntity entity = response.getEntity();
-				String responseEntity = EntityUtils.toString(entity);
-				FoundRuns found = gson.fromJson(responseEntity, FoundRuns.class);
-				if (found.docs == null) {
-					throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
-				}
-
-				if (found.warning != null) {
-					logger.warn("CouchDB warning detected - " + found.warning);
-				}
-
-				if (found.docs.isEmpty()) {
-					break;
-				}
-
-				for(TestStructureCouchdb ts : found.docs ) {
-					Path runArtifactPath = getRunArtifactPath(ts);
-
-					//*** Add this run to the results
-					CouchdbRunResult cdbrr = new CouchdbRunResult(this, ts, runArtifactPath);
-					runs.add(cdbrr);
-				}
-
-				//*** find the next batch of runs
-				find.bookmark = found.bookmark;
-			} catch(CouchdbRasException e) {
-				throw e;
-			} catch(Exception e) {
-				throw new ResultArchiveStoreException("Unable to find runs", e);
-			}
-
-
-		}
-
-
-		return runs;
-
-	}
-
-
-
-	private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
-
-		ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
-		CouchdbRasFileSystemProvider runProvider = new CouchdbRasFileSystemProvider(fileStore, this);
-		if (ts.getArtifactRecordIds() == null || ts.getArtifactRecordIds().isEmpty()) {
-			return runProvider.getRoot();
-		}
-		
-		for(String artifactRecordId : ts.getArtifactRecordIds()) {
-			HttpGet httpGet = new HttpGet(this.rasUri + "/cirillo_artifacts/" + artifactRecordId);
-			httpGet.addHeader("Accept", "application/json");
-
-			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-				StatusLine statusLine = response.getStatusLine();
-				if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) { // TODO Ignore it for now
-					continue;
-				}
-				if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-					throw new CouchdbRasException("Unable to find artifacts - " + statusLine.toString());
-				}
-
-				HttpEntity entity = response.getEntity();
-				String responseEntity = EntityUtils.toString(entity);
-				JsonObject artifactRecord = gson.fromJson(responseEntity, JsonObject.class);
-
-				JsonElement attachmentsElement = artifactRecord.get("_attachments");
-
-				if (attachmentsElement != null) {
-					if (attachmentsElement instanceof JsonObject) {
-						JsonObject attachments = (JsonObject) attachmentsElement;
-						Set<Entry<String, JsonElement>> entries = attachments.entrySet();
-						if (entries != null) {
-							for(Entry<String, JsonElement> entry : entries) {
-								JsonElement elem = entry.getValue();
-								if (elem instanceof JsonObject) {
-									runProvider.addPath(new CouchdbArtifactPath(runProvider.getActualFileSystem(), entry.getKey(), (JsonObject)elem, artifactRecordId));
-								}
-							}
-						}
-					}
-				}
-			} catch(CouchdbRasException e) {
-				throw e;
-			} catch(Exception e) {
-				throw new CouchdbRasException("Unable to find runs", e);
-			}
-		}
-
-		return runProvider.getRoot();
-	}
+//	private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
+//
+//		ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
+//		CouchdbRasFileSystemProvider runProvider = new CouchdbRasFileSystemProvider(fileStore, this);
+//		if (ts.getArtifactRecordIds() == null || ts.getArtifactRecordIds().isEmpty()) {
+//			return runProvider.getRoot();
+//		}
+//		
+//		for(String artifactRecordId : ts.getArtifactRecordIds()) {
+//			HttpGet httpGet = new HttpGet(this.rasUri + "/cirillo_artifacts/" + artifactRecordId);
+//			httpGet.addHeader("Accept", "application/json");
+//
+//			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+//				StatusLine statusLine = response.getStatusLine();
+//				if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) { // TODO Ignore it for now
+//					continue;
+//				}
+//				if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+//					throw new CouchdbRasException("Unable to find artifacts - " + statusLine.toString());
+//				}
+//
+//				HttpEntity entity = response.getEntity();
+//				String responseEntity = EntityUtils.toString(entity);
+//				JsonObject artifactRecord = gson.fromJson(responseEntity, JsonObject.class);
+//
+//				JsonElement attachmentsElement = artifactRecord.get("_attachments");
+//
+//				if (attachmentsElement != null) {
+//					if (attachmentsElement instanceof JsonObject) {
+//						JsonObject attachments = (JsonObject) attachmentsElement;
+//						Set<Entry<String, JsonElement>> entries = attachments.entrySet();
+//						if (entries != null) {
+//							for(Entry<String, JsonElement> entry : entries) {
+//								JsonElement elem = entry.getValue();
+//								if (elem instanceof JsonObject) {
+//									runProvider.addPath(new CouchdbArtifactPath(runProvider.getActualFileSystem(), entry.getKey(), (JsonObject)elem, artifactRecordId));
+//								}
+//							}
+//						}
+//					}
+//				}
+//			} catch(CouchdbRasException e) {
+//				throw e;
+//			} catch(Exception e) {
+//				throw new CouchdbRasException("Unable to find runs", e);
+//			}
+//		}
+//
+//		return runProvider.getRoot();
+//	}
 	
 	public void retrieveArtifact(CouchdbArtifactPath path, Path cachePath) throws CouchdbRasException {
 		String artifactRecordId = path.getArtifactRecordId();
@@ -531,6 +522,11 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 	public void updateArtifactDocumentRev(String newArtifactDocumentRev) {
 		this.artifactDocumentRev = newArtifactDocumentRev;
 
+	}
+	
+	@Override
+	public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
+		throw new UnsupportedOperationException("Not written yet");
 	}
 
 }
