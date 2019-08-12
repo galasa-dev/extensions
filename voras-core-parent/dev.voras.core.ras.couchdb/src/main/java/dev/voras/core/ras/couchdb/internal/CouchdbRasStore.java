@@ -98,6 +98,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 			// TODO check the minimum version
 
 			// TODO check the databases exist
+			
+			// TODO check the indexes and views exist
+			
 			logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
 		} catch(CouchdbRasException e) {
 			throw e;
@@ -237,6 +240,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 		this.lastTestStructure = testStructure;
 		this.lastTestStructure.setLogRecordIds(this.logIds);		
 		this.lastTestStructure.setArtifactRecordIds(this.artifactDocumentId);		
+		this.lastTestStructure.normalise();
 
 		String jsonStructure = gson.toJson(testStructure);
 
@@ -521,12 +525,13 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
 	public void updateArtifactDocumentRev(String newArtifactDocumentRev) {
 		this.artifactDocumentRev = newArtifactDocumentRev;
-
 	}
 	
 	@Override
 	public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
-		throw new UnsupportedOperationException("Not written yet");
+		ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
+		dirs.add(new CouchdbDirectoryService(this));
+		return dirs;
 	}
 
 }
