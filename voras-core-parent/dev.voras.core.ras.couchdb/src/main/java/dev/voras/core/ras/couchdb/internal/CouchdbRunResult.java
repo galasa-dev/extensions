@@ -14,7 +14,11 @@ public class CouchdbRunResult implements IRunResult {
 	
 	public CouchdbRunResult(CouchdbRasStore store, TestStructure testStructure, Path path) {
 		this.store         = store;
-		this.testStructure = testStructure;
+		if (testStructure == null) {
+			this.testStructure = new TestStructure();
+		} else {
+			this.testStructure = testStructure;
+		}
 		this.path          = path;
 	}
 
