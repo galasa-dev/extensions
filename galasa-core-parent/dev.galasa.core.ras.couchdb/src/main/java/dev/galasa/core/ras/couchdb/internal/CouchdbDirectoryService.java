@@ -215,7 +215,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 			JsonObject criteria = new JsonObject();
 			JsonObject jto = new JsonObject();
 			jto.addProperty("$lt", to.toString());
-			criteria.add("requested", jto);
+			criteria.add("queued", jto);
 			and.add(criteria);			
 		}
 		
