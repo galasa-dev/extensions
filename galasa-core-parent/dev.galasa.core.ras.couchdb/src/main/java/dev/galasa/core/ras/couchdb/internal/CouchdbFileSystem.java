@@ -1,12 +1,18 @@
 package dev.galasa.core.ras.couchdb.internal;
 
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystem;
-import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
 
 public class CouchdbFileSystem extends ResultArchiveStoreFileSystem {
+	
+	private final CouchdbRasFileSystemProvider actualFileSystemProvider;
 
-	public CouchdbFileSystem(ResultArchiveStoreFileSystemProvider fileSystemProvider) {
+	public CouchdbFileSystem(CouchdbRasFileSystemProvider fileSystemProvider) {
 		super(fileSystemProvider);
+		this.actualFileSystemProvider = fileSystemProvider;
+	}
+	
+	public CouchdbRasFileSystemProvider getActualFileSystemProvider() {
+		return this.actualFileSystemProvider;
 	}
 
 }
