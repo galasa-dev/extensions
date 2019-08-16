@@ -1,6 +1,7 @@
 package dev.galasa.core.ras.couchdb.internal;
 
 import java.nio.file.FileSystem;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -16,6 +17,8 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
 	private int    length;
 	
 	private String artifactRecordId;
+	
+	private boolean directory = false;
 	
 	public CouchdbArtifactPath(@NotNull FileSystem fileSystem, String pathName) {
 		super(fileSystem, pathName);
@@ -49,10 +52,17 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
         if (this.nameElements.isEmpty()) {
             return null;
         }
-        return new CouchdbArtifactPath(this.fileSystem, this.absolute, this.nameElements, 0,
-                this.nameElements.size() - 1);
+        
+        CouchdbArtifactPath parentPath = new CouchdbArtifactPath(this.fileSystem, this.absolute, this.nameElements, 0, this.nameElements.size() - 1);
+        parentPath.setDirectory(true);
+        
+        return parentPath;
 	}
 	
+	private void setDirectory(boolean directory) {
+		this.directory = directory;
+	}
+
 	@Override
 	public CouchdbArtifactPath toAbsolutePath() {
         if (this.absolute) {
@@ -64,6 +74,18 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
 
 	public String getArtifactRecordId() {
 		return this.artifactRecordId;
+	}
+
+	public BasicFileAttributes readAttributes() {
+		return new CoucbDbBasicAttributes(this);
+	}
+
+	public boolean isDirectory() {
+		return directory;
+	}
+
+	public long getLength() {
+		return this.length;
 	}
 	
 }

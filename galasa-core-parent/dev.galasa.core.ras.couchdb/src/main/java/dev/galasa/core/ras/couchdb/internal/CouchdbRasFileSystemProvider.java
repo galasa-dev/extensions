@@ -7,9 +7,11 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileAttribute;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,5 +98,15 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 	public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
 		return new CouchdbDirectoryStream(dir, filter, paths);		
 	}
+	
+    @SuppressWarnings("unchecked") // NOSONAR
+    @Override
+    public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
+            throws IOException {
+    	if (path instanceof CouchdbArtifactPath) {
+    		return (A)((CouchdbArtifactPath)path).readAttributes();
+    	}
+    	return null;
+    }
 
 }
