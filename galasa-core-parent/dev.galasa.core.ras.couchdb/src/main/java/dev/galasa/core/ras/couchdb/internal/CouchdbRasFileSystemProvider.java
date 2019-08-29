@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import dev.galasa.ResultArchiveStoreContentType;
+import dev.galasa.SetContentType;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
 
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
@@ -34,17 +35,17 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 		this.couchdbRasStore = couchdbRasStore;
 		paths.add(new CouchdbArtifactPath(fileSystem, "/"));
 	}
-	
+
 	protected void addPath(CouchdbArtifactPath path) {
 		path = path.toAbsolutePath();
 		paths.add(path);
-		
+
 		CouchdbArtifactPath parentPath = (CouchdbArtifactPath) path.getParent();
 		while(parentPath != null && !paths.contains(parentPath)) {
 			paths.add(parentPath);
 			parentPath = parentPath.getParent();
 		}
-		
+
 	}
 
 
@@ -57,10 +58,18 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 		if (write) {
 			Path absolute = path.toAbsolutePath();
 			ResultArchiveStoreContentType contentType = null;
-			for(FileAttribute<?> attr : attrs) {
-				if (attr instanceof ResultArchiveStoreContentType) {
-					contentType = (ResultArchiveStoreContentType) attr;
-					contentTypes.put(absolute, contentType);
+			for(OpenOption option : options) {
+				if (option instanceof SetContentType) {
+					contentType = ((SetContentType)option).getContentType();
+				}
+			}
+
+			if (contentType != null) {
+				for(FileAttribute<?> attr : attrs) {
+					if (attr instanceof ResultArchiveStoreContentType) {
+						contentType = (ResultArchiveStoreContentType) attr;
+						contentTypes.put(absolute, contentType);
+					}
 				}
 			}
 			if (contentType == null) {
@@ -88,25 +97,25 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 	public Path getRoot() {
 		return new CouchdbArtifactPath(this.getActualFileSystem(), "/");
 	}
-	
+
 	@Override
 	public Path getPath(URI uri) {
 		return new CouchdbArtifactPath(this.getActualFileSystem(), uri.toString());
 	}
-	
+
 	@Override
 	public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
 		return new CouchdbDirectoryStream(dir, filter, paths);		
 	}
-	
-    @SuppressWarnings("unchecked") // NOSONAR
-    @Override
-    public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
-            throws IOException {
-    	if (path instanceof CouchdbArtifactPath) {
-    		return (A)((CouchdbArtifactPath)path).readAttributes();
-    	}
-    	return null;
-    }
+
+	@SuppressWarnings("unchecked") // NOSONAR
+	@Override
+	public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
+			throws IOException {
+		if (path instanceof CouchdbArtifactPath) {
+			return (A)((CouchdbArtifactPath)path).readAttributes();
+		}
+		return null;
+	}
 
 }
