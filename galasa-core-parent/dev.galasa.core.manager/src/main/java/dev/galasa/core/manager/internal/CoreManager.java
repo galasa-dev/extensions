@@ -22,6 +22,7 @@ import dev.galasa.core.manager.TestProperty;
 import dev.galasa.framework.spi.AbstractManager;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.GenerateAnnotatedField;
+import dev.galasa.framework.spi.IConfidentialTextService;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IManager;
@@ -32,6 +33,7 @@ import dev.galasa.framework.spi.creds.CredentialsException;
 public class CoreManager extends AbstractManager implements ICoreManager {
 
 	private IConfigurationPropertyStoreService cpsTest;
+	private IConfidentialTextService           ctf;
 
 	/*
 	 * (non-Javadoc)
@@ -49,6 +51,7 @@ public class CoreManager extends AbstractManager implements ICoreManager {
 		} catch (ConfigurationPropertyStoreException e) {
 			throw new CoreManagerException("Unable to initialise the CPS for Core Manager",e);
 		}
+		this.ctf = framework.getConfidentialTextService();
 
 		// *** We always want the Core Manager initialised and included in the Test Run
 		activeManagers.add(this);
@@ -154,6 +157,11 @@ public class CoreManager extends AbstractManager implements ICoreManager {
 		} catch (CredentialsException e) {
 			throw new CoreManagerException("Unable to retrieve credentials for id " + credentialsId, e);
 		}
+	}
+
+	@Override
+	public void registerConfidentialText(String confidentialString, String comment) {
+		ctf.registerText(confidentialString, comment);
 	}
 
 }
