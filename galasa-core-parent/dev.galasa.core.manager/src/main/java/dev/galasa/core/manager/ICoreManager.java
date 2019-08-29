@@ -41,5 +41,6 @@ public interface ICoreManager {
      * @throws CoreManagerException If there is a problem accessing the credentials store
      */
     ICredentials getCredentials(@NotNull String credentialsId) throws CoreManagerException;
-
+    
+    void registerConfidentialText(String confidentialString, String comment);
 }
