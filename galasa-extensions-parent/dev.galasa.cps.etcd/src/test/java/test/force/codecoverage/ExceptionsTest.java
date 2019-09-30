@@ -10,9 +10,9 @@ import javax.validation.constraints.AssertTrue;
 import org.junit.Assert;
 import org.junit.Test;
 
-import dev.galasa.core.cps.etcd.Etcd3ManagerException;
-import dev.galasa.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
-import dev.galasa.core.cps.etcd.spi.Etcd3ClientException;
+import dev.galasa.cps.etcd.Etcd3ManagerException;
+import dev.galasa.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
+import dev.galasa.cps.etcd.spi.Etcd3ClientException;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 
 public class ExceptionsTest {
