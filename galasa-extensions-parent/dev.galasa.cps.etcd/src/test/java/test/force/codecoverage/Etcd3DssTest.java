@@ -21,8 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import dev.galasa.core.cps.etcd.internal.Etcd3DynamicStatusStore;
-import dev.galasa.core.cps.etcd.internal.Etcd3DynamicStatusStoreRegistration;
+import dev.galasa.cps.etcd.internal.Etcd3DynamicStatusStore;
+import dev.galasa.cps.etcd.internal.Etcd3DynamicStatusStoreRegistration;
 import dev.galasa.framework.FrameworkInitialisation;
 import dev.galasa.framework.spi.DynamicStatusStoreException;
 import io.etcd.jetcd.ByteSequence;

@@ -16,8 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import dev.galasa.core.cps.etcd.internal.Etcd3ConfigurationPropertyRegistration;
-import dev.galasa.core.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
+import dev.galasa.cps.etcd.internal.Etcd3ConfigurationPropertyRegistration;
+import dev.galasa.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
 import dev.galasa.framework.FrameworkInitialisation;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import io.etcd.jetcd.ByteSequence;
