@@ -10,24 +10,16 @@
 		<version>0.3.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>galasa-core-parent</artifactId>
+	<artifactId>galasa-extensions-parent</artifactId>
 	<version>0.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Galasa Core area</name>
-
-	<properties>
-		<dev.galasa.core.manager>0.3.0-SNAPSHOT</dev.galasa.core.manager>
-		<dev.galasa.core.cps.etcd>0.3.0-SNAPSHOT</dev.galasa.core.cps.etcd>
-		<dev.galasa.core.ras.couchdb>0.3.0-SNAPSHOT</dev.galasa.core.ras.couchdb>
-		<dev.galasa.core.obr>0.3.0-SNAPSHOT</dev.galasa.core.obr>
-	</properties>
+	<name>Galasa Framework Extensions</name>
 
 	<modules>
-		<module>dev.galasa.core.manager</module>
-		<module>dev.galasa.core.cps.etcd</module>
-		<module>dev.galasa.core.ras.couchdb</module>
-		<module>dev.galasa.core.obr</module>
+		<module>dev.galasa.cps.etcd</module>
+		<module>dev.galasa.ras.couchdb</module>
+		<module>dev.galasa.extensions.obr</module>
 	</modules>
 
 	<dependencies>

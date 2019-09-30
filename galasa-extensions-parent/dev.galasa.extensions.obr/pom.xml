@@ -6,31 +6,25 @@
 
 	<parent>
 		<groupId>dev.galasa</groupId>
-		<artifactId>galasa-core-parent</artifactId>
+		<artifactId>galasa-extensions-parent</artifactId>
 		<version>0.3.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>dev.galasa.core.obr</artifactId>
+	<artifactId>dev.galasa.extensions.obr</artifactId>
 	<version>0.3.0-SNAPSHOT</version>
 	<packaging>galasa-obr</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>dev.galasa</groupId>
-			<artifactId>dev.galasa.core.manager</artifactId>
-			<version>${dev.galasa.core.manager}</version>
+			<artifactId>dev.galasa.cps.etcd</artifactId>
+			<version>0.3.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
-			<artifactId>dev.galasa.core.cps.etcd</artifactId>
-			<version>${dev.galasa.core.cps.etcd}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>dev.galasa</groupId>
-			<artifactId>dev.galasa.core.ras.couchdb</artifactId>
-			<version>${dev.galasa.core.ras.couchdb}</version>
+			<artifactId>dev.galasa.ras.couchdb</artifactId>
+			<version>0.3.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
