@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.ui.wizards.simframe;
+package dev.galasa.eclipse.ui.wizards.simbank;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -31,11 +31,11 @@ import org.osgi.framework.Bundle;
 
 import dev.galasa.eclipse.Activator;
 
-public class ExampleSimframeOperation implements IRunnableWithProgress {
+public class ExampleSimbankOperation implements IRunnableWithProgress {
 
 	private final String prefix;
 
-	public ExampleSimframeOperation(String prefix) {
+	public ExampleSimbankOperation(String prefix) {
 		this.prefix = prefix;
 	}
 
@@ -61,11 +61,11 @@ public class ExampleSimframeOperation implements IRunnableWithProgress {
 			managerProject.open(monitor);
 
 			Bundle bundle = Activator.getInstance().getBundle();
-			IPath path = new Path("lib/galasa.test.parent-examples.zip");
+			IPath path = new Path("lib/galasa-simbanktests-parent-examples.zip");
 			URL zipUrl = FileLocator.find(bundle, path, null);
 			if (zipUrl == null) {
 				throw new CoreException(new Status(Status.ERROR,
-						Activator.PLUGIN_ID, "The galasa.test.parent-examples.zip file is missing from the plugin"));
+						Activator.PLUGIN_ID, "The galasa-simbanktests-parent-examples.zip file is missing from the plugin"));
 			}
 			zipUrl = FileLocator.toFileURL(zipUrl);
 			java.nio.file.Path pathZip = Paths.get(zipUrl.toURI());
@@ -86,9 +86,9 @@ public class ExampleSimframeOperation implements IRunnableWithProgress {
 					}
 
 					IProject outputProject = null;
-					if ("simframe.galasa.test".equals(fileNameParts[1])) {
+					if ("dev.galasa.simbank.tests".equals(fileNameParts[1])) {
 						outputProject = testProject;
-					} else if ("simframe.galasa.manager".equals(fileNameParts[1])) {
+					} else if ("dev.galasa.simbank.manager".equals(fileNameParts[1])) {
 						outputProject = managerProject;
 					} else {
 						continue;

@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.ui.wizards.simframe;
+package dev.galasa.eclipse.ui.wizards.simbank;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 
-public class ExampleSimframeWizardPage extends WizardPage implements Listener {
+public class ExampleSimbankWizardPage extends WizardPage implements Listener {
 
 	private Text prefixNameField;
 	private Label testProjectName;
@@ -20,10 +20,10 @@ public class ExampleSimframeWizardPage extends WizardPage implements Listener {
 	
 	private static String[] invalidCharacters = {"!","@","£","$","^","&","*",};
 
-	public ExampleSimframeWizardPage(String pageName) {
+	public ExampleSimbankWizardPage(String pageName) {
 		super(pageName);
 		
-		setTitle("Example projects for the SimFrame tutorial");
+		setTitle("Example projects for the SimBank tutorial");
 		setDescription("Select a prefix that will be used to create the example projects.");
 	}
 
@@ -51,7 +51,7 @@ public class ExampleSimframeWizardPage extends WizardPage implements Listener {
 		prefixNameField.setLayoutData(data);
 		prefixNameField.setFont(parent.getFont());
 		
-		prefixNameField.setText("dev.galasa.simframe");
+		prefixNameField.setText("dev.galasa.simbank");
 		prefixNameField.addListener(SWT.Modify, this);
 		
 				

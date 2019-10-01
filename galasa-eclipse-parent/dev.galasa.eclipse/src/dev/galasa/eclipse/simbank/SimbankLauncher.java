@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.simframe;
+package dev.galasa.eclipse.simbank;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
 
 import dev.galasa.eclipse.Activator;
 
-public class SimframeLauncher extends JavaLaunchDelegate {
+public class SimbankLauncher extends JavaLaunchDelegate {
 
 	private MessageConsole console;
 	private PrintStream consoleDefault;
@@ -49,18 +49,18 @@ public class SimframeLauncher extends JavaLaunchDelegate {
 			}
 		});
 
-		consoleDefault.append("\nLaunching SimFrame\n");
+		consoleDefault.append("\nLaunching SimBank\n");
 		
 		//*** Find all the information necessary to run
-		File simframeJarFile = findSimframeJar();
-		consoleDefault.append("Simframe jar is located at " + simframeJarFile.toURI().toString() + "\n");
+		File simbankJarFile = findSimbankJar();
+		consoleDefault.append("Simbank jar is located at " + simbankJarFile.toURI().toString() + "\n");
 		
 		//*** Setup the Java running environment		
 		IVMRunner runner = getVMRunner(configuration, mode);
 
 		//*** Only need the boot.jar on the classpath
 		String[] classpath = new String[1];
-		classpath[0] = simframeJarFile.toString();
+		classpath[0] = simbankJarFile.toString();
 		
 		//*** From the config get any environment properties
 		String[] envp = getEnvironment(configuration);
@@ -81,7 +81,7 @@ public class SimframeLauncher extends JavaLaunchDelegate {
 		Map<String, Object> vmAttributesMap = getVMSpecificAttributesMap(configuration);
 
 		//*** As can only use a classpath,  need to provide main class
-		String mainTypeName = "dev.galasa.simframe.main.Simframe";
+		String mainTypeName = "dev.galasa.simplatform.main.Simplatform";
 
 		VMRunnerConfiguration runConfig = new VMRunnerConfiguration(
 				mainTypeName, classpath);
@@ -98,20 +98,20 @@ public class SimframeLauncher extends JavaLaunchDelegate {
 		runner.run(runConfig, launch, monitor);
 	}
 
-	private File findSimframeJar() throws CoreException {
+	private File findSimbankJar() throws CoreException {
 		try {
 			Bundle bundle = Activator.getInstance().getBundle();
-			IPath path = new Path("lib/simframe.jar");
+			IPath path = new Path("lib/galasa-simplatform.jar");
 			URL bootUrl = FileLocator.find(bundle, path, null);
 			if (bootUrl == null) {
 				throw new CoreException(new Status(Status.ERROR,
-						Activator.PLUGIN_ID, "The galasa-boot.jar is missing from the plugin"));
+						Activator.PLUGIN_ID, "The galasa-simplatform.jar is missing from the plugin"));
 			}
 			bootUrl = FileLocator.toFileURL(bootUrl);
 			return Paths.get(bootUrl.toURI()).toFile().getAbsoluteFile();
 		} catch (Exception e) {
 			throw new CoreException(new Status(Status.ERROR,
-					Activator.PLUGIN_ID, "Problem locating the galasa-boot.jar in the plugin", e));
+					Activator.PLUGIN_ID, "Problem locating the galasa-simplatform.jar in the plugin", e));
 		}
 	}
 

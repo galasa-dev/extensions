@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.ui.wizards.simframe;
+package dev.galasa.eclipse.ui.wizards.simbank;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -11,10 +11,10 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import dev.galasa.eclipse.Activator;
 
-public class ExampleSimframeWizard extends Wizard implements INewWizard {
+public class ExampleSimbankWizard extends Wizard implements INewWizard {
 	
-	public ExampleSimframeWizard() {
-		setWindowTitle("Import Galasa SimFrame example projects");
+	public ExampleSimbankWizard() {
+		setWindowTitle("Import Galasa SimBank example projects");
 	}
 
 	@Override
@@ -24,12 +24,12 @@ public class ExampleSimframeWizard extends Wizard implements INewWizard {
 
 	@Override
 	public boolean performFinish() {
-		String prefix = ((ExampleSimframeWizardPage)getPage("prefix")).getPrefix().trim();
+		String prefix = ((ExampleSimbankWizardPage)getPage("prefix")).getPrefix().trim();
 		if (prefix.isEmpty()) {
 			return false;
 		}
 		
-		ExampleSimframeOperation runnable = new ExampleSimframeOperation(prefix);
+		ExampleSimbankOperation runnable = new ExampleSimbankOperation(prefix);
 		IRunnableWithProgress op = new WorkspaceModifyDelegatingOperation(runnable);
 		try {
 			getContainer().run(false, true, op);
@@ -44,7 +44,7 @@ public class ExampleSimframeWizard extends Wizard implements INewWizard {
 	
 	@Override
 	public void addPages() {
-		addPage(new ExampleSimframeWizardPage("prefix"));
+		addPage(new ExampleSimbankWizardPage("prefix"));
 	}
 
 }
