@@ -1,0 +1,83 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>dev.galasa</groupId>
+		<artifactId>galasa-eclipse-parent</artifactId>
+		<version>0.3.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>dev.galasa.eclipse</artifactId>
+	<version>0.3.0-SNAPSHOT</version>
+	<packaging>eclipse-plugin</packaging>
+	<name>Galasa Eclipse</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>dev.galasa</groupId>
+			<artifactId>dev.galasa.framework</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<item>
+									<groupId>org.apache.maven.shared</groupId>
+									<artifactId>maven-invoker</artifactId>
+								</item>
+								<item>
+									<groupId>org.apache.maven.shared</groupId>
+									<artifactId>maven-shared-utils</artifactId>
+								</item>
+								<item>
+									<groupId>org.apache.felix</groupId>
+									<artifactId>org.apache.felix.bundlerepository</artifactId>
+									<version>2.0.10</version>
+								</item>
+								<item>
+									<groupId>dev.galasa</groupId>
+									<artifactId>galasa-boot</artifactId>
+									<version>0.3.0-SNAPSHOT</version>
+								</item>
+								<item>
+									<groupId>dev.galasa.simframe</groupId>
+									<artifactId>simframe</artifactId>
+									<version>0.3.0-SNAPSHOT</version>
+								</item>
+								<item>
+									<groupId>dev.galasa.simframe</groupId>
+									<artifactId>galasa.test.parent</artifactId>
+									<version>0.3.0-SNAPSHOT</version>
+									<classifier>examples</classifier>
+									<type>zip</type>
+								</item>
+							</artifactItems>
+							<outputDirectory>lib</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

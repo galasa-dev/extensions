@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<!-- Build Test OBRs Command -->
+	<extension point="org.eclipse.ui.commands">
+      	<category
+        	name="Galasa"
+            id="dev.galasa.eclipse.commands.category">
+      	</category>
+      	<command
+      		name="Initialise Galasa Framework"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.intialiseFramework">
+      	</command>
+      	<command
+      		name="Shutdown Galasa Framework"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.shutdownFramework">
+      	</command>
+      	<command
+      		name="Setup Galasa workspace"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.setupWorkspace">
+      	</command>
+      	<command
+      		name="Submit tests to automation"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.submitTests">
+      	</command>
+      	<command
+      		name="Open Galasa Views"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.shutdownFramework">
+      	</command>
+      	<command
+      		name="Refresh"
+            categoryId="dev.galasa.eclipse.commands.category"
+            id="dev.galasa.eclipse.commands.refresh">
+      	</command>
+   	</extension>
+   	
+   	<!-- Build Test OBRs Handler --> 
+   	<extension point="org.eclipse.ui.handlers">
+		<handler
+        	commandId="dev.galasa.eclipse.commands.intialiseFramework"
+            class="dev.galasa.eclipse.framework.management.InitialiseFrameworkHandler">
+      	</handler>
+		<handler
+        	commandId="dev.galasa.eclipse.commands.shutdownFramework"
+            class="dev.galasa.eclipse.framework.management.ShutdownFrameworkHandler">
+      	</handler>
+		<handler
+        	commandId="dev.galasa.eclipse.commands.setupWorkspace"
+            class="dev.galasa.eclipse.setup.SetupGalasaHandler">
+      	</handler>
+		<handler
+        	commandId="dev.galasa.eclipse.commands.submitTests"
+            class="dev.galasa.eclipse.ui.wizards.submittests.SubmitTestsHandler">
+      	</handler>
+		<handler
+        	commandId="dev.galasa.eclipse.commands.openViews"
+            class="dev.galasa.eclipse.ui.OpenViewsHandler">
+      	</handler>
+		<handler
+        	commandId="dev.galasa.eclipse.commands.refresh"
+            class="dev.galasa.eclipse.ui.RefreshHandler">
+      	</handler>
+   	</extension>
+   	
+   	<!-- Galasa Menu -->
+   	<extension point="org.eclipse.ui.menus">
+		<menuContribution
+        	locationURI="menu:org.eclipse.ui.main.menu">
+			<menu
+    			label="Galasa"
+            	id="dev.galasa.eclipse.menus.galasaMenu">
+	            <command
+    				label="Initialise Galasa Framework"
+    	        	commandId="dev.galasa.eclipse.commands.intialiseFramework"
+            	    id="dev.galasa.eclipse.menus.intialiseFramework">
+            	</command>
+	            <command
+    				label="Setup Galasa Workspace"
+    	        	commandId="dev.galasa.eclipse.commands.setupWorkspace"
+            	    id="dev.galasa.eclipse.menus.setupWorkspace">
+            	</command>
+	            <command
+    				label="Shutdown Galasa Framework"
+    	        	commandId="dev.galasa.eclipse.commands.shutdownFramework"
+            	    id="dev.galasa.eclipse.menus.shutdownFramework">
+            	</command>
+	            <command
+    				label="Submit tests to automation"
+    	        	commandId="dev.galasa.eclipse.commands.submitTests"
+            	    id="ddev.galasa.eclipse.menus.submitTests">
+            	</command>
+        	</menu>
+		</menuContribution>
+      	<menuContribution
+        	locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         	<toolbar
+            	id="dev.galasa.eclipse.toolbars">
+            	<command
+                	commandId="dev.galasa.eclipse.commands.openViews"
+                  	icon="icons/galasa-dark.png"
+                  	tooltip="Open Galasa Views"
+                  	id="dev.galasa.eclipse.toolbars.openViews">
+	            </command>
+         	</toolbar>
+      	</menuContribution>
+      	<menuContribution
+        	locationURI="popup:dev.galasa.eclipse.ui.results.ResultsView">
+	            <command
+    				label="Refresh"
+    	        	commandId="dev.galasa.eclipse.commands.refresh"
+            	    id="dev.galasa.eclipse.menus.refresh" >
+					<visibleWhen
+              			checkEnabled="false">
+           				<iterate
+                 			ifEmpty="false"
+                 			operator="or">
+                 			<instanceof
+                       			value="dev.galasa.eclipse.ui.results.BranchSelectedRuns">
+                 			</instanceof>
+           				</iterate>
+        			</visibleWhen>
+				</command>
+      	</menuContribution>
+   	</extension>
+   	   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="dev.galasa.eclipse.launcher.Launcher"
+            delegateDescription="Run Galasa tests from within Eclipse"
+            delegateName="Galasa Launcher"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
+            id="dev.galasa.eclipse.launcher.Launcher"
+            modes="run, debug"
+            name="Galasa">
+      </launchConfigurationType>
+      <launchConfigurationType
+            delegate="dev.galasa.eclipse.simframe.SimframeLauncher"
+            delegateDescription="Run Simframe"
+            delegateName="Simframe Launcher"
+            id="dev.galasa.eclipse.simframe.SimframeLauncher"
+            modes="run"
+            name="Galasa Simframe">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+             icon="icons/galasa-dark.png"
+           configTypeID="dev.galasa.eclipse.launcher.Launcher"
+            id="dev.galasa.eclipse.launcher.Launcher.image">
+      </launchConfigurationTypeImage>
+      <launchConfigurationTypeImage
+            icon="icons/galasa-dark.png"
+            configTypeID="dev.galasa.eclipse.simframe.SimframeLauncher"
+            id="dev.galasa.eclipse.simframe.SimframeLauncher.image">
+      </launchConfigurationTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            type="dev.galasa.eclipse.launcher.Launcher"
+            class="dev.galasa.eclipse.launcher.LaunchTabGroup"
+            id="dev.galasa.eclipse.launcher.LaunchTabGroup">
+         <launchMode
+               mode="debug">
+         </launchMode>
+         <launchMode
+               mode="run">
+         </launchMode>
+      </launchConfigurationTabGroup>
+      <launchConfigurationTabGroup
+            type="dev.galasa.eclipse.simframe.SimframeLauncher"
+            class="dev.galasa.eclipse.simframe.SimframeLaunchTabGroup"
+            id="dev.galasa.eclipse.simframe.SimframeLaunchTabGroup">
+         <launchMode
+               mode="run">
+         </launchMode>
+      </launchConfigurationTabGroup>
+   </extension>      
+   
+   <!-- Views --> 
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="dev.galasa.eclipse.views"
+            name="Galasa">
+      </category>
+         
+      <view
+            allowMultiple="false"
+            category="dev.galasa.eclipse.views"
+            class="dev.galasa.eclipse.ui.runs.RunsView"
+            icon="icons/galasa-dark.png"
+            id="dev.galasa.eclipse.ui.runs.RunsView"
+            name="Galasa Runs"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="dev.galasa.eclipse.views"
+            class="dev.galasa.eclipse.ui.resources.ResourcesView"
+            icon="icons/galasa-dark.png"
+            id="dev.galasa.eclipse.ui.resources.ResourcesView"
+            name="Galasa Resources"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="dev.galasa.eclipse.views"
+            class="dev.galasa.eclipse.ui.results.ResultsView"
+            icon="icons/galasa-dark.png"
+            id="dev.galasa.eclipse.ui.results.ResultsView"
+            name="Galasa Results"
+            restorable="true">
+      </view>
+   </extension>
+   
+   <!-- Editors --> 
+
+    <extension
+       point="org.eclipse.ui.editors">
+    <editor
+          class="dev.galasa.eclipse.ui.run.RunEditor"
+          default="false"
+          restorable="false"
+          icon="icons/galasa-dark.png"
+          id="dev.galasa.eclipse.ui.run.RunEditor"
+          name="Galasa Run">
+    </editor>
+    <editor
+          class="dev.galasa.eclipse.ui.run.ArtifactEditor"
+          default="false"
+          restorable="false"
+          icon="icons/galasa-dark.png"
+          id="dev.galasa.eclipse.ui.run.ArtifactEditor"
+          name="Galasa Artifact">
+    </editor>
+ </extension>
+   
+   <!-- Preferences --> 
+     <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="dev.galasa.eclipse.preferences.GalasaPreferences"
+            id="dev.galasa.eclipse.preferences.GalasaPreferences"
+            name="Galasa">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="dev.galasa.eclipse.preferences.GalasaPreferencesInitialiser">
+      </initializer>
+   </extension>
+   
+   
+   	<extension point="org.eclipse.ui.newWizards">
+		<category
+			name="Galasa Examples"
+			parentCategory="org.eclipse.ui.Examples"
+			id="dev.galasa.eclipse.wizards.examples">
+		</category>
+		<wizard
+			name="SimFrame example projects"
+			class="dev.galasa.eclipse.ui.wizards.simframe.ExampleSimframeWizard"
+			category="org.eclipse.ui.Examples/dev.galasa.eclipse.wizards.examples"
+			id="dev.galasa.eclipse.ui.wizards.simframe.ExampleSimframeWizard"
+			project="true"
+            icon="icons/galasa-dark.png">
+			<description>
+				Create example test projects that use SimFrame to demonstrate the capabilities of Galasa 
+			</description>
+		</wizard>
+	</extension>
+   
+   
+   	
+</plugin>
