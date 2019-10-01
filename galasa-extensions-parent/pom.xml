@@ -20,6 +20,7 @@
 		<module>dev.galasa.cps.etcd</module>
 		<module>dev.galasa.ras.couchdb</module>
 		<module>dev.galasa.extensions.obr</module>
+		<module>galasa-eclipse-parent</module>
 	</modules>
 
 	<dependencies>

@@ -1,0 +1,113 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>dev.galasa</groupId>
+		<artifactId>galasa-parent</artifactId>
+		<version>0.3.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>galasa-eclipse-parent</artifactId>
+	<version>0.3.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Galasa Eclipse Parent</name>
+
+	<modules>
+		<module>dev.galasa.eclipse</module>
+		<module>dev.galasa.eclipse.feature</module>
+	</modules>
+
+	<repositories>
+		<repository>
+			<id>Oxygen</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/oxygen</url>
+		</repository>
+	</repositories>
+
+	<properties>
+		<tycho-version>1.4.0</tycho-version>
+		<!-- Exclude tests until Jenkins display issue resolved -->
+		<skipTests>true</skipTests>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.maven</groupId>
+				<artifactId>maven-core</artifactId>
+				<version>3.6.1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.shared</groupId>
+				<artifactId>maven-invoker</artifactId>
+				<version>3.0.1</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.maven.shared</groupId>
+				<artifactId>maven-shared-utils</artifactId>
+				<version>3.0.0</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.sonatype.plexus</groupId>
+				<artifactId>plexus-build-api</artifactId>
+				<version>0.0.7</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.galasa</groupId>
+				<artifactId>dev.galasa</artifactId>
+				<version>0.3.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>dev.galasa</groupId>
+				<artifactId>dev.galasa.framework</artifactId>
+				<version>0.3.0-SNAPSHOT</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>${tycho-version}</version>
+				<extensions>true</extensions>
+				<configuration>
+					<includeAllDependencies>true</includeAllDependencies>
+					<pomDependencies>consider</pomDependencies>
+					<environments>
+						<environment>
+							<os>win32</os>
+							<ws>win32</ws>
+							<arch>x86</arch>
+						</environment>
+						<environment>
+							<os>linux</os>
+							<ws>gtk</ws>
+							<arch>x86_64</arch>
+						</environment>
+						<environment>
+							<os>macosx</os>
+							<ws>cocoa</ws>
+							<arch>x86_64</arch>
+						</environment>
+					</environments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>target-platform-configuration</artifactId>
+				<version>${tycho-version}</version>
+				<configuration>
+					<pomDependencies>consider</pomDependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
