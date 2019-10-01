@@ -7,7 +7,7 @@ import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
-import dev.galasa.common.zos3270.spi.Terminal;
+import dev.galasa.zos3270.spi.Terminal;
 
 @Command(scope = "3270", name = "connect", description = "Connect a 3270 Terminal")
 @Service
