@@ -140,12 +140,12 @@
             name="Galasa">
       </launchConfigurationType>
       <launchConfigurationType
-            delegate="dev.galasa.eclipse.simframe.SimframeLauncher"
-            delegateDescription="Run Simframe"
-            delegateName="Simframe Launcher"
-            id="dev.galasa.eclipse.simframe.SimframeLauncher"
+            delegate="dev.galasa.eclipse.simbank.SimbankLauncher"
+            delegateDescription="Run SimBank"
+            delegateName="SimBank Launcher"
+            id="dev.galasa.eclipse.simbank.SimbankLauncher"
             modes="run"
-            name="Galasa Simframe">
+            name="Galasa SimBank">
       </launchConfigurationType>
    </extension>
    <extension
@@ -157,8 +157,8 @@
       </launchConfigurationTypeImage>
       <launchConfigurationTypeImage
             icon="icons/galasa-dark.png"
-            configTypeID="dev.galasa.eclipse.simframe.SimframeLauncher"
-            id="dev.galasa.eclipse.simframe.SimframeLauncher.image">
+            configTypeID="dev.galasa.eclipse.simbank.SimbankLauncher"
+            id="dev.galasa.eclipse.simbank.SimbankLauncher.image">
       </launchConfigurationTypeImage>
    </extension>
    <extension
@@ -175,9 +175,9 @@
          </launchMode>
       </launchConfigurationTabGroup>
       <launchConfigurationTabGroup
-            type="dev.galasa.eclipse.simframe.SimframeLauncher"
-            class="dev.galasa.eclipse.simframe.SimframeLaunchTabGroup"
-            id="dev.galasa.eclipse.simframe.SimframeLaunchTabGroup">
+            type="dev.galasa.eclipse.simbank.SimbankLauncher"
+            class="dev.galasa.eclipse.simbank.SimbankLaunchTabGroup"
+            id="dev.galasa.eclipse.simbank.SimbankLaunchTabGroup">
          <launchMode
                mode="run">
          </launchMode>
@@ -268,10 +268,10 @@
 			id="dev.galasa.eclipse.wizards.examples">
 		</category>
 		<wizard
-			name="SimFrame example projects"
-			class="dev.galasa.eclipse.ui.wizards.simframe.ExampleSimframeWizard"
+			name="SimBank example projects"
+			class="dev.galasa.eclipse.ui.wizards.simbank.ExampleSimbankWizard"
 			category="org.eclipse.ui.Examples/dev.galasa.eclipse.wizards.examples"
-			id="dev.galasa.eclipse.ui.wizards.simframe.ExampleSimframeWizard"
+			id="dev.galasa.eclipse.ui.wizards.simbank.ExampleSimbankWizard"
 			project="true"
             icon="icons/galasa-dark.png">
 			<description>
