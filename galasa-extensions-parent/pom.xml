@@ -21,8 +21,6 @@
 		<module>dev.galasa.ras.couchdb</module>
 		<module>dev.galasa.extensions.obr</module>
 		<module>dev.galasa.devtools.karaf</module>
-		<module>dev.galasa.devtools.obr</module>
-		<module>dev.galasa.devtools.karaffeature</module>
 	</modules>
 
 	<dependencies>
