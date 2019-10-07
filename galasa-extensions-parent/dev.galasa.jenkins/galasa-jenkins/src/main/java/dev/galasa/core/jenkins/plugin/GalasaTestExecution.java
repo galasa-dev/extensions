@@ -214,10 +214,10 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 		logger.println("The following " + currentTests.size() + " Voras test classes have been selected for running");
 		for (TestCase tc : currentTests.values()) {
-			logger.println("    " + getTestNamePart(tc.className));
+			logger.println("    " + getTestNamePart(tc.getClassName()));
 		}
 
-		logger.println("Test Run Instance = " + testRun.instance);
+		logger.println("Test Run Instance = " + testRun.getInstance());
 
 		if (!overrides.isEmpty()) {
 			logger.println("------------------------------------------------");
@@ -240,7 +240,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		submitAllTestsToSchedule(testToRun, vorasContext);
 		
 		if(!waitForTestsToRun(vorasContext)) {
-			testRun.status = Status.BYPASSED;
+			testRun.setStatus(Status.BYPASSED);
 			return;
 		}
 		
@@ -256,11 +256,11 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			for(TestCase test : failedTests) {
 				StringBuilder sb = new StringBuilder();
 				for(TestCaseResult tcr : test.getResults()) {
-					if (tcr.runIdFriendly != null && !tcr.runIdFriendly.isEmpty()) {
+					if (tcr.getRunIdFriendly() != null && !tcr.getRunIdFriendly().isEmpty()) {
 						if (sb.length() > 0) {
 							sb.append(",");
 						}
-						sb.append(tcr.runIdFriendly);
+						sb.append(tcr.getRunIdFriendly());
 					}
 				}
 				
@@ -275,25 +275,25 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 
 		if (!failedTests.isEmpty()) {
-			testRun.status = Status.FAILED;
+			testRun.setStatus(Status.FAILED);
 		} else {
-			testRun.status = Status.SUCCESS;
+			testRun.setStatus(Status.SUCCESS);
 		}
 	}
 	
 	private void submitAllTestsToSchedule(LinkedList<TestCase> testsToSubmit, VorasContext context) throws AbortException {
 		ScheduleRequest request = new ScheduleRequest();
-		request.requestorType = RequestorType.JENKINS;
-		request.testStream = this.stream;
-		request.classNames = new ArrayList<String>();
+		request.setRequestorType(RequestorType.JENKINS);
+		request.setTestStream(this.stream); 
+		request.setClassNames(new ArrayList<String>());
 		
 		if(!this.mavenRepository.equals("")) {
-			request.mavenRepository = this.mavenRepository;
-			request.obr = this.obr;
+			request.setMavenRepository(this.mavenRepository);
+			request.setObr(this.obr);
 		}
 
 		for(TestCase tc : testsToSubmit) {
-			request.classNames.add(tc.getFullName());
+			request.getClassNames().add(tc.getFullName());
 		}
 
 		String scheduleRequestString = null;
@@ -334,7 +334,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 				else
 					continue;
 			}
-			testFinished = status.scheduleStatus.isRunComplete();
+			testFinished = status.getScheduleStatus().isRunComplete();
 			if(testFinished)
 				return true;
 			try {
@@ -425,10 +425,10 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 
 		TestCase newTest = new TestCase();
-		newTest.bundleName = testFullName.split("/")[0];
-		newTest.className = testFullName.split("/")[1];
-		newTest.stream = stream;
-		newTest.type = "Voras";
+		newTest.setBundleName(testFullName.split("/")[0]);
+		newTest.setClassName(testFullName.split("/")[1]);
+		newTest.setStream(stream);
+		newTest.setType("Galasa");
 
 		Properties newTestEnvProperties = new Properties();
 		newTestEnvProperties.putAll(envOverrides);
@@ -448,7 +448,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 		boolean updated = false;
 
-		for (SerializedRun run : scheduleStatus.runs) {
+		for (SerializedRun run : scheduleStatus.getRuns()) {
 			switch (run.getStatus()) {
 			case "ABORTED":
 			case "FAILED_RUN":
@@ -487,7 +487,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			
 			TestCase runningTest = runningTestsi.next();
 			TestCaseResult tcr = runningTest.getResults().get(0);
-			UUID runUUID = UUID.fromString(tcr.runId);
+			UUID runUUID = UUID.fromString(tcr.getRunId());
 			if (runUUID.toString().equals(run.getGroup())) {
 				runningTestsi.remove();
 				if (run.getStatus().equals(RunStatus.FINISHED_RUN.toString())  || run.getStatus().equals(RunStatus.FINISHED_DEFECTS_RUN.toString())  || run.getStatus().equals(RunStatus.IGNORED_RUN.toString())) {
@@ -495,8 +495,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 				} else {
 					failedTests.add(runningTest);
 				}
-				tcr.status = run.getStatus();
-				logger.println("Test " + getTestNamePart(runningTest.className) + " run(" + run.getName() + ")  has finished with " + run.getStatus());
+				tcr.setStatus(run.getStatus());
+				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ")  has finished with " + run.getStatus());
 				return true;
 			}
 		}
@@ -510,13 +510,13 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		while(runningTestsi.hasNext()) {
 			TestCase runningTest = runningTestsi.next();
 			TestCaseResult tcr = runningTest.getResults().get(0);
-			UUID runUUID = UUID.fromString(tcr.runId);
+			UUID runUUID = UUID.fromString(tcr.getRunId());
 			if (runUUID.toString().equals(run.getGroup().toString())) {
-				logger.println("Test " + getTestNamePart(runningTest.className) + " run(" + run.getName() + ") is currently " + run.getStatus());
-				if (tcr.status.equals(run.getStatus())) {
+				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ") is currently " + run.getStatus());
+				if (tcr.getStatus().equals(run.getStatus())) {
 					return false;
 				} else {
-					tcr.status = run.getStatus();
+					tcr.setStatus(run.getStatus());
 					return true;
 				}
 			}
