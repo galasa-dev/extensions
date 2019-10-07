@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>io.jenkins.plugins</groupId>
 	<artifactId>galasa-jenkins</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>0.3.0-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<properties>
 		<jenkins.version>2.164.1</jenkins.version>
