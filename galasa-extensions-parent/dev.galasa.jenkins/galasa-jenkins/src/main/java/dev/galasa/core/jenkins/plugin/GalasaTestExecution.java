@@ -234,7 +234,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 		
 		
-		VorasContext vorasContext = new VorasContext(galasaConfiguration.getURL(), getCredentials());
+		GalasaContext vorasContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
 		
 
 		submitAllTestsToSchedule(testToRun, vorasContext);
@@ -281,7 +281,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 	}
 	
-	private void submitAllTestsToSchedule(LinkedList<TestCase> testsToSubmit, VorasContext context) throws AbortException {
+	private void submitAllTestsToSchedule(LinkedList<TestCase> testsToSubmit, GalasaContext context) throws AbortException {
 		ScheduleRequest request = new ScheduleRequest();
 		request.setRequestorType(RequestorType.JENKINS);
 		request.setTestStream(this.stream); 
@@ -321,7 +321,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 
 
-	private boolean waitForTestsToRun(VorasContext context) throws AbortException {
+	private boolean waitForTestsToRun(GalasaContext context) throws AbortException {
 		boolean testFinished = false;
 		while(!testFinished) {
 			ScheduleStatus status = getTestStatus(context);
@@ -346,7 +346,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		return false;
 	}
 	
-	private ScheduleStatus getTestStatus(VorasContext context) throws AbortException {
+	private ScheduleStatus getTestStatus(GalasaContext context) throws AbortException {
 		String          scheduleResponseString = null;
 		ScheduleStatus  scheduleStatus = null;
 		try {
@@ -569,17 +569,17 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 	}
 	
-	private static final class VorasContext {
-		private final URL vorasURL;
+	private static final class GalasaContext {
+		private final URL galasaURL;
 		private final HttpHost target;
 		private final CloseableHttpClient client;
 		private final HttpClientContext context;
 
 
-		private VorasContext(URL url, StandardUsernamePasswordCredentials credentials) {
-			this.vorasURL = url;
+		private GalasaContext(URL url, StandardUsernamePasswordCredentials credentials) {
+			this.galasaURL = url;
 
-			this.target = new HttpHost(vorasURL.getHost(), vorasURL.getPort(), vorasURL.getProtocol());
+			this.target = new HttpHost(galasaURL.getHost(), galasaURL.getPort(), galasaURL.getProtocol());
 
 			CredentialsProvider credsProvider = new BasicCredentialsProvider();
 			credsProvider.setCredentials(new AuthScope(this.target.getHostName(), this.target.getPort()),
@@ -623,7 +623,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 
 		public URI getVorasURI() throws URISyntaxException {
-			return vorasURL.toURI();
+			return galasaURL.toURI();
 		}
 	}
 }

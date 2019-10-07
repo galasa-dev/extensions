@@ -18,14 +18,6 @@
 		<java.level>8</java.level>
 	</properties>
 	<name>Galasa Plugin</name>
-	<!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for 
-		the applicable one if needed. -->
-	<licenses>
-		<license>
-			<name>MIT License</name>
-			<url>https://opensource.org/licenses/MIT</url>
-		</license>
-	</licenses>
 	<dependencies>
 		<dependency>
 			<groupId>dev.galasa</groupId>
