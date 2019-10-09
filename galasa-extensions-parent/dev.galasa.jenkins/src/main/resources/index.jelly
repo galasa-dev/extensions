@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    TODO
+    Allows Galasa tests to be executed from within a jenkins pipeline.  Pipeline execution will pause until all tests have completed execution
 </div>

@@ -44,6 +44,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.kenai.jnr.x86asm.Logger;
 
 import dev.galasa.framework.SerializedRun;
 import dev.galasa.framework.api.runs.bind.RequestorType;
@@ -183,14 +184,20 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		logger.println("** Galasa Test Selection starting                        ***");
 		logger.println("************************************************************");
 		galasaConfiguration = GalasaConfiguration.get();
+		GalasaContext galasaContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
 
 		TestRun testRun = TestRun.getTestRun("jenkins");
 
 		properties = new Properties();
 		overrides = new Properties();
 		
-		// *** Retrieve the JAT properties
-		properties.putAll(getGalasaProperties(galasaConfiguration.getUrl(),getCredentials()));
+		// *** Retrieve the Galasa bootstrap properties
+		try {
+			properties.putAll(getGalasaProperties(galasaConfiguration.getUrl(),getCredentials(),galasaContext));
+		} catch (MissingClass e) {
+			logger.println("Unable to access Boostrap properties");
+			return;
+		}
 
 		// add envProps to overrideString if specified
 		if (this.envProps != null && !this.envProps.trim().isEmpty()) {
@@ -227,15 +234,11 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 		
 		logger.println("Maximum number of concurrent runs is: " + this.numberOfRuns);
-		logger.println("Voras Server Poll time is: " + this.pollTime + " seconds");
+		logger.println("Galasa Server Poll time is: " + this.pollTime + " seconds");
 		
 		for(TestCase tc : testRun.getTestCases()) {
 			testToRun.add(tc);
 		}
-		
-		
-		GalasaContext galasaContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
-		
 
 		submitAllTestsToSchedule(testToRun, galasaContext);
 		
@@ -380,19 +383,18 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		// *** Find the username and password to use for the Galasa Bootsrap
 		StandardUsernamePasswordCredentials credentials = galasaConfiguration.getCredentials(run);
 		if (credentials != null) {
-			logger.println("Using username '" + credentials.getUsername() + "' for Voras bootstrap");
+			logger.println("Using username '" + credentials.getUsername() + "' for Galasa bootstrap");
 		} else {
-			logger.println("No credentials provided for Voras bootsrap");
+			logger.println("No credentials provided for Galasa bootsrap");
 		}
 		return credentials;
 	}
 	
 	private void authenticate(URL endpoint) {
-		String url = endpoint.toString() + "/bootstrap";
 		try {
 			StandardUsernamePasswordCredentials credentials = galasaConfiguration.getCredentials(run);
 			Executor executor = Executor.newInstance().auth(credentials.getUsername(), credentials.getPassword().getPlainText());
-			this.jwt = executor.execute(Request.Get(new URI(url))).returnContent().asString();
+			this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
 		} catch (ClientProtocolException e) {
 			if (e.getMessage().contains("Unauthorized")) {
 				logger.println("Unauthorised to access the Galasa bootstrap");
@@ -407,14 +409,19 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 	}
 	
-	private Properties getGalasaProperties(String host,StandardUsernamePasswordCredentials credentials) throws MalformedURLException {
+	private Properties getGalasaProperties(String host,StandardUsernamePasswordCredentials credentials, GalasaContext context) throws IOException, InterruptedException, MissingClass {
 		Properties configurationProperties = new Properties();
 		
-		URL authURL = new URL(host + "auth");
+		if(this.jwt == null) {
+			logger.println("Authenticating with Galasa auth Service");
+			authenticate(new URL(host + "auth"));
+		}
+		logger.println("Retrieving Galasa Configuration Properties");
 		
-		if(this.jwt == null)
-			authenticate(authURL);
-			logger.println("Retrieving Galasa Configuration Properties");
+		HttpGet getRequest = new HttpGet(host+"bootstrap");
+		String bootstrapResponse = context.execute(getRequest, logger);
+		configurationProperties.load(new StringReader(bootstrapResponse));
+		
 		return configurationProperties;
 	}
 
