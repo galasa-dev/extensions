@@ -301,7 +301,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		try {
 			scheduleRequestString = new Gson().toJson(request);
 
-			HttpPost postRequest = new HttpPost(context.getGalasaURI()+"schedule/"+this.uuid.toString());
+			HttpPost postRequest = new HttpPost(context.getGalasaURI()+"/run/"+this.uuid.toString());
 			postRequest.addHeader("Accept", "application/json");
 			postRequest.addHeader("Content-Type", "application/json");
 			postRequest.setEntity(new StringEntity(scheduleRequestString));
@@ -388,10 +388,11 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	}
 	
 	private void authenticate(URL endpoint) {
+		String url = endpoint.toString() + "/bootstrap";
 		try {
 			StandardUsernamePasswordCredentials credentials = galasaConfiguration.getCredentials(run);
 			Executor executor = Executor.newInstance().auth(credentials.getUsername(), credentials.getPassword().getPlainText());
-			this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
+			this.jwt = executor.execute(Request.Get(new URI(url))).returnContent().asString();
 		} catch (ClientProtocolException e) {
 			if (e.getMessage().contains("Unauthorized")) {
 				logger.println("Unauthorised to access the Galasa bootstrap");
