@@ -212,7 +212,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			return;
 		}
 
-		logger.println("The following " + currentTests.size() + " Voras test classes have been selected for running");
+		logger.println("The following " + currentTests.size() + " Galasa test classes have been selected for running");
 		for (TestCase tc : currentTests.values()) {
 			logger.println("    " + getTestNamePart(tc.getClassName()));
 		}
@@ -234,12 +234,12 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 		
 		
-		GalasaContext vorasContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
+		GalasaContext galasaContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
 		
 
-		submitAllTestsToSchedule(testToRun, vorasContext);
+		submitAllTestsToSchedule(testToRun, galasaContext);
 		
-		if(!waitForTestsToRun(vorasContext)) {
+		if(!waitForTestsToRun(galasaContext)) {
 			testRun.setStatus(Status.BYPASSED);
 			return;
 		}
@@ -301,7 +301,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		try {
 			scheduleRequestString = new Gson().toJson(request);
 
-			HttpPost postRequest = new HttpPost(context.getVorasURI()+"schedule/"+this.uuid.toString());
+			HttpPost postRequest = new HttpPost(context.getGalasaURI()+"schedule/"+this.uuid.toString());
 			postRequest.addHeader("Accept", "application/json");
 			postRequest.addHeader("Content-Type", "application/json");
 			postRequest.setEntity(new StringEntity(scheduleRequestString));
@@ -350,7 +350,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		String          scheduleResponseString = null;
 		ScheduleStatus  scheduleStatus = null;
 		try {
-			HttpGet getRequest = new HttpGet(context.getVorasURI()+"schedule/" + this.uuid.toString());
+			HttpGet getRequest = new HttpGet(context.getGalasaURI()+"schedule/" + this.uuid.toString());
 			getRequest.addHeader("Accept", "application/json");
 
 			scheduleResponseString = context.execute(getRequest, logger);
@@ -622,7 +622,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 
 
-		public URI getVorasURI() throws URISyntaxException {
+		public URI getGalasaURI() throws URISyntaxException {
 			return galasaURL.toURI();
 		}
 	}
