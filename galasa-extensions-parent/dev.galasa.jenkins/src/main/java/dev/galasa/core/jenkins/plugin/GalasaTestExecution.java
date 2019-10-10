@@ -310,7 +310,10 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			postRequest.setEntity(new StringEntity(scheduleRequestString));
 
 			scheduleResponseString = context.execute(postRequest, logger);
-			logger.println("Tests scheduled: " + scheduleResponseString);
+			logger.println("Tests schedule endpoint: " + postRequest.getURI());
+			
+			runningTests.addAll(currentTests.values());
+			currentTests.clear();
 
 		} catch(IOException|InterruptedException|MissingClass|URISyntaxException|JsonSyntaxException e) {
 			logger.println("Failed to schedule runs '" + e.getMessage());
@@ -459,6 +462,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		for (SerializedRun run : scheduleStatus.getRuns()) {
 			switch (run.getStatus()) {
 			case "ABORTED":
+			case "finished":
 			case "FAILED_RUN":
 			case "FAILED_DEFECTS_RUN":
 			case "FINISHED_RUN":
@@ -469,14 +473,14 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 					updated = true;
 				}
 				break;
-			case "ALLOCATED":
+			case "allocated":
 			case "BUILDING_ENVIRONMENT":
 			case "DISCARDING_ENVIRONMENT":
 			case "STARTED_RUN":
 			case "STARTING_ENVIRONMENT":
 			case "STOPPING_ENVIRONMENT":
 			case "SUBMITTED":
-			case "TESTING":
+			case "testing":
 			default:
 				if (reportTestProgress(run, runningTests, logger)) {
 					updated = true;
@@ -491,6 +495,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	
 	private boolean markTestFinished(SerializedRun run, LinkedList<TestCase> runningTests, ArrayList<TestCase> finishedTests, ArrayList<TestCase> failedTests, PrintStream logger) {
 		Iterator<TestCase> runningTestsi = runningTests.iterator();
+		
+		//If the test was known to be running update the status
 		while(runningTestsi.hasNext()) {
 			
 			TestCase runningTest = runningTestsi.next();
