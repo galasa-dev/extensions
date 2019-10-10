@@ -474,6 +474,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 				}
 				break;
 			case "allocated":
+			case "queued":
 			case "BUILDING_ENVIRONMENT":
 			case "DISCARDING_ENVIRONMENT":
 			case "STARTED_RUN":
@@ -500,6 +501,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		while(runningTestsi.hasNext()) {
 			
 			TestCase runningTest = runningTestsi.next();
+			//running test has no results so it fails ArrayIndexOutOfBounds 
 			TestCaseResult tcr = runningTest.getResults().get(0);
 			UUID runUUID = UUID.fromString(tcr.getRunId());
 			if (runUUID.toString().equals(run.getGroup())) {
