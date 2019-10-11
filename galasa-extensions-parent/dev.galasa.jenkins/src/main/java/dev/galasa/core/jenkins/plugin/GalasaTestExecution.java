@@ -475,7 +475,6 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 				}
 			}
 			test.setRunDetails(run);
-			currentTests.get(run.getTest()).setRunDetails(run);
 		}
 //
 //		for (SerializedRun run : scheduleStatus.getRuns()) {
