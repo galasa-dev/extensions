@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -91,11 +92,6 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	private PrintStream logger;
 	
 	private HashMap<String, TestCase> currentTests = new HashMap<>();
-	
-	private LinkedList<TestCase> testToRun = new LinkedList<TestCase>();
-	private LinkedList<TestCase> runningTests = new LinkedList<TestCase>();
-	private ArrayList<TestCase> finishedTests = new ArrayList<TestCase>();
-	private ArrayList<TestCase> failedTests = new ArrayList<TestCase>();
 	
 	private Properties properties;
 	
@@ -235,56 +231,71 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		
 		logger.println("Maximum number of concurrent runs is: " + this.numberOfRuns);
 		logger.println("Galasa Server Poll time is: " + this.pollTime + " seconds");
-		
-		for(TestCase tc : testRun.getTestCases()) {
-			testToRun.add(tc);
-		}
 
-		submitAllTestsToSchedule(testToRun, galasaContext);
+		submitAllTestsToSchedule(currentTests.values(), galasaContext);
 		
 		if(!waitForTestsToRun(galasaContext)) {
 			testRun.setStatus(Status.BYPASSED);
 			return;
 		}
 		
-		if (!finishedTests.isEmpty()) {
-			logger.println("The following test PASSED:-");
-			for(TestCase test : finishedTests) {
-				logger.println("    " + test.getBundleName() + "/" + test.getClassName());
+		logger.println("Tests completed:");
+		for(TestCase test : currentTests.values()) {
+			if(test.getRunDetails().getStatus().equals("finished")) {
+				logger.println(test.getFullName());
+			}
+		}
+		logger.println("Tests passed:");
+		for(TestCase test : currentTests.values()) {
+			if(test.getRunDetails().getStatus().equals("passed")) {
+				logger.println(test.getFullName());
 			}
 		}
 		
-		if (!failedTests.isEmpty()) {
-			logger.println("The following test FAILED:-");
-			for(TestCase test : failedTests) {
-				StringBuilder sb = new StringBuilder();
-				for(TestCaseResult tcr : test.getResults()) {
-					if (tcr.getRunIdFriendly() != null && !tcr.getRunIdFriendly().isEmpty()) {
-						if (sb.length() > 0) {
-							sb.append(",");
-						}
-						sb.append(tcr.getRunIdFriendly());
-					}
-				}
-				
-				String runs = "";
-				if (sb.length() > 0) {
-					runs = " (" + sb.toString() + ")";
-				}
-				
-				logger.println("    " + test.getBundleName() + "/" + test.getClassName() + runs);
+		logger.println("Tests failed:");
+		for(TestCase test : currentTests.values()) {
+			if(test.getRunDetails().getStatus().equals("failed")) {
+				logger.println(test.getFullName());
 			}
 		}
-
-
-		if (!failedTests.isEmpty()) {
-			testRun.setStatus(Status.FAILED);
-		} else {
-			testRun.setStatus(Status.SUCCESS);
-		}
+//		if (!finishedTests.isEmpty()) {
+//			logger.println("The following test PASSED:-");
+//			for(TestCase test : finishedTests) {
+//				logger.println("    " + test.getBundleName() + "/" + test.getClassName());
+//			}
+//		}
+//		
+//		if (!failedTests.isEmpty()) {
+//			logger.println("The following test FAILED:-");
+//			for(TestCase test : failedTests) {
+//				StringBuilder sb = new StringBuilder();
+//				for(TestCaseResult tcr : test.getResults()) {
+//					if (tcr.getRunIdFriendly() != null && !tcr.getRunIdFriendly().isEmpty()) {
+//						if (sb.length() > 0) {
+//							sb.append(",");
+//						}
+//						sb.append(tcr.getRunIdFriendly());
+//					}
+//				}
+//				
+//				String runs = "";
+//				if (sb.length() > 0) {
+//					runs = " (" + sb.toString() + ")";
+//				}
+//				
+//				logger.println("    " + test.getBundleName() + "/" + test.getClassName() + runs);
+//			}
+//		}
+//
+//
+//		if (!failedTests.isEmpty()) {
+//			testRun.setStatus(Status.FAILED);
+//		} else {
+//			testRun.setStatus(Status.SUCCESS);
+//		}
 	}
 	
-	private void submitAllTestsToSchedule(LinkedList<TestCase> testsToSubmit, GalasaContext context) throws AbortException {
+	private void submitAllTestsToSchedule(Collection<TestCase> collection, GalasaContext context) throws AbortException {
 		ScheduleRequest request = new ScheduleRequest();
 		request.setRequestorType(RequestorType.JENKINS);
 		request.setTestStream(this.stream); 
@@ -295,7 +306,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			request.setObr(this.obr);
 		}
 
-		for(TestCase tc : testsToSubmit) {
+		for(TestCase tc : collection) {
 			request.getClassNames().add(tc.getFullName());
 		}
 
@@ -311,9 +322,6 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 			scheduleResponseString = context.execute(postRequest, logger);
 			logger.println("Tests schedule endpoint: " + postRequest.getURI());
-			
-			runningTests.addAll(currentTests.values());
-			currentTests.clear();
 
 		} catch(IOException|InterruptedException|MissingClass|URISyntaxException|JsonSyntaxException e) {
 			logger.println("Failed to schedule runs '" + e.getMessage());
@@ -361,7 +369,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 
 			scheduleResponseString = context.execute(getRequest, logger);
 			scheduleStatus = new Gson().fromJson(scheduleResponseString, ScheduleStatus.class);
-			updateTestStatus(scheduleStatus, logger, runningTests, finishedTests, failedTests);
+			updateTestStatus(scheduleStatus, logger);
 			return scheduleStatus;
 		} catch(AbortException e) {
 			throw e;
@@ -449,97 +457,108 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		newTestEnvProperties.store(envPropertiesSw, null);
 
 		currentTests.put(testFullName, newTest);
-		testRun.getTestCases().add(newTest);
 	}
 	
-	private boolean updateTestStatus(ScheduleStatus scheduleStatus, PrintStream logger, LinkedList<TestCase> runningTests, ArrayList<TestCase> finishedTests, ArrayList<TestCase> failedTests) throws IOException {
+	private boolean updateTestStatus(ScheduleStatus scheduleStatus, PrintStream logger) throws IOException {
 		if (scheduleStatus == null) {
 			return false;
 		}
 
 		boolean updated = false;
-
-		for (SerializedRun run : scheduleStatus.getRuns()) {
-			switch (run.getStatus()) {
-			case "ABORTED":
-			case "finished":
-			case "FAILED_RUN":
-			case "FAILED_DEFECTS_RUN":
-			case "FINISHED_RUN":
-			case "FINISHED_DEFECTS_RUN":
-			case "IGNORED_RUN":
-			case "UNKNOWN":
-				if (markTestFinished(run, runningTests,finishedTests, failedTests, logger)) {
+		
+		for(SerializedRun run : scheduleStatus.getRuns()) {
+			TestCase test = currentTests.get(run.getTest());
+			SerializedRun oldRunDetails = test.getRunDetails();
+			if(oldRunDetails!=null) {
+				if(!oldRunDetails.getStatus().equals(run.getStatus())) {
 					updated = true;
 				}
-				break;
-			case "allocated":
-			case "queued":
-			case "BUILDING_ENVIRONMENT":
-			case "DISCARDING_ENVIRONMENT":
-			case "STARTED_RUN":
-			case "STARTING_ENVIRONMENT":
-			case "STOPPING_ENVIRONMENT":
-			case "SUBMITTED":
-			case "testing":
-			default:
-				if (reportTestProgress(run, runningTests, logger)) {
-					updated = true;
-				}
-				break;
 			}
-
+			test.setRunDetails(run);
+			currentTests.get(run.getTest()).setRunDetails(run);
 		}
+//
+//		for (SerializedRun run : scheduleStatus.getRuns()) {
+//			switch (run.getStatus()) {
+//			case "ABORTED":
+//			case "finished":
+//			case "FAILED_RUN":
+//			case "FAILED_DEFECTS_RUN":
+//			case "FINISHED_RUN":
+//			case "FINISHED_DEFECTS_RUN":
+//			case "IGNORED_RUN":
+//			case "UNKNOWN":
+//				if (markTestFinished(run, runningTests,finishedTests, failedTests, logger)) {
+//					updated = true;
+//				}
+//				break;
+//			case "allocated":
+//			case "queued":
+//			case "BUILDING_ENVIRONMENT":
+//			case "DISCARDING_ENVIRONMENT":
+//			case "STARTED_RUN":
+//			case "STARTING_ENVIRONMENT":
+//			case "STOPPING_ENVIRONMENT":
+//			case "SUBMITTED":
+//			case "testing":
+//			default:
+//				if (reportTestProgress(run, runningTests, logger)) {
+//					updated = true;
+//				}
+//				break;
+//			}
+//
+//		}
 
 		return updated;
 	}
 	
-	private boolean markTestFinished(SerializedRun run, LinkedList<TestCase> runningTests, ArrayList<TestCase> finishedTests, ArrayList<TestCase> failedTests, PrintStream logger) {
-		Iterator<TestCase> runningTestsi = runningTests.iterator();
-		
-		//If the test was known to be running update the status
-		while(runningTestsi.hasNext()) {
-			
-			TestCase runningTest = runningTestsi.next();
-			//running test has no results so it fails ArrayIndexOutOfBounds 
-			TestCaseResult tcr = runningTest.getResults().get(0);
-			UUID runUUID = UUID.fromString(tcr.getRunId());
-			if (runUUID.toString().equals(run.getGroup())) {
-				runningTestsi.remove();
-				if (run.getStatus().equals(RunStatus.FINISHED_RUN.toString())  || run.getStatus().equals(RunStatus.FINISHED_DEFECTS_RUN.toString())  || run.getStatus().equals(RunStatus.IGNORED_RUN.toString())) {
-					finishedTests.add(runningTest);
-				} else {
-					failedTests.add(runningTest);
-				}
-				tcr.setStatus(run.getStatus());
-				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ")  has finished with " + run.getStatus());
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	private boolean reportTestProgress(SerializedRun run, LinkedList<TestCase> runningTests, PrintStream logger) {
-
-		Iterator<TestCase> runningTestsi = runningTests.iterator();
-		while(runningTestsi.hasNext()) {
-			TestCase runningTest = runningTestsi.next();
-			TestCaseResult tcr = runningTest.getResults().get(0);
-			UUID runUUID = UUID.fromString(tcr.getRunId());
-			if (runUUID.toString().equals(run.getGroup().toString())) {
-				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ") is currently " + run.getStatus());
-				if (tcr.getStatus().equals(run.getStatus())) {
-					return false;
-				} else {
-					tcr.setStatus(run.getStatus());
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
+//	private boolean markTestFinished(SerializedRun run, LinkedList<TestCase> runningTests, ArrayList<TestCase> finishedTests, ArrayList<TestCase> failedTests, PrintStream logger) {
+//		Iterator<TestCase> runningTestsi = runningTests.iterator();
+//		
+//		//If the test was known to be running update the status
+//		while(runningTestsi.hasNext()) {
+//			
+//			TestCase runningTest = runningTestsi.next();
+//			//running test has no results so it fails ArrayIndexOutOfBounds 
+//			TestCaseResult tcr = runningTest.getResults().get(0);
+//			UUID runUUID = UUID.fromString(tcr.getRunId());
+//			if (runUUID.toString().equals(run.getGroup())) {
+//				runningTestsi.remove();
+//				if (run.getStatus().equals(RunStatus.FINISHED_RUN.toString())  || run.getStatus().equals(RunStatus.FINISHED_DEFECTS_RUN.toString())  || run.getStatus().equals(RunStatus.IGNORED_RUN.toString())) {
+//					finishedTests.add(runningTest);
+//				} else {
+//					failedTests.add(runningTest);
+//				}
+//				tcr.setStatus(run.getStatus());
+//				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ")  has finished with " + run.getStatus());
+//				return true;
+//			}
+//		}
+//
+//		return false;
+//	}
+//	
+//	private boolean reportTestProgress(SerializedRun run, LinkedList<TestCase> runningTests, PrintStream logger) {
+//
+//		Iterator<TestCase> runningTestsi = runningTests.iterator();
+//		while(runningTestsi.hasNext()) {
+//			TestCase runningTest = runningTestsi.next();
+//			TestCaseResult tcr = runningTest.getResults().get(0);
+//			UUID runUUID = UUID.fromString(tcr.getRunId());
+//			if (runUUID.toString().equals(run.getGroup().toString())) {
+//				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ") is currently " + run.getStatus());
+//				if (tcr.getStatus().equals(run.getStatus())) {
+//					return false;
+//				} else {
+//					tcr.setStatus(run.getStatus());
+//					return true;
+//				}
+//			}
+//		}
+//
+//		return false;
+//	}
 
 	@Override
 	public DescriptorImpl getDescriptor() {
