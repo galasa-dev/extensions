@@ -1,6 +1,5 @@
-package dev.galasa.eclipse.ui.run;
+package dev.galasa.eclipse.ui.run.storedartifacts;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
@@ -15,12 +14,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 
-import dev.galasa.eclipse.Activator;
+import dev.galasa.eclipse.ui.run.RunEditor;
 import dev.galasa.framework.spi.IRunResult;
 
 public class ArtifactsPage extends FormPage implements IDoubleClickListener {
@@ -74,11 +72,9 @@ public class ArtifactsPage extends FormPage implements IDoubleClickListener {
 		gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		treeStoredArtifacts.getTree().setLayoutData(gd);
 		treeStoredArtifacts.setContentProvider(new StoredArtifactContentProvider());
-//		treeStoredArtifacts.setSorter(new StoredArtifactSorter());
+		treeStoredArtifacts.setComparator(new StoredArtifactComparator());
 		treeStoredArtifacts.setInput(new TreeLoading());
 		treeStoredArtifacts.addDoubleClickListener(this);
-//		treeStoredArtifacts.addTreeListener(this);
-//		treeStoredArtifacts.addSelectionChangedListener(this);
 		toolkit.adapt(treeStoredArtifacts.getTree());
 		
 		MenuManager contextMenu = new MenuManager();
@@ -86,9 +82,6 @@ public class ArtifactsPage extends FormPage implements IDoubleClickListener {
 		treeStoredArtifacts.getControl().setMenu(menu);
 		getSite().registerContextMenu(contextMenu, treeStoredArtifacts);
 		getSite().setSelectionProvider(treeStoredArtifacts);
-
-
-//		sectionStoredArtifacts.setClient(storedArtifactsComposite);
 		
 		return;
 	}
@@ -206,14 +199,8 @@ public class ArtifactsPage extends FormPage implements IDoubleClickListener {
 				for(Object selected : selectedList) {
 					if (selected instanceof ArtifactFolder) {
 						treeStoredArtifacts.expandToLevel(selected, 1);
-					} else if (selected instanceof ArtifactFile) {
-						ArtifactFile artifactFile = (ArtifactFile)selected;
-						
-						try {
-							getSite().getPage().openEditor(new ArtifactEditorInput(artifactFile.getRunResult(), artifactFile.getPath()), ArtifactEditor.ID);
-						} catch (PartInitException e) {
-							Activator.log(e);
-						}
+					} else if (selected instanceof IArtifact) {
+					    ((IArtifact)selected).doubleClick(getSite());
 					}
 				}
 			}

@@ -9,6 +9,7 @@ import org.eclipse.ui.forms.editor.SharedHeaderFormEditor;
 import org.eclipse.ui.forms.widgets.Form;
 
 import dev.galasa.eclipse.Activator;
+import dev.galasa.eclipse.ui.run.storedartifacts.ArtifactsPage;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.teststructure.TestStructure;
