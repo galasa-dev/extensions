@@ -9,6 +9,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -121,8 +122,18 @@ public class RasDisplay implements Action {
 				slashed = true;
 			}
 			sb.append(prefix + child.getFileName());
-
-			if (Files.isDirectory(child)) {
+			
+			if (Files.isRegularFile(child)) {
+			    Map<String, Object> attrs = Files.readAttributes(child, "ras:contentType");
+			    if (attrs != null) {
+			        String contentType = (String)attrs.get("ras:contentType");
+			        if (contentType != null) {
+			            sb.append(", ");
+			            sb.append(contentType);
+			        }
+			    }
+			    sb.append("\n");
+			} else if (Files.isDirectory(child)) {
 				reportDirectory(sb, child, prefix + "  ");
 			}
 		}

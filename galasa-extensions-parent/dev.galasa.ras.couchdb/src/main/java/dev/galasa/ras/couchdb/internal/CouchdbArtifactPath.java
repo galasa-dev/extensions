@@ -81,7 +81,7 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
 		return this.artifactRecordId;
 	}
 
-	public BasicFileAttributes readAttributes() {
+	public CoucbDbBasicAttributes readAttributes() {
 		return new CoucbDbBasicAttributes(this);
 	}
 
@@ -92,5 +92,9 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
 	public long getLength() {
 		return this.length;
 	}
+	
+	public String getContentType() {
+        return contentType;
+    }
 	
 }
