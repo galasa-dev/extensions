@@ -1,11 +1,14 @@
-package dev.galasa.eclipse.ui.run;
+package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -30,11 +33,26 @@ public class FetchStoredArtifactsJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 
 		try {
+		    IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
+		    IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor("dev.galasa.eclipse.extension.storedartifacts.filter");
+		    
 			Path root = runResult.getArtifactsRoot();
 			
 			ArtifactFolder rootFolder = new ArtifactFolder("/");
 
 			Files.list(root).forEach(new ConsumeDirectory(runResult, rootFolder));
+			
+			
+			if (elements != null) {
+			    for(IConfigurationElement element : elements) {
+			        try {
+			            IStoredArtifactsFilter filterClass = (IStoredArtifactsFilter) element.createExecutableExtension("class");
+			            filterClass.filter(rootFolder);
+			        } catch(Exception e1) {
+			            Activator.log(e1);
+			        }
+			    }
+			}
 
 			this.artifactsPage.setArtifacts(rootFolder);
 		} catch (Exception e) {
@@ -63,11 +81,9 @@ public class FetchStoredArtifactsJob extends Job {
 				if (Files.isDirectory(path)) {
 					ArtifactFolder newFolder = new ArtifactFolder(path.getFileName().toString());
 					folder.addArtifact(newFolder);
-					System.out.println("dir=" + path.toString());
 					Files.list(path).forEach(new ConsumeDirectory(runResult, newFolder));
 				} else {
 					folder.addArtifact(new ArtifactFile(runResult, path));
-					System.out.println("file=" + path.toString());
 				}
 			} catch(Exception e) {
 				Activator.log(e);

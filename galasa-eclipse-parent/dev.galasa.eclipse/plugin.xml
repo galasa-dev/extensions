@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="dev.galasa.eclipse.extension.storedartifacts.filter" name="Filter Stored Artifacts" schema="schema/dev.galasa.eclipse.extension.storedartifacts.filter.exsd"/>
 	<!-- Build Test OBRs Command -->
 	<extension point="org.eclipse.ui.commands">
       	<category
@@ -214,11 +215,11 @@
           name="Galasa Run">
     </editor>
     <editor
-          class="dev.galasa.eclipse.ui.run.ArtifactEditor"
+          class="dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor"
           default="false"
           restorable="false"
           icon="icons/galasa-dark.png"
-          id="dev.galasa.eclipse.ui.run.ArtifactEditor"
+          id="dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor"
           name="Galasa Artifact">
     </editor>
  </extension>

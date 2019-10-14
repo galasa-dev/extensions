@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.ui.run;
+package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
