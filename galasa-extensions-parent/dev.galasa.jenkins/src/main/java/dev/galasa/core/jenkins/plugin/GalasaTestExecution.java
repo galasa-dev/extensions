@@ -303,6 +303,9 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		
 		if(!this.mavenRepository.equals("")) {
 			request.setMavenRepository(this.mavenRepository);
+		}
+		
+		if(!this.obr.equals("")) {
 			request.setObr(this.obr);
 		}
 
