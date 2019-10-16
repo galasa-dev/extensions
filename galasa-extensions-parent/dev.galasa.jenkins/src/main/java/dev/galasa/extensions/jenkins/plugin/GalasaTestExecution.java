@@ -1,4 +1,4 @@
-package dev.galasa.core.jenkins.plugin;
+package dev.galasa.extensions.jenkins.plugin;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -77,6 +77,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	private Properties overrides;
 	private int numberOfRuns = 0;
 	private int pollTime = 0;
+	private boolean trace = false;
 	
 	private int pollFailures = 0;
 	private final static int TOTAL_FAILURES = 5;
@@ -142,6 +143,11 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			this.pollTime = POLL_TIME_DEFAULT;
 		}
 		
+	}
+	
+	@DataBoundSetter
+	public void setTrace(boolean trace) {
+		this.trace = trace;
 	}
 
 	private void setDefaults() {
@@ -300,6 +306,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		request.setRequestorType(RequestorType.JENKINS);
 		request.setTestStream(this.stream); 
 		request.setClassNames(new ArrayList<String>());
+		request.setTrace(this.trace);
 		
 		if(!this.mavenRepository.equals("")) {
 			request.setMavenRepository(this.mavenRepository);

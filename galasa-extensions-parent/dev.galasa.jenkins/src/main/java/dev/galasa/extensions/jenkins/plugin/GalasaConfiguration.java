@@ -1,4 +1,4 @@
-package dev.galasa.core.jenkins.plugin;
+package dev.galasa.extensions.jenkins.plugin;
 
 import java.net.MalformedURLException;
 import java.net.URL;
