@@ -47,7 +47,11 @@ public class FetchStoredArtifactsJob extends Job {
 			    for(IConfigurationElement element : elements) {
 			        try {
 			            IStoredArtifactsFilter filterClass = (IStoredArtifactsFilter) element.createExecutableExtension("class");
-			            filterClass.filter(rootFolder);
+			            String runId = "unknown";
+			            if (runResult.getTestStructure() != null && runResult.getTestStructure().getRunName() != null) {
+			                runId = runResult.getTestStructure().getRunName();
+			            }
+			            filterClass.filter(runId, rootFolder);
 			        } catch(Exception e1) {
 			            Activator.log(e1);
 			        }
