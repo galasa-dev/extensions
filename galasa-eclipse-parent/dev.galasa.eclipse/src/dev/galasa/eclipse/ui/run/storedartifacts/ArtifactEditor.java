@@ -1,4 +1,4 @@
-package dev.galasa.eclipse.ui.run;
+package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.resource.JFaceResources;
@@ -21,7 +21,7 @@ import dev.galasa.framework.spi.teststructure.TestStructure;
 
 public class ArtifactEditor extends EditorPart {
 	
-	public final static String ID = "dev.galasa.eclipse.ui.run.ArtifactEditor";
+	public final static String ID = "dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor";
 	
 	private ArtifactEditorInput editorInput;
 	
