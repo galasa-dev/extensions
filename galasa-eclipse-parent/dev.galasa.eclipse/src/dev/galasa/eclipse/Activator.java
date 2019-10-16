@@ -1,6 +1,11 @@
 package dev.galasa.eclipse;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -23,6 +28,8 @@ public class Activator extends AbstractUIPlugin {
 	private LinkedList<IFrameworkChangeListener> frameworkChangeListeners = new LinkedList<>();
 	
 	private ConsoleLog console;
+	
+	private Path cachePath;
 
 	public Activator() {
 		INSTANCE = this;
@@ -31,10 +38,24 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		
+		cachePath = Files.createTempDirectory("galasa_eclipse_cache_");
+	}
+	
+	@Override
+	public void stop(BundleContext context) throws Exception {
+	    
+	    deleteCache(cachePath);
+	    
+	    super.stop(context);
 	}
 
 	public static Activator getInstance() {
 		return INSTANCE;
+	}
+	
+	public static Path getCachePath() {
+	    return INSTANCE.cachePath;
 	}
 	
 	/**
@@ -114,6 +135,41 @@ public class Activator extends AbstractUIPlugin {
 				listener.statusChanged(initialised);
 			}
 		}
+	}
+	
+	public static void deleteCache(Path path) throws IOException {
+	    
+	    if (path == null) {
+	        return;
+	    }
+	    
+	    if (!Files.exists(path)) {
+	        return;
+	    }
+	    
+	    if (!Files.isDirectory(path)) {
+	        Files.delete(path);
+	        return;
+	    }
+	    
+	    ArrayList<Path> children = new ArrayList<>();
+	    
+	    Files.list(path).forEach(new Consumer<Path>() {
+            @Override
+            public void accept(Path subPath) {
+                children.add(subPath);
+            }
+        });
+	    
+	    for(Path child : children) {
+	        if (Files.isDirectory(child)) {
+	            deleteCache(child);
+	        } else {
+	            Files.deleteIfExists(child);
+	        }
+	    }
+	    
+	    Files.delete(path);
 	}
 
 }
