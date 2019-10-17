@@ -31,9 +31,12 @@ public class TestStream {
 				case "galasa-ivt":
 					temp = "Galasa IVTs";
 					break;
-				case "simframe":
-					temp = "Simframe Galasa demo tests";
-					break;
+                case "galasa-int":
+                    temp = "Galasa Integration Tests";
+                    break;
+                case "simbank":
+                    temp = "SimBank Galasa demo tests";
+                    break;
 				default:
 					temp = id;
 				}
