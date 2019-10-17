@@ -249,7 +249,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		for(TestCase test : currentTests.values()) {
 			if(test.getRunDetails().getStatus().equals("finished")) {
 				logger.println(test.getFullName());
-			}
+			}	
 		}
 		logger.println("Tests passed:");
 		for(TestCase test : currentTests.values()) {
