@@ -56,6 +56,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
@@ -89,6 +90,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	private PrintStream logger;
 	
 	private HashMap<String, TestCase> currentTests = new HashMap<>();
+	private int totalTests = 0;
+	private int failedTests = 0;
 	
 	private Properties properties;
 	
@@ -193,7 +196,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		try {
 			properties.putAll(getGalasaProperties(galasaConfiguration.getUrl(),getCredentials(),galasaContext));
 		} catch (MissingClass e) {
-			logger.println("Unable to access Boostrap properties");
+			logger.println("Unable to access Bootstrap properties");
 			return;
 		}
 
@@ -216,8 +219,9 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			logger.println("No tests have been selected for running");
 			return;
 		}
-
-		logger.println("The following " + currentTests.size() + " Galasa test classes have been selected for running");
+		
+		this.totalTests = currentTests.size();
+		logger.println("The following " + this.totalTests + " Galasa test classes have been selected for running");
 		for (TestCase tc : currentTests.values()) {
 			logger.println("    " + getTestNamePart(tc.getClassName()));
 		}
@@ -241,67 +245,51 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			return;
 		}
 		
-		logger.println("Tests completed:");
+		updateConsole();
+		if(this.failedTests > 0) {
+			testRun.setStatus(Status.FAILED);
+			run.setResult(Result.FAILURE);
+		}
+		else {
+			testRun.setStatus(Status.SUCCESS);
+			run.setResult(Result.SUCCESS);
+		}
+	}
+	
+	private void updateConsole() {
+		int completedTests = 0;
+		this.failedTests = 0;
+		
 		for(TestCase test : currentTests.values()) {
 			if(test.getRunDetails().getStatus().equals("finished")) {
-				logger.println(test.getFullName());
+				completedTests++;
 			}	
 		}
+		logger.println("Galasa has completed " + completedTests + " out of " + totalTests + "tests");
+		
+		
 		logger.println("Tests passed:");
 		for(TestCase test : currentTests.values()) {
 			if("Passed".equals(test.getRunDetails().getResult())){
-				logger.println(test.getFullName());
+				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
 			}
 		}
 		
 		logger.println("Tests failed:");
 		for(TestCase test : currentTests.values()) {
 			if("Failed".equals(test.getRunDetails().getResult())){
-				logger.println(test.getFullName());
+				this.failedTests++;
+				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
 			}
 		}
 		
 		logger.println("Tests ignored:");
 		for(TestCase test : currentTests.values()) {
-			if("Ignored".equals(test.getRunDetails().getResult())){
-				logger.println(test.getFullName());
+			if(test.getRunDetails().getResult() == null || "Ignored".equals(test.getRunDetails().getResult())){
+				this.failedTests++;
+				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
 			}
 		}
-//		if (!finishedTests.isEmpty()) {
-//			logger.println("The following test PASSED:-");
-//			for(TestCase test : finishedTests) {
-//				logger.println("    " + test.getBundleName() + "/" + test.getClassName());
-//			}
-//		}
-//		
-//		if (!failedTests.isEmpty()) {
-//			logger.println("The following test FAILED:-");
-//			for(TestCase test : failedTests) {
-//				StringBuilder sb = new StringBuilder();
-//				for(TestCaseResult tcr : test.getResults()) {
-//					if (tcr.getRunIdFriendly() != null && !tcr.getRunIdFriendly().isEmpty()) {
-//						if (sb.length() > 0) {
-//							sb.append(",");
-//						}
-//						sb.append(tcr.getRunIdFriendly());
-//					}
-//				}
-//				
-//				String runs = "";
-//				if (sb.length() > 0) {
-//					runs = " (" + sb.toString() + ")";
-//				}
-//				
-//				logger.println("    " + test.getBundleName() + "/" + test.getClassName() + runs);
-//			}
-//		}
-//
-//
-//		if (!failedTests.isEmpty()) {
-//			testRun.setStatus(Status.FAILED);
-//		} else {
-//			testRun.setStatus(Status.SUCCESS);
-//		}
 	}
 	
 	private void submitAllTestsToSchedule(Collection<TestCase> collection, GalasaContext context) throws AbortException {
@@ -423,7 +411,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
 		} catch (ClientProtocolException e) {
 			if (e.getMessage().contains("Unauthorized")) {
-				logger.println("Unauthorised to access the Galasa");
+				logger.println("Unauthorised to access Galasa");
 				return;
 			}
 		} catch (IOException e) {
@@ -493,88 +481,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			}
 			test.setRunDetails(run);
 		}
-//
-//		for (SerializedRun run : scheduleStatus.getRuns()) {
-//			switch (run.getStatus()) {
-//			case "ABORTED":
-//			case "finished":
-//			case "FAILED_RUN":
-//			case "FAILED_DEFECTS_RUN":
-//			case "FINISHED_RUN":
-//			case "FINISHED_DEFECTS_RUN":
-//			case "IGNORED_RUN":
-//			case "UNKNOWN":
-//				if (markTestFinished(run, runningTests,finishedTests, failedTests, logger)) {
-//					updated = true;
-//				}
-//				break;
-//			case "allocated":
-//			case "queued":
-//			case "BUILDING_ENVIRONMENT":
-//			case "DISCARDING_ENVIRONMENT":
-//			case "STARTED_RUN":
-//			case "STARTING_ENVIRONMENT":
-//			case "STOPPING_ENVIRONMENT":
-//			case "SUBMITTED":
-//			case "testing":
-//			default:
-//				if (reportTestProgress(run, runningTests, logger)) {
-//					updated = true;
-//				}
-//				break;
-//			}
-//
-//		}
-
 		return updated;
 	}
-	
-//	private boolean markTestFinished(SerializedRun run, LinkedList<TestCase> runningTests, ArrayList<TestCase> finishedTests, ArrayList<TestCase> failedTests, PrintStream logger) {
-//		Iterator<TestCase> runningTestsi = runningTests.iterator();
-//		
-//		//If the test was known to be running update the status
-//		while(runningTestsi.hasNext()) {
-//			
-//			TestCase runningTest = runningTestsi.next();
-//			//running test has no results so it fails ArrayIndexOutOfBounds 
-//			TestCaseResult tcr = runningTest.getResults().get(0);
-//			UUID runUUID = UUID.fromString(tcr.getRunId());
-//			if (runUUID.toString().equals(run.getGroup())) {
-//				runningTestsi.remove();
-//				if (run.getStatus().equals(RunStatus.FINISHED_RUN.toString())  || run.getStatus().equals(RunStatus.FINISHED_DEFECTS_RUN.toString())  || run.getStatus().equals(RunStatus.IGNORED_RUN.toString())) {
-//					finishedTests.add(runningTest);
-//				} else {
-//					failedTests.add(runningTest);
-//				}
-//				tcr.setStatus(run.getStatus());
-//				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ")  has finished with " + run.getStatus());
-//				return true;
-//			}
-//		}
-//
-//		return false;
-//	}
-//	
-//	private boolean reportTestProgress(SerializedRun run, LinkedList<TestCase> runningTests, PrintStream logger) {
-//
-//		Iterator<TestCase> runningTestsi = runningTests.iterator();
-//		while(runningTestsi.hasNext()) {
-//			TestCase runningTest = runningTestsi.next();
-//			TestCaseResult tcr = runningTest.getResults().get(0);
-//			UUID runUUID = UUID.fromString(tcr.getRunId());
-//			if (runUUID.toString().equals(run.getGroup().toString())) {
-//				logger.println("Test " + getTestNamePart(runningTest.getClassName()) + " run(" + run.getName() + ") is currently " + run.getStatus());
-//				if (tcr.getStatus().equals(run.getStatus())) {
-//					return false;
-//				} else {
-//					tcr.setStatus(run.getStatus());
-//					return true;
-//				}
-//			}
-//		}
-//
-//		return false;
-//	}
 
 	@Override
 	public DescriptorImpl getDescriptor() {
