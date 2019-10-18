@@ -12,8 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -45,16 +43,13 @@ import org.kohsuke.stapler.DataBoundSetter;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.kenai.jnr.x86asm.Logger;
 
 import dev.galasa.framework.SerializedRun;
 import dev.galasa.framework.api.runs.bind.RequestorType;
-import dev.galasa.framework.api.runs.bind.RunStatus;
 import dev.galasa.framework.api.runs.bind.ScheduleRequest;
 import dev.galasa.framework.api.runs.bind.ScheduleStatus;
 import dev.galasa.framework.api.runs.bind.Status;
 import dev.galasa.framework.api.runs.bind.TestCase;
-import dev.galasa.framework.api.runs.bind.TestCaseResult;
 import dev.galasa.framework.api.runs.bind.TestRun;
 import hudson.AbortException;
 import hudson.Extension;
@@ -89,6 +84,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	private static final int POLL_TIME_DEFAULT = 120;
 	
 	private GalasaConfiguration galasaConfiguration;
+	private StandardUsernamePasswordCredentials credentials = null;
 	
 	private PrintStream logger;
 	
@@ -253,14 +249,21 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 		}
 		logger.println("Tests passed:");
 		for(TestCase test : currentTests.values()) {
-			if(test.getRunDetails().getStatus().equals("passed")) {
+			if("Passed".equals(test.getRunDetails().getResult())){
 				logger.println(test.getFullName());
 			}
 		}
 		
 		logger.println("Tests failed:");
 		for(TestCase test : currentTests.values()) {
-			if(test.getRunDetails().getStatus().equals("failed")) {
+			if("Failed".equals(test.getRunDetails().getResult())){
+				logger.println(test.getFullName());
+			}
+		}
+		
+		logger.println("Tests ignored:");
+		for(TestCase test : currentTests.values()) {
+			if("Ignored".equals(test.getRunDetails().getResult())){
 				logger.println(test.getFullName());
 			}
 		}
@@ -402,7 +405,9 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	
 	private StandardUsernamePasswordCredentials getCredentials() throws MalformedURLException, AbortException {
 		// *** Find the username and password to use for the Galasa Bootsrap
-		StandardUsernamePasswordCredentials credentials = galasaConfiguration.getCredentials(run);
+		if(this.credentials != null)
+			return this.credentials;
+		this.credentials = galasaConfiguration.getCredentials(run);
 		if (credentials != null) {
 			logger.println("Using username '" + credentials.getUsername() + "' for Galasa bootstrap");
 		} else {
@@ -413,12 +418,12 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 	
 	private void authenticate(URL endpoint) {
 		try {
-			StandardUsernamePasswordCredentials credentials = galasaConfiguration.getCredentials(run);
+			StandardUsernamePasswordCredentials credentials = getCredentials();
 			Executor executor = Executor.newInstance().auth(credentials.getUsername(), credentials.getPassword().getPlainText());
 			this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
 		} catch (ClientProtocolException e) {
 			if (e.getMessage().contains("Unauthorized")) {
-				logger.println("Unauthorised to access the Galasa bootstrap");
+				logger.println("Unauthorised to access the Galasa");
 				return;
 			}
 		} catch (IOException e) {
@@ -437,11 +442,13 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep{
 			logger.println("Authenticating with Galasa auth Service");
 			authenticate(new URL(host + "auth"));
 		}
-		logger.println("Retrieving Galasa Configuration Properties");
+		logger.println("Retrieving Galasa Bootstrap Properties");
 		
 		HttpGet getRequest = new HttpGet(host+"bootstrap");
 		String bootstrapResponse = context.execute(getRequest, logger);
 		configurationProperties.load(new StringReader(bootstrapResponse));
+		logger.println("Received Bootsrap properties:");
+		configurationProperties.list(logger);
 		
 		return configurationProperties;
 	}
