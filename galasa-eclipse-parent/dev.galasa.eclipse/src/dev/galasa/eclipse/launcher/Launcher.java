@@ -25,9 +25,12 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -136,11 +139,16 @@ public class Launcher extends JavaLaunchDelegate {
 
 		//*** Report the Bootstrap URI
 		consoleDefault.append("Bootstrap URI is " + bootstrapUri + "\n");
+
+		//*** Retrieve all the Launcher Override extensions
+        IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
+        IConfigurationElement[] overrideExtensions = extensionRegistry.getConfigurationElementsFor("dev.galasa.eclipse.extension.launcher.overrides");
+
 		
 		//*** Calculate which overrides file to use
 		java.nio.file.Path overridesFile = null;
 		try {
-			overridesFile = Files.createTempFile("galasaoverrides", ".properties");
+			overridesFile = Files.createTempFile(Activator.getCachePath(), "galasaoverrides", ".properties");
 
 			Properties generatedOverrides = new Properties();
 
@@ -167,6 +175,19 @@ public class Launcher extends JavaLaunchDelegate {
 				}
 			}
 			
+			//*** Ask the extensions to contribute to the overrides
+			if (overrideExtensions != null) {
+                for(IConfigurationElement extension : overrideExtensions) {
+                    try {
+                        ILauncherOverridesExtension extensionClass = (ILauncherOverridesExtension) extension.createExecutableExtension("class");
+                        extensionClass.appendOverrides(configuration, generatedOverrides);
+                    } catch(Exception e1) {
+                        Activator.log(e1);
+                    }
+                }
+            }		
+			
+			//*** Add the framework overrides
 			generatedOverrides.put("framework.run.requestor", requestorId);
 			
 			//*** At the moment,  force the local runs to use local RAS.  TODO provide a preference and launch config option
