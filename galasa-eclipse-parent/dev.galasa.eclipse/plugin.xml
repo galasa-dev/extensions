@@ -2,6 +2,8 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="dev.galasa.eclipse.extension.storedartifacts.filter" name="Filter Stored Artifacts" schema="schema/dev.galasa.eclipse.extension.storedartifacts.filter.exsd"/>
+   <extension-point id="dev.galasa.eclipse.extension.launcher.overrides" name="Launcher Overrides" schema="schema/dev.galasa.eclipse.extension.launcher.overrides.exsd"/>
+   <extension-point id="dev.galasa.eclipse.extension.launcher.configuration" name="Launcher Configuration" schema="schema/dev.galasa.eclipse.extension.launcher.configuration.exsd"/>
 	<!-- Build Test OBRs Command -->
 	<extension point="org.eclipse.ui.commands">
       	<category
