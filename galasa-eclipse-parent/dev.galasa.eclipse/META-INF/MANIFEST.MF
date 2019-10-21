@@ -37,5 +37,7 @@ Bundle-Activator: dev.galasa.eclipse.Activator
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir
 Export-Package: dev.galasa.eclipse,
+ dev.galasa.eclipse.launcher,
+ dev.galasa.eclipse.launcher.tabs,
  dev.galasa.eclipse.ui.run,
  dev.galasa.eclipse.ui.run.storedartifacts
