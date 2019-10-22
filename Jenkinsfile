@@ -8,7 +8,7 @@ pipeline {
 //Configure Maven from the maven tooling in Jenkins
       def mvnHome = tool 'Default'
       PATH = "${mvnHome}/bin:${env.PATH}"
-      
+
 //Set some defaults
       def workspace = pwd()
       def mvnGoal    = 'install'
@@ -48,9 +48,9 @@ pipeline {
             echo "Skip Signing JARs  : ${galasaSignJarSkip}"
          }
       }
-   
+
 // Set up the workspace, clear the git directories and setup the manve settings.xml files
-      stage('prep-workspace') { 
+      stage('prep-workspace') {
          steps {
             configFileProvider([configFile(fileId: '86dde059-684b-4300-b595-64e83c2dd217', targetLocation: 'settings.xml')]) {
             }
@@ -62,7 +62,7 @@ pipeline {
             }
          }
       }
-      
+
       stage('Extensions Maven') {
          steps {
             withSonarQubeEnv('GalasaSonarQube') {
@@ -82,6 +82,10 @@ pipeline {
                   }
 
                   dir('dev.galasa.devtools.karaf') {
+                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                  }
+
+                  dir('dev.galasa.jenkins') {
                      sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
                   }
               }
