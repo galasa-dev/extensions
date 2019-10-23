@@ -26,6 +26,17 @@
 		<java.level>8</java.level>
 	</properties>
 	
+	<distributionManagement>
+		<repository>
+			<id>galasa.repo</id>
+			<url>${galasa.distribution.repo}</url>
+		</repository>
+		<snapshotRepository>
+			<id>galasa.repo</id>
+			<url>${galasa.distribution.repo}</url>
+		</snapshotRepository>
+	</distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>dev.galasa</groupId>
