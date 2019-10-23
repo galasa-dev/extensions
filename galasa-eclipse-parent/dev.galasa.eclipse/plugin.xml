@@ -95,7 +95,7 @@
 	            <command
     				label="Submit tests to automation"
     	        	commandId="dev.galasa.eclipse.commands.submitTests"
-            	    id="ddev.galasa.eclipse.menus.submitTests">
+            	    id="dev.galasa.eclipse.menus.submitTests">
             	</command>
         	</menu>
 		</menuContribution>
@@ -105,7 +105,7 @@
             	id="dev.galasa.eclipse.toolbars">
             	<command
                 	commandId="dev.galasa.eclipse.commands.openViews"
-                  	icon="icons/galasa-dark.png"
+                  	icon="icons/galasa-dark-new.png"
                   	tooltip="Open Galasa Views"
                   	id="dev.galasa.eclipse.toolbars.openViews">
 	            </command>
@@ -146,7 +146,7 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-             icon="icons/galasa-dark.png"
+             icon="icons/galasa-dark-new.png"
            configTypeID="dev.galasa.eclipse.launcher.Launcher"
             id="dev.galasa.eclipse.launcher.Launcher.image">
       </launchConfigurationTypeImage>
@@ -179,7 +179,7 @@
             allowMultiple="false"
             category="dev.galasa.eclipse.views"
             class="dev.galasa.eclipse.ui.runs.RunsView"
-            icon="icons/galasa-dark.png"
+            icon="icons/galasa-dark-new.png"
             id="dev.galasa.eclipse.ui.runs.RunsView"
             name="Galasa Runs"
             restorable="true">
@@ -188,7 +188,7 @@
             allowMultiple="false"
             category="dev.galasa.eclipse.views"
             class="dev.galasa.eclipse.ui.resources.ResourcesView"
-            icon="icons/galasa-dark.png"
+            icon="icons/galasa-dark-new.png"
             id="dev.galasa.eclipse.ui.resources.ResourcesView"
             name="Galasa Resources"
             restorable="true">
@@ -197,7 +197,7 @@
             allowMultiple="false"
             category="dev.galasa.eclipse.views"
             class="dev.galasa.eclipse.ui.results.ResultsView"
-            icon="icons/galasa-dark.png"
+            icon="icons/galasa-dark-new.png"
             id="dev.galasa.eclipse.ui.results.ResultsView"
             name="Galasa Results"
             restorable="true">
@@ -212,7 +212,7 @@
           class="dev.galasa.eclipse.ui.run.RunEditor"
           default="false"
           restorable="false"
-          icon="icons/galasa-dark.png"
+          icon="icons/galasa-dark-new.png"
           id="dev.galasa.eclipse.ui.run.RunEditor"
           name="Galasa Run">
     </editor>
@@ -220,7 +220,7 @@
           class="dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor"
           default="false"
           restorable="false"
-          icon="icons/galasa-dark.png"
+          icon="icons/galasa-dark-new.png"
           id="dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor"
           name="Galasa Artifact">
     </editor>
