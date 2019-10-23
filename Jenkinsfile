@@ -86,7 +86,7 @@ pipeline {
                   }
 
                   dir('dev.galasa.jenkins') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -DskipTests -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
                   }
               }
             }
