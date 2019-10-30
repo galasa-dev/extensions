@@ -15,6 +15,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
+import dev.galasa.eclipse.liveupdates.ILiveUpdateServer;
+import dev.galasa.eclipse.liveupdates.internal.LiveUpdateServer;
 import dev.galasa.framework.spi.FrameworkException;
 import dev.galasa.framework.spi.IFramework;
 
@@ -30,6 +32,8 @@ public class Activator extends AbstractUIPlugin {
 	private ConsoleLog console;
 	
 	private Path cachePath;
+	
+	private LiveUpdateServer liveUpdateServer;
 
 	public Activator() {
 		INSTANCE = this;
@@ -46,6 +50,10 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 	    
 	    deleteCache(cachePath);
+	    
+	    if (liveUpdateServer != null) {
+	    	liveUpdateServer.stop();
+	    }
 	    
 	    super.stop(context);
 	}
@@ -170,6 +178,16 @@ public class Activator extends AbstractUIPlugin {
 	    }
 	    
 	    Files.delete(path);
+	}
+	
+	public static ILiveUpdateServer getLiveUpdateServer() throws Exception {
+		synchronized (INSTANCE) {
+			if (INSTANCE.liveUpdateServer == null) {
+				INSTANCE.liveUpdateServer = new LiveUpdateServer();
+			}
+			
+			return INSTANCE.liveUpdateServer;
+		}
 	}
 
 }

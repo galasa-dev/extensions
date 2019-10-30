@@ -61,6 +61,8 @@ P/N:  L-APIG-BF3HMA
       <import plugin="org.eclipse.m2e.core.ui"/>
       <import plugin="org.eclipse.pde.core"/>
       <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.jetty.server"/>
+      <import plugin="org.eclipse.jetty.util"/>
    </requires>
 
    <plugin
