@@ -16,52 +16,55 @@ import dev.galasa.eclipse.Activator;
 import dev.galasa.eclipse.liveupdates.ILiveUpdateServer;
 
 public class LiveUpdateServer implements ILiveUpdateServer {
-	
-	private final Server server;
-	private final ServletContextHandler handler;
-	private final URL     url;
-	
-	public LiveUpdateServer() throws Exception {
-		this.server = new Server(new InetSocketAddress("localhost", 0));
-		String context = "/" + UUID.randomUUID().toString();
-		this.handler = new ServletContextHandler();
-		this.handler.setContextPath(context);
-		this.server.setHandler(this.handler);
-		this.server.start();
-		
-		this.url = new URL(this.server.getURI() + "/");
-	}
 
-	@Override
-	public URL getLiveUpdateUrl() {
-		return this.url;
-	}
+    private final Server                server;
+    private final ServletContextHandler handler;
+    private final URL                   url;
 
-	@Override
-	public synchronized void registerServlet(HttpServlet servlet, String pathSpec) {
-		this.handler.addServlet(new ServletHolder(servlet), pathSpec);
-	}
+    public LiveUpdateServer() throws Exception {
+        this.server = new Server(new InetSocketAddress("localhost", 0));
+        String context = "/" + UUID.randomUUID().toString();
+        this.handler = new ServletContextHandler();
+        this.handler.setContextPath(context);
+        this.server.setHandler(this.handler);
+        this.server.start();
 
-	@Override
-	public synchronized void unregisterServlet(HttpServlet servlet) {
-		ServletHolder[] servlets = this.handler.getServletHandler().getServlets();
-		
-		ArrayList<ServletHolder> newServlets = new ArrayList<>();
-		for(ServletHolder holder : servlets) {
-			try {
-				if (holder.getServlet() != servlet) {
-					newServlets.add(holder);
-				}
-			} catch (ServletException e) {
-				Activator.log(e);
-			}
-		}
-		
-		this.handler.getServletHandler().setServlets(newServlets.toArray(new ServletHolder[newServlets.size()]));
-	}
+        this.url = new URL(this.server.getURI() + "/");
+    }
 
-	public synchronized void stop() throws Exception {
-		this.server.stop();
-	}
+    @Override
+    public URL getLiveUpdateUrl() {
+        return this.url;
+    }
+
+    @Override
+    public synchronized void registerServlet(HttpServlet servlet, String pathSpec) {
+        this.handler.addServlet(new ServletHolder(servlet), pathSpec);
+    }
+
+    @Override
+    public synchronized void unregisterServlet(HttpServlet servlet) {
+        // *** no official way to unregister servlets, as they are little beans, hope it
+        // is not a problem
+        // *** until we can find a way of doing it
+//		ServletHolder[] servlets = this.handler.getServletHandler().getServlets();
+//		
+//		ArrayList<ServletHolder> newServlets = new ArrayList<>();
+//		for(ServletHolder holder : servlets) {
+//			try {
+//				if (holder.getServlet() != servlet) {
+//					newServlets.add(holder);
+//				}
+//			} catch (ServletException e) {
+//				Activator.log(e);
+//			}
+//		}
+//		
+//		this.handler.getServletHandler().setServlets(newServlets.toArray(new ServletHolder[newServlets.size()]));
+    }
+
+    public synchronized void stop() throws Exception {
+        this.server.stop();
+    }
 
 }
