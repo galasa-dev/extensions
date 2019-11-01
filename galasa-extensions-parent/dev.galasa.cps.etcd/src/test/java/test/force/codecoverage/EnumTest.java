@@ -11,13 +11,13 @@ import org.junit.Test;
 import dev.galasa.cps.etcd.spi.IEtcd3Listener.Event;
 
 public class EnumTest {
-	
-	@Test
-	public void testIEtcd3ListenerEvent() {
-		Event event = Event.DELETE;
-		event.compareTo(Event.PUT);		
-		event.compareTo(Event.UNKNOWN);		
-		Assert.assertTrue("dummy",true);
-	}
-	
+
+    @Test
+    public void testIEtcd3ListenerEvent() {
+        Event event = Event.DELETE;
+        event.compareTo(Event.PUT);
+        event.compareTo(Event.UNKNOWN);
+        Assert.assertTrue("dummy", true);
+    }
+
 }

@@ -24,31 +24,30 @@ public class RunList implements Action {
     @Override
     public Object execute() throws Exception {
 
-    	final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-    	
-    	if (!devEnv.isFrameworkInitialised()) {
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+
+        if (!devEnv.isFrameworkInitialised()) {
             System.err.println("The Framework has not been initialised, use cirillo:init");
             return null;
         }
-    	
-    	IFrameworkRuns frameworkRuns = devEnv.getFramework().getFrameworkRuns();
-    	List<IRun> runs = frameworkRuns.getAllRuns();
-    	Collections.sort(runs, new RunSort());
-    	
-    	
-    	for(IRun run : runs) {
-    		System.out.println(run.getName() + " - " + run.getStatus());
-    	}
+
+        IFrameworkRuns frameworkRuns = devEnv.getFramework().getFrameworkRuns();
+        List<IRun> runs = frameworkRuns.getAllRuns();
+        Collections.sort(runs, new RunSort());
+
+        for (IRun run : runs) {
+            System.out.println(run.getName() + " - " + run.getStatus());
+        }
 
         return null;
     }
-    
+
     private static class RunSort implements Comparator<IRun> {
 
-		@Override
-		public int compare(IRun o1, IRun o2) {
-			return o1.getName().compareTo(o2.getName());
-		}
-    	
+        @Override
+        public int compare(IRun o1, IRun o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
+
     }
 }

@@ -9,28 +9,28 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 
 public class BranchAllRunsFolder extends BranchFolder {
 
-	protected BranchAllRunsFolder(ResultsView view, IResultArchiveStoreDirectoryService dirService) {
-		super(view, dirService, Icon.none, 2);
-		
-		addDateFolders(null, null, dirService.isLocal());
-	}
-	
-	@Override
-	public String toString() {
-		return "All runs";
-	}
+    protected BranchAllRunsFolder(ResultsView view, IResultArchiveStoreDirectoryService dirService) {
+        super(view, dirService, Icon.none, 2);
 
-	@Override
-	public void dispose() {
-	}
+        addDateFolders(null, null, dirService.isLocal());
+    }
 
-	@Override
-	public void refresh() {
-	}
-	
-	@Override
-	public void expandPrimaryBranch() {
-		getView().expand(branches.get(0));
-		branches.get(0).load();
-	}
+    @Override
+    public String toString() {
+        return "All runs";
+    }
+
+    @Override
+    public void dispose() {
+    }
+
+    @Override
+    public void refresh() {
+    }
+
+    @Override
+    public void expandPrimaryBranch() {
+        getView().expand(branches.get(0));
+        branches.get(0).load();
+    }
 }

@@ -68,526 +68,523 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import jenkins.tasks.SimpleBuildStep;
 
+public class GalasaTestExecution extends Builder implements SimpleBuildStep {
 
-public class GalasaTestExecution extends Builder implements SimpleBuildStep{
+    private String[]                            tests;
+    private String                              testInstance;
+    private String                              stream;
+    private String                              envProps;
+    private Properties                          overrides;
+    private int                                 numberOfRuns           = 0;
+    private int                                 pollTime               = 0;
+    private boolean                             trace                  = false;
 
-	private String[] tests;
-	private String testInstance;
-	private String stream;
-	private String envProps;
-	private Properties overrides;
-	private int numberOfRuns = 0;
-	private int pollTime = 0;
-	private boolean trace = false;
-	
-	private int pollFailures = 0;
-	private final static int TOTAL_FAILURES = 5;
-	
-	private String obr = "";
-	private String mavenRepository = "";
-	
-	private static final int NUMBER_OF_RUNS_DEFAULT = 1;
-	private static final int POLL_TIME_DEFAULT = 120;
-	
-	private GalasaConfiguration galasaConfiguration;
-	private StandardUsernamePasswordCredentials credentials = null;
-	
-	private PrintStream logger;
-	
-	private HashMap<String, TestCase> currentTests = new HashMap<>();
-	private int totalTests = 0;
-	private int failedTests = 0;
-	
-	private Properties properties;
-	
-	private Run run;
-	private String jwt;
-	
-	private UUID uuid;
+    private int                                 pollFailures           = 0;
+    private final static int                    TOTAL_FAILURES         = 5;
 
-	@DataBoundConstructor
-	public GalasaTestExecution(String[] tests, String stream, String envProps) {
-		this.tests = tests.clone();
-		this.stream = stream;
-		this.envProps = envProps;
-		
-		setDefaults();
-	}
-	
-	@DataBoundSetter
-	public void setObr(String obr) {
-		this.obr = obr;
-	}
-	
-	@DataBoundSetter
-	public void setMavenRepository(String mavenRepository) {
-		this.mavenRepository = mavenRepository;
-	}
-	
-	@DataBoundSetter
-	public void setTestInstance(String testInstance) {
-		this.testInstance = testInstance;
-	}
-	
-	@DataBoundSetter
-	public void setNumberOfRuns(String numberOfRuns) {
-		try {
-			this.numberOfRuns = Integer.parseInt(numberOfRuns);
-		}catch(NumberFormatException nfe) {
-			this.numberOfRuns = NUMBER_OF_RUNS_DEFAULT;
-		}
-		
-	}
-	
-	@DataBoundSetter
-	public void setPollTime(String pollTime) {
-		try {
-			this.pollTime = Integer.parseInt(pollTime);
-		}catch(NumberFormatException nfe) {
-			this.pollTime = POLL_TIME_DEFAULT;
-		}
-		
-	}
-	
-	@DataBoundSetter
-	public void setTrace(boolean trace) {
-		this.trace = trace;
-	}
+    private String                              obr                    = "";
+    private String                              mavenRepository        = "";
 
-	private void setDefaults() {
-		if (this.stream == null || this.stream.trim().isEmpty()) {
-			this.stream = "prod";
-		}
+    private static final int                    NUMBER_OF_RUNS_DEFAULT = 1;
+    private static final int                    POLL_TIME_DEFAULT      = 120;
 
-		if (this.testInstance == null || this.testInstance.trim().isEmpty()) {
-			this.testInstance = "default";
-		}
+    private GalasaConfiguration                 galasaConfiguration;
+    private StandardUsernamePasswordCredentials credentials            = null;
 
-		if (this.envProps == null || envProps.trim().isEmpty()) {
-			this.envProps = "";
-		}
-		
-		if(this.numberOfRuns == 0) {
-			this.numberOfRuns = NUMBER_OF_RUNS_DEFAULT;
-		}
-		
-		if(this.pollTime == 0) {
-			this.pollTime = POLL_TIME_DEFAULT;
-		}
-		if(this.uuid == null || this.uuid.toString().trim().isEmpty()) {
-			this.uuid = UUID.randomUUID();
-		}
-		
-	}
+    private PrintStream                         logger;
 
-	@Override
-	public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
-			throws InterruptedException, IOException {
-		this.run = run;
-		this.logger = listener.getLogger();
+    private HashMap<String, TestCase>           currentTests           = new HashMap<>();
+    private int                                 totalTests             = 0;
+    private int                                 failedTests            = 0;
 
-		logger.println("************************************************************");
-		logger.println("** Galasa Test Selection starting                        ***");
-		logger.println("************************************************************");
-		galasaConfiguration = GalasaConfiguration.get();
-		GalasaContext galasaContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
+    private Properties                          properties;
 
-		TestRun testRun = TestRun.getTestRun("jenkins");
+    private Run                                 run;
+    private String                              jwt;
 
-		properties = new Properties();
-		overrides = new Properties();
-		
-		// *** Retrieve the Galasa bootstrap properties
-		try {
-			properties.putAll(getGalasaProperties(galasaConfiguration.getUrl(),getCredentials(),galasaContext));
-		} catch (MissingClass e) {
-			logger.println("Unable to access Bootstrap properties");
-			return;
-		}
+    private UUID                                uuid;
 
-		// add envProps to overrideString if specified
-		if (this.envProps != null && !this.envProps.trim().isEmpty()) {
-			properties.load(new StringReader(envProps));
-		}
+    @DataBoundConstructor
+    public GalasaTestExecution(String[] tests, String stream, String envProps) {
+        this.tests = tests.clone();
+        this.stream = stream;
+        this.envProps = envProps;
 
-		// *** Select tests
-		if (tests != null) {
-			for (String tc : tests) {
-				String className = tc.trim();
-				if (!className.isEmpty() && !className.startsWith("!")) {
-					addTest(currentTests, testRun, stream, className, properties);
-				}
-			}
-		}
+        setDefaults();
+    }
 
-		if (currentTests.isEmpty()) {
-			logger.println("No tests have been selected for running");
-			return;
-		}
-		
-		this.totalTests = currentTests.size();
-		logger.println("The following " + this.totalTests + " Galasa test classes have been selected for running");
-		for (TestCase tc : currentTests.values()) {
-			logger.println("    " + getTestNamePart(tc.getClassName()));
-		}
+    @DataBoundSetter
+    public void setObr(String obr) {
+        this.obr = obr;
+    }
 
-		logger.println("Test Run Instance = " + testRun.getInstance());
+    @DataBoundSetter
+    public void setMavenRepository(String mavenRepository) {
+        this.mavenRepository = mavenRepository;
+    }
 
-		if (!overrides.isEmpty()) {
-			logger.println("------------------------------------------------");
-			logger.println("Properties:-");
-			logger.println("------------------------------------------------");
-			overrides.list(logger);
-		}
-		
-		logger.println("Maximum number of concurrent runs is: " + this.numberOfRuns);
-		logger.println("Galasa Server Poll time is: " + this.pollTime + " seconds");
+    @DataBoundSetter
+    public void setTestInstance(String testInstance) {
+        this.testInstance = testInstance;
+    }
 
-		submitAllTestsToSchedule(currentTests.values(), galasaContext);
-		
-		if(!waitForTestsToRun(galasaContext)) {
-			testRun.setStatus(Status.BYPASSED);
-			return;
-		}
-		
-		updateConsole();
-		if(this.failedTests > 0) {
-			testRun.setStatus(Status.FAILED);
-			run.setResult(Result.FAILURE);
-		}
-		else {
-			testRun.setStatus(Status.SUCCESS);
-			run.setResult(Result.SUCCESS);
-		}
-	}
-	
-	private void updateConsole() {
-		int completedTests = 0;
-		this.failedTests = 0;
-		
-		for(TestCase test : currentTests.values()) {
-			if(test.getRunDetails().getStatus().equals("finished")) {
-				completedTests++;
-			}	
-		}
-		logger.println("Galasa has completed " + completedTests + " out of " + totalTests + "tests");
-		
-		
-		logger.println("Tests passed:");
-		for(TestCase test : currentTests.values()) {
-			if("Passed".equals(test.getRunDetails().getResult())){
-				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
-			}
-		}
-		
-		logger.println("Tests failed:");
-		for(TestCase test : currentTests.values()) {
-			if("Failed".equals(test.getRunDetails().getResult())){
-				this.failedTests++;
-				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
-			}
-		}
-		
-		logger.println("Tests ignored:");
-		for(TestCase test : currentTests.values()) {
-			if(test.getRunDetails().getResult() == null || "Ignored".equals(test.getRunDetails().getResult())){
-				this.failedTests++;
-				logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
-			}
-		}
-	}
-	
-	private void submitAllTestsToSchedule(Collection<TestCase> collection, GalasaContext context) throws AbortException {
-		ScheduleRequest request = new ScheduleRequest();
-		request.setRequestorType(RequestorType.JENKINS);
-		request.setTestStream(this.stream); 
-		request.setClassNames(new ArrayList<String>());
-		request.setTrace(this.trace);
-		
-		if(!this.mavenRepository.equals("")) {
-			request.setMavenRepository(this.mavenRepository);
-		}
-		
-		if(!this.obr.equals("")) {
-			request.setObr(this.obr);
-		}
+    @DataBoundSetter
+    public void setNumberOfRuns(String numberOfRuns) {
+        try {
+            this.numberOfRuns = Integer.parseInt(numberOfRuns);
+        } catch (NumberFormatException nfe) {
+            this.numberOfRuns = NUMBER_OF_RUNS_DEFAULT;
+        }
 
-		for(TestCase tc : collection) {
-			request.getClassNames().add(tc.getFullName());
-		}
+    }
 
-		String scheduleRequestString = null;
-		String scheduleResponseString = null;
-		try {
-			scheduleRequestString = new Gson().toJson(request);
+    @DataBoundSetter
+    public void setPollTime(String pollTime) {
+        try {
+            this.pollTime = Integer.parseInt(pollTime);
+        } catch (NumberFormatException nfe) {
+            this.pollTime = POLL_TIME_DEFAULT;
+        }
 
-			HttpPost postRequest = new HttpPost(context.getGalasaURI()+"run/"+this.uuid.toString());
-			postRequest.addHeader("Accept", "application/json");
-			postRequest.addHeader("Content-Type", "application/json");
-			postRequest.setEntity(new StringEntity(scheduleRequestString));
+    }
 
-			scheduleResponseString = context.execute(postRequest, logger);
-			logger.println("Tests schedule endpoint: " + postRequest.getURI());
+    @DataBoundSetter
+    public void setTrace(boolean trace) {
+        this.trace = trace;
+    }
 
-		} catch(IOException|InterruptedException|MissingClass|URISyntaxException|JsonSyntaxException e) {
-			logger.println("Failed to schedule runs '" + e.getMessage());
-			logger.println("Schedule request:-");
-			logger.println(scheduleRequestString);
-			logger.println("Schedule response:-");
-			logger.println(scheduleResponseString);
-			throw new AbortException("Failed to schedule runs '" + e.getMessage());
-		}
-	}
+    private void setDefaults() {
+        if (this.stream == null || this.stream.trim().isEmpty()) {
+            this.stream = "prod";
+        }
 
+        if (this.testInstance == null || this.testInstance.trim().isEmpty()) {
+            this.testInstance = "default";
+        }
 
+        if (this.envProps == null || envProps.trim().isEmpty()) {
+            this.envProps = "";
+        }
 
-	private boolean waitForTestsToRun(GalasaContext context) throws AbortException {
-		boolean testFinished = false;
-		while(!testFinished) {
-			ScheduleStatus status = getTestStatus(context);
-			if(status == null) {
-				this.pollFailures++;
-				if(pollFailures >= this.TOTAL_FAILURES) {
-					logger.println("Total number of poll attempts exceeds total failures, abandoning run");
-					return false;
-				}
-				else
-					continue;
-			}
-			testFinished = status.getScheduleStatus().isRunComplete();
-			if(testFinished)
-				return true;
-			try {
-				Thread.sleep(this.pollTime * 1000);
-			}catch(InterruptedException e) {
-				Thread.interrupted();
-			}
-		}
-		return false;
-	}
-	
-	private ScheduleStatus getTestStatus(GalasaContext context) throws AbortException {
-		String          scheduleResponseString = null;
-		ScheduleStatus  scheduleStatus = null;
-		try {
-			HttpGet getRequest = new HttpGet(context.getGalasaURI()+"run/" + this.uuid.toString());
-			getRequest.addHeader("Accept", "application/json");
+        if (this.numberOfRuns == 0) {
+            this.numberOfRuns = NUMBER_OF_RUNS_DEFAULT;
+        }
 
-			scheduleResponseString = context.execute(getRequest, logger);
-			scheduleStatus = new Gson().fromJson(scheduleResponseString, ScheduleStatus.class);
-			updateTestStatus(scheduleStatus, logger);
-			return scheduleStatus;
-		} catch(AbortException e) {
-			throw e;
-		} catch(IOException e) {
-			logger.println("Failed to inquire schedule '" + e.getMessage() + "'");
-			logger.println("Schedule response:-");
-			logger.println(scheduleResponseString);
-			logger.println("Stacktrace ");
-			e.printStackTrace(logger);
-			return null;
-		} catch(Exception e) {
-			logger.println("Failed to inquire schedule '" + e.getMessage() + "'");
-			logger.println("Schedule response:-");
-			logger.println(scheduleResponseString);
-			logger.println("Stacktrace ");
-			e.printStackTrace(logger);
-			return null;
-		}
-	}
-	
-	private StandardUsernamePasswordCredentials getCredentials() throws MalformedURLException, AbortException {
-		// *** Find the username and password to use for the Galasa Bootsrap
-		if(this.credentials != null)
-			return this.credentials;
-		this.credentials = galasaConfiguration.getCredentials(run);
-		if (credentials != null) {
-			logger.println("Using username '" + credentials.getUsername() + "' for Galasa bootstrap");
-		} else {
-			logger.println("No credentials provided for Galasa bootsrap");
-		}
-		return credentials;
-	}
-	
-	private void authenticate(URL endpoint) {
-		try {
-			StandardUsernamePasswordCredentials credentials = getCredentials();
-			Executor executor = Executor.newInstance().auth(credentials.getUsername(), credentials.getPassword().getPlainText());
-			this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
-		} catch (ClientProtocolException e) {
-			if (e.getMessage().contains("Unauthorized")) {
-				logger.println("Unauthorised to access Galasa");
-				return;
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	private Properties getGalasaProperties(String host,StandardUsernamePasswordCredentials credentials, GalasaContext context) throws IOException, InterruptedException, MissingClass {
-		Properties configurationProperties = new Properties();
-		
-		if(this.jwt == null) {
-			logger.println("Authenticating with Galasa auth Service");
-			authenticate(new URL(host + "auth"));
-		}
-		logger.println("Retrieving Galasa Bootstrap Properties");
-		
-		HttpGet getRequest = new HttpGet(host+"bootstrap");
-		String bootstrapResponse = context.execute(getRequest, logger);
-		configurationProperties.load(new StringReader(bootstrapResponse));
-		logger.println("Received Bootsrap properties:");
-		configurationProperties.list(logger);
-		
-		return configurationProperties;
-	}
+        if (this.pollTime == 0) {
+            this.pollTime = POLL_TIME_DEFAULT;
+        }
+        if (this.uuid == null || this.uuid.toString().trim().isEmpty()) {
+            this.uuid = UUID.randomUUID();
+        }
 
-	private void addTest(HashMap<String, TestCase> currentTests, TestRun testRun,
-			String stream, String testFullName, Properties envOverrides) throws IOException {
+    }
 
-		if (currentTests.containsKey(testFullName)) {
-			return;
-		}
+    @Override
+    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
+            throws InterruptedException, IOException {
+        this.run = run;
+        this.logger = listener.getLogger();
 
-		TestCase newTest = new TestCase();
-		newTest.setBundleName(testFullName.split("/")[0]);
-		newTest.setClassName(testFullName.split("/")[1]);
-		newTest.setStream(stream);
-		newTest.setType("Galasa");
+        logger.println("************************************************************");
+        logger.println("** Galasa Test Selection starting                        ***");
+        logger.println("************************************************************");
+        galasaConfiguration = GalasaConfiguration.get();
+        GalasaContext galasaContext = new GalasaContext(galasaConfiguration.getURL(), getCredentials());
 
-		Properties newTestEnvProperties = new Properties();
-		newTestEnvProperties.putAll(envOverrides);
+        TestRun testRun = TestRun.getTestRun("jenkins");
 
-		// *** Store properties in String
-		StringWriter envPropertiesSw = new StringWriter();
-		newTestEnvProperties.store(envPropertiesSw, null);
+        properties = new Properties();
+        overrides = new Properties();
 
-		currentTests.put(testFullName, newTest);
-	}
-	
-	private boolean updateTestStatus(ScheduleStatus scheduleStatus, PrintStream logger) throws IOException {
-		if (scheduleStatus == null) {
-			return false;
-		}
+        // *** Retrieve the Galasa bootstrap properties
+        try {
+            properties.putAll(getGalasaProperties(galasaConfiguration.getUrl(), getCredentials(), galasaContext));
+        } catch (MissingClass e) {
+            logger.println("Unable to access Bootstrap properties");
+            return;
+        }
 
-		boolean updated = false;
-		
-		for(SerializedRun run : scheduleStatus.getRuns()) {
-			TestCase test = currentTests.get(run.getTest());
-			SerializedRun oldRunDetails = test.getRunDetails();
-			if(oldRunDetails!=null) {
-				if(!oldRunDetails.getStatus().equals(run.getStatus())) {
-					updated = true;
-				}
-			}
-			test.setRunDetails(run);
-		}
-		return updated;
-	}
+        // add envProps to overrideString if specified
+        if (this.envProps != null && !this.envProps.trim().isEmpty()) {
+            properties.load(new StringReader(envProps));
+        }
 
-	@Override
-	public DescriptorImpl getDescriptor() {
-		return (DescriptorImpl) super.getDescriptor();
-	}
+        // *** Select tests
+        if (tests != null) {
+            for (String tc : tests) {
+                String className = tc.trim();
+                if (!className.isEmpty() && !className.startsWith("!")) {
+                    addTest(currentTests, testRun, stream, className, properties);
+                }
+            }
+        }
 
-	public String getTestInstance() {
-		return testInstance;
-	}
+        if (currentTests.isEmpty()) {
+            logger.println("No tests have been selected for running");
+            return;
+        }
 
-	public String getStream() {
-		return stream;
-	}
+        this.totalTests = currentTests.size();
+        logger.println("The following " + this.totalTests + " Galasa test classes have been selected for running");
+        for (TestCase tc : currentTests.values()) {
+            logger.println("    " + getTestNamePart(tc.getClassName()));
+        }
 
-	public String getEnvProps() {
-		return envProps;
-	}
+        logger.println("Test Run Instance = " + testRun.getInstance());
 
-	public static String getTestNamePart(String testName) {
-		String[] parts = testName.split("/");
-		if (parts.length == 1) {
-			return testName;
-		}
-		return parts[1];
-	}
+        if (!overrides.isEmpty()) {
+            logger.println("------------------------------------------------");
+            logger.println("Properties:-");
+            logger.println("------------------------------------------------");
+            overrides.list(logger);
+        }
 
-	@Symbol("galasa")
-	@Extension
-	public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+        logger.println("Maximum number of concurrent runs is: " + this.numberOfRuns);
+        logger.println("Galasa Server Poll time is: " + this.pollTime + " seconds");
 
-		public DescriptorImpl() {
-			load();
-		}
+        submitAllTestsToSchedule(currentTests.values(), galasaContext);
 
-		@Override
-		public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-			return true;
-		}
+        if (!waitForTestsToRun(galasaContext)) {
+            testRun.setStatus(Status.BYPASSED);
+            return;
+        }
 
-		@Override
-		public String getDisplayName() {
-			return "Galasa - Test Class Selection";
-		}
-	}
-	
-	private static final class GalasaContext {
-		private final URL galasaURL;
-		private final HttpHost target;
-		private final CloseableHttpClient client;
-		private final HttpClientContext context;
+        updateConsole();
+        if (this.failedTests > 0) {
+            testRun.setStatus(Status.FAILED);
+            run.setResult(Result.FAILURE);
+        } else {
+            testRun.setStatus(Status.SUCCESS);
+            run.setResult(Result.SUCCESS);
+        }
+    }
 
+    private void updateConsole() {
+        int completedTests = 0;
+        this.failedTests = 0;
 
-		private GalasaContext(URL url, StandardUsernamePasswordCredentials credentials) {
-			this.galasaURL = url;
+        for (TestCase test : currentTests.values()) {
+            if (test.getRunDetails().getStatus().equals("finished")) {
+                completedTests++;
+            }
+        }
+        logger.println("Galasa has completed " + completedTests + " out of " + totalTests + "tests");
 
-			this.target = new HttpHost(galasaURL.getHost(), galasaURL.getPort(), galasaURL.getProtocol());
+        logger.println("Tests passed:");
+        for (TestCase test : currentTests.values()) {
+            if ("Passed".equals(test.getRunDetails().getResult())) {
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+            }
+        }
 
-			CredentialsProvider credsProvider = new BasicCredentialsProvider();
-			credsProvider.setCredentials(new AuthScope(this.target.getHostName(), this.target.getPort()),
-					new UsernamePasswordCredentials(credentials.getUsername(), credentials.getPassword().getPlainText()));
+        logger.println("Tests failed:");
+        for (TestCase test : currentTests.values()) {
+            if ("Failed".equals(test.getRunDetails().getResult())) {
+                this.failedTests++;
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+            }
+        }
 
-			this.client = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+        logger.println("Tests ignored:");
+        for (TestCase test : currentTests.values()) {
+            if (test.getRunDetails().getResult() == null || "Ignored".equals(test.getRunDetails().getResult())) {
+                this.failedTests++;
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+            }
+        }
+    }
 
-			AuthCache authCache = new BasicAuthCache();
-			BasicScheme basicAuth = new BasicScheme();
-			authCache.put(this.target, basicAuth);
+    private void submitAllTestsToSchedule(Collection<TestCase> collection, GalasaContext context)
+            throws AbortException {
+        ScheduleRequest request = new ScheduleRequest();
+        request.setRequestorType(RequestorType.JENKINS);
+        request.setTestStream(this.stream);
+        request.setClassNames(new ArrayList<String>());
+        request.setTrace(this.trace);
 
-			// Add AuthCache to the execution context
-			this.context = HttpClientContext.create();
-			this.context.setAuthCache(authCache);
+        if (!this.mavenRepository.equals("")) {
+            request.setMavenRepository(this.mavenRepository);
+        }
 
-			return;
-		}
-		
-		public String execute(HttpRequest request, PrintStream logger) throws IOException, InterruptedException, MissingClass {
-			CloseableHttpResponse response = null;
-			String responseString;
-			while(true) {
-				try {
-					response = this.client.execute(this.target, request, this.context);
-					responseString = EntityUtils.toString(response.getEntity());
+        if (!this.obr.equals("")) {
+            request.setObr(this.obr);
+        }
 
-					if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-						logger.println("Error with call to Galasa WAS " + response.getStatusLine());
-					} else {
-						break;
-					}
-				} catch(SocketException e) {
-					logger.println("Galasa Server is not responding");
-				}
+        for (TestCase tc : collection) {
+            request.getClassNames().add(tc.getFullName());
+        }
 
-				Thread.sleep(30000);
-			}
+        String scheduleRequestString = null;
+        String scheduleResponseString = null;
+        try {
+            scheduleRequestString = new Gson().toJson(request);
 
-			return responseString;
-		}
+            HttpPost postRequest = new HttpPost(context.getGalasaURI() + "run/" + this.uuid.toString());
+            postRequest.addHeader("Accept", "application/json");
+            postRequest.addHeader("Content-Type", "application/json");
+            postRequest.setEntity(new StringEntity(scheduleRequestString));
 
+            scheduleResponseString = context.execute(postRequest, logger);
+            logger.println("Tests schedule endpoint: " + postRequest.getURI());
 
-		public URI getGalasaURI() throws URISyntaxException {
-			return galasaURL.toURI();
-		}
-	}
+        } catch (IOException | InterruptedException | MissingClass | URISyntaxException | JsonSyntaxException e) {
+            logger.println("Failed to schedule runs '" + e.getMessage());
+            logger.println("Schedule request:-");
+            logger.println(scheduleRequestString);
+            logger.println("Schedule response:-");
+            logger.println(scheduleResponseString);
+            throw new AbortException("Failed to schedule runs '" + e.getMessage());
+        }
+    }
+
+    private boolean waitForTestsToRun(GalasaContext context) throws AbortException {
+        boolean testFinished = false;
+        while (!testFinished) {
+            ScheduleStatus status = getTestStatus(context);
+            if (status == null) {
+                this.pollFailures++;
+                if (pollFailures >= this.TOTAL_FAILURES) {
+                    logger.println("Total number of poll attempts exceeds total failures, abandoning run");
+                    return false;
+                } else
+                    continue;
+            }
+            testFinished = status.getScheduleStatus().isRunComplete();
+            if (testFinished)
+                return true;
+            try {
+                Thread.sleep(this.pollTime * 1000);
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
+        }
+        return false;
+    }
+
+    private ScheduleStatus getTestStatus(GalasaContext context) throws AbortException {
+        String scheduleResponseString = null;
+        ScheduleStatus scheduleStatus = null;
+        try {
+            HttpGet getRequest = new HttpGet(context.getGalasaURI() + "run/" + this.uuid.toString());
+            getRequest.addHeader("Accept", "application/json");
+
+            scheduleResponseString = context.execute(getRequest, logger);
+            scheduleStatus = new Gson().fromJson(scheduleResponseString, ScheduleStatus.class);
+            updateTestStatus(scheduleStatus, logger);
+            return scheduleStatus;
+        } catch (AbortException e) {
+            throw e;
+        } catch (IOException e) {
+            logger.println("Failed to inquire schedule '" + e.getMessage() + "'");
+            logger.println("Schedule response:-");
+            logger.println(scheduleResponseString);
+            logger.println("Stacktrace ");
+            e.printStackTrace(logger);
+            return null;
+        } catch (Exception e) {
+            logger.println("Failed to inquire schedule '" + e.getMessage() + "'");
+            logger.println("Schedule response:-");
+            logger.println(scheduleResponseString);
+            logger.println("Stacktrace ");
+            e.printStackTrace(logger);
+            return null;
+        }
+    }
+
+    private StandardUsernamePasswordCredentials getCredentials() throws MalformedURLException, AbortException {
+        // *** Find the username and password to use for the Galasa Bootsrap
+        if (this.credentials != null)
+            return this.credentials;
+        this.credentials = galasaConfiguration.getCredentials(run);
+        if (credentials != null) {
+            logger.println("Using username '" + credentials.getUsername() + "' for Galasa bootstrap");
+        } else {
+            logger.println("No credentials provided for Galasa bootsrap");
+        }
+        return credentials;
+    }
+
+    private void authenticate(URL endpoint) {
+        try {
+            StandardUsernamePasswordCredentials credentials = getCredentials();
+            Executor executor = Executor.newInstance().auth(credentials.getUsername(),
+                    credentials.getPassword().getPlainText());
+            this.jwt = executor.execute(Request.Get(endpoint.toURI())).returnContent().asString();
+        } catch (ClientProtocolException e) {
+            if (e.getMessage().contains("Unauthorized")) {
+                logger.println("Unauthorised to access Galasa");
+                return;
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private Properties getGalasaProperties(String host, StandardUsernamePasswordCredentials credentials,
+            GalasaContext context) throws IOException, InterruptedException, MissingClass {
+        Properties configurationProperties = new Properties();
+
+        if (this.jwt == null) {
+            logger.println("Authenticating with Galasa auth Service");
+            authenticate(new URL(host + "auth"));
+        }
+        logger.println("Retrieving Galasa Bootstrap Properties");
+
+        HttpGet getRequest = new HttpGet(host + "bootstrap");
+        String bootstrapResponse = context.execute(getRequest, logger);
+        configurationProperties.load(new StringReader(bootstrapResponse));
+        logger.println("Received Bootsrap properties:");
+        configurationProperties.list(logger);
+
+        return configurationProperties;
+    }
+
+    private void addTest(HashMap<String, TestCase> currentTests, TestRun testRun, String stream, String testFullName,
+            Properties envOverrides) throws IOException {
+
+        if (currentTests.containsKey(testFullName)) {
+            return;
+        }
+
+        TestCase newTest = new TestCase();
+        newTest.setBundleName(testFullName.split("/")[0]);
+        newTest.setClassName(testFullName.split("/")[1]);
+        newTest.setStream(stream);
+        newTest.setType("Galasa");
+
+        Properties newTestEnvProperties = new Properties();
+        newTestEnvProperties.putAll(envOverrides);
+
+        // *** Store properties in String
+        StringWriter envPropertiesSw = new StringWriter();
+        newTestEnvProperties.store(envPropertiesSw, null);
+
+        currentTests.put(testFullName, newTest);
+    }
+
+    private boolean updateTestStatus(ScheduleStatus scheduleStatus, PrintStream logger) throws IOException {
+        if (scheduleStatus == null) {
+            return false;
+        }
+
+        boolean updated = false;
+
+        for (SerializedRun run : scheduleStatus.getRuns()) {
+            TestCase test = currentTests.get(run.getTest());
+            SerializedRun oldRunDetails = test.getRunDetails();
+            if (oldRunDetails != null) {
+                if (!oldRunDetails.getStatus().equals(run.getStatus())) {
+                    updated = true;
+                }
+            }
+            test.setRunDetails(run);
+        }
+        return updated;
+    }
+
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
+    public String getTestInstance() {
+        return testInstance;
+    }
+
+    public String getStream() {
+        return stream;
+    }
+
+    public String getEnvProps() {
+        return envProps;
+    }
+
+    public static String getTestNamePart(String testName) {
+        String[] parts = testName.split("/");
+        if (parts.length == 1) {
+            return testName;
+        }
+        return parts[1];
+    }
+
+    @Symbol("galasa")
+    @Extension
+    public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
+
+        public DescriptorImpl() {
+            load();
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return "Galasa - Test Class Selection";
+        }
+    }
+
+    private static final class GalasaContext {
+        private final URL                 galasaURL;
+        private final HttpHost            target;
+        private final CloseableHttpClient client;
+        private final HttpClientContext   context;
+
+        private GalasaContext(URL url, StandardUsernamePasswordCredentials credentials) {
+            this.galasaURL = url;
+
+            this.target = new HttpHost(galasaURL.getHost(), galasaURL.getPort(), galasaURL.getProtocol());
+
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(new AuthScope(this.target.getHostName(), this.target.getPort()),
+                    new UsernamePasswordCredentials(credentials.getUsername(),
+                            credentials.getPassword().getPlainText()));
+
+            this.client = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+
+            AuthCache authCache = new BasicAuthCache();
+            BasicScheme basicAuth = new BasicScheme();
+            authCache.put(this.target, basicAuth);
+
+            // Add AuthCache to the execution context
+            this.context = HttpClientContext.create();
+            this.context.setAuthCache(authCache);
+
+            return;
+        }
+
+        public String execute(HttpRequest request, PrintStream logger)
+                throws IOException, InterruptedException, MissingClass {
+            CloseableHttpResponse response = null;
+            String responseString;
+            while (true) {
+                try {
+                    response = this.client.execute(this.target, request, this.context);
+                    responseString = EntityUtils.toString(response.getEntity());
+
+                    if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                        logger.println("Error with call to Galasa WAS " + response.getStatusLine());
+                    } else {
+                        break;
+                    }
+                } catch (SocketException e) {
+                    logger.println("Galasa Server is not responding");
+                }
+
+                Thread.sleep(30000);
+            }
+
+            return responseString;
+        }
+
+        public URI getGalasaURI() throws URISyntaxException {
+            return galasaURL.toURI();
+        }
+    }
 }

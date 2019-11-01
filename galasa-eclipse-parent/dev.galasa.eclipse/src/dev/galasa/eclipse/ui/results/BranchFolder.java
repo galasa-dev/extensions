@@ -14,77 +14,82 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 
 public abstract class BranchFolder extends Branch implements IUIParent {
 
-	protected final static LoadingPleaseWait loadingPleaseWait = new LoadingPleaseWait();
-	protected final ArrayList<Branch> branches = new ArrayList<>();
+    protected final static LoadingPleaseWait loadingPleaseWait = new LoadingPleaseWait();
+    protected final ArrayList<Branch>        branches          = new ArrayList<>();
 
-	private boolean loading   = true;
-	
-	private final int sortOrder;
+    private boolean                          loading           = true;
 
-	protected enum Icon {
-		none
-	};
+    private final int                        sortOrder;
 
-	private final Icon icon;
-	private final IResultArchiveStoreDirectoryService dirService;
+    protected enum Icon {
+        none
+    };
 
-	protected BranchFolder(ResultsView view, IResultArchiveStoreDirectoryService dirService, Icon icon, int sortOrder) {
-		super(view);
-		this.icon       = icon;
-		this.dirService = dirService;
-		this.sortOrder  = sortOrder;
-	}
+    private final Icon                                icon;
+    private final IResultArchiveStoreDirectoryService dirService;
 
-	@Override
-	public boolean hasChildren() {
-		synchronized (branches) {
-			return !branches.isEmpty() || loading;
-		}
-	}
+    protected BranchFolder(ResultsView view, IResultArchiveStoreDirectoryService dirService, Icon icon, int sortOrder) {
+        super(view);
+        this.icon = icon;
+        this.dirService = dirService;
+        this.sortOrder = sortOrder;
+    }
 
-	@Override
-	public Object[] getChildren() {
-		ArrayList<Object> children = new ArrayList<>();
-		if (loading) {
-			children.add(loadingPleaseWait);
-		}
-		synchronized (branches) {
-			children.addAll(branches);
-		}
+    @Override
+    public boolean hasChildren() {
+        synchronized (branches) {
+            return !branches.isEmpty() || loading;
+        }
+    }
 
-		return children.toArray();
-	}
+    @Override
+    public Object[] getChildren() {
+        ArrayList<Object> children = new ArrayList<>();
+        if (loading) {
+            children.add(loadingPleaseWait);
+        }
+        synchronized (branches) {
+            children.addAll(branches);
+        }
 
-	public abstract void dispose();
-	public abstract void refresh();
+        return children.toArray();
+    }
 
-	protected void addDateFolders(String requestor, String testClass, boolean includeOlder) {
-		this.loading = false;
-		ZonedDateTime now = ZonedDateTime.now();
-		int dow = now.getDayOfWeek().getValue();
+    public abstract void dispose();
 
-		branches.add(new BranchSelectedRuns(getView(), dirService, "Today's runs", requestor, testClass, DateRange.TODAY));
-		branches.add(new BranchSelectedRuns(getView(), dirService, "Yesterdays's runs", requestor, testClass, DateRange.YESTERDAY));
+    public abstract void refresh();
 
-		if (dow > 2) {
-			branches.add(new BranchSelectedRuns(getView(), dirService, "Earlier this week's runs", requestor, testClass, DateRange.EARLIER_THIS_WEEK));
-		}
-		branches.add(new BranchSelectedRuns(getView(), dirService, "Last week's runs", requestor, testClass, DateRange.LAST_WEEK));
-		if (includeOlder) {
-			branches.add(new BranchSelectedRuns(getView(), dirService, "Older runs", requestor, testClass, DateRange.OLDER));
-		}
-	}
+    protected void addDateFolders(String requestor, String testClass, boolean includeOlder) {
+        this.loading = false;
+        ZonedDateTime now = ZonedDateTime.now();
+        int dow = now.getDayOfWeek().getValue();
 
-	protected void setLoading(boolean newLoading) {
-		this.loading = newLoading;
-	}
+        branches.add(
+                new BranchSelectedRuns(getView(), dirService, "Today's runs", requestor, testClass, DateRange.TODAY));
+        branches.add(new BranchSelectedRuns(getView(), dirService, "Yesterdays's runs", requestor, testClass,
+                DateRange.YESTERDAY));
 
-	public void expandPrimaryBranch() {
-	}
+        if (dow > 2) {
+            branches.add(new BranchSelectedRuns(getView(), dirService, "Earlier this week's runs", requestor, testClass,
+                    DateRange.EARLIER_THIS_WEEK));
+        }
+        branches.add(new BranchSelectedRuns(getView(), dirService, "Last week's runs", requestor, testClass,
+                DateRange.LAST_WEEK));
+        if (includeOlder) {
+            branches.add(
+                    new BranchSelectedRuns(getView(), dirService, "Older runs", requestor, testClass, DateRange.OLDER));
+        }
+    }
 
-	public int getSortOrder() {
-		return this.sortOrder;
-	}
+    protected void setLoading(boolean newLoading) {
+        this.loading = newLoading;
+    }
 
+    public void expandPrimaryBranch() {
+    }
+
+    public int getSortOrder() {
+        return this.sortOrder;
+    }
 
 }

@@ -48,30 +48,33 @@ import io.etcd.jetcd.watch.WatchEvent.EventType;
 import io.etcd.jetcd.watch.WatchResponse;
 
 /**
- * This class implements the DSS store for the use of etcd3 as the k-v store. It is interacting with the Jetcd Client
- * offered from coreOs.
+ * This class implements the DSS store for the use of etcd3 as the k-v store. It
+ * is interacting with the Jetcd Client offered from coreOs.
  * 
  * @author James Davies
  */
-public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
-	private final Client client;
-    private final KV kvClient;
-	private final Watch watchClient;
-	
-	private final HashMap<UUID, PassthroughWatcher> watchers = new HashMap<>();
+public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
+    private final Client                            client;
+    private final KV                                kvClient;
+    private final Watch                             watchClient;
+
+    private final HashMap<UUID, PassthroughWatcher> watchers = new HashMap<>();
 
     /**
-     * The constructure sets up a private KVClient that can be used by this class to interact with the etcd3 cluster.
+     * The constructure sets up a private KVClient that can be used by this class to
+     * interact with the etcd3 cluster.
      * 
-     * The URI passed from the registration of the EtcdDSS should check that it is a valid URI.
+     * The URI passed from the registration of the EtcdDSS should check that it is a
+     * valid URI.
+     * 
      * @param dssUri - http:// uri for th etcd cluster.
      */
-    public Etcd3DynamicStatusStore (URI dssUri) {
+    public Etcd3DynamicStatusStore(URI dssUri) {
         client = Client.builder().endpoints(dssUri).build();
-		kvClient = client.getKVClient();
-		this.watchClient = client.getWatchClient();
+        kvClient = client.getKVClient();
+        this.watchClient = client.getWatchClient();
     }
-    
+
     /**
      * A simple put class that adds a single key value in etcd key value store.
      * 
@@ -105,7 +108,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         PutOption options = PutOption.DEFAULT;
 
         ArrayList<Op> ops = new ArrayList<>();
-        for (String key: keyValues.keySet()) {
+        for (String key : keyValues.keySet()) {
             ByteSequence obsKey = ByteSequence.from(key, UTF_8);
             ByteSequence obsValue = ByteSequence.from(keyValues.get(key), UTF_8);
             ops.add(Op.put(obsKey, obsValue, options));
@@ -113,18 +116,19 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         Txn request = txn.Then(ops.toArray(new Op[ops.size()]));
         CompletableFuture<TxnResponse> response = request.commit();
         try {
-			response.get();
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("", e);
-		}
+            response.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("", e);
+        }
 
     }
 
     /**
-     * A put swap method does a check before setting the key-value. 
+     * A put swap method does a check before setting the key-value.
      * 
-     * If the oldValue argument is not the current value of the key the newValue is NOT set into the store.
+     * If the oldValue argument is not the current value of the key the newValue is
+     * NOT set into the store.
      * 
      * @param key
      * @param oldValue - the value the key should have for the change to succeeed
@@ -133,7 +137,8 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
      * @throws DynamicStatusStoreException
      */
     @Override
-    public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue) throws DynamicStatusStoreException {
+    public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue)
+            throws DynamicStatusStoreException {
         ByteSequence bsKey = ByteSequence.from(key, UTF_8);
         ByteSequence bsNewValue = ByteSequence.from(newValue, UTF_8);
 
@@ -162,20 +167,23 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
     }
 
     /**
-     * A put swap method does a check before setting the key-value. 
+     * A put swap method does a check before setting the key-value.
      * 
-     * If the oldValue argument is not the current value of the key the newValue is NOT set into the store.
-     * If the old value was correct then a map of other key value pairs can be then set.
+     * If the oldValue argument is not the current value of the key the newValue is
+     * NOT set into the store. If the old value was correct then a map of other key
+     * value pairs can be then set.
      * 
      * @param key
      * @param oldValue - the value the key should have for the change to succeeed
      * @param newValue - the new value to set too if the old value was correct
-     * @param others - a map of all subsequent values to set if the condition was satisfied
+     * @param others   - a map of all subsequent values to set if the condition was
+     *                 satisfied
      * @return boolean - if the swap was successful
      * @throws DynamicStatusStoreException
      */
     @Override
-    public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue, @NotNull Map<String, String> others) throws DynamicStatusStoreException {
+    public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue,
+            @NotNull Map<String, String> others) throws DynamicStatusStoreException {
         ByteSequence bsKey = ByteSequence.from(key, UTF_8);
         ByteSequence bsNewValue = ByteSequence.from(newValue, UTF_8);
 
@@ -194,7 +202,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         PutOption option = PutOption.DEFAULT;
         ops.add(Op.put(bsKey, bsNewValue, option));
 
-        for(Entry<String, String> entry: others.entrySet()) {
+        for (Entry<String, String> entry : others.entrySet()) {
             ByteSequence obsKey = ByteSequence.from(entry.getKey(), UTF_8);
             ByteSequence obsValue = ByteSequence.from(entry.getValue(), UTF_8);
 
@@ -208,12 +216,13 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
             Thread.currentThread().interrupt();
             throw new DynamicStatusStoreException("Put Swap failed", e);
         }
-        
+
     }
+
     /**
      * A simple get method that retireves on value from one key
      * 
-     * @param key 
+     * @param key
      * @return String - the value of the key and null if not exsisting.
      * @throws DynamicStatusStoreException
      */
@@ -222,21 +231,22 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         ByteSequence bsKey = ByteSequence.from(key, UTF_8);
         CompletableFuture<GetResponse> getFuture = kvClient.get(bsKey);
 
-		try {
-			GetResponse response = getFuture.get();
-			List<KeyValue> kvs = response.getKvs();
-			if (kvs.isEmpty()){
-				return null;
-			}
-			return kvs.get(0).getValue().toString(UTF_8);
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("Could not retrieve key.", e);
-		}
+        try {
+            GetResponse response = getFuture.get();
+            List<KeyValue> kvs = response.getKvs();
+            if (kvs.isEmpty()) {
+                return null;
+            }
+            return kvs.get(0).getValue().toString(UTF_8);
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("Could not retrieve key.", e);
+        }
     }
 
     /**
-     * A get of all keys and value that start with a specified prefix. They are returned in a Map<String,String>
+     * A get of all keys and value that start with a specified prefix. They are
+     * returned in a Map<String,String>
      * 
      * @param keyPrefix - the prefix for any key(s)
      * @return Map<String, String>
@@ -247,26 +257,26 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         ByteSequence bsPrefix = ByteSequence.from(keyPrefix, UTF_8);
         GetOption options = GetOption.newBuilder().withPrefix(bsPrefix).build();
         CompletableFuture<GetResponse> getFuture = kvClient.get(bsPrefix, options);
-        Map<String,String> keyValues = new HashMap<>();
+        Map<String, String> keyValues = new HashMap<>();
 
-		try {
-			GetResponse response = getFuture.get();
+        try {
+            GetResponse response = getFuture.get();
             List<KeyValue> kvs = response.getKvs();
-            
-			if (kvs.isEmpty()){
-				return new HashMap<>();
+
+            if (kvs.isEmpty()) {
+                return new HashMap<>();
             }
-            
-			for (KeyValue kv : kvs){
+
+            for (KeyValue kv : kvs) {
                 keyValues.put(kv.getKey().toString(UTF_8), kv.getValue().toString(UTF_8));
             }
             return keyValues;
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("Could not retrieve key.", e);
-		}
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("Could not retrieve key.", e);
+        }
     }
-    
+
     /**
      * A Simple delete of a singe Key value pair.
      * 
@@ -278,18 +288,18 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         ByteSequence bsKey = ByteSequence.from(key, UTF_8);
         CompletableFuture<DeleteResponse> deleteFuture = kvClient.delete(bsKey);
 
-		try {
-			deleteFuture.get();
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("Could not delete key.", e);
-		}
+        try {
+            deleteFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("Could not delete key.", e);
+        }
     }
 
     /**
      * A delete of a set of provided keys and there corresponding values.
      * 
-     * @param keys  a set of keys to delete
+     * @param keys a set of keys to delete
      * @throws DynamicStatusStoreException
      *
      */
@@ -299,22 +309,23 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         DeleteOption options = DeleteOption.DEFAULT;
 
         ArrayList<Op> ops = new ArrayList<>();
-        for (String key: keys) {
+        for (String key : keys) {
             ByteSequence obsKey = ByteSequence.from(key, UTF_8);
             ops.add(Op.delete(obsKey, options));
         }
 
         CompletableFuture<TxnResponse> response = txn.Then(ops.toArray(new Op[ops.size()])).commit();
         try {
-			response.get();
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("Could not delete key(s).", e);
-		}
+            response.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("Could not delete key(s).", e);
+        }
     }
 
     /**
-     * A delete which removes all keys with a specified prefix and there corresponding values from the store.
+     * A delete which removes all keys with a specified prefix and there
+     * corresponding values from the store.
      * 
      * @param keyPrefix - a string prefix that all the key(s) have in common
      * @throws DynamicStatusStoreException
@@ -325,132 +336,123 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore{
         DeleteOption options = DeleteOption.newBuilder().withPrefix(bsKey).build();
         CompletableFuture<DeleteResponse> deleteFuture = kvClient.delete(bsKey, options);
 
-		try {
-			deleteFuture.get();
-		} catch (InterruptedException | ExecutionException e){
-			Thread.currentThread().interrupt();
-			throw new DynamicStatusStoreException("Could not delete key(s).", e);
-		}
+        try {
+            deleteFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("Could not delete key(s).", e);
+        }
     }
 
-    //TODO Test and document
-	@Override
-	public UUID watch(IDynamicStatusStoreWatcher watcher, String key) throws DynamicStatusStoreException {
-		ByteSequence bsKey = ByteSequence.from(key, UTF_8);
-		PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
-		passWatcher.setEtcdWatcher(watchClient.watch(bsKey, passWatcher));
-		watchers.put(passWatcher.getID(), passWatcher);
-		return passWatcher.getID();
-	}
+    // TODO Test and document
+    @Override
+    public UUID watch(IDynamicStatusStoreWatcher watcher, String key) throws DynamicStatusStoreException {
+        ByteSequence bsKey = ByteSequence.from(key, UTF_8);
+        PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
+        passWatcher.setEtcdWatcher(watchClient.watch(bsKey, passWatcher));
+        watchers.put(passWatcher.getID(), passWatcher);
+        return passWatcher.getID();
+    }
 
-    //TODO Test and document
-	@Override
-	public UUID watchPrefix(IDynamicStatusStoreWatcher watcher, String keyPrefix) throws DynamicStatusStoreException {
-		ByteSequence bsKey = ByteSequence.from(keyPrefix, UTF_8);
-		PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
-		WatchOption watchOption = WatchOption.newBuilder().withPrefix(bsKey).build();
-		Watcher etcdWatcher = watchClient.watch(bsKey, watchOption, passWatcher);
-		passWatcher.setEtcdWatcher(etcdWatcher);
-		watchers.put(passWatcher.getID(), passWatcher);
-		return passWatcher.getID();
-	}
+    // TODO Test and document
+    @Override
+    public UUID watchPrefix(IDynamicStatusStoreWatcher watcher, String keyPrefix) throws DynamicStatusStoreException {
+        ByteSequence bsKey = ByteSequence.from(keyPrefix, UTF_8);
+        PassthroughWatcher passWatcher = new PassthroughWatcher(watcher);
+        WatchOption watchOption = WatchOption.newBuilder().withPrefix(bsKey).build();
+        Watcher etcdWatcher = watchClient.watch(bsKey, watchOption, passWatcher);
+        passWatcher.setEtcdWatcher(etcdWatcher);
+        watchers.put(passWatcher.getID(), passWatcher);
+        return passWatcher.getID();
+    }
 
-    //TODO Test and document
-	@Override
-	public void unwatch(UUID watchId) throws DynamicStatusStoreException {
-		PassthroughWatcher passWatcher = watchers.remove(watchId);
-		if (passWatcher == null) {
-			return;
-		}
-				
-		passWatcher.getEtcdWatcher().close();
-	}
-	
-	private class PassthroughWatcher implements Listener {
-		
-		private final UUID id = UUID.randomUUID();
-		private final IDynamicStatusStoreWatcher watcher;
-		private Watcher etcdWatcher;
-		
-		public PassthroughWatcher(IDynamicStatusStoreWatcher watcher) {
-			this.watcher = watcher;
-		}
+    // TODO Test and document
+    @Override
+    public void unwatch(UUID watchId) throws DynamicStatusStoreException {
+        PassthroughWatcher passWatcher = watchers.remove(watchId);
+        if (passWatcher == null) {
+            return;
+        }
 
-		@Override
-		public void onNext(WatchResponse response) {
-			if (response == null) {
-				return;
-			}
-			
-			List<WatchEvent> events = response.getEvents();
-			if (events == null) {
-				return;
-			}
-			
-			for(WatchEvent event : events) {
-				EventType eventType = event.getEventType();
-				KeyValue eventKey  = event.getKeyValue();
-				KeyValue eventPrev = event.getPrevKV();
-				
-				if (eventType == null || eventKey == null) {
-					continue;
-				}
-				
-				switch(eventType) {
-				case DELETE:
-					watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
-							Event.DELETE, 
-							null, 
-							null);
-					break;
-				case PUT:
-					if (eventPrev != null) {
-						watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
-								Event.MODIFIED, 
-								eventPrev.getValue().toString(UTF_8), 
-								eventKey.getValue().toString(UTF_8));
-					} else {
-						watcher.propertyModified(eventKey.getKey().toString(UTF_8), 
-								Event.NEW, 
-								null, 
-								eventKey.getValue().toString(UTF_8));
-					}
-					break;
-				case UNRECOGNIZED:
-				default:
-					continue;
-				}
-			}
-		}
+        passWatcher.getEtcdWatcher().close();
+    }
 
-		@Override
-		public void onError(Throwable throwable) {
-		}
+    private class PassthroughWatcher implements Listener {
 
-		@Override
-		public void onCompleted() {
-		}
-		
-		public UUID getID() {
-			return this.id;
-		}
-		
-		public void setEtcdWatcher(Watcher etcdWatcher) {
-			this.etcdWatcher = etcdWatcher;			
-		}
-		
-		public Watcher getEtcdWatcher() {
-			return this.etcdWatcher;			
-		}
-	}
-	
-	@Override
-	public void shutdown() throws DynamicStatusStoreException {
-		watchClient.close();
-		kvClient.close();
-		client.close();
-	}
+        private final UUID                       id = UUID.randomUUID();
+        private final IDynamicStatusStoreWatcher watcher;
+        private Watcher                          etcdWatcher;
 
+        public PassthroughWatcher(IDynamicStatusStoreWatcher watcher) {
+            this.watcher = watcher;
+        }
 
-    
+        @Override
+        public void onNext(WatchResponse response) {
+            if (response == null) {
+                return;
+            }
+
+            List<WatchEvent> events = response.getEvents();
+            if (events == null) {
+                return;
+            }
+
+            for (WatchEvent event : events) {
+                EventType eventType = event.getEventType();
+                KeyValue eventKey = event.getKeyValue();
+                KeyValue eventPrev = event.getPrevKV();
+
+                if (eventType == null || eventKey == null) {
+                    continue;
+                }
+
+                switch (eventType) {
+                    case DELETE:
+                        watcher.propertyModified(eventKey.getKey().toString(UTF_8), Event.DELETE, null, null);
+                        break;
+                    case PUT:
+                        if (eventPrev != null) {
+                            watcher.propertyModified(eventKey.getKey().toString(UTF_8), Event.MODIFIED,
+                                    eventPrev.getValue().toString(UTF_8), eventKey.getValue().toString(UTF_8));
+                        } else {
+                            watcher.propertyModified(eventKey.getKey().toString(UTF_8), Event.NEW, null,
+                                    eventKey.getValue().toString(UTF_8));
+                        }
+                        break;
+                    case UNRECOGNIZED:
+                    default:
+                        continue;
+                }
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+        }
+
+        @Override
+        public void onCompleted() {
+        }
+
+        public UUID getID() {
+            return this.id;
+        }
+
+        public void setEtcdWatcher(Watcher etcdWatcher) {
+            this.etcdWatcher = etcdWatcher;
+        }
+
+        public Watcher getEtcdWatcher() {
+            return this.etcdWatcher;
+        }
+    }
+
+    @Override
+    public void shutdown() throws DynamicStatusStoreException {
+        watchClient.close();
+        kvClient.close();
+        client.close();
+    }
+
 }

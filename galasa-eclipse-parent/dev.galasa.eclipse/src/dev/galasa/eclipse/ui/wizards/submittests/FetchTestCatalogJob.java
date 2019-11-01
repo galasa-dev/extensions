@@ -22,43 +22,43 @@ import dev.galasa.eclipse.ui.wizards.submittests.model.TestCatalog;
 import dev.galasa.eclipse.ui.wizards.submittests.model.TestStream;
 
 public class FetchTestCatalogJob extends Job {
-	
-	private final SelectTestsWizardPage selectTestsWizardPage;
-	private final TestStream            testStream;
 
-	public FetchTestCatalogJob(SelectTestsWizardPage selectTestsWizardPage, TestStream testStream) {
-		super("Fetch Test Catalog");
-		
-		this.selectTestsWizardPage = selectTestsWizardPage;
-		this.testStream            = testStream;
-		
-		this.setUser(true);
-	}
+    private final SelectTestsWizardPage selectTestsWizardPage;
+    private final TestStream            testStream;
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		
-		try {
-			URI testCatalogURI = testStream.getLocation();
-			if (testCatalogURI == null) {
-				return new Status(Status.ERROR, Activator.PLUGIN_ID,
-						"Unable to retrieve test catalog for stream " + testStream.getId() + " as location is not known");
-			}
-			
-			URLConnection connection = testCatalogURI.toURL().openConnection();
-			Gson gson = new Gson();
-			JsonObject jsonCatalog = gson.fromJson(new InputStreamReader(connection.getInputStream()), JsonObject.class); 
+    public FetchTestCatalogJob(SelectTestsWizardPage selectTestsWizardPage, TestStream testStream) {
+        super("Fetch Test Catalog");
 
-			TestCatalog testCatalog = new TestCatalog(jsonCatalog);
-			
-			this.selectTestsWizardPage.setTestCatalog(this.testStream, testCatalog);
-			
-		} catch (Exception e) {
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
-		}
-		
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Test Catalog fetched");
-	}
+        this.selectTestsWizardPage = selectTestsWizardPage;
+        this.testStream = testStream;
+
+        this.setUser(true);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+
+        try {
+            URI testCatalogURI = testStream.getLocation();
+            if (testCatalogURI == null) {
+                return new Status(Status.ERROR, Activator.PLUGIN_ID, "Unable to retrieve test catalog for stream "
+                        + testStream.getId() + " as location is not known");
+            }
+
+            URLConnection connection = testCatalogURI.toURL().openConnection();
+            Gson gson = new Gson();
+            JsonObject jsonCatalog = gson.fromJson(new InputStreamReader(connection.getInputStream()),
+                    JsonObject.class);
+
+            TestCatalog testCatalog = new TestCatalog(jsonCatalog);
+
+            this.selectTestsWizardPage.setTestCatalog(this.testStream, testCatalog);
+
+        } catch (Exception e) {
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+        }
+
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Test Catalog fetched");
+    }
 
 }

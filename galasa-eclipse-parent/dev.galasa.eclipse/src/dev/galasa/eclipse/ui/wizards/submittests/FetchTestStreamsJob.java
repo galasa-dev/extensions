@@ -20,48 +20,49 @@ import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 
 public class FetchTestStreamsJob extends Job {
-	
-	private final SelectTestsWizardPage selectTestsWizardPage;
 
-	public FetchTestStreamsJob(SelectTestsWizardPage selectTestsWizardPage) {
-		super("Fetch Test Streams");
-		
-		this.selectTestsWizardPage = selectTestsWizardPage;
-		
-		this.setUser(true);
-	}
+    private final SelectTestsWizardPage selectTestsWizardPage;
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		
-		IConfigurationPropertyStoreService cps = this.selectTestsWizardPage.getCPS();
-		
-		try {
-			IFramework framework = Activator.getInstance().getFramework();
-			if (!framework.isInitialised()) {
-				return new Status(Status.OK, Activator.PLUGIN_ID, "Test Streams not fetched - Framework not intialised");
-			}
-			
-			String testStreams = AbstractManager.defaultString(cps.getProperty("test","streams"), "galasa-ivt,simframe");
-			
-			String[] splitTestStreams = testStreams.split(",");
-			List<TestStream> streams = new ArrayList<>();
-			for(String stream : splitTestStreams) {
-				if (stream.trim().isEmpty()) {
-					continue;
-				}
-				
-				streams.add(new TestStream(stream, cps));
-			}
-			
-			this.selectTestsWizardPage.setTestStreams(streams);
-			
-		} catch (Exception e) {
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
-		}
-		
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Test Streams fetched");
-	}
+    public FetchTestStreamsJob(SelectTestsWizardPage selectTestsWizardPage) {
+        super("Fetch Test Streams");
+
+        this.selectTestsWizardPage = selectTestsWizardPage;
+
+        this.setUser(true);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+
+        IConfigurationPropertyStoreService cps = this.selectTestsWizardPage.getCPS();
+
+        try {
+            IFramework framework = Activator.getInstance().getFramework();
+            if (!framework.isInitialised()) {
+                return new Status(Status.OK, Activator.PLUGIN_ID,
+                        "Test Streams not fetched - Framework not intialised");
+            }
+
+            String testStreams = AbstractManager.defaultString(cps.getProperty("test", "streams"),
+                    "galasa-ivt,simframe");
+
+            String[] splitTestStreams = testStreams.split(",");
+            List<TestStream> streams = new ArrayList<>();
+            for (String stream : splitTestStreams) {
+                if (stream.trim().isEmpty()) {
+                    continue;
+                }
+
+                streams.add(new TestStream(stream, cps));
+            }
+
+            this.selectTestsWizardPage.setTestStreams(streams);
+
+        } catch (Exception e) {
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+        }
+
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Test Streams fetched");
+    }
 
 }

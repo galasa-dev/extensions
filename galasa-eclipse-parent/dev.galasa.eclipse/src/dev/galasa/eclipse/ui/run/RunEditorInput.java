@@ -11,47 +11,47 @@ import org.eclipse.ui.IPersistableElement;
 import dev.galasa.framework.spi.IRunResult;
 
 public class RunEditorInput implements IRunEditorInput {
-	
-	private final IRunResult runResult;
-	private final String     runName;
-	
-	public RunEditorInput(IRunResult runResult, String runName) {
-		this.runResult = runResult;
-		this.runName   = runName;
-	}
 
-	@Override
-	public boolean exists() {
-		return true;
-	}
+    private final IRunResult runResult;
+    private final String     runName;
 
-	@Override
-	public ImageDescriptor getImageDescriptor() {
-		return null;
-	}
+    public RunEditorInput(IRunResult runResult, String runName) {
+        this.runResult = runResult;
+        this.runName = runName;
+    }
 
-	@Override
-	public String getName() {
-		return this.runName;
-	}
+    @Override
+    public boolean exists() {
+        return true;
+    }
 
-	@Override
-	public IPersistableElement getPersistable() {
-		return null;
-	}
+    @Override
+    public ImageDescriptor getImageDescriptor() {
+        return null;
+    }
 
-	@Override
-	public String getToolTipText() {
-		return null;
-	}
+    @Override
+    public String getName() {
+        return this.runName;
+    }
 
-	@Override
-	public <T> T getAdapter(Class<T> arg0) {
-		return null;
-	}
+    @Override
+    public IPersistableElement getPersistable() {
+        return null;
+    }
 
-	public IRunResult getRunResult() {
-		return runResult;
-	}
+    @Override
+    public String getToolTipText() {
+        return null;
+    }
+
+    @Override
+    public <T> T getAdapter(Class<T> arg0) {
+        return null;
+    }
+
+    public IRunResult getRunResult() {
+        return runResult;
+    }
 
 }

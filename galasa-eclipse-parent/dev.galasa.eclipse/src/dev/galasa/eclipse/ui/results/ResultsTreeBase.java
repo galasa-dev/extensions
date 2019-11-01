@@ -18,90 +18,88 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 
 public class ResultsTreeBase implements IUIParent, IFrameworkChangeListener {
 
-	private FrameworkNotInitialised     frameworkNotInitialised;
-	private ArrayList<ResultDirectory>  rases = new ArrayList<>();
+    private FrameworkNotInitialised    frameworkNotInitialised;
+    private ArrayList<ResultDirectory> rases = new ArrayList<>();
 
-	private ResultsView           view;
+    private ResultsView                view;
 
-	protected ResultsTreeBase(ResultsView resultsView) {
-		this.view = resultsView;
-	}
+    protected ResultsTreeBase(ResultsView resultsView) {
+        this.view = resultsView;
+    }
 
-	protected void viewCreateFinished() {
-		try {
-			IFramework framework = Activator.getInstance().getFramework();
-			statusChanged(framework.isInitialised());
-		} catch (FrameworkException e) {
-			Activator.log(e);
-		}
+    protected void viewCreateFinished() {
+        try {
+            IFramework framework = Activator.getInstance().getFramework();
+            statusChanged(framework.isInitialised());
+        } catch (FrameworkException e) {
+            Activator.log(e);
+        }
 
-		Activator.addFrameworkChangeListener(this);
-	}
+        Activator.addFrameworkChangeListener(this);
+    }
 
+    protected void dispose() {
+        Activator.removeFrameworkChangeListener(this);
+    }
 
-	protected void dispose() {
-		Activator.removeFrameworkChangeListener(this);
-	}
+    @Override
+    public boolean hasChildren() {
+        if (frameworkNotInitialised != null || !rases.isEmpty()) {
+            return true;
+        }
 
-	@Override
-	public boolean hasChildren() {
-		if (frameworkNotInitialised != null
-				|| !rases.isEmpty() ) {
-			return true;
-		}
+        return false;
+    }
 
-		return false;
-	}
+    @Override
+    public Object[] getChildren() {
+        ArrayList<Object> children = new ArrayList<>();
 
-	@Override
-	public Object[] getChildren() {
-		ArrayList<Object> children = new ArrayList<>();
+        if (frameworkNotInitialised != null) {
+            children.add(frameworkNotInitialised);
+        }
 
-		if (frameworkNotInitialised != null) {
-			children.add(frameworkNotInitialised);
-		}
+        children.addAll(rases);
 
-		children.addAll(rases);
+        return children.toArray();
+    }
 
-		return children.toArray();
-	}
+    @Override
+    public void statusChanged(boolean initialised) {
+        if (initialised) {
+            if (frameworkNotInitialised != null) {
+                frameworkNotInitialised = null;
+            }
 
+            try {
+                IFramework framework = Activator.getInstance().getFramework();
 
-	@Override
-	public void statusChanged(boolean initialised) {
-		if (initialised) {
-			if (frameworkNotInitialised != null) {
-				frameworkNotInitialised = null;
-			}
+                int sortOrder = 1;
+                List<IResultArchiveStoreDirectoryService> resultDirectories = framework.getResultArchiveStore()
+                        .getDirectoryServices();
+                for (IResultArchiveStoreDirectoryService dirService : resultDirectories) {
+                    rases.add(new ResultDirectory(view, dirService, sortOrder));
+                    sortOrder++;
+                }
+            } catch (FrameworkException e) {
+                Activator.log(e);
+            }
+        } else {
+            if (frameworkNotInitialised == null) {
+                frameworkNotInitialised = new FrameworkNotInitialised();
+            }
 
-			try {
-				IFramework framework = Activator.getInstance().getFramework();
+            rases.clear();
+        }
 
-				int sortOrder = 1;
-				List<IResultArchiveStoreDirectoryService> resultDirectories = framework.getResultArchiveStore().getDirectoryServices();
-				for(IResultArchiveStoreDirectoryService dirService : resultDirectories) {
-					rases.add(new ResultDirectory(view, dirService, sortOrder));
-					sortOrder++;
-				}
-			} catch (FrameworkException e) {
-				Activator.log(e);
-			}
-		} else {
-			if (frameworkNotInitialised == null) {
-				frameworkNotInitialised = new FrameworkNotInitialised();
-			}
+        if (view != null) {
+            view.refresh(this);
 
-			rases.clear();
-		}
+            for (ResultDirectory ras : rases) {
+                ras.expand(ras);
+            }
+        }
 
-		if (view != null) {
-			view.refresh(this);
-
-			for(ResultDirectory ras: rases) {
-				ras.expand(ras);
-			}
-		}
-
-	}
+    }
 
 }

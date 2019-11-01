@@ -15,29 +15,27 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-public class RefreshHandler  extends AbstractHandler {
+public class RefreshHandler extends AbstractHandler {
 
-	
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow activeWorkbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
-		IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-		IStructuredSelection selection = (IStructuredSelection) activePage.getSelection();
-		
-		if (selection == null) {
-			return null;
-		}
-		
-		Iterator<?> i = selection.iterator();
-		while(i.hasNext()) {
-			Object o = i.next();
-			if (o instanceof IRefreshable) {
-				((IRefreshable)o).refreshCommand();
-			}
-		}
-		
-		return null;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+        IWorkbenchWindow activeWorkbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
+        IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+        IStructuredSelection selection = (IStructuredSelection) activePage.getSelection();
+
+        if (selection == null) {
+            return null;
+        }
+
+        Iterator<?> i = selection.iterator();
+        while (i.hasNext()) {
+            Object o = i.next();
+            if (o instanceof IRefreshable) {
+                ((IRefreshable) o).refreshCommand();
+            }
+        }
+
+        return null;
+    }
 
 }

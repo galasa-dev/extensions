@@ -10,10 +10,14 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.widgets.Composite;
 
 public interface IConfigurationGroups {
-    
+
     void createControl(IConfigurationTab tab, Composite parent);
+
     void setDefaults(ILaunchConfigurationWorkingCopy config);
+
     void initializeFrom(ILaunchConfiguration config);
+
     void performApply(ILaunchConfigurationWorkingCopy configuration);
+
     boolean validatePage();
 }

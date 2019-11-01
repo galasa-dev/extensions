@@ -12,28 +12,28 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 
 public class DateConverter {
-	
-	private final static ZoneId zoneid = ZoneId.systemDefault();
-	private final static DateTimeFormatter dtf =  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
-	
-	public static String visualDate(Instant instant) {
-		return visualDate(ZonedDateTime.ofInstant(instant, zoneid));
-	}
 
-	public static String visualDate(ZonedDateTime zonedDateTime) {
-		ZonedDateTime zdt = ZonedDateTime.now(zoneid);
-		
-		if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
-			return "Today, " + zdt.toLocalTime().toString();
-		}
-		
-		zdt = zdt.minusDays(1);
-		
-		if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
-			return "Yesterday, " + zdt.toLocalTime().toString();
-		}
-		
-		return zonedDateTime.format(dtf);
-	}
+    private final static ZoneId            zoneid = ZoneId.systemDefault();
+    private final static DateTimeFormatter dtf    = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
+
+    public static String visualDate(Instant instant) {
+        return visualDate(ZonedDateTime.ofInstant(instant, zoneid));
+    }
+
+    public static String visualDate(ZonedDateTime zonedDateTime) {
+        ZonedDateTime zdt = ZonedDateTime.now(zoneid);
+
+        if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
+            return "Today, " + zdt.toLocalTime().toString();
+        }
+
+        zdt = zdt.minusDays(1);
+
+        if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
+            return "Yesterday, " + zdt.toLocalTime().toString();
+        }
+
+        return zonedDateTime.format(dtf);
+    }
 
 }

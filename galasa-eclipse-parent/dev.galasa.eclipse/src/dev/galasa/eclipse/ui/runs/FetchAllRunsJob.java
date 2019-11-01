@@ -21,41 +21,40 @@ import dev.galasa.framework.spi.IDynamicStatusStoreService;
 import dev.galasa.framework.spi.IFramework;
 
 public class FetchAllRunsJob extends Job {
-	
-	private final IPropertyListener listener;
 
-	public FetchAllRunsJob(IPropertyListener listener) {
-		super("Fetch all runs");
-		
-		this.listener = listener;
-		
-		this.setUser(true);
-	}
+    private final IPropertyListener listener;
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		
-		try {
-			IFramework framework = Activator.getInstance().getFramework();
-			if (!framework.isInitialised()) {
-				return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
-			}
-			
-			IDynamicStatusStoreService dss = framework.getDynamicStatusStoreService("framework");
-			
-			Map<String, String> runProperties = dss.getPrefix("run.");
-			
-			for(Entry<String, String> runProperty : runProperties.entrySet()) {
-				listener.propertyUpdate(new PropertyUpdate(runProperty.getKey(), runProperty.getValue(), Type.UPDATE));
-			}
-			
-			listener.propertyUpdateComplete();
-		} catch (Exception e) {
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
-		}
-		
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Runs fetched");
-	}
+    public FetchAllRunsJob(IPropertyListener listener) {
+        super("Fetch all runs");
+
+        this.listener = listener;
+
+        this.setUser(true);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+
+        try {
+            IFramework framework = Activator.getInstance().getFramework();
+            if (!framework.isInitialised()) {
+                return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
+            }
+
+            IDynamicStatusStoreService dss = framework.getDynamicStatusStoreService("framework");
+
+            Map<String, String> runProperties = dss.getPrefix("run.");
+
+            for (Entry<String, String> runProperty : runProperties.entrySet()) {
+                listener.propertyUpdate(new PropertyUpdate(runProperty.getKey(), runProperty.getValue(), Type.UPDATE));
+            }
+
+            listener.propertyUpdateComplete();
+        } catch (Exception e) {
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+        }
+
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Runs fetched");
+    }
 
 }

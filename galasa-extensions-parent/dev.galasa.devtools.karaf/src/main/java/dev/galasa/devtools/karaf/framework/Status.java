@@ -17,14 +17,14 @@ public class Status implements Action {
 
     @Override
     public Object execute() throws Exception {
-    	
-    	final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-    	
-    	if (devEnv.isFrameworkInitialised()) {
-    		System.out.println("The Galasa Framework is initialised");
-    	} else {
-    		System.out.println("The Galasa Framework is not initialised");
-    	}
+
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+
+        if (devEnv.isFrameworkInitialised()) {
+            System.out.println("The Galasa Framework is initialised");
+        } else {
+            System.out.println("The Galasa Framework is not initialised");
+        }
 
         return null;
     }

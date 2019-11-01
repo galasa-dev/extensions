@@ -13,24 +13,26 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import dev.galasa.eclipse.Activator;
 
-public class GalasaPreferencesInitialiser  extends AbstractPreferenceInitializer {
+public class GalasaPreferencesInitialiser extends AbstractPreferenceInitializer {
 
-	@Override
-	public void initializeDefaultPreferences() {
-		
-		IPreferenceStore store = Activator.getInstance().getPreferenceStore();
-		
-		Path galasaDir = Paths.get(System.getProperty("user.home"), ".galasa");
-		
-		String username = System.getProperty("user.name");
-		if (username == null || username.trim().isEmpty()) {
-			username = "unknown";
-		}
-		
-		store.setDefault(PreferenceConstants.P_BOOTSTRAP_URI, galasaDir.resolve("bootstrap.properties").toUri().toString());
-		store.setDefault(PreferenceConstants.P_OVERRIDES_URI, galasaDir.resolve("overrides.properties").toUri().toString());
-		store.setDefault(PreferenceConstants.P_REQUESTOR_ID, username);
-		store.setDefault(PreferenceConstants.P_REMOTEMAVEN_URI, "https://repo.maven.apache.org/maven2/");
-	}
+    @Override
+    public void initializeDefaultPreferences() {
+
+        IPreferenceStore store = Activator.getInstance().getPreferenceStore();
+
+        Path galasaDir = Paths.get(System.getProperty("user.home"), ".galasa");
+
+        String username = System.getProperty("user.name");
+        if (username == null || username.trim().isEmpty()) {
+            username = "unknown";
+        }
+
+        store.setDefault(PreferenceConstants.P_BOOTSTRAP_URI,
+                galasaDir.resolve("bootstrap.properties").toUri().toString());
+        store.setDefault(PreferenceConstants.P_OVERRIDES_URI,
+                galasaDir.resolve("overrides.properties").toUri().toString());
+        store.setDefault(PreferenceConstants.P_REQUESTOR_ID, username);
+        store.setDefault(PreferenceConstants.P_REMOTEMAVEN_URI, "https://repo.maven.apache.org/maven2/");
+    }
 
 }

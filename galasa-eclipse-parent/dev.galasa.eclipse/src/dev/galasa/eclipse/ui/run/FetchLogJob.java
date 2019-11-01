@@ -17,36 +17,35 @@ import dev.galasa.eclipse.Activator;
 import dev.galasa.framework.spi.IRunResult;
 
 public class FetchLogJob extends Job {
-	
-	private final LogPage logPage;
-	private final IRunResult runResult;
 
-	public FetchLogJob(LogPage logPage, IRunResult runResult) {
-		super("Fetch Run Log");
-		
-		this.logPage = logPage;
-		this.runResult = runResult;
-		
-		this.setUser(true);
-	}
+    private final LogPage    logPage;
+    private final IRunResult runResult;
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
-		
-		try {
-			String log = this.runResult.getLog();
-			this.logPage.setLog(log);			
-		} catch (Exception e) {
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			e.printStackTrace(pw);
-			logPage.setLog("Fetch of run Log failed\n" + sw.toString());
-			
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
-		}
-		
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Run Log Fetched");
-	}
+    public FetchLogJob(LogPage logPage, IRunResult runResult) {
+        super("Fetch Run Log");
+
+        this.logPage = logPage;
+        this.runResult = runResult;
+
+        this.setUser(true);
+    }
+
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
+
+        try {
+            String log = this.runResult.getLog();
+            this.logPage.setLog(log);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            logPage.setLog("Fetch of run Log failed\n" + sw.toString());
+
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+        }
+
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Run Log Fetched");
+    }
 
 }

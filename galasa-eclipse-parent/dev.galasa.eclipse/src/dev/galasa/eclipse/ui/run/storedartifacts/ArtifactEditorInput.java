@@ -14,51 +14,51 @@ import org.eclipse.ui.IPersistableElement;
 import dev.galasa.framework.spi.IRunResult;
 
 public class ArtifactEditorInput implements IEditorInput {
-	
-	private final IRunResult runResult;
-	private final Path       path;
-	
-	public ArtifactEditorInput(IRunResult runResult, Path path) {
-		this.runResult = runResult;
-		this.path      = path;
-	}
 
-	@Override
-	public boolean exists() {
-		return true;
-	}
+    private final IRunResult runResult;
+    private final Path       path;
 
-	@Override
-	public ImageDescriptor getImageDescriptor() {
-		return null;
-	}
+    public ArtifactEditorInput(IRunResult runResult, Path path) {
+        this.runResult = runResult;
+        this.path = path;
+    }
 
-	public Path getPath() {
-		return this.path;
-	}
+    @Override
+    public boolean exists() {
+        return true;
+    }
 
-	@Override
-	public IPersistableElement getPersistable() {
-		return null;
-	}
+    @Override
+    public ImageDescriptor getImageDescriptor() {
+        return null;
+    }
 
-	@Override
-	public String getToolTipText() {
-		return null;
-	}
+    public Path getPath() {
+        return this.path;
+    }
 
-	@Override
-	public <T> T getAdapter(Class<T> arg0) {
-		return null;
-	}
+    @Override
+    public IPersistableElement getPersistable() {
+        return null;
+    }
 
-	public IRunResult getRunResult() {
-		return runResult;
-	}
+    @Override
+    public String getToolTipText() {
+        return null;
+    }
 
-	@Override
-	public String getName() {
-		return this.path.getFileName().toString();
-	}
+    @Override
+    public <T> T getAdapter(Class<T> arg0) {
+        return null;
+    }
+
+    public IRunResult getRunResult() {
+        return runResult;
+    }
+
+    @Override
+    public String getName() {
+        return this.path.getFileName().toString();
+    }
 
 }

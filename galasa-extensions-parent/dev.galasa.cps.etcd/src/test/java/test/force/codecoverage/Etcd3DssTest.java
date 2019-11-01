@@ -43,7 +43,8 @@ import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 
 /**
- * This test class is a for testing the implementation of the JETD client is correct and behaving as expected.
+ * This test class is a for testing the implementation of the JETD client is
+ * correct and behaving as expected.
  * 
  * All Responses from a etcd cluster have been mocked using mockito.
  * 
@@ -54,23 +55,25 @@ public class Etcd3DssTest {
 
     /**
      * Creates a fake URI to test with
+     * 
      * @return URI - for the etcd
      */
     private URI createDssUri() {
-		URI testUri;
-		try {
-			testUri = new URI("http://something");
-		} catch (URISyntaxException e) {
-			testUri = null;
-		}
-		return testUri;
+        URI testUri;
+        try {
+            testUri = new URI("http://something");
+        } catch (URISyntaxException e) {
+            testUri = null;
+        }
+        return testUri;
     }
-    
+
     /**
-     * This mocks the client for the etcd server and injects it into the Etcd3Dss class
+     * This mocks the client for the etcd server and injects it into the Etcd3Dss
+     * class
      */
     @Mock
-    KV mockKvCLient;
+    KV                      mockKvCLient;
 
     /**
      * Creates a dss for the etcd and injects the mock above.
@@ -84,27 +87,29 @@ public class Etcd3DssTest {
      * @throws DynamicStatusStoreException
      */
 //    @Test
-    public void testPutSingleValue() throws DynamicStatusStoreException{
+    public void testPutSingleValue() throws DynamicStatusStoreException {
         ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
         ByteSequence bsValue = ByteSequence.from("bar", UTF_8);
 
         PutResponse response = Mockito.mock(PutResponse.class);
-        CompletableFuture<PutResponse> mockFuture = CompletableFuture.completedFuture(response);       
+        CompletableFuture<PutResponse> mockFuture = CompletableFuture.completedFuture(response);
 
         when(mockKvCLient.put(bsKey, bsValue)).thenReturn(mockFuture);
 
-        mockDss.put("foo","bar");
+        mockDss.put("foo", "bar");
 
         assertTrue("dummy", true);
     }
+
     /**
-     * This test methods checks the put for a map of values. It uses the etcd transactions rather than a deicated put.
+     * This test methods checks the put for a map of values. It uses the etcd
+     * transactions rather than a deicated put.
      * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
      */
 //    @Test
-    public void testPutMapOfValues() throws DynamicStatusStoreException, InterruptedException{
+    public void testPutMapOfValues() throws DynamicStatusStoreException, InterruptedException {
         Map<String, String> kvs = new HashMap<>();
 
         kvs.put("foo", "bar");
@@ -127,7 +132,8 @@ public class Etcd3DssTest {
     }
 
     /**
-     * This test methods does a atomic/swap put. This looks for a IF arguament before completing a put.
+     * This test methods does a atomic/swap put. This looks for a IF arguament
+     * before completing a put.
      * 
      * In this case it is a simple example of just one value for another.
      * 
@@ -145,7 +151,7 @@ public class Etcd3DssTest {
         Txn mocktxn = Mockito.mock(Txn.class);
         Txn mockCheck = Mockito.mock(Txn.class);
         Txn mockRequest = Mockito.mock(Txn.class);
-       
+
         when(mockKvCLient.txn()).thenReturn(mocktxn);
 
         CompletableFuture<TxnResponse> mockFuture = CompletableFuture.completedFuture(response);
@@ -159,14 +165,16 @@ public class Etcd3DssTest {
     }
 
     /**
-     * This atomic/swap put checks the case where the key doesnt exist prior to the put.
+     * This atomic/swap put checks the case where the key doesnt exist prior to the
+     * put.
      * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
      * @throws ExecutionException
      */
 //    @Test
-    public void testPutSwapBasicWithNullOld() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+    public void testPutSwapBasicWithNullOld()
+            throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         String key = "foo";
         String oldValue = null;
         String newValue = "bar-er";
@@ -175,11 +183,11 @@ public class Etcd3DssTest {
         Txn mocktxn = Mockito.mock(Txn.class);
         Txn mockCheck = Mockito.mock(Txn.class);
         Txn mockRequest = Mockito.mock(Txn.class);
-       
+
         when(mockKvCLient.txn()).thenReturn(mocktxn);
 
         CompletableFuture<TxnResponse> mockFuture = CompletableFuture.completedFuture(response);
-        
+
         when(mocktxn.If(any())).thenReturn(mockCheck);
         when(mockCheck.Then(any())).thenReturn(mockRequest);
         when(mockRequest.commit()).thenReturn(mockFuture);
@@ -189,8 +197,8 @@ public class Etcd3DssTest {
     }
 
     /**
-     * This test method also does a atomic/swap put but also includes the map of values to set if the condition is
-     * satisfied.
+     * This test method also does a atomic/swap put but also includes the map of
+     * values to set if the condition is satisfied.
      * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
@@ -201,7 +209,7 @@ public class Etcd3DssTest {
         String key = "foo";
         String oldValue = "bar";
         String newValue = "bar-er";
-        Map<String,String> otherKvs = new HashMap<>();
+        Map<String, String> otherKvs = new HashMap<>();
 
         otherKvs.put("marco", "pollo");
         otherKvs.put("Tom", "Jerry");
@@ -210,7 +218,7 @@ public class Etcd3DssTest {
         Txn mocktxn = Mockito.mock(Txn.class);
         Txn mockCheck = Mockito.mock(Txn.class);
         Txn mockRequest = Mockito.mock(Txn.class);
-       
+
         when(mockKvCLient.txn()).thenReturn(mocktxn);
 
         CompletableFuture<TxnResponse> mockFuture = CompletableFuture.completedFuture(response);
@@ -224,19 +232,20 @@ public class Etcd3DssTest {
     }
 
     /**
-     * This atomic/swap put checks the case where the key doesnt exist prior to the put. This too includes a map of values
-     * to set if successful.
+     * This atomic/swap put checks the case where the key doesnt exist prior to the
+     * put. This too includes a map of values to set if successful.
      * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
      * @throws ExecutionException
      */
 //    @Test
-    public void testPutSwapWithMapWithNullOld() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+    public void testPutSwapWithMapWithNullOld()
+            throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         String key = "foo";
         String oldValue = null;
         String newValue = "bar-er";
-        Map<String,String> otherKvs = new HashMap<>();
+        Map<String, String> otherKvs = new HashMap<>();
 
         otherKvs.put("marco", "pollo");
         otherKvs.put("Tom", "Jerry");
@@ -245,7 +254,7 @@ public class Etcd3DssTest {
         Txn mocktxn = Mockito.mock(Txn.class);
         Txn mockCheck = Mockito.mock(Txn.class);
         Txn mockRequest = Mockito.mock(Txn.class);
-       
+
         when(mockKvCLient.txn()).thenReturn(mocktxn);
 
         CompletableFuture<TxnResponse> mockFuture = CompletableFuture.completedFuture(response);
@@ -266,39 +275,40 @@ public class Etcd3DssTest {
 //    @Test
     public void testGetSimple() throws DynamicStatusStoreException {
         ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
-        
-		GetResponse response = Mockito.mock(GetResponse.class);
-		KeyValue kv = Mockito.mock(KeyValue.class);
 
-		when(kv.getValue()).thenReturn(ByteSequence.from("bar", UTF_8));
-		when(response.getKvs()).thenReturn(asList(kv));
-		
-		CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
+        GetResponse response = Mockito.mock(GetResponse.class);
+        KeyValue kv = Mockito.mock(KeyValue.class);
 
-		when(mockKvCLient.get(bsKey)).thenReturn(futureResponse);
+        when(kv.getValue()).thenReturn(ByteSequence.from("bar", UTF_8));
+        when(response.getKvs()).thenReturn(asList(kv));
 
-		String out = mockDss.get("foo");
-		assertEquals("Unexpected Response" ,"bar", out);
+        CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
+
+        when(mockKvCLient.get(bsKey)).thenReturn(futureResponse);
+
+        String out = mockDss.get("foo");
+        assertEquals("Unexpected Response", "bar", out);
     }
 
     /**
-     * This test does a simple get a new key from etcd (mocked) of a single k-v pair.
+     * This test does a simple get a new key from etcd (mocked) of a single k-v
+     * pair.
      * 
      * @throws DynamicStatusStoreException
      */
 //    @Test
     public void testGetSimpleWithNew() throws DynamicStatusStoreException {
         ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
-        
-		GetResponse response = Mockito.mock(GetResponse.class);
+
+        GetResponse response = Mockito.mock(GetResponse.class);
         when(response.getKvs()).thenReturn(new ArrayList<KeyValue>());
-		
-		CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
 
-		when(mockKvCLient.get(bsKey)).thenReturn(futureResponse);
+        CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
 
-		String out = mockDss.get("foo");
-		assertEquals("Unexpected Response" , null, out);
+        when(mockKvCLient.get(bsKey)).thenReturn(futureResponse);
+
+        String out = mockDss.get("foo");
+        assertEquals("Unexpected Response", null, out);
     }
 
     /**
@@ -309,7 +319,7 @@ public class Etcd3DssTest {
      * @throws ExecutionException
      */
 //    @Test
-    public void testGetprefix() throws DynamicStatusStoreException, InterruptedException, ExecutionException{
+    public void testGetprefix() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         ByteSequence bsPrefix = ByteSequence.from("foo", UTF_8);
         ByteSequence bsValue = ByteSequence.from("bar", UTF_8);
 
@@ -322,10 +332,10 @@ public class Etcd3DssTest {
 
         CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
 
-		when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
-        
+        when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
+
         Map<String, String> map = mockDss.getPrefix("foo");
-        assertEquals("Map was the wrong size",1 , map.size());
+        assertEquals("Map was the wrong size", 1, map.size());
 
         String out = map.get("foo");
 
@@ -333,14 +343,15 @@ public class Etcd3DssTest {
     }
 
     /**
-     * This test method does a get for serveral keys using a prefix, but no eksy exsist.
+     * This test method does a get for serveral keys using a prefix, but no eksy
+     * exsist.
      * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
      * @throws ExecutionException
      */
 //    @Test
-    public void testGetprefixWithoKeys() throws DynamicStatusStoreException, InterruptedException, ExecutionException{
+    public void testGetprefixWithoKeys() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         ByteSequence bsPrefix = ByteSequence.from("foo", UTF_8);
         ByteSequence bsValue = ByteSequence.from("bar", UTF_8);
 
@@ -350,10 +361,10 @@ public class Etcd3DssTest {
 
         CompletableFuture<GetResponse> futureResponse = CompletableFuture.completedFuture(response);
 
-		when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
-        
+        when(mockKvCLient.get(Mockito.eq(bsPrefix), any(GetOption.class))).thenReturn(futureResponse);
+
         Map<String, String> map = mockDss.getPrefix("foo");
-        assertEquals("Map was the wrong size",0 , map.size());
+        assertEquals("Map was the wrong size", 0, map.size());
 
         String out = map.get("foo");
 
@@ -417,12 +428,12 @@ public class Etcd3DssTest {
      */
 //    @Test
     public void testDeletePrefix() throws DynamicStatusStoreException {
-       String keyPrefix = "foo";
-       ByteSequence bsKeyPrefix = ByteSequence.from(keyPrefix, UTF_8);
+        String keyPrefix = "foo";
+        ByteSequence bsKeyPrefix = ByteSequence.from(keyPrefix, UTF_8);
 
-       DeleteResponse response = Mockito.mock(DeleteResponse.class);
+        DeleteResponse response = Mockito.mock(DeleteResponse.class);
 
-       CompletableFuture<DeleteResponse> futureResponse = CompletableFuture.completedFuture(response);
+        CompletableFuture<DeleteResponse> futureResponse = CompletableFuture.completedFuture(response);
 
         when(mockKvCLient.delete(Mockito.eq(bsKeyPrefix), any(DeleteOption.class))).thenReturn(futureResponse);
 
@@ -441,15 +452,15 @@ public class Etcd3DssTest {
     public void testRegistration() throws DynamicStatusStoreException, URISyntaxException {
 
         FrameworkInitialisation fi = Mockito.mock(FrameworkInitialisation.class);
-		Etcd3DynamicStatusStoreRegistration regi = new Etcd3DynamicStatusStoreRegistration();
-		
-		when(fi.getDynamicStatusStoreUri()).thenReturn(new URI("http://thisIsAEtcd3"));
-		regi.initialise(fi);
-		
-		assertTrue("dummy", true);
-	}
+        Etcd3DynamicStatusStoreRegistration regi = new Etcd3DynamicStatusStoreRegistration();
 
-     /**
+        when(fi.getDynamicStatusStoreUri()).thenReturn(new URI("http://thisIsAEtcd3"));
+        regi.initialise(fi);
+
+        assertTrue("dummy", true);
+    }
+
+    /**
      * This method checks the quiet failure of not registring if the URI is a file.
      * 
      * @throws DynamicStatusStoreException
@@ -459,14 +470,15 @@ public class Etcd3DssTest {
     public void testRegistrationwithFile() throws DynamicStatusStoreException, URISyntaxException {
 
         FrameworkInitialisation fi = Mockito.mock(FrameworkInitialisation.class);
-		Etcd3DynamicStatusStoreRegistration regi = new Etcd3DynamicStatusStoreRegistration();
-		
+        Etcd3DynamicStatusStoreRegistration regi = new Etcd3DynamicStatusStoreRegistration();
+
         when(fi.getDynamicStatusStoreUri()).thenReturn(new URI("file:///blah"));
-        
-		regi.initialise(fi);
-		
-		assertTrue("dummy", true);
+
+        regi.initialise(fi);
+
+        assertTrue("dummy", true);
     }
+
     /**
      * Tests the exception is thrown correctly
      * 
@@ -475,14 +487,14 @@ public class Etcd3DssTest {
     public void testPutExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         Boolean caught = false;
         ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
-        ByteSequence bsValue = ByteSequence.from("bar", UTF_8);   
+        ByteSequence bsValue = ByteSequence.from("bar", UTF_8);
 
         CompletableFuture<PutResponse> response = Mockito.mock(CompletableFuture.class);
         when(mockKvCLient.put(bsKey, bsValue)).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
-            mockDss.put("foo","bar");
+            mockDss.put("foo", "bar");
         } catch (DynamicStatusStoreException e) {
             caught = true;
         }
@@ -502,7 +514,7 @@ public class Etcd3DssTest {
         Map<String, String> kvs = new HashMap<>();
 
         kvs.put("foo", "bar");
-        kvs.put("foo-er", "bar-er");   
+        kvs.put("foo-er", "bar-er");
 
         CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
         Txn mocktxn = Mockito.mock(Txn.class);
@@ -510,7 +522,7 @@ public class Etcd3DssTest {
         Txn request = Mockito.mock(Txn.class);
         when(mocktxn.Then(any(Op.class))).thenReturn(request);
         when(request.commit()).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.put(kvs);
@@ -532,7 +544,7 @@ public class Etcd3DssTest {
         Boolean caught = false;
         String key = "foo";
         String oldValue = "notBar";
-        String newValue = "bar";  
+        String newValue = "bar";
 
         CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
         Txn mocktxn = Mockito.mock(Txn.class);
@@ -542,7 +554,7 @@ public class Etcd3DssTest {
         Txn request = Mockito.mock(Txn.class);
         when(check.Then(any(Op.class))).thenReturn(request);
         when(request.commit()).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
             mockDss.putSwap(key, oldValue, newValue);
 
@@ -564,9 +576,9 @@ public class Etcd3DssTest {
         Boolean caught = false;
         String key = "foo";
         String oldValue = "notBar";
-        String newValue = "bar";  
+        String newValue = "bar";
 
-        Map<String,String> otherKvs = new HashMap<>();
+        Map<String, String> otherKvs = new HashMap<>();
 
         otherKvs.put("marco", "pollo");
         otherKvs.put("Tom", "Jerry");
@@ -579,7 +591,7 @@ public class Etcd3DssTest {
         Txn request = Mockito.mock(Txn.class);
         when(check.Then(any(Op.class))).thenReturn(request);
         when(request.commit()).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
             mockDss.putSwap(key, oldValue, newValue, otherKvs);
 
@@ -599,11 +611,11 @@ public class Etcd3DssTest {
 //    @Test
     public void testGetExcpetion() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         Boolean caught = false;
-        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
 
         CompletableFuture<GetResponse> response = Mockito.mock(CompletableFuture.class);
         when(mockKvCLient.get(bsKey)).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.get("foo");
@@ -623,11 +635,11 @@ public class Etcd3DssTest {
 //    @Test
     public void testGetPrefixException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         Boolean caught = false;
-        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
 
         CompletableFuture<GetResponse> response = Mockito.mock(CompletableFuture.class);
         when(mockKvCLient.get(Mockito.eq(bsKey), any(GetOption.class))).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.getPrefix("foo");
@@ -647,11 +659,11 @@ public class Etcd3DssTest {
 //    @Test
     public void testDeleteException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         Boolean caught = false;
-        ByteSequence bsKey = ByteSequence.from("foo", UTF_8); 
+        ByteSequence bsKey = ByteSequence.from("foo", UTF_8);
 
         CompletableFuture<DeleteResponse> response = Mockito.mock(CompletableFuture.class);
         when(mockKvCLient.delete(Mockito.eq(bsKey))).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.delete("foo");
@@ -663,7 +675,7 @@ public class Etcd3DssTest {
 
     /**
      * Tests the exception is thrown correctly
-     *  
+     * 
      * @throws DynamicStatusStoreException
      * @throws InterruptedException
      * @throws ExecutionException
@@ -674,7 +686,7 @@ public class Etcd3DssTest {
         Set<String> keys = new HashSet<>();
         keys.add("foo");
         keys.add("bar");
-    
+
         CompletableFuture<TxnResponse> response = Mockito.mock(CompletableFuture.class);
         Txn mocktxn = Mockito.mock(Txn.class);
         when(mockKvCLient.txn()).thenReturn(mocktxn);
@@ -682,7 +694,7 @@ public class Etcd3DssTest {
         when(mocktxn.Then(any(Op.class))).thenReturn(request);
         when(request.commit()).thenReturn(response);
 
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.delete(keys);
@@ -700,13 +712,14 @@ public class Etcd3DssTest {
      * @throws ExecutionException
      */
 //    @Test
-    public void testDeletePrefixException() throws DynamicStatusStoreException, InterruptedException, ExecutionException {
+    public void testDeletePrefixException()
+            throws DynamicStatusStoreException, InterruptedException, ExecutionException {
         Boolean caught = false;
-        ByteSequence bsPrefixKey = ByteSequence.from("foo", UTF_8); 
+        ByteSequence bsPrefixKey = ByteSequence.from("foo", UTF_8);
 
         CompletableFuture<DeleteResponse> response = Mockito.mock(CompletableFuture.class);
         when(mockKvCLient.delete(Mockito.eq(bsPrefixKey), any(DeleteOption.class))).thenReturn(response);
-        try{ 
+        try {
             when(response.get()).thenThrow(new InterruptedException());
 
             mockDss.deletePrefix("foo");

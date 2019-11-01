@@ -27,118 +27,115 @@ import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IDynamicStatusStoreService;
 import dev.galasa.framework.spi.IFramework;
 
-@Component(immediate=true, 
-service= {DevEnvironment.class},
-scope=ServiceScope.SINGLETON)
+@Component(immediate = true, service = { DevEnvironment.class }, scope = ServiceScope.SINGLETON)
 public class DevEnvironment {
 
-	@Reference(policy=ReferencePolicy.STATIC,
-			policyOption=ReferencePolicyOption.GREEDY)
-	private IFramework framework;
+    @Reference(policy = ReferencePolicy.STATIC, policyOption = ReferencePolicyOption.GREEDY)
+    private IFramework                         framework;
 
-	private String namespace;
-	private String runName;
+    private String                             namespace;
+    private String                             runName;
 
-	private IConfigurationPropertyStoreService cps;
-	private IDynamicStatusStoreService         dss;
+    private IConfigurationPropertyStoreService cps;
+    private IDynamicStatusStoreService         dss;
 
-	public static final DateTimeFormatter DTF = DateTimeFormatter.RFC_1123_DATE_TIME;
+    public static final DateTimeFormatter      DTF = DateTimeFormatter.RFC_1123_DATE_TIME;
 
-	public DevEnvironment() {
-	}
+    public DevEnvironment() {
+    }
 
-	@Activate
-	public void activate() {
-		System.out.println("DevTools Environment service activated");
-		System.out.println("DevTools version  = " + getBundleVersion(getClass()));
-		System.out.println("DevTools build    = " + getBundleBuild(getClass()));
-		System.out.println("Framework version = " + getBundleVersion(IFramework.class));
-		System.out.println("Framework build   = " + getBundleBuild(IFramework.class));
-		if (this.framework.isInitialised()) {
-			System.out.println("Framework is initialised");
-		} else {
-			System.out.println("Framework is not initialised");
-		}
+    @Activate
+    public void activate() {
+        System.out.println("DevTools Environment service activated");
+        System.out.println("DevTools version  = " + getBundleVersion(getClass()));
+        System.out.println("DevTools build    = " + getBundleBuild(getClass()));
+        System.out.println("Framework version = " + getBundleVersion(IFramework.class));
+        System.out.println("Framework build   = " + getBundleBuild(IFramework.class));
+        if (this.framework.isInitialised()) {
+            System.out.println("Framework is initialised");
+        } else {
+            System.out.println("Framework is not initialised");
+        }
 
-	}
+    }
 
-	@Deactivate
-	public void deactivate() {
-		System.out.println("DevTools Environment service deactivated");
-	}
-	
-	public static DevEnvironment getDevEnvironment() {
-		BundleContext context = FrameworkUtil.getBundle(DevEnvironment.class).getBundleContext();
-		ServiceReference<DevEnvironment> sr = context.getServiceReference(DevEnvironment.class);
-		if (sr == null) {
-			return null;
-		}
+    @Deactivate
+    public void deactivate() {
+        System.out.println("DevTools Environment service deactivated");
+    }
 
-		return context.getService(sr);
-	}
+    public static DevEnvironment getDevEnvironment() {
+        BundleContext context = FrameworkUtil.getBundle(DevEnvironment.class).getBundleContext();
+        ServiceReference<DevEnvironment> sr = context.getServiceReference(DevEnvironment.class);
+        if (sr == null) {
+            return null;
+        }
 
-	public boolean isFrameworkInitialised() {
-		return framework.isInitialised();
-	}
+        return context.getService(sr);
+    }
 
-	public IFramework getFramework() {
-		return this.framework;
-	}
+    public boolean isFrameworkInitialised() {
+        return framework.isInitialised();
+    }
 
-	public String getNamespace() {
-		return this.namespace;
-	}
+    public IFramework getFramework() {
+        return this.framework;
+    }
 
-	public void setNamespace(String namespace) throws FrameworkException {
-		this.namespace = namespace;
+    public String getNamespace() {
+        return this.namespace;
+    }
 
-		this.cps = this.framework.getConfigurationPropertyService(this.namespace);
-		this.dss = this.framework.getDynamicStatusStoreService(this.namespace);
-	}
+    public void setNamespace(String namespace) throws FrameworkException {
+        this.namespace = namespace;
 
-	public IDynamicStatusStoreService getDSS() {
-		return this.dss;
-	}
+        this.cps = this.framework.getConfigurationPropertyService(this.namespace);
+        this.dss = this.framework.getDynamicStatusStoreService(this.namespace);
+    }
 
-	public IConfigurationPropertyStoreService getCPS() {
-		return this.cps;
-	}
+    public IDynamicStatusStoreService getDSS() {
+        return this.dss;
+    }
 
-	private String getBundleVersion(Class<?> klass) {
-		String version = "UNKNOWN";
+    public IConfigurationPropertyStoreService getCPS() {
+        return this.cps;
+    }
 
-		Dictionary<String, String> headers = FrameworkUtil.getBundle(klass).getHeaders();
-		if (headers != null) {
-			String bundleVersion = headers.get("Bundle-Version");
-			if (bundleVersion != null) {
-				version = bundleVersion;
-			}
-		}
+    private String getBundleVersion(Class<?> klass) {
+        String version = "UNKNOWN";
 
-		return version;
-	}
+        Dictionary<String, String> headers = FrameworkUtil.getBundle(klass).getHeaders();
+        if (headers != null) {
+            String bundleVersion = headers.get("Bundle-Version");
+            if (bundleVersion != null) {
+                version = bundleVersion;
+            }
+        }
 
-	private String getBundleBuild(Class<?> klass) {
-		String build = "UNKNOWN";
-		Dictionary<String, String> headers = FrameworkUtil.getBundle(klass).getHeaders();
-		if (headers != null) {
-			String bndLastModified = headers.get("Bnd-LastModified");
-			if (bndLastModified != null) {
-				Instant time = Instant.ofEpochMilli(Long.parseLong(bndLastModified));
-				ZonedDateTime zdt = ZonedDateTime.ofInstant(time, ZoneId.systemDefault());
-				build = zdt.format(DTF);
-			}
-		}
+        return version;
+    }
 
-		return build;
-	}
+    private String getBundleBuild(Class<?> klass) {
+        String build = "UNKNOWN";
+        Dictionary<String, String> headers = FrameworkUtil.getBundle(klass).getHeaders();
+        if (headers != null) {
+            String bndLastModified = headers.get("Bnd-LastModified");
+            if (bndLastModified != null) {
+                Instant time = Instant.ofEpochMilli(Long.parseLong(bndLastModified));
+                ZonedDateTime zdt = ZonedDateTime.ofInstant(time, ZoneId.systemDefault());
+                build = zdt.format(DTF);
+            }
+        }
 
-	public void setRunName(String runName) {
-		this.runName = runName;
-	}
+        return build;
+    }
 
-	public String getRunName() {
-		return this.runName;
-	}
+    public void setRunName(String runName) {
+        this.runName = runName;
+    }
+
+    public String getRunName() {
+        return this.runName;
+    }
 
 }

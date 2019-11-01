@@ -10,35 +10,35 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import dev.galasa.eclipse.ui.IUIParent;
 
-public class RunsContentProvider implements IStructuredContentProvider,ITreeContentProvider {
+public class RunsContentProvider implements IStructuredContentProvider, ITreeContentProvider {
 
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		
-		if (parentElement instanceof IUIParent) {
-			return ((IUIParent)parentElement).getChildren();
-		}
-		
-		return new Object[0];
-	}
+    @Override
+    public Object[] getChildren(Object parentElement) {
 
-	@Override
-	public boolean hasChildren(Object parentElement) {
-		if (parentElement instanceof IUIParent) {
-			return ((IUIParent)parentElement).hasChildren();
-		}
-		
-		return false;
-	}
+        if (parentElement instanceof IUIParent) {
+            return ((IUIParent) parentElement).getChildren();
+        }
 
-	@Override
-	public Object getParent(Object element) {
-		return null;
-	}
+        return new Object[0];
+    }
 
-	@Override
-	public Object[] getElements(Object inputElement) {
-		return getChildren(inputElement);
-	}
+    @Override
+    public boolean hasChildren(Object parentElement) {
+        if (parentElement instanceof IUIParent) {
+            return ((IUIParent) parentElement).hasChildren();
+        }
+
+        return false;
+    }
+
+    @Override
+    public Object getParent(Object element) {
+        return null;
+    }
+
+    @Override
+    public Object[] getElements(Object inputElement) {
+        return getChildren(inputElement);
+    }
 
 }

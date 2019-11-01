@@ -17,26 +17,26 @@ import dev.galasa.framework.spi.IFrameworkRuns;
 @Service
 public class RunDelete implements Action {
 
-	@Argument(index = 0, name = "runname", description = "The run to delete", required = true)
-	private String    runname;
+    @Argument(index = 0, name = "runname", description = "The run to delete", required = true)
+    private String runname;
 
-	@Override
-	public Object execute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
 
-		final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
 
-		if (!devEnv.isFrameworkInitialised()) {
-			System.err.println("The Framework has not been initialised, use cirillo:init");
-			return null;
-		}
+        if (!devEnv.isFrameworkInitialised()) {
+            System.err.println("The Framework has not been initialised, use cirillo:init");
+            return null;
+        }
 
-		IFrameworkRuns runs = devEnv.getFramework().getFrameworkRuns();
-		if (runs.delete(runname.toUpperCase())) {
-			System.out.println("Run " + runname + " deleted");
-		} else {
-			System.out.println("Run " + runname + " not found");
-		}
+        IFrameworkRuns runs = devEnv.getFramework().getFrameworkRuns();
+        if (runs.delete(runname.toUpperCase())) {
+            System.out.println("Run " + runname + " deleted");
+        } else {
+            System.out.println("Run " + runname + " not found");
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

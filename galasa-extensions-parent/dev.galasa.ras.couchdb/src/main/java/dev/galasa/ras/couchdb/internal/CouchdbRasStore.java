@@ -59,37 +59,37 @@ import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
 
-    private final Log        logger = LogFactory.getLog(getClass());
+    private final Log                          logger             = LogFactory.getLog(getClass());
 
-    private final IFramework                     framework;                      // NOSONAR
-    private final URI                            rasUri;
+    private final IFramework                   framework;                                         // NOSONAR
+    private final URI                          rasUri;
 
-    private final CloseableHttpClient            httpClient;
-    private boolean                              shutdown = false;
+    private final CloseableHttpClient          httpClient;
+    private boolean                            shutdown           = false;
 
-    private final Gson                           gson = GalasaGsonBuilder.build();
+    private final Gson                         gson               = GalasaGsonBuilder.build();
 
-    private final CouchdbRasFileSystemProvider   provider;
+    private final CouchdbRasFileSystemProvider provider;
 
-    private final IRun                           run;
-    private String                               runDocumentId;
-    private String                               runDocumentRevision;
+    private final IRun                         run;
+    private String                             runDocumentId;
+    private String                             runDocumentRevision;
 
-    private long                                 logOrder = 0;
+    private long                               logOrder           = 0;
 
-    private final ArrayList<String>              logCache = new ArrayList<>(100);
+    private final ArrayList<String>            logCache           = new ArrayList<>(100);
 
-    private ArrayList<String>                    logIds = new ArrayList<>();
-    private ArrayList<String>                    artifactDocumentId = new ArrayList<>();;
-    private String                               artifactDocumentRev;
+    private ArrayList<String>                  logIds             = new ArrayList<>();
+    private ArrayList<String>                  artifactDocumentId = new ArrayList<>();;
+    private String                             artifactDocumentRev;
 
-    private TestStructure                        lastTestStructure;
+    private TestStructure                      lastTestStructure;
 
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
         this.framework = framework;
-        this.rasUri    = rasUri;
+        this.rasUri = rasUri;
 
-        //*** Validate the connection to the server and it's version
+        // *** Validate the connection to the server and it's version
         this.httpClient = HttpClients.createDefault();
 
         HttpGet httpGet = new HttpGet(rasUri);
@@ -106,27 +106,27 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.getVersion(), 2,3,1);
+            checkVersion(welcome.getVersion(), 2, 3, 1);
             checkDatabasePresent("galasa_run");
             checkDatabasePresent("galasa_log");
             checkDatabasePresent("galasa_artifacts");
 
             checkRunDesignDocument();
-            
-            checkIndex("galasa_run","runName");
-            checkIndex("galasa_run","requestor");
-            checkIndex("galasa_run","queued");
+
+            checkIndex("galasa_run", "runName");
+            checkIndex("galasa_run", "requestor");
+            checkIndex("galasa_run", "queued");
 
             logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Validation failed", e);
         }
 
         this.run = this.framework.getTestRun();
 
-        //*** If this is a run, ensure we can create the run document
+        // *** If this is a run, ensure we can create the run document
         if (this.run != null) {
             lastTestStructure = new TestStructure();
             lastTestStructure.setRunName(this.run.getName());
@@ -150,33 +150,34 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
             idxJson = EntityUtils.toString(response.getEntity());
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK
+                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
                 throw new CouchdbRasException("Validation failed of database indexes - " + statusLine.toString());
             }
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 idxJson = "{}";
             }
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Validation failed", e);
         }
-        
+
         JsonObject idx = gson.fromJson(idxJson, JsonObject.class);
         boolean create = true;
-        
+
         String idxName = field + "-index";
-        
+
         JsonArray idxs = idx.getAsJsonArray("indexes");
         if (idxs != null) {
-            for(int i = 0; i < idxs.size(); i++) {
+            for (int i = 0; i < idxs.size(); i++) {
                 JsonElement elem = idxs.get(i);
                 if (elem.isJsonObject()) {
                     JsonObject o = (JsonObject) elem;
-                    
+
                     JsonElement name = o.get("name");
                     if (name != null) {
-                        if (name.isJsonPrimitive() && ((JsonPrimitive)name).isString()) {
+                        if (name.isJsonPrimitive() && ((JsonPrimitive) name).isString()) {
                             if (idxName.equals(name.getAsString())) {
                                 create = false;
                                 break;
@@ -186,27 +187,25 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 }
             }
         }
-        
+
         if (create) {
             logger.info("Updating the galasa_run index " + idxName);
-            
+
             JsonObject doc = new JsonObject();
             doc.addProperty("name", idxName);
             doc.addProperty("type", "json");
-            
+
             JsonObject index = new JsonObject();
             doc.add("index", index);
             JsonArray fields = new JsonArray();
-            index.add("fields",fields);
-            
+            index.add("fields", fields);
+
             JsonObject field1 = new JsonObject();
             fields.add(field1);
             field1.addProperty(field, "asc");
-            
-            
-            
-            HttpEntity entity = new StringEntity(gson.toJson(doc),ContentType.APPLICATION_JSON);
-            
+
+            HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
+
             HttpPost httpPost = new HttpPost(rasUri + "/galasa_run/_index");
             httpPost.setEntity(entity);
 
@@ -214,17 +213,17 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 StatusLine statusLine = response.getStatusLine();
                 EntityUtils.consumeQuietly(response.getEntity());
                 if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                    throw new CouchdbRasException("Update of galasa_run index failed on CouchDB server - " + statusLine.toString());
+                    throw new CouchdbRasException(
+                            "Update of galasa_run index failed on CouchDB server - " + statusLine.toString());
                 }
 
-            } catch(CouchdbRasException e) {
+            } catch (CouchdbRasException e) {
                 throw e;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new CouchdbRasException("Update of galasa_run index faile", e);
             }
         }
-        
-        
+
     }
 
     private void checkDatabasePresent(String dbName) throws CouchdbRasException {
@@ -237,11 +236,12 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 return;
             }
             if (statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException("Validation failed of database " + dbName + " - " + statusLine.toString());
+                throw new CouchdbRasException(
+                        "Validation failed of database " + dbName + " - " + statusLine.toString());
             }
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Validation failed", e);
         }
 
@@ -253,13 +253,14 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
-                throw new CouchdbRasException("Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
+                throw new CouchdbRasException(
+                        "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Create database " + dbName + " failed", e);
         }
     }
@@ -271,41 +272,43 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
             docJson = EntityUtils.toString(response.getEntity());
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException("Validation failed of database galasa_run designdocument - " + statusLine.toString());
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK
+                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+                throw new CouchdbRasException(
+                        "Validation failed of database galasa_run designdocument - " + statusLine.toString());
             }
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 docJson = "{}";
             }
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Validation failed", e);
         }
-        
+
         boolean updated = false;
-        
+
         JsonObject doc = gson.fromJson(docJson, JsonObject.class);
-        doc.remove("_id");  
+        doc.remove("_id");
         String rev = null;
         if (doc.has("_rev")) {
             rev = doc.get("_rev").getAsString();
         }
-        
-        JsonObject views      = doc.getAsJsonObject("views");
+
+        JsonObject views = doc.getAsJsonObject("views");
         if (views == null) {
             updated = true;
             views = new JsonObject();
             doc.add("views", views);
         }
-        
+
         JsonObject requestors = views.getAsJsonObject("requestors-view");
         if (requestors == null) {
             updated = true;
             requestors = new JsonObject();
             views.add("requestors-view", requestors);
         }
-        
+
         if (checkView(requestors, "function (doc) { emit(doc.requestor, 1); }", "_count")) {
             updated = true;
         }
@@ -316,45 +319,44 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             testnames = new JsonObject();
             views.add("testnames-view", testnames);
         }
-        
+
         if (checkView(testnames, "function (doc) { emit(doc.testName, 1); }", "_count")) {
             updated = true;
         }
-        
+
         if (updated) {
             logger.info("Updating the galasa_run design document");
-            
-            HttpEntity entity = new StringEntity(gson.toJson(doc),ContentType.APPLICATION_JSON);
-            
+
+            HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
+
             HttpPut httpPut = new HttpPut(rasUri + "/galasa_run/_design/docs");
             httpPut.setEntity(entity);
-            
+
             if (rev != null) {
-                httpPut.addHeader("ETaq", "\"" + rev +"\"");
+                httpPut.addHeader("ETaq", "\"" + rev + "\"");
             }
 
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                 StatusLine statusLine = response.getStatusLine();
                 if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                     EntityUtils.consumeQuietly(response.getEntity());
-                    throw new CouchdbRasException("Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
+                    throw new CouchdbRasException(
+                            "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
                 }
 
                 EntityUtils.consumeQuietly(response.getEntity());
-            } catch(CouchdbRasException e) {
+            } catch (CouchdbRasException e) {
                 throw e;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new CouchdbRasException("Update of galasa_run design document faile", e);
             }
         }
     }
 
-
-
     private boolean checkView(JsonObject view, String targetMap, String targetReduce) {
-        
+
         boolean updated = false;
-        
+
         if (checkViewString(view, "map", targetMap)) {
             updated = true;
         }
@@ -364,23 +366,23 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         if (checkViewString(view, "language", "javascript")) {
             updated = true;
         }
-        
+
         return updated;
     }
 
     private boolean checkViewString(JsonObject view, String field, String value) {
-        
+
         JsonElement element = view.get(field);
         if (element == null) {
             view.addProperty(field, value);
             return true;
         }
-        
-        if (!element.isJsonPrimitive() || !((JsonPrimitive)element).isString()) {
+
+        if (!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
             view.addProperty(field, value);
             return true;
         }
-        
+
         String actualValue = element.getAsString();
         if (!value.equals(actualValue)) {
             view.addProperty(field, value);
@@ -389,7 +391,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return false;
     }
 
-    private void checkVersion(String version, int minVersion, int minRelease, int minModification) throws CouchdbRasException {
+    private void checkVersion(String version, int minVersion, int minRelease, int minModification)
+            throws CouchdbRasException {
         String minVRM = minVersion + "." + minRelease + "." + minModification;
 
         Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
@@ -407,8 +410,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             actualVersion = Integer.parseInt(m.group(1));
             actualRelease = Integer.parseInt(m.group(2));
             actualModification = Integer.parseInt(m.group(3));
-        } catch(NumberFormatException e) {
-            throw new CouchdbRasException("Unable to determine CouchDB version " + version,e);
+        } catch (NumberFormatException e) {
+            throw new CouchdbRasException("Unable to determine CouchDB version " + version, e);
         }
 
         if (actualVersion > minVersion) {
@@ -419,7 +422,6 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
-
         if (actualRelease > minRelease) {
             return;
         }
@@ -427,7 +429,6 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         if (actualRelease < minRelease) {
             throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
         }
-
 
         if (actualModification > minModification) {
             return;
@@ -467,9 +468,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
             this.artifactDocumentId.add(putPostResponse.id);
             this.artifactDocumentRev = putPostResponse.rev;
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Unable to store the artifacts document", e);
         }
     }
@@ -503,7 +504,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             logCache.clear();
         }
         logLines.runName = this.run.getName();
-        logLines.runId   = this.runDocumentId;
+        logLines.runId = this.runDocumentId;
 
         String jsonStructure = gson.toJson(logLines);
 
@@ -527,9 +528,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             this.logIds.add(putPostResponse.id);
 
             this.updateTestStructure(lastTestStructure);
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new ResultArchiveStoreException("Unable to store the test log", e);
         }
     }
@@ -540,20 +541,21 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             throw new ResultArchiveStoreException("Not a run");
         }
 
-        for(String message : messages) {
+        for (String message : messages) {
             writeLog(message);
         }
     }
 
     @Override
-    public synchronized void updateTestStructure(@NotNull TestStructure testStructure) throws ResultArchiveStoreException {
+    public synchronized void updateTestStructure(@NotNull TestStructure testStructure)
+            throws ResultArchiveStoreException {
         if (this.run == null) {
             throw new ResultArchiveStoreException("Not a run");
         }
 
         this.lastTestStructure = testStructure;
-        this.lastTestStructure.setLogRecordIds(this.logIds);		
-        this.lastTestStructure.setArtifactRecordIds(this.artifactDocumentId);		
+        this.lastTestStructure.setLogRecordIds(this.logIds);
+        this.lastTestStructure.setArtifactRecordIds(this.artifactDocumentId);
         this.lastTestStructure.normalise();
 
         String jsonStructure = gson.toJson(testStructure);
@@ -573,7 +575,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
-                    logger.error("The run document has been updated by another engine, terminating now to avoid corruption");
+                    logger.error(
+                            "The run document has been updated by another engine, terminating now to avoid corruption");
                     System.exit(0);
                 }
 
@@ -585,12 +588,12 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             if (putPostResponse.id == null || putPostResponse.rev == null) {
                 throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
             }
-            this.runDocumentId       = putPostResponse.id;
+            this.runDocumentId = putPostResponse.id;
             this.runDocumentRevision = putPostResponse.rev;
 
-        } catch(CouchdbRasException e) {
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new ResultArchiveStoreException("Unable to store the test structure", e);
         }
     }
@@ -608,7 +611,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) { 
+            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 throw new CouchdbRasException("Not found - " + path.toString());
             }
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
@@ -616,10 +619,10 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             }
 
             HttpEntity entity = response.getEntity();
-            Files.copy(entity.getContent(), cachePath, StandardCopyOption.REPLACE_EXISTING);			
-        } catch(CouchdbRasException e) {
+            Files.copy(entity.getContent(), cachePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (CouchdbRasException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CouchdbRasException("Unable to find runs", e);
         }
     }
@@ -627,7 +630,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     public String getLog(TestStructure ts) throws CouchdbRasException {
         StringBuilder sb = new StringBuilder();
 
-        for(String logRecordId : ts.getLogRecordIds()) {
+        for (String logRecordId : ts.getLogRecordIds()) {
             HttpGet httpGet = new HttpGet(this.rasUri + "/galasa_log/" + logRecordId);
             httpGet.addHeader("Accept", "application/json");
 
@@ -644,24 +647,21 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 String responseEntity = EntityUtils.toString(entity);
                 LogLines logLines = gson.fromJson(responseEntity, LogLines.class);
                 if (logLines.lines != null) {
-                    for(String line : logLines.lines) {
+                    for (String line : logLines.lines) {
                         if (sb.length() > 0) {
                             sb.append("\n");
                         }
                         sb.append(line);
                     }
                 }
-            } catch(CouchdbRasException e) {
+            } catch (CouchdbRasException e) {
                 throw e;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 throw new CouchdbRasException("Unable to find runs", e);
             }
         }
         return sb.toString();
     }
-
-
-
 
     @Override
     public Path getStoredArtifactsRoot() {
@@ -676,7 +676,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         try {
             flushLogCache();
         } catch (ResultArchiveStoreException e) {
-            logger.error("Error with heartbeat flush",e);
+            logger.error("Error with heartbeat flush", e);
         }
     }
 
@@ -686,7 +686,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         try {
             flushLogCache();
         } catch (ResultArchiveStoreException e) {
-            logger.error("Error with shutdown flush",e);
+            logger.error("Error with shutdown flush", e);
         }
 
         try {
