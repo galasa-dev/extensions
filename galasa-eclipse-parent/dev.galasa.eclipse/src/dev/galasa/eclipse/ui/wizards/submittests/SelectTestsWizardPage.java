@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.wizards.submittests;
 
 import java.util.ArrayList;
@@ -36,91 +41,89 @@ import dev.galasa.eclipse.ui.wizards.submittests.model.TestPackage;
 import dev.galasa.eclipse.ui.wizards.submittests.model.TestStream;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 
-public class SelectTestsWizardPage extends WizardPage implements SelectionListener, ModifyListener, ISelectionChangedListener {
+public class SelectTestsWizardPage extends WizardPage
+        implements SelectionListener, ModifyListener, ISelectionChangedListener {
 
-	private TreeViewer treeViewer;
+    private TreeViewer                               treeViewer;
 
-	private Combo      comboStream;
-	private Button     saveButton;
-	private Button     loadButton;
-	private Text searchText;
+    private Combo                                    comboStream;
+    private Button                                   saveButton;
+    private Button                                   loadButton;
+    private Text                                     searchText;
 
-	private Composite testClassFrame;
-	private FormToolkit toolkit;
-	private ScrolledForm       scrolledForm;
-	
-	private final IConfigurationPropertyStoreService cps;
-	
-	private boolean disposed = false;
+    private Composite                                testClassFrame;
+    private FormToolkit                              toolkit;
+    private ScrolledForm                             scrolledForm;
 
-	private List<TestStream> testStreams;
-	
-	private TestStream selectedTestStream = null;
-	
-	
-	public SelectTestsWizardPage(String pageName, IConfigurationPropertyStoreService cps) {
-		super(pageName);
-		
-		this.cps = cps;
+    private final IConfigurationPropertyStoreService cps;
 
-		setTitle("Select tests");
-		setDescription("Select tests to submit to the automation system.");
-	}
+    private boolean                                  disposed           = false;
 
-	@Override
-	public void createControl(Composite parent) {
-		Composite master = new Composite(parent, SWT.NONE);
-		master.setLayout(new GridLayout(2, false));
-		master.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    private List<TestStream>                         testStreams;
 
-		Composite composite = new Composite(master, SWT.NONE);
-		composite.setLayout(new GridLayout(2, false));
-		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+    private TestStream                               selectedTestStream = null;
 
+    public SelectTestsWizardPage(String pageName, IConfigurationPropertyStoreService cps) {
+        super(pageName);
 
-		Label label = new Label(composite, SWT.NONE);
-		label.setText("Test Bundle Stream");
+        this.cps = cps;
 
-		comboStream = new Combo(composite, SWT.READ_ONLY | SWT.DROP_DOWN);
-		GridData gridData = new GridData();
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.horizontalAlignment = GridData.FILL;
-		comboStream.setLayoutData(gridData); // combo is drop down, fills the gridData
-		comboStream.add("Loading......");
-		comboStream.select(0);
-		comboStream.setEnabled(false);
-		
-		Label label2 = new Label(composite, SWT.NONE);
-		label2.setText("Search for Test Class (RegEx):");
-		
-		searchText = new Text(composite, SWT.SEARCH);
-		searchText.setLayoutData(gridData);
-		searchText.addModifyListener(this);
-		searchText.setEnabled(false);
+        setTitle("Select tests");
+        setDescription("Select tests to submit to the automation system.");
+    }
 
-		gridData = new GridData(); // container for treeViewer
-		gridData.horizontalSpan = 2;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.widthHint = 610;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = SWT.FILL;
-		gridData.verticalAlignment = SWT.FILL;
+    @Override
+    public void createControl(Composite parent) {
+        Composite master = new Composite(parent, SWT.NONE);
+        master.setLayout(new GridLayout(2, false));
+        master.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		treeViewer = new TreeViewer(composite);
-		treeViewer.getControl().setLayoutData(gridData);
+        Composite composite = new Composite(master, SWT.NONE);
+        composite.setLayout(new GridLayout(2, false));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		setControl(master);
+        Label label = new Label(composite, SWT.NONE);
+        label.setText("Test Bundle Stream");
 
-		treeViewer.setContentProvider(new TestTreeContentProvider());
-		treeViewer.setLabelProvider(new TestTreeLabelProvider());
+        comboStream = new Combo(composite, SWT.READ_ONLY | SWT.DROP_DOWN);
+        GridData gridData = new GridData();
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.horizontalAlignment = GridData.FILL;
+        comboStream.setLayoutData(gridData); // combo is drop down, fills the gridData
+        comboStream.add("Loading......");
+        comboStream.select(0);
+        comboStream.setEnabled(false);
+
+        Label label2 = new Label(composite, SWT.NONE);
+        label2.setText("Search for Test Class (RegEx):");
+
+        searchText = new Text(composite, SWT.SEARCH);
+        searchText.setLayoutData(gridData);
+        searchText.addModifyListener(this);
+        searchText.setEnabled(false);
+
+        gridData = new GridData(); // container for treeViewer
+        gridData.horizontalSpan = 2;
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.widthHint = 610;
+        gridData.grabExcessVerticalSpace = true;
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.verticalAlignment = SWT.FILL;
+
+        treeViewer = new TreeViewer(composite);
+        treeViewer.getControl().setLayoutData(gridData);
+
+        setControl(master);
+
+        treeViewer.setContentProvider(new TestTreeContentProvider());
+        treeViewer.setLabelProvider(new TestTreeLabelProvider());
 //		treeViewer.setSorter(new ViewerSorter());
 
-		ArrayList<String> loading = new ArrayList<String>(1);
-		loading.add("Select test stream....");
-		treeViewer.setInput(loading);
-		treeViewer.addSelectionChangedListener(this);
-		treeViewer.getControl().setEnabled(false);
-
+        ArrayList<String> loading = new ArrayList<String>(1);
+        loading.add("Select test stream....");
+        treeViewer.setInput(loading);
+        treeViewer.addSelectionChangedListener(this);
+        treeViewer.getControl().setEnabled(false);
 
 //		saveButton = new Button(composite, SWT.NONE);
 //		saveButton.setText("Save Test Selection...");
@@ -131,184 +134,183 @@ public class SelectTestsWizardPage extends WizardPage implements SelectionListen
 //		loadButton.addSelectionListener(this);
 //		
 //		
-		
 
-		toolkit = new FormToolkit(parent.getDisplay());
-		testClassFrame = new Composite(master, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.marginWidth = 0;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
-		gl.marginHeight = 0;
-		testClassFrame.setLayout(gl);
-		GridData temp = new GridData();
-		temp.widthHint = 400;
-		temp.grabExcessVerticalSpace = true; 
-		temp.grabExcessHorizontalSpace = true;
-		temp.horizontalAlignment = SWT.FILL;
-		temp.verticalAlignment = SWT.FILL;
-		testClassFrame.setLayoutData(temp);
-		
-		new FetchTestStreamsJob(this).schedule();
-		
-		validatePage();
-	}
-	
-	@Override
-	public void dispose() {
-		this.disposed = true;
-		super.dispose();
-	}
+        toolkit = new FormToolkit(parent.getDisplay());
+        testClassFrame = new Composite(master, SWT.NONE);
+        GridLayout gl = new GridLayout();
+        gl.marginWidth = 0;
+        gl.marginHeight = 0;
+        testClassFrame.setLayout(gl);
+        GridData temp = new GridData();
+        temp.widthHint = 400;
+        temp.grabExcessVerticalSpace = true;
+        temp.grabExcessHorizontalSpace = true;
+        temp.horizontalAlignment = SWT.FILL;
+        temp.verticalAlignment = SWT.FILL;
+        testClassFrame.setLayoutData(temp);
 
-	private void validatePage() {
-		setPageComplete(isPageValid());
-		
-		return;
-	}
+        new FetchTestStreamsJob(this).schedule();
 
-	@Override
-	public void selectionChanged(SelectionChangedEvent event) {
-		displayTestClass((ITreeSelection) event.getSelection());
+        validatePage();
+    }
 
-		validatePage();
-	}
+    @Override
+    public void dispose() {
+        this.disposed = true;
+        super.dispose();
+    }
 
-	@Override
-	public void modifyText(ModifyEvent event) {
-		System.out.println("modifyText=" + event);
-	}
+    private void validatePage() {
+        setPageComplete(isPageValid());
 
-	@Override
-	public void widgetDefaultSelected(SelectionEvent event) {
-	}
+        return;
+    }
 
-	@Override
-	public void widgetSelected(SelectionEvent event) {
-		if (event.getSource() == comboStream) {
-			selectTestStream(this.testStreams.get(comboStream.getSelectionIndex()));
-		}
-	}
+    @Override
+    public void selectionChanged(SelectionChangedEvent event) {
+        displayTestClass((ITreeSelection) event.getSelection());
 
-	public IConfigurationPropertyStoreService getCPS() {
-		return this.cps;
-	}
+        validatePage();
+    }
 
-	public void setTestStreams(List<TestStream> testStreams) {
-		if (disposed) {
-			return;
-		}
-		
-		//*** This method has to run on the UI thread, so switch if required
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					setTestStreams(testStreams);
-				}
-			});
-			return;
-		}
-		
-		this.testStreams = testStreams;
-		
-		comboStream.removeAll();
-		
-		for(TestStream testStream : this.testStreams) {
-			comboStream.add(testStream.getDescription());
-		}
-		
-		comboStream.setEnabled(true);
-		comboStream.addSelectionListener(this);
-		
-		comboStream.select(0);  // TODO select previous used stream
-		
-		selectTestStream(testStreams.get(0));
-		
-		validatePage();
-	}
+    @Override
+    public void modifyText(ModifyEvent event) {
+        System.out.println("modifyText=" + event);
+    }
 
-	private void selectTestStream(TestStream testStream) {
-		ArrayList<String> loading = new ArrayList<String>(1);
-		loading.add( "Retrieving tests, please wait.....");
-		treeViewer.setInput(loading);
-		treeViewer.getControl().setEnabled(false);
-		
-		selectedTestStream = testStream;
-		new FetchTestCatalogJob(this, testStream).schedule();
-	}
+    @Override
+    public void widgetDefaultSelected(SelectionEvent event) {
+    }
 
-	public void setTestCatalog(TestStream testStream, TestCatalog testCatalog) {
-		if (disposed) {
-			return;
-		}
-		
-		//*** This method has to run on the UI thread, so switch if required
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					setTestCatalog(testStream, testCatalog);
-				}
-			});
-			return;
-		}
-		
-		if (selectedTestStream != testStream) {
-			return;
-		}
-		
-		treeViewer.setInput(testCatalog);
-		treeViewer.getControl().setEnabled(true);
+    @Override
+    public void widgetSelected(SelectionEvent event) {
+        if (event.getSource() == comboStream) {
+            selectTestStream(this.testStreams.get(comboStream.getSelectionIndex()));
+        }
+    }
 
-		validatePage();
+    public IConfigurationPropertyStoreService getCPS() {
+        return this.cps;
+    }
 
-		return;
-	}
-	
-	private void displayTestClass(ITreeSelection selection) {
-		if (scrolledForm != null) {
-			scrolledForm.dispose();
-			scrolledForm = null;
-		}
+    public void setTestStreams(List<TestStream> testStreams) {
+        if (disposed) {
+            return;
+        }
 
-		if (selection == null) {
-			return;
-		}
+        // *** This method has to run on the UI thread, so switch if required
+        if (Display.getCurrent() == null) {
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                    setTestStreams(testStreams);
+                }
+            });
+            return;
+        }
 
-		Object[] selected = selection.toArray();
-		if (selected.length != 1) {
-			return;
-		}
+        this.testStreams = testStreams;
 
-		if (!(selected[0] instanceof TestClass)) {
-			return;
-		}
+        comboStream.removeAll();
 
-		TestClass tc = (TestClass) selected[0];
+        for (TestStream testStream : this.testStreams) {
+            comboStream.add(testStream.getDescription());
+        }
 
-		scrolledForm = toolkit.createScrolledForm(testClassFrame);
-		scrolledForm.setText(tc.getShortName());
-		GridLayout gl = new GridLayout();
-		scrolledForm.setLayout(gl);
-		scrolledForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		scrolledForm.getBody().setLayout(gl);
-		scrolledForm.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        comboStream.setEnabled(true);
+        comboStream.addSelectionListener(this);
 
-		Section overviewSection = toolkit.createSection(scrolledForm.getBody(), 
-				Section.DESCRIPTION|Section.TITLE_BAR|Section.EXPANDED);
-		overviewSection.setText("Overview");
-		if (tc.getSummary() == null) {
-			overviewSection.setDescription("No summary text provided");
-		} else {
-			overviewSection.setDescription(tc.getSummary());
-		}
-		overviewSection.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+        comboStream.select(0); // TODO select previous used stream
 
-		Composite overviewComp = toolkit.createComposite(overviewSection);
-		overviewComp.setLayout(new GridLayout(2, false));
-		overviewComp.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+        selectTestStream(testStreams.get(0));
 
-		toolkit.createLabel(overviewComp, "Bundle:");
-		toolkit.createLabel(overviewComp, tc.getBundle());
-		toolkit.createLabel(overviewComp, "Package:");
-		toolkit.createLabel(overviewComp, tc.getPackageName());
-		overviewSection.setClient(overviewComp);
+        validatePage();
+    }
+
+    private void selectTestStream(TestStream testStream) {
+        ArrayList<String> loading = new ArrayList<String>(1);
+        loading.add("Retrieving tests, please wait.....");
+        treeViewer.setInput(loading);
+        treeViewer.getControl().setEnabled(false);
+
+        selectedTestStream = testStream;
+        new FetchTestCatalogJob(this, testStream).schedule();
+    }
+
+    public void setTestCatalog(TestStream testStream, TestCatalog testCatalog) {
+        if (disposed) {
+            return;
+        }
+
+        // *** This method has to run on the UI thread, so switch if required
+        if (Display.getCurrent() == null) {
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                    setTestCatalog(testStream, testCatalog);
+                }
+            });
+            return;
+        }
+
+        if (selectedTestStream != testStream) {
+            return;
+        }
+
+        treeViewer.setInput(testCatalog);
+        treeViewer.getControl().setEnabled(true);
+
+        validatePage();
+
+        return;
+    }
+
+    private void displayTestClass(ITreeSelection selection) {
+        if (scrolledForm != null) {
+            scrolledForm.dispose();
+            scrolledForm = null;
+        }
+
+        if (selection == null) {
+            return;
+        }
+
+        Object[] selected = selection.toArray();
+        if (selected.length != 1) {
+            return;
+        }
+
+        if (!(selected[0] instanceof TestClass)) {
+            return;
+        }
+
+        TestClass tc = (TestClass) selected[0];
+
+        scrolledForm = toolkit.createScrolledForm(testClassFrame);
+        scrolledForm.setText(tc.getShortName());
+        GridLayout gl = new GridLayout();
+        scrolledForm.setLayout(gl);
+        scrolledForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        scrolledForm.getBody().setLayout(gl);
+        scrolledForm.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+        Section overviewSection = toolkit.createSection(scrolledForm.getBody(),
+                Section.DESCRIPTION | Section.TITLE_BAR | Section.EXPANDED);
+        overviewSection.setText("Overview");
+        if (tc.getSummary() == null) {
+            overviewSection.setDescription("No summary text provided");
+        } else {
+            overviewSection.setDescription(tc.getSummary());
+        }
+        overviewSection.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+        Composite overviewComp = toolkit.createComposite(overviewSection);
+        overviewComp.setLayout(new GridLayout(2, false));
+        overviewComp.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+
+        toolkit.createLabel(overviewComp, "Bundle:");
+        toolkit.createLabel(overviewComp, tc.getBundle());
+        toolkit.createLabel(overviewComp, "Package:");
+        toolkit.createLabel(overviewComp, tc.getPackageName());
+        overviewSection.setClient(overviewComp);
 
 //		if (tc.javadoc != null && !tc.javadoc.isEmpty()) {
 //			Section javadocSection = toolkit.createSection(scrolledForm.getBody(), 
@@ -325,67 +327,64 @@ public class SelectTestsWizardPage extends WizardPage implements SelectionListen
 //			javadocSection.setClient(javadocComp);
 //		}
 
-		testClassFrame.layout();
+        testClassFrame.layout();
 
-		return;
-	}
+        return;
+    }
 
-	private boolean isPageValid() {
-		setErrorMessage(null);
+    private boolean isPageValid() {
+        setErrorMessage(null);
 
-		if (testStreams == null || testStreams.isEmpty()) {
-			setErrorMessage("Test Streams are unavailable, no framework.test.streams property");
-			return false;
-		}
+        if (testStreams == null || testStreams.isEmpty()) {
+            setErrorMessage("Test Streams are unavailable, no framework.test.streams property");
+            return false;
+        }
 
+        ISelection selected = treeViewer.getSelection();
+        if (!(selected instanceof ITreeSelection)) {
+            setErrorMessage("Internal selection is not a ITreeSelection");
+            return false;
+        }
 
+        boolean found = false;
+        for (Object selectedObject : ((ITreeSelection) selected).toArray()) {
+            if (selectedObject instanceof TestClass) {
+                found = true;
+                break;
+            }
+            if (selectedObject instanceof TestBundle || selectedObject instanceof TestPackage) {
+                found = true;
+                break;
+            }
+        }
 
-		ISelection selected = treeViewer.getSelection();
-		if (!(selected instanceof ITreeSelection)) {
-			setErrorMessage("Internal selection is not a ITreeSelection");
-			return false;
-		}
+        if (!found) {
+            setErrorMessage("Select 1 or more test classes to run");
+            return false;
+        }
 
-		boolean found = false;
-		for(Object selectedObject : ((ITreeSelection)selected).toArray()) {
-			if (selectedObject instanceof TestClass) {
-				found = true;
-				break;
-			}
-			if (selectedObject instanceof TestBundle 
-					|| selectedObject instanceof TestPackage) {
-					found = true;
-				break;
-			}
-		}
+        return true;
+    }
 
-		if (!found) {
-			setErrorMessage("Select 1 or more test classes to run");
-			return false;
-		}
+    public List<TestClass> getSelectedClasses() {
 
-		return true;
-	}
+        HashMap<String, TestClass> selectedClasses = new HashMap<>();
 
-	public List<TestClass> getSelectedClasses() {
-		
-		HashMap<String, TestClass> selectedClasses = new HashMap<>();
-		
-		ISelection selected = treeViewer.getSelection();
-		for(Object selectedObject : ((ITreeSelection)selected).toArray()) {
-			if (selectedObject instanceof TestBranch) {
-				((TestBranch)selectedObject).addTests(selectedClasses);
-			}
-		}
-		
-		ArrayList<TestClass> testClasses = new ArrayList<>(selectedClasses.values());
-		Collections.sort(testClasses);
-		
-		return testClasses;
-	}
+        ISelection selected = treeViewer.getSelection();
+        for (Object selectedObject : ((ITreeSelection) selected).toArray()) {
+            if (selectedObject instanceof TestBranch) {
+                ((TestBranch) selectedObject).addTests(selectedClasses);
+            }
+        }
 
-	public TestStream getTestStream() {
-		return this.selectedTestStream;
-	}
+        ArrayList<TestClass> testClasses = new ArrayList<>(selectedClasses.values());
+        Collections.sort(testClasses);
+
+        return testClasses;
+    }
+
+    public TestStream getTestStream() {
+        return this.selectedTestStream;
+    }
 
 }

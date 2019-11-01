@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.devtools.karaf.framework;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -12,14 +17,14 @@ public class Status implements Action {
 
     @Override
     public Object execute() throws Exception {
-    	
-    	final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-    	
-    	if (devEnv.isFrameworkInitialised()) {
-    		System.out.println("The Galasa Framework is initialised");
-    	} else {
-    		System.out.println("The Galasa Framework is not initialised");
-    	}
+
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+
+        if (devEnv.isFrameworkInitialised()) {
+            System.out.println("The Galasa Framework is initialised");
+        } else {
+            System.out.println("The Galasa Framework is not initialised");
+        }
 
         return null;
     }

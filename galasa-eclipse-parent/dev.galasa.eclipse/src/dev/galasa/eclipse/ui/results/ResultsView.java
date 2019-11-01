@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.results;
 
 import org.eclipse.jface.action.IToolBarManager;
@@ -28,7 +33,8 @@ import dev.galasa.eclipse.ui.runs.RunsContentProvider;
 import dev.galasa.eclipse.ui.runs.RunsLabelProvider;
 
 /**
- * Displays a view with all the results in the Galasa ecosystem, both local and remote
+ * Displays a view with all the results in the Galasa ecosystem, both local and
+ * remote
  * 
  * TODO add a refresh button
  * 
@@ -36,163 +42,158 @@ import dev.galasa.eclipse.ui.runs.RunsLabelProvider;
  *
  */
 public class ResultsView extends ViewPart implements ICollapseAllListener, IExpandAllListener {
-	
-	public static final String ID = "dev.galasa.eclipse.ui.results.ResultsView";
-	
-	private TreeViewer viewer;
-	
-	private ResultsTreeBase treeBase = new ResultsTreeBase(this);
 
-	private boolean disposed = false;
-	
-	
+    public static final String ID       = "dev.galasa.eclipse.ui.results.ResultsView";
 
-	@Override
-	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(2, false));
-		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		
-		
-		GridData gridData = new GridData(); // container for treeViewer
-		gridData.horizontalSpan = 1;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = SWT.FILL;
-		gridData.verticalAlignment = SWT.FILL;
-		
-		MenuManager contextMenu = new MenuManager();
-		Menu menu = contextMenu.createContextMenu(viewer.getControl());
-		viewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(contextMenu, viewer);
-		getSite().setSelectionProvider(viewer);
-		
-		viewer.getControl().setLayoutData(gridData);
-		
-		viewer.setContentProvider(new RunsContentProvider());
-		ColumnViewerToolTipSupport.enableFor(viewer);
-		viewer.setLabelProvider(new RunsLabelProvider());
-		viewer.setComparator(new ResultsComparator());
+    private TreeViewer         viewer;
 
+    private ResultsTreeBase    treeBase = new ResultsTreeBase(this);
 
-		viewer.setAutoExpandLevel(2);
-		viewer.setInput(treeBase);
-		
-		IToolBarManager toolBarMngr = getViewSite().getActionBars().getToolBarManager();
-		toolBarMngr.add(new CollapseAllAction(this));
-		
-		
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
+    private boolean            disposed = false;
 
-			@Override
-			public void doubleClick(DoubleClickEvent event) { 
-				Object selectedNode = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
-				if (selectedNode == null) {
-					return;
-				}
+    @Override
+    public void createPartControl(Composite parent) {
+        parent.setLayout(new GridLayout(2, false));
+        parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-				if (selectedNode instanceof BranchRun) {
-					BranchRun run = (BranchRun)selectedNode;
-					try {
-						getSite().getPage().openEditor(new RunEditorInput(run.getResult(), run.getRunName()), RunEditor.ID);
-					} catch (PartInitException e) {
-						Activator.log(e);
-					}
-				} else {
-					boolean expand = !viewer.getExpandedState(selectedNode);
-					viewer.setExpandedState(selectedNode, !viewer.getExpandedState(selectedNode));
-					
-					if (expand) {
-						if (selectedNode instanceof BranchSelectedRuns) {
-							BranchSelectedRuns bsr = (BranchSelectedRuns) selectedNode;
-							bsr.load();
-						}
-					}
-				}
-			}
-		});
-		
-		viewer.addTreeListener(new ITreeViewerListener() {
-			
-			@Override
-			public void treeExpanded(TreeExpansionEvent arg0) {
-				if (arg0.getElement() instanceof BranchSelectedRuns) {
-					BranchSelectedRuns bsr = (BranchSelectedRuns) arg0.getElement();
-					bsr.load();
-				}
-			}
+        viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-			@Override
-			public void treeCollapsed(TreeExpansionEvent arg0) {
-			}
-		});
+        GridData gridData = new GridData(); // container for treeViewer
+        gridData.horizontalSpan = 1;
+        gridData.grabExcessHorizontalSpace = true;
+        gridData.grabExcessVerticalSpace = true;
+        gridData.horizontalAlignment = SWT.FILL;
+        gridData.verticalAlignment = SWT.FILL;
 
+        MenuManager contextMenu = new MenuManager();
+        Menu menu = contextMenu.createContextMenu(viewer.getControl());
+        viewer.getControl().setMenu(menu);
+        getSite().registerContextMenu(contextMenu, viewer);
+        getSite().setSelectionProvider(viewer);
 
-		treeBase.viewCreateFinished();
-	}
+        viewer.getControl().setLayoutData(gridData);
 
-	@Override
-	public void setFocus() {
-		viewer.getControl().setFocus();
-		
-	}
-	
-	@Override
-	public void dispose() {
-		this.disposed = true;
-		this.treeBase.dispose();
-		super.dispose();
-	}
+        viewer.setContentProvider(new RunsContentProvider());
+        ColumnViewerToolTipSupport.enableFor(viewer);
+        viewer.setLabelProvider(new RunsLabelProvider());
+        viewer.setComparator(new ResultsComparator());
 
-	public void refresh(Object element) {
-		if (disposed || viewer == null) {
-			return;
-		}
-		
-		//*** This method has to run on the UI thread, so switch if required
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					refresh(element);
-				}
-			});
-			return;
-		}
+        viewer.setAutoExpandLevel(2);
+        viewer.setInput(treeBase);
 
-		//*** Now running on the UI thread
+        IToolBarManager toolBarMngr = getViewSite().getActionBars().getToolBarManager();
+        toolBarMngr.add(new CollapseAllAction(this));
 
-		viewer.refresh(element, true);
-	}
+        viewer.addDoubleClickListener(new IDoubleClickListener() {
 
-	public void expand(Object element) {
-		if (disposed || viewer == null) {
-			return;
-		}
-		
-		//*** This method has to run on the UI thread, so switch if required
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					expand(element);
-				}
-			});
-			return;
-		}
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                Object selectedNode = ((IStructuredSelection) viewer.getSelection()).getFirstElement();
+                if (selectedNode == null) {
+                    return;
+                }
 
-		//*** Now running on the UI thread
+                if (selectedNode instanceof BranchRun) {
+                    BranchRun run = (BranchRun) selectedNode;
+                    try {
+                        getSite().getPage().openEditor(new RunEditorInput(run.getResult(), run.getRunName()),
+                                RunEditor.ID);
+                    } catch (PartInitException e) {
+                        Activator.log(e);
+                    }
+                } else {
+                    boolean expand = !viewer.getExpandedState(selectedNode);
+                    viewer.setExpandedState(selectedNode, !viewer.getExpandedState(selectedNode));
 
-		viewer.expandToLevel(element, 1);
-	}
+                    if (expand) {
+                        if (selectedNode instanceof BranchSelectedRuns) {
+                            BranchSelectedRuns bsr = (BranchSelectedRuns) selectedNode;
+                            bsr.load();
+                        }
+                    }
+                }
+            }
+        });
 
-	@Override
-	public void expandAll() {
-		this.viewer.expandAll();
-	}
+        viewer.addTreeListener(new ITreeViewerListener() {
 
-	@Override
-	public void collapseAll() {
-		this.viewer.collapseAll();
-	}
-	
+            @Override
+            public void treeExpanded(TreeExpansionEvent arg0) {
+                if (arg0.getElement() instanceof BranchSelectedRuns) {
+                    BranchSelectedRuns bsr = (BranchSelectedRuns) arg0.getElement();
+                    bsr.load();
+                }
+            }
+
+            @Override
+            public void treeCollapsed(TreeExpansionEvent arg0) {
+            }
+        });
+
+        treeBase.viewCreateFinished();
+    }
+
+    @Override
+    public void setFocus() {
+        viewer.getControl().setFocus();
+
+    }
+
+    @Override
+    public void dispose() {
+        this.disposed = true;
+        this.treeBase.dispose();
+        super.dispose();
+    }
+
+    public void refresh(Object element) {
+        if (disposed || viewer == null) {
+            return;
+        }
+
+        // *** This method has to run on the UI thread, so switch if required
+        if (Display.getCurrent() == null) {
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                    refresh(element);
+                }
+            });
+            return;
+        }
+
+        // *** Now running on the UI thread
+
+        viewer.refresh(element, true);
+    }
+
+    public void expand(Object element) {
+        if (disposed || viewer == null) {
+            return;
+        }
+
+        // *** This method has to run on the UI thread, so switch if required
+        if (Display.getCurrent() == null) {
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                    expand(element);
+                }
+            });
+            return;
+        }
+
+        // *** Now running on the UI thread
+
+        viewer.expandToLevel(element, 1);
+    }
+
+    @Override
+    public void expandAll() {
+        this.viewer.expandAll();
+    }
+
+    @Override
+    public void collapseAll() {
+        this.viewer.collapseAll();
+    }
+
 }

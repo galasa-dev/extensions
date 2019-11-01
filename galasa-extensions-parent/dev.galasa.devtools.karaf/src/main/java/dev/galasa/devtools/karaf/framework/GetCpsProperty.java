@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.devtools.karaf.framework;
 
 import org.apache.commons.logging.Log;
@@ -33,13 +38,13 @@ public class GetCpsProperty implements Action {
     @Override
     public Object execute() throws Exception {
 
-    	final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-    	
-    	if (!devEnv.isFrameworkInitialised()) {
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+
+        if (!devEnv.isFrameworkInitialised()) {
             this.logger.error("The Framework has not been initialised, use cirillo:init");
             return null;
         }
-    	
+
         IConfigurationPropertyStoreService cps = devEnv.getCPS();
 
         if (this.namespace != null) {

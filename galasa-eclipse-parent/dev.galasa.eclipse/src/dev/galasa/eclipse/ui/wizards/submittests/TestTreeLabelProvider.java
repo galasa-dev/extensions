@@ -1,17 +1,22 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.wizards.submittests;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
 /**
- * Provides the labels for the Notification tree nodes 
+ * Provides the labels for the Notification tree nodes
  * 
  * @author Michael Baylis
  *
  */
 public class TestTreeLabelProvider extends LabelProvider {
 
-	@Override
-	public String getText(Object element) {
+    @Override
+    public String getText(Object element) {
 //		if (element instanceof TestCatalog) {
 //			return "Test Catalog"; 
 //		}
@@ -27,11 +32,8 @@ public class TestTreeLabelProvider extends LabelProvider {
 //			
 //			return tc.shortName; 
 //		}
-		
-		
-		return super.getText(element);
-	}
 
-	
+        return super.getText(element);
+    }
 
 }

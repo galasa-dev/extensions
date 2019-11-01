@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package test.force.codecoverage;
 
 import java.beans.Transient;
@@ -16,39 +21,39 @@ import dev.galasa.cps.etcd.spi.Etcd3ClientException;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 
 public class ExceptionsTest {
-	
-	@Test
-	public void testEtcd3ManagerException() {
-		Throwable throwable = new Etcd3ManagerException();
-		new Etcd3ManagerException("Message");		
-		new Etcd3ManagerException("Message", throwable);		
-		new Etcd3ManagerException(throwable);		
-		new Etcd3ManagerException("Message", throwable, false, false);		
-		Assert.assertTrue("dummy",true);
-	}
-	
-	@Test
-	public void testEtcd3ClientException() {
-		Throwable throwable = new Etcd3ClientException();
-		new Etcd3ClientException("Message");		
-		new Etcd3ClientException("Message", throwable);		
-		new Etcd3ClientException(throwable);		
-		new Etcd3ClientException("Message", throwable, false, false);		
-		Assert.assertTrue("dummy",true);
-	}
-	
-	@Test
-	public void testCatchingException() throws URISyntaxException{
-		boolean caught = false;
 
-		try {
-			URI testUri = new URI("http://test.com");
-			Etcd3ConfigurationPropertyStore cps = new Etcd3ConfigurationPropertyStore(testUri);
-			cps.getProperty("NoKey");
-		} catch (ConfigurationPropertyStoreException e) {
-			caught = true;
-		}
+    @Test
+    public void testEtcd3ManagerException() {
+        Throwable throwable = new Etcd3ManagerException();
+        new Etcd3ManagerException("Message");
+        new Etcd3ManagerException("Message", throwable);
+        new Etcd3ManagerException(throwable);
+        new Etcd3ManagerException("Message", throwable, false, false);
+        Assert.assertTrue("dummy", true);
+    }
 
-		Assert.assertTrue("Exception not caught", caught);
-	}	
+    @Test
+    public void testEtcd3ClientException() {
+        Throwable throwable = new Etcd3ClientException();
+        new Etcd3ClientException("Message");
+        new Etcd3ClientException("Message", throwable);
+        new Etcd3ClientException(throwable);
+        new Etcd3ClientException("Message", throwable, false, false);
+        Assert.assertTrue("dummy", true);
+    }
+
+    @Test
+    public void testCatchingException() throws URISyntaxException {
+        boolean caught = false;
+
+        try {
+            URI testUri = new URI("http://test.com");
+            Etcd3ConfigurationPropertyStore cps = new Etcd3ConfigurationPropertyStore(testUri);
+            cps.getProperty("NoKey");
+        } catch (ConfigurationPropertyStoreException e) {
+            caught = true;
+        }
+
+        Assert.assertTrue("Exception not caught", caught);
+    }
 }

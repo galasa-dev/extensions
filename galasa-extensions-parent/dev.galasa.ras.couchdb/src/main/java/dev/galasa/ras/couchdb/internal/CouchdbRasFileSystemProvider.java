@@ -32,15 +32,15 @@ import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
 
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
 
-    private static final String RAS_CONTENT_TYPE      = "ras:contentType";
-    private static final String BASIC_SIZE            = "size";
-    private static final String POSIX_SIZE            = "posix:size";
+    private static final String                                RAS_CONTENT_TYPE = "ras:contentType";
+    private static final String                                BASIC_SIZE       = "size";
+    private static final String                                POSIX_SIZE       = "posix:size";
 
-    private final HashMap<Path, ResultArchiveStoreContentType> contentTypes = new HashMap<>();
+    private final HashMap<Path, ResultArchiveStoreContentType> contentTypes     = new HashMap<>();
 
-    private final HashSet<CouchdbArtifactPath> paths = new HashSet<>();
+    private final HashSet<CouchdbArtifactPath>                 paths            = new HashSet<>();
 
-    private final CouchdbRasStore couchdbRasStore;
+    private final CouchdbRasStore                              couchdbRasStore;
 
     protected CouchdbRasFileSystemProvider(FileStore fileSystemStore, CouchdbRasStore couchdbRasStore) {
         super(fileSystemStore, null);
@@ -54,13 +54,12 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
         paths.add(path);
 
         CouchdbArtifactPath parentPath = (CouchdbArtifactPath) path.getParent();
-        while(parentPath != null && !paths.contains(parentPath)) {
+        while (parentPath != null && !paths.contains(parentPath)) {
             paths.add(parentPath);
             parentPath = parentPath.getParent();
         }
 
     }
-
 
     @Override
     public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
@@ -71,14 +70,14 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
         if (write) {
             Path absolute = path.toAbsolutePath();
             ResultArchiveStoreContentType contentType = null;
-            for(OpenOption option : options) {
+            for (OpenOption option : options) {
                 if (option instanceof SetContentType) {
-                    contentType = ((SetContentType)option).getContentType();
+                    contentType = ((SetContentType) option).getContentType();
                 }
             }
 
             if (contentType != null) {
-                for(FileAttribute<?> attr : attrs) {
+                for (FileAttribute<?> attr : attrs) {
                     if (attr instanceof ResultArchiveStoreContentType) {
                         contentType = (ResultArchiveStoreContentType) attr;
                         contentTypes.put(absolute, contentType);
@@ -93,7 +92,8 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
             passThroughOptions.add(StandardOpenOption.WRITE);
             passThroughOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
 
-            return new CouchdbRasWriteByteChannel(this.couchdbRasStore, absolute, contentType, passThroughOptions, attrs);
+            return new CouchdbRasWriteByteChannel(this.couchdbRasStore, absolute, contentType, passThroughOptions,
+                    attrs);
         } else {
             CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
             Path cachePath = Files.createTempFile("galasa_couchdb", "temp");
@@ -106,7 +106,6 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
         }
     }
 
-
     public Path getRoot() {
         return new CouchdbArtifactPath(this.getActualFileSystem(), "/");
     }
@@ -118,16 +117,16 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 
     @Override
     public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
-        return new CouchdbDirectoryStream(dir, filter, paths);		
+        return new CouchdbDirectoryStream(dir, filter, paths);
     }
 
     @Override
     public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
             throws IOException {
-        if (path instanceof CouchdbArtifactPath 
+        if (path instanceof CouchdbArtifactPath
                 && (type == CoucbDbBasicAttributes.class || type == BasicFileAttributes.class)) {
             CouchdbArtifactPath caPath = (CouchdbArtifactPath) path;
-            return (A)caPath.readAttributes();  
+            return (A) caPath.readAttributes();
         }
         return null;
     }
@@ -142,9 +141,10 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 
         CouchdbArtifactPath caPath = (CouchdbArtifactPath) path;
 
-        final ArrayList<String> attrs = new ArrayList<>(Arrays.asList(attributes.replaceAll(" ", "").split(","))); 
+        final ArrayList<String> attrs = new ArrayList<>(Arrays.asList(attributes.replaceAll(" ", "").split(",")));
 
-        // *** We need to add our attributes for * or ras:* or ras:contentType, and also the basic/posix file attributes
+        // *** We need to add our attributes for * or ras:* or ras:contentType, and also
+        // the basic/posix file attributes
         final Iterator<String> it = attrs.iterator();
         while (it.hasNext()) {
             final String attr = it.next();

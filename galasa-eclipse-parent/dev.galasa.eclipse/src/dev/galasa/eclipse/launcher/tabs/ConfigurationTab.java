@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.launcher.tabs;
 
 import java.nio.file.Files;
@@ -43,26 +48,28 @@ import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import dev.galasa.eclipse.Activator;
 import dev.galasa.eclipse.launcher.Launcher;
 
-public class ConfigurationTab extends AbstractLaunchConfigurationTab implements IConfigurationTab, SelectionListener, ModifyListener, FocusListener {
+public class ConfigurationTab extends AbstractLaunchConfigurationTab
+        implements IConfigurationTab, SelectionListener, ModifyListener, FocusListener {
 
-    private static final String MAVEN_NATURE = "org.eclipse.m2e.core.maven2Nature";
+    private static final String             MAVEN_NATURE        = "org.eclipse.m2e.core.maven2Nature";
 
-    private Composite comp;
+    private Composite                       comp;
 
-    private TestClassSelectionWidget testClassSelector;
+    private TestClassSelectionWidget        testClassSelector;
 
-    private Button trace;
-    private Button includeWorkspaceOverrides;
-    private Text propertiesFile;
-    private Button propertiesFileBrowse;
-    private IFile propertiesFilePath;
+    private Button                          trace;
+    private Button                          includeWorkspaceOverrides;
+    private Text                            propertiesFile;
+    private Button                          propertiesFileBrowse;
+    private IFile                           propertiesFilePath;
 
     private ArrayList<IConfigurationGroups> configurationGroups = new ArrayList<>();
 
     public ConfigurationTab() {
         IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
-        IConfigurationElement[] extensions = extensionRegistry.getConfigurationElementsFor("dev.galasa.eclipse.extension.launcher.configuration");
-        for(IConfigurationElement extension : extensions) {
+        IConfigurationElement[] extensions = extensionRegistry
+                .getConfigurationElementsFor("dev.galasa.eclipse.extension.launcher.configuration");
+        for (IConfigurationElement extension : extensions) {
             try {
                 configurationGroups.add((IConfigurationGroups) extension.createExecutableExtension("class"));
             } catch (CoreException e) {
@@ -84,7 +91,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
 
         createDiagnosticControler(comp);
 
-        for(IConfigurationGroups group : configurationGroups) {
+        for (IConfigurationGroups group : configurationGroups) {
             group.createControl(this, comp);
         }
 
@@ -116,8 +123,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
         GridLayout topLayout = new GridLayout(1, false);
         group.setLayout(topLayout);
 
-        testClassSelector = new TestClassSelectionWidget(
-                getLaunchConfigurationDialog(), group, SWT.NONE);
+        testClassSelector = new TestClassSelectionWidget(getLaunchConfigurationDialog(), group, SWT.NONE);
         testClassSelector.addModifyListener(this);
     }
 
@@ -198,8 +204,8 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
                 return;
             }
         }
-        
-        for(IConfigurationGroups group : configurationGroups) {
+
+        for (IConfigurationGroups group : configurationGroups) {
             if (!group.validatePage()) {
                 return;
             }
@@ -253,8 +259,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
                 return false;
             }
 
-
-            //*** Validate the Class
+            // *** Validate the Class
             String sClass = testClassSelector.getClassText();
             if (sClass == null || sClass.trim().isEmpty()) {
                 setErrorMessage("A test class must be provided");
@@ -274,39 +279,35 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
                 return false;
             }
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             setErrorMessage("Problem validating test selection, see error log");
             Activator.log(e);
             return false;
         }
 
-
-        //		if(automationRunTest.getSelection()) {
-        //			String errorMessage = automationRunSelector.validate();
-        //			if(errorMessage!=null) {
-        //				setErrorMessage(errorMessage);
-        //				return false;
-        //			}
-        //		}
+        // if(automationRunTest.getSelection()) {
+        // String errorMessage = automationRunSelector.validate();
+        // if(errorMessage!=null) {
+        // setErrorMessage(errorMessage);
+        // return false;
+        // }
+        // }
 
         return true;
     }
-
 
     @Override
     public void initializeFrom(ILaunchConfiguration config) {
         String projectName = "";
 
         try {
-            projectName = config.getAttribute(
-                    IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
+            projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
             trace.setSelection(config.getAttribute(Launcher.TRACE, false));
             includeWorkspaceOverrides.setSelection(config.getAttribute(Launcher.WORKSPACE_OVERRIDES, true));
 
             // set the project name
             testClassSelector.setProjectText(projectName);
-            testClassSelector.setClass(config.getAttribute(
-                    Launcher.TEST_CLASS, ""));
+            testClassSelector.setClass(config.getAttribute(Launcher.TEST_CLASS, ""));
 
             String path = config.getAttribute(Launcher.OVERRIDES, "");
             if (path.isEmpty()) {
@@ -318,14 +319,13 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
                 propertiesFilePath = root.getFileForLocation(epath);
                 propertiesFile.setText(propertiesFilePath.getName());
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             Activator.log(e);
         }
 
-        for(IConfigurationGroups group : configurationGroups) {
+        for (IConfigurationGroups group : configurationGroups) {
             group.initializeFrom(config);
         }
-
 
         validatePage();
 
@@ -334,24 +334,18 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
 
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        configuration.setAttribute(
-                IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+        configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
                 testClassSelector.getProjectText());
-        configuration.setAttribute(
-                Launcher.TEST_CLASS,
-                testClassSelector.getClassText());
+        configuration.setAttribute(Launcher.TEST_CLASS, testClassSelector.getClassText());
         configuration.setAttribute(Launcher.TRACE, trace.getSelection());
         configuration.setAttribute(Launcher.WORKSPACE_OVERRIDES, includeWorkspaceOverrides.getSelection());
         if (propertiesFilePath == null) {
-            configuration.setAttribute(
-                    Launcher.OVERRIDES, "");
+            configuration.setAttribute(Launcher.OVERRIDES, "");
         } else {
-            configuration.setAttribute(
-                    Launcher.OVERRIDES,
-                    propertiesFilePath.getLocation().toString());
+            configuration.setAttribute(Launcher.OVERRIDES, propertiesFilePath.getLocation().toString());
         }
 
-        for(IConfigurationGroups group : configurationGroups) {
+        for (IConfigurationGroups group : configurationGroups) {
             group.performApply(configuration);
         }
 
@@ -360,11 +354,11 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy config) {
         config.setAttribute(Launcher.TEST_CLASS, "");
-        config.setAttribute(Launcher.TRACE,false);
-        config.setAttribute(Launcher.WORKSPACE_OVERRIDES,true);
+        config.setAttribute(Launcher.TRACE, false);
+        config.setAttribute(Launcher.WORKSPACE_OVERRIDES, true);
         config.setAttribute(Launcher.OVERRIDES, "");
 
-        for(IConfigurationGroups group : configurationGroups) {
+        for (IConfigurationGroups group : configurationGroups) {
             group.setDefaults(config);
         }
 
@@ -392,11 +386,9 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab implements 
     @Override
     public void widgetSelected(SelectionEvent e) {
         if (e.getSource() == propertiesFileBrowse) {
-            FilteredResourcesSelectionDialog d = new FilteredResourcesSelectionDialog(
-                    getShell(), false,
+            FilteredResourcesSelectionDialog d = new FilteredResourcesSelectionDialog(getShell(), false,
                     ResourcesPlugin.getWorkspace().getRoot(), IResource.FILE);
-            d.setInitialPattern("*.gover",
-                    FilteredResourcesSelectionDialog.NONE);
+            d.setInitialPattern("*.gover", FilteredResourcesSelectionDialog.NONE);
             d.setTitle("Select a properties file");
             if (d.open() == FilteredResourcesSelectionDialog.CANCEL) {
                 return;

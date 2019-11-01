@@ -12,30 +12,31 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class CouchdbDirectoryStream implements  DirectoryStream<Path> {
-	
-	private ArrayList<Path> children = new ArrayList<>();
-	
-	public CouchdbDirectoryStream(Path dir, Filter<? super Path> filter, HashSet<CouchdbArtifactPath> paths) throws IOException {
-		dir = dir.toAbsolutePath();
-		
-		for(CouchdbArtifactPath path : paths) {
-			CouchdbArtifactPath parent = path.getParent();
-			if (parent != null && path.getParent().equals(dir)) {
-				if (filter.accept(path)) { 
-					children.add(path);
-				}
-			}
-		}
-	}
+public class CouchdbDirectoryStream implements DirectoryStream<Path> {
 
-	@Override
-	public void close() throws IOException {
-	}
+    private ArrayList<Path> children = new ArrayList<>();
 
-	@Override
-	public Iterator<Path> iterator() {
-		return children.iterator();
-	}
+    public CouchdbDirectoryStream(Path dir, Filter<? super Path> filter, HashSet<CouchdbArtifactPath> paths)
+            throws IOException {
+        dir = dir.toAbsolutePath();
+
+        for (CouchdbArtifactPath path : paths) {
+            CouchdbArtifactPath parent = path.getParent();
+            if (parent != null && path.getParent().equals(dir)) {
+                if (filter.accept(path)) {
+                    children.add(path);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+
+    @Override
+    public Iterator<Path> iterator() {
+        return children.iterator();
+    }
 
 }

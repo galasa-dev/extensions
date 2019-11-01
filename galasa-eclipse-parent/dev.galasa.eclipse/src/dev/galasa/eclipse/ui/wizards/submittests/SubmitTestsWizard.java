@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.wizards.submittests;
 
 import java.util.List;
@@ -20,66 +25,61 @@ import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 
 public class SubmitTestsWizard extends Wizard implements INewWizard {
 
-	private IConfigurationPropertyStoreService cps;
+    private IConfigurationPropertyStoreService cps;
 
-	private SelectTestsWizardPage selectionWizard;
-	private ConfigurationWizardPage configurationWizardPage;
+    private SelectTestsWizardPage              selectionWizard;
+    private ConfigurationWizardPage            configurationWizardPage;
 
-	public SubmitTestsWizard() throws ConfigurationPropertyStoreException, FrameworkException {
-		cps = Activator.getInstance().getFramework().getConfigurationPropertyService("framework");
+    public SubmitTestsWizard() throws ConfigurationPropertyStoreException, FrameworkException {
+        cps = Activator.getInstance().getFramework().getConfigurationPropertyService("framework");
 
-		selectionWizard = new SelectTestsWizardPage("select", cps);
-		configurationWizardPage = new ConfigurationWizardPage("config", cps);
+        selectionWizard = new SelectTestsWizardPage("select", cps);
+        configurationWizardPage = new ConfigurationWizardPage("config", cps);
 
-		setWindowTitle("Submit automation test runs");
-	}
+        setWindowTitle("Submit automation test runs");
+    }
 
-	@Override
-	public void init(IWorkbench arg0, IStructuredSelection arg1) {
+    @Override
+    public void init(IWorkbench arg0, IStructuredSelection arg1) {
 
-	}
+    }
 
-	@Override
-	public boolean performFinish() {
+    @Override
+    public boolean performFinish() {
 
-		TestStream testStream = selectionWizard.getTestStream();
-		List<TestClass> selectedClasses = selectionWizard.getSelectedClasses();
-		
-		boolean trace = configurationWizardPage.isTrace();
-		
-		IFile overridesFile = configurationWizardPage.getOverridesFile();
-		boolean includeGlobalOverrides = configurationWizardPage.isIncludeGlobalOverrides();
-		
-		IPreferenceStore preferenceStore = Activator.getInstance().getPreferenceStore();
-		String requestorId    = preferenceStore.getString(PreferenceConstants.P_REQUESTOR_ID);
-		if (requestorId.isEmpty()) {
-			requestorId = preferenceStore.getDefaultString(PreferenceConstants.P_REQUESTOR_ID);
-		}
-		
-		try {
-			String mavenRepository = AbstractManager.nulled(cps.getProperty("test.stream." + testStream.getId(), "maven.repo"));
-			String obr             = AbstractManager.nulled(cps.getProperty("test.stream." + testStream.getId(), "obr"));
+        TestStream testStream = selectionWizard.getTestStream();
+        List<TestClass> selectedClasses = selectionWizard.getSelectedClasses();
 
-			SubmitTestRunsJob job = new SubmitTestRunsJob(testStream,
-					selectedClasses,
-					trace,
-					requestorId,
-					overridesFile,
-					includeGlobalOverrides,
-					mavenRepository,
-					obr);
-			job.schedule();
-		} catch (FrameworkException e) {
-			Activator.log(e);
-		}
+        boolean trace = configurationWizardPage.isTrace();
 
-		return true;
-	}
+        IFile overridesFile = configurationWizardPage.getOverridesFile();
+        boolean includeGlobalOverrides = configurationWizardPage.isIncludeGlobalOverrides();
 
-	@Override
-	public void addPages() {
-		addPage(selectionWizard);
-		addPage(configurationWizardPage);
-	}
+        IPreferenceStore preferenceStore = Activator.getInstance().getPreferenceStore();
+        String requestorId = preferenceStore.getString(PreferenceConstants.P_REQUESTOR_ID);
+        if (requestorId.isEmpty()) {
+            requestorId = preferenceStore.getDefaultString(PreferenceConstants.P_REQUESTOR_ID);
+        }
+
+        try {
+            String mavenRepository = AbstractManager
+                    .nulled(cps.getProperty("test.stream." + testStream.getId(), "maven.repo"));
+            String obr = AbstractManager.nulled(cps.getProperty("test.stream." + testStream.getId(), "obr"));
+
+            SubmitTestRunsJob job = new SubmitTestRunsJob(testStream, selectedClasses, trace, requestorId,
+                    overridesFile, includeGlobalOverrides, mavenRepository, obr);
+            job.schedule();
+        } catch (FrameworkException e) {
+            Activator.log(e);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void addPages() {
+        addPage(selectionWizard);
+        addPage(configurationWizardPage);
+    }
 
 }

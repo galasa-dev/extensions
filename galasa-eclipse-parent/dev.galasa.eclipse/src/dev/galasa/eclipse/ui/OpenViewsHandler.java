@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -10,23 +15,23 @@ import dev.galasa.eclipse.Activator;
 import dev.galasa.eclipse.ui.results.ResultsView;
 import dev.galasa.eclipse.ui.runs.RunsView;
 
-public class OpenViewsHandler  extends AbstractHandler {
+public class OpenViewsHandler extends AbstractHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ResultsView.ID);
-		} catch (PartInitException e) {
-			Activator.log(e);
-		}
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(RunsView.ID);
-		} catch (PartInitException e) {
-			Activator.log(e);
-		}
-		
-		return null;
-	}
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+
+        try {
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ResultsView.ID);
+        } catch (PartInitException e) {
+            Activator.log(e);
+        }
+        try {
+            PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(RunsView.ID);
+        } catch (PartInitException e) {
+            Activator.log(e);
+        }
+
+        return null;
+    }
 
 }

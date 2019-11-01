@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import java.nio.file.Files;
@@ -17,81 +22,81 @@ import dev.galasa.framework.spi.IRunResult;
 
 public class FetchStoredArtifactsJob extends Job {
 
-	private final ArtifactsPage artifactsPage;
-	private final IRunResult runResult;
+    private final ArtifactsPage artifactsPage;
+    private final IRunResult    runResult;
 
-	public FetchStoredArtifactsJob(ArtifactsPage artifactsPage, IRunResult runResult) {
-		super("Fetch Stored Artifacts Log");
+    public FetchStoredArtifactsJob(ArtifactsPage artifactsPage, IRunResult runResult) {
+        super("Fetch Stored Artifacts Log");
 
-		this.artifactsPage = artifactsPage;
-		this.runResult     = runResult;
+        this.artifactsPage = artifactsPage;
+        this.runResult = runResult;
 
-		this.setUser(true);
-	}
+        this.setUser(true);
+    }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
 
-		try {
-		    IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
-		    IConfigurationElement[] elements = extensionRegistry.getConfigurationElementsFor("dev.galasa.eclipse.extension.storedartifacts.filter");
-		    
-			Path root = runResult.getArtifactsRoot();
-			
-			ArtifactFolder rootFolder = new ArtifactFolder("/");
+        try {
+            IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
+            IConfigurationElement[] elements = extensionRegistry
+                    .getConfigurationElementsFor("dev.galasa.eclipse.extension.storedartifacts.filter");
 
-			Files.list(root).forEach(new ConsumeDirectory(runResult, rootFolder));
-			
-			
-			if (elements != null) {
-			    for(IConfigurationElement element : elements) {
-			        try {
-			            IStoredArtifactsFilter filterClass = (IStoredArtifactsFilter) element.createExecutableExtension("class");
-			            String runId = "unknown";
-			            if (runResult.getTestStructure() != null && runResult.getTestStructure().getRunName() != null) {
-			                runId = runResult.getTestStructure().getRunName();
-			            }
-			            filterClass.filter(runId, rootFolder);
-			        } catch(Exception e1) {
-			            Activator.log(e1);
-			        }
-			    }
-			}
+            Path root = runResult.getArtifactsRoot();
 
-			this.artifactsPage.setArtifacts(rootFolder);
-		} catch (Exception e) {
-			artifactsPage.setError("Fetch of Run Stored Artifacts failed - " + e.getMessage());
+            ArtifactFolder rootFolder = new ArtifactFolder("/");
 
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
-		}
+            Files.list(root).forEach(new ConsumeDirectory(runResult, rootFolder));
 
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Run Stored Artifacts Fetched");
-	}
+            if (elements != null) {
+                for (IConfigurationElement element : elements) {
+                    try {
+                        IStoredArtifactsFilter filterClass = (IStoredArtifactsFilter) element
+                                .createExecutableExtension("class");
+                        String runId = "unknown";
+                        if (runResult.getTestStructure() != null && runResult.getTestStructure().getRunName() != null) {
+                            runId = runResult.getTestStructure().getRunName();
+                        }
+                        filterClass.filter(runId, rootFolder);
+                    } catch (Exception e1) {
+                        Activator.log(e1);
+                    }
+                }
+            }
 
-	private static class ConsumeDirectory implements Consumer<Path> {
-		
-		private final ArtifactFolder folder;
-		private final IRunResult     runResult;
+            this.artifactsPage.setArtifacts(rootFolder);
+        } catch (Exception e) {
+            artifactsPage.setError("Fetch of Run Stored Artifacts failed - " + e.getMessage());
 
-		public ConsumeDirectory(IRunResult runResult, ArtifactFolder folder) {
-			this.folder    = folder;
-			this.runResult = runResult;
-		}
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+        }
 
-		@Override
-		public void accept(Path path) {
-			try {
-				if (Files.isDirectory(path)) {
-					ArtifactFolder newFolder = new ArtifactFolder(path.getFileName().toString());
-					folder.addArtifact(newFolder);
-					Files.list(path).forEach(new ConsumeDirectory(runResult, newFolder));
-				} else {
-					folder.addArtifact(new ArtifactFile(runResult, path));
-				}
-			} catch(Exception e) {
-				Activator.log(e);
-			}
-		}
-	}
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Run Stored Artifacts Fetched");
+    }
+
+    private static class ConsumeDirectory implements Consumer<Path> {
+
+        private final ArtifactFolder folder;
+        private final IRunResult     runResult;
+
+        public ConsumeDirectory(IRunResult runResult, ArtifactFolder folder) {
+            this.folder = folder;
+            this.runResult = runResult;
+        }
+
+        @Override
+        public void accept(Path path) {
+            try {
+                if (Files.isDirectory(path)) {
+                    ArtifactFolder newFolder = new ArtifactFolder(path.getFileName().toString());
+                    folder.addArtifact(newFolder);
+                    Files.list(path).forEach(new ConsumeDirectory(runResult, newFolder));
+                } else {
+                    folder.addArtifact(new ArtifactFile(runResult, path));
+                }
+            } catch (Exception e) {
+                Activator.log(e);
+            }
+        }
+    }
 }

@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.run;
 
 import java.util.List;
@@ -17,81 +22,79 @@ import dev.galasa.framework.spi.teststructure.TestStructure;
 
 public class MethodSummaryComposite extends Composite {
 
-	private final GeneralPage generalPage;
-	
-	private static Font boldFont;
+    private final GeneralPage generalPage;
 
-	public MethodSummaryComposite(FormToolkit toolkit, Composite parent, TestStructure testStructure, GeneralPage generalPage) {
-		super(parent, SWT.NONE);
+    private static Font       boldFont;
 
-		FontData fontData = this.getFont().getFontData()[0];
-		boldFont = new Font(Display.getCurrent(), new FontData(fontData.getName(), fontData
-				.getHeight(), SWT.BOLD));
+    public MethodSummaryComposite(FormToolkit toolkit, Composite parent, TestStructure testStructure,
+            GeneralPage generalPage) {
+        super(parent, SWT.NONE);
 
-		this.generalPage = generalPage;
+        FontData fontData = this.getFont().getFontData()[0];
+        boldFont = new Font(Display.getCurrent(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD));
 
-		this.setLayout(new GridLayout(2, false));
-		toolkit.paintBordersFor(this);
+        this.generalPage = generalPage;
 
-		toolkit.createLabel(this, "Test Method");
-		Label label = toolkit.createLabel(this, "Result");
-		label.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+        this.setLayout(new GridLayout(2, false));
+        toolkit.paintBordersFor(this);
 
-		List<TestMethod> methods = testStructure.getMethods();
-		if (methods == null || methods.isEmpty()) {
-			toolkit.adapt(this);
-			return;
-		}
-		
-		for(TestMethod testMethod : methods) {
-			processTestMethod(toolkit, testMethod);
-		}
+        toolkit.createLabel(this, "Test Method");
+        Label label = toolkit.createLabel(this, "Result");
+        label.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 
-		toolkit.adapt(this);
-	}
+        List<TestMethod> methods = testStructure.getMethods();
+        if (methods == null || methods.isEmpty()) {
+            toolkit.adapt(this);
+            return;
+        }
 
+        for (TestMethod testMethod : methods) {
+            processTestMethod(toolkit, testMethod);
+        }
 
-	private void processTestMethod(FormToolkit toolkit, TestMethod testMethod) {
-		if (testMethod.getBefores() != null) {
-			for(TestMethod before : testMethod.getBefores()) {
-				processTestMethod(toolkit, before);
-			}
-		}
-		
-		TestMethodResult result = new TestMethodResult(testMethod, this.generalPage);
-		Label name   = toolkit.createLabel(this, result.getName());
-		Label status = toolkit.createLabel(this, result.getResult());
-		
-		if (testMethod.getAfters() != null) {
-			for(TestMethod after : testMethod.getAfters()) {
-				processTestMethod(toolkit, after);
-			}
-		}
-	}
+        toolkit.adapt(this);
+    }
 
+    private void processTestMethod(FormToolkit toolkit, TestMethod testMethod) {
+        if (testMethod.getBefores() != null) {
+            for (TestMethod before : testMethod.getBefores()) {
+                processTestMethod(toolkit, before);
+            }
+        }
 
-	private static class TestMethodResult {
+        TestMethodResult result = new TestMethodResult(testMethod, this.generalPage);
+        Label name = toolkit.createLabel(this, result.getName());
+        Label status = toolkit.createLabel(this, result.getResult());
 
-		private final String      methodName;
-		private final GeneralPage generalPage;
-		private       String      result;
+        if (testMethod.getAfters() != null) {
+            for (TestMethod after : testMethod.getAfters()) {
+                processTestMethod(toolkit, after);
+            }
+        }
+    }
 
-		public TestMethodResult(TestMethod testMethod, GeneralPage generalPage) {
-			this.methodName    = testMethod.getMethodName(); 
-			this.result        = testMethod.getResult();
-			if (this.result == null) {
-				this.result = "Unknown";
-			}
-			this.generalPage = generalPage;
-		}
+    private static class TestMethodResult {
 
-		public String getName() {
-			return methodName;
-		}
+        private final String      methodName;
+        private final GeneralPage generalPage;
+        private String            result;
 
-		public String getResult() {
-			return result;
-		}
-	}
+        public TestMethodResult(TestMethod testMethod, GeneralPage generalPage) {
+            this.methodName = testMethod.getMethodName();
+            this.result = testMethod.getResult();
+            if (this.result == null) {
+                this.result = "Unknown";
+            }
+            this.generalPage = generalPage;
+        }
+
+        public String getName() {
+            return methodName;
+        }
+
+        public String getResult() {
+            return result;
+        }
+    }
 
 }

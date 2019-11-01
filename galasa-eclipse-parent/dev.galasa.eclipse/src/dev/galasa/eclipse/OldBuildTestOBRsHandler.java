@@ -1,16 +1,21 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse;
 
 /**
  * UI handler for the Build Test OBRs extension point.
  * 
- * Finds all Galasa projects (Maven project with a packaging type of bundle and a
- * dependency on dev.galasa:dev.galasa) <br>
+ * Finds all Galasa projects (Maven project with a packaging type of bundle and
+ * a dependency on dev.galasa:dev.galasa) <br>
  * and builds the OSGi Bundle Repository resource. OBR files are written to
  * [workspace]/.metadata/.plugin/[plugin-name].
  * 
  */
-public class OldBuildTestOBRsHandler /* extends AbstractHandler */	{
-	
+public class OldBuildTestOBRsHandler /* extends AbstractHandler */ {
+
 //	private static String productName;
 //	public static void setProductName(String productName) {
 //		OldBuildTestOBRsHandler.productName = productName;

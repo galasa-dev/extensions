@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.devtools.karaf.framework;
 
 import org.apache.commons.logging.Log;
@@ -20,10 +25,10 @@ public class Namespace implements Action {
 
     @Override
     public Object execute() throws Exception {
-    	
-    	final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-    	
-    	if (!devEnv.isFrameworkInitialised()) {
+
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+
+        if (!devEnv.isFrameworkInitialised()) {
             this.logger.error("The Framework has not been initialised, use galasa:init");
             return null;
         }
@@ -32,7 +37,7 @@ public class Namespace implements Action {
             this.logger.info("Current namespace is '" + devEnv.getNamespace() + "'");
             return null;
         }
-        
+
         devEnv.setNamespace(this.namespace);
 
         this.logger.info("Namespace set to '" + this.namespace + "'");

@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.preferences;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -10,40 +15,44 @@ import dev.galasa.eclipse.Activator;
 
 public class GalasaPreferences extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	StringFieldEditor bootstrapField;
-	StringFieldEditor overridesField;
-	StringFieldEditor requestorField;
-	StringFieldEditor remoteMavenField;
-	
-	public GalasaPreferences() {
-		super(GRID);
+    StringFieldEditor bootstrapField;
+    StringFieldEditor overridesField;
+    StringFieldEditor requestorField;
+    StringFieldEditor remoteMavenField;
 
-		IPreferenceStore store = Activator.getInstance().getPreferenceStore(); 
+    public GalasaPreferences() {
+        super(GRID);
 
-		setPreferenceStore(store);
-		setDescription("Galasa Preferences");
+        IPreferenceStore store = Activator.getInstance().getPreferenceStore();
 
-		store.addPropertyChangeListener(this);
-	}
-	
-	@Override
-	public void init(IWorkbench arg0) {
-	}
+        setPreferenceStore(store);
+        setDescription("Galasa Preferences");
 
-	@Override
-	protected void createFieldEditors() {
-		bootstrapField   = new StringFieldEditor(PreferenceConstants.P_BOOTSTRAP_URI,   "Bootstrap URI:",            getFieldEditorParent());
-		overridesField   = new StringFieldEditor(PreferenceConstants.P_OVERRIDES_URI,   "Overrides URI:",            getFieldEditorParent());
-		requestorField   = new StringFieldEditor(PreferenceConstants.P_REQUESTOR_ID,    "TEMPORARY - Requestor ID:", getFieldEditorParent());
-		remoteMavenField = new StringFieldEditor(PreferenceConstants.P_REMOTEMAVEN_URI, "Remote Maven URI:",         getFieldEditorParent());
-		
-		bootstrapField.setErrorMessage("Bootstrap URI is required");
-		bootstrapField.setEmptyStringAllowed(false);
-		
-		addField(bootstrapField);
-		addField(overridesField);
-		addField(requestorField);
-		addField(remoteMavenField);
-	}
-	
+        store.addPropertyChangeListener(this);
+    }
+
+    @Override
+    public void init(IWorkbench arg0) {
+    }
+
+    @Override
+    protected void createFieldEditors() {
+        bootstrapField = new StringFieldEditor(PreferenceConstants.P_BOOTSTRAP_URI, "Bootstrap URI:",
+                getFieldEditorParent());
+        overridesField = new StringFieldEditor(PreferenceConstants.P_OVERRIDES_URI, "Overrides URI:",
+                getFieldEditorParent());
+        requestorField = new StringFieldEditor(PreferenceConstants.P_REQUESTOR_ID, "TEMPORARY - Requestor ID:",
+                getFieldEditorParent());
+        remoteMavenField = new StringFieldEditor(PreferenceConstants.P_REMOTEMAVEN_URI, "Remote Maven URI:",
+                getFieldEditorParent());
+
+        bootstrapField.setErrorMessage("Bootstrap URI is required");
+        bootstrapField.setEmptyStringAllowed(false);
+
+        addField(bootstrapField);
+        addField(overridesField);
+        addField(requestorField);
+        addField(remoteMavenField);
+    }
+
 }

@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.runs;
 
 import java.util.ArrayList;
@@ -20,8 +25,8 @@ import dev.galasa.framework.spi.IFramework;
 /**
  * maintain a list of the runs in the ecosystem.
  * 
- * can get slightly out of date during start up due
- * to the watch and job may return slightly out of sync data.
+ * can get slightly out of date during start up due to the watch and job may
+ * return slightly out of sync data.
  * 
  * TODO, add housekeeping timer to check contents occasionally
  * 
@@ -30,190 +35,191 @@ import dev.galasa.framework.spi.IFramework;
  */
 public class RunsParent implements IUIParent, IPropertyListener, IDynamicStatusStoreWatcher {
 
-	//*** All the displayed runs
-	private final ArrayList<Run> runs = new ArrayList<>();
-	private final HashMap<String, Run> runMap = new HashMap<>();
-	
-	//*** All the runs received,  but are not yet valid
-	private final HashMap<String, Run> pendingRunMap = new HashMap<>();
+    // *** All the displayed runs
+    private final ArrayList<Run>       runs   = new ArrayList<>();
+    private final HashMap<String, Run> runMap = new HashMap<>();
 
-	private RunsView view;
+    // *** All the runs received, but are not yet valid
+    private final HashMap<String, Run> pendingRunMap = new HashMap<>();
 
-	private IDynamicStatusStoreService dss;
-	private UUID watchId;
+    private RunsView                   view;
 
-	//*** Remove old invalid runs that are unlikely to be updated further
-	private Timer deletePendingRunsTimer;
+    private IDynamicStatusStoreService dss;
+    private UUID                       watchId;
 
-	protected RunsParent(RunsView runsView) {
-		this.view = runsView;
+    // *** Remove old invalid runs that are unlikely to be updated further
+    private Timer deletePendingRunsTimer;
 
-		//*** Create the delete old invalid runs timer task
-		deletePendingRunsTimer = new Timer();
-		deletePendingRunsTimer.scheduleAtFixedRate(new TimerTask() {
+    protected RunsParent(RunsView runsView) {
+        this.view = runsView;
 
-			@Override
-			public void run() {
-				checkForDeletedPendingRuns();
+        // *** Create the delete old invalid runs timer task
+        deletePendingRunsTimer = new Timer();
+        deletePendingRunsTimer.scheduleAtFixedRate(new TimerTask() {
 
-			}
-		}, 30000, 30000);
+            @Override
+            public void run() {
+                checkForDeletedPendingRuns();
 
-		//*** Go and retrieve all the current runs
-		new FetchAllRunsJob(this).schedule();
+            }
+        }, 30000, 30000);
 
-		//*** Retrieve the DSS and set a watch
-		try {
-			IFramework framework = Activator.getInstance().getFramework();
+        // *** Go and retrieve all the current runs
+        new FetchAllRunsJob(this).schedule();
 
-			dss = framework.getDynamicStatusStoreService("framework");
-			watchId = dss.watchPrefix(this, "run.");
-		} catch (FrameworkException e) {
-			Activator.log(e);
-		}
-	}
+        // *** Retrieve the DSS and set a watch
+        try {
+            IFramework framework = Activator.getInstance().getFramework();
 
-	public synchronized void dispose() {
-		view = null;
+            dss = framework.getDynamicStatusStoreService("framework");
+            watchId = dss.watchPrefix(this, "run.");
+        } catch (FrameworkException e) {
+            Activator.log(e);
+        }
+    }
 
-		if (deletePendingRunsTimer != null) {
-			deletePendingRunsTimer.cancel();
-			deletePendingRunsTimer = null;
-		}
+    public synchronized void dispose() {
+        view = null;
 
-		if (dss != null && watchId != null) {
-			try {
-				dss.unwatch(watchId);
-			} catch (DynamicStatusStoreException e) {
-				Activator.log(e);
-			}
-		}
+        if (deletePendingRunsTimer != null) {
+            deletePendingRunsTimer.cancel();
+            deletePendingRunsTimer = null;
+        }
 
-	}
+        if (dss != null && watchId != null) {
+            try {
+                dss.unwatch(watchId);
+            } catch (DynamicStatusStoreException e) {
+                Activator.log(e);
+            }
+        }
 
-	public void setRunsView(RunsView runsView) {
-		this.view = runsView;
-	}
+    }
 
-	@Override
-	public boolean hasChildren() {
-		return !runs.isEmpty();
-	}
+    public void setRunsView(RunsView runsView) {
+        this.view = runsView;
+    }
 
-	@Override
-	public Object[] getChildren() {
-		return runs.toArray();
-	}
+    @Override
+    public boolean hasChildren() {
+        return !runs.isEmpty();
+    }
 
-	@Override
-	public String toString() {
-		return "Runs";
-	}
+    @Override
+    public Object[] getChildren() {
+        return runs.toArray();
+    }
 
-	/* 
-	 * Called by the fetch all runs job
-	 */
-	@Override
-	public synchronized void propertyUpdate(PropertyUpdate propertyUpdate) {
-		String key   = propertyUpdate.getKey();
-		String value = propertyUpdate.getValue();
-		Type   type  = propertyUpdate.getType();
-		String[] parts = key.split("\\.");
-		if (parts.length < 3) {
-			return;
-		}
+    @Override
+    public String toString() {
+        return "Runs";
+    }
 
-		if (!"run".equals(parts[0])) {
-			return;
-		}
+    /*
+     * Called by the fetch all runs job
+     */
+    @Override
+    public synchronized void propertyUpdate(PropertyUpdate propertyUpdate) {
+        String key = propertyUpdate.getKey();
+        String value = propertyUpdate.getValue();
+        Type type = propertyUpdate.getType();
+        String[] parts = key.split("\\.");
+        if (parts.length < 3) {
+            return;
+        }
 
-		String runName = parts[1];
+        if (!"run".equals(parts[0])) {
+            return;
+        }
 
-		key = key.substring(4 + runName.length() + 1);
+        String runName = parts[1];
 
-		Run run = runMap.get(runName);
-		if (run == null) {
-			if (value != null) {
-				run = pendingRunMap.get(runName);
-				if (run != null) {
-					run.propertyUpdate(key, value, type);
-					if (run.isValid()) {
-						runs.add(run);
-						runMap.put(runName, run);
-						pendingRunMap.remove(runName);
-						update(this);
-					}
-				} else {
-					run = new Run(runName);
-					run.propertyUpdate(key, value, type);
-					if (run.isValid()) {
-						runs.add(run);
-						runMap.put(runName, run);
-						update(this);
-					} else {
-						pendingRunMap.put(runName, run);
-					}
-				}
-			}
-		} else {
-			run.propertyUpdate(key, value, type);
-			if (run.isValid()) {
-				update(run);
-			} else {
-				runs.remove(run);
-				runMap.remove(run.getRunName());
-				update(this);
-			}
-		}
-	}
+        key = key.substring(4 + runName.length() + 1);
 
-	@Override
-	public synchronized void propertyUpdateComplete() {
-		if (!runs.isEmpty()) {
-			view.expand(this);
-		}
-	}
+        Run run = runMap.get(runName);
+        if (run == null) {
+            if (value != null) {
+                run = pendingRunMap.get(runName);
+                if (run != null) {
+                    run.propertyUpdate(key, value, type);
+                    if (run.isValid()) {
+                        runs.add(run);
+                        runMap.put(runName, run);
+                        pendingRunMap.remove(runName);
+                        update(this);
+                    }
+                } else {
+                    run = new Run(runName);
+                    run.propertyUpdate(key, value, type);
+                    if (run.isValid()) {
+                        runs.add(run);
+                        runMap.put(runName, run);
+                        update(this);
+                    } else {
+                        pendingRunMap.put(runName, run);
+                    }
+                }
+            }
+        } else {
+            run.propertyUpdate(key, value, type);
+            if (run.isValid()) {
+                update(run);
+            } else {
+                runs.remove(run);
+                runMap.remove(run.getRunName());
+                update(this);
+            }
+        }
+    }
 
-	private synchronized void update(Object element) {
-		if (view != null) {
-			view.refresh(this);
-		}
-	}
+    @Override
+    public synchronized void propertyUpdateComplete() {
+        if (!runs.isEmpty()) {
+            view.expand(this);
+        }
+    }
 
-	/* Called by the watch
-	 * 
-	 */
-	@Override
-	public void propertyModified(String key, Event event, String oldValue, String newValue) {
-		Type type = null;
-		switch(event) {
-		case DELETE:
-			type = Type.DELETE;
-			break;
-		case MODIFIED:
-		case NEW:
-		default:
-			type = Type.UPDATE;
-			break;
-		}
+    private synchronized void update(Object element) {
+        if (view != null) {
+            view.refresh(this);
+        }
+    }
 
-		try {
-			propertyUpdate(new PropertyUpdate(key, newValue, type));
-		} catch(Throwable t) {
-			Activator.log(t);
-		}
-	}
+    /*
+     * Called by the watch
+     * 
+     */
+    @Override
+    public void propertyModified(String key, Event event, String oldValue, String newValue) {
+        Type type = null;
+        switch (event) {
+            case DELETE:
+                type = Type.DELETE;
+                break;
+            case MODIFIED:
+            case NEW:
+            default:
+                type = Type.UPDATE;
+                break;
+        }
 
-	/**
-	 * Check for any invalid runs that can be deleted
-	 */
-	private synchronized void checkForDeletedPendingRuns() {
-		ArrayList<Run> pendingRuns = new ArrayList<>(pendingRunMap.values());
-		for(Run pendingRun : pendingRuns) {
-			if (!pendingRun.updatedRecently() && !pendingRun.isValid()) {
-				pendingRunMap.remove(pendingRun.getRunName());
-			}
-		}
-	}
+        try {
+            propertyUpdate(new PropertyUpdate(key, newValue, type));
+        } catch (Throwable t) {
+            Activator.log(t);
+        }
+    }
+
+    /**
+     * Check for any invalid runs that can be deleted
+     */
+    private synchronized void checkForDeletedPendingRuns() {
+        ArrayList<Run> pendingRuns = new ArrayList<>(pendingRunMap.values());
+        for (Run pendingRun : pendingRuns) {
+            if (!pendingRun.updatedRecently() && !pendingRun.isValid()) {
+                pendingRunMap.remove(pendingRun.getRunName());
+            }
+        }
+    }
 
 }

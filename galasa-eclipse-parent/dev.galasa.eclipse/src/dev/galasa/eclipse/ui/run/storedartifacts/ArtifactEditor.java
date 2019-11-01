@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,118 +25,117 @@ import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 
 public class ArtifactEditor extends EditorPart {
-	
-	public final static String ID = "dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor";
-	
-	private ArtifactEditorInput editorInput;
-	
-	private boolean disposed = false;
 
-	private TextViewer textViewer;
+    public final static String  ID       = "dev.galasa.eclipse.ui.run.storedartifacts.ArtifactEditor";
 
-	private Document doc;
+    private ArtifactEditorInput editorInput;
 
-	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		
-		setSite(site);
-		setInput(input);
-		
-		if (!(input instanceof ArtifactEditorInput)) {
-			throw new PartInitException("Invalid input to ArtifactEditor (" + input.getClass().getName() + ")");
-		}
-		
-		this.editorInput   = (ArtifactEditorInput) input;
-		IRunResult runResult = this.editorInput.getRunResult();
-		TestStructure testStructure;
-		try {
-			testStructure = runResult.getTestStructure();
-		} catch (ResultArchiveStoreException e) {
-			throw new PartInitException("Error loading test structure for run " + this.editorInput.getName(),e);
-		}
-		
-		setTitle("Run " + testStructure.getRunName() + " - " + this.editorInput.getPath().getFileName().toString());
-		
-		new FetchStoredArtifactJob(this, editorInput.getPath()).schedule();
-	}
+    private boolean             disposed = false;
 
-	@Override
-	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(1,true));
-		
-		Composite lvComposite = new Composite(parent, SWT.NONE);
-		lvComposite.setLayout(new FillLayout());
-		
-		textViewer = new TextViewer(lvComposite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.heightHint = 0;
-		gd.widthHint = 0;
-		
-		lvComposite.setLayoutData(gd);
-		
-		textViewer.setEditable(false);
-		doc = new Document();
-		textViewer.setDocument(doc);
-		doc.set("Loading, please wait...");
-		
-		textViewer.getTextWidget().setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
-	}
+    private TextViewer          textViewer;
 
-	@Override
-	public void doSave(IProgressMonitor arg0) {
-		
-	}
+    private Document            doc;
 
-	@Override
-	public void doSaveAs() {
-	}
+    @Override
+    public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 
-	@Override
-	public boolean isDirty() {
-		return false;
-	}
+        setSite(site);
+        setInput(input);
 
-	@Override
-	public boolean isSaveAsAllowed() {
-		return false;
-	}
+        if (!(input instanceof ArtifactEditorInput)) {
+            throw new PartInitException("Invalid input to ArtifactEditor (" + input.getClass().getName() + ")");
+        }
 
+        this.editorInput = (ArtifactEditorInput) input;
+        IRunResult runResult = this.editorInput.getRunResult();
+        TestStructure testStructure;
+        try {
+            testStructure = runResult.getTestStructure();
+        } catch (ResultArchiveStoreException e) {
+            throw new PartInitException("Error loading test structure for run " + this.editorInput.getName(), e);
+        }
 
-	@Override
-	public void setFocus() {
-		textViewer.getControl().setFocus();
-		
-	}
-	
-	@Override
-	public void dispose() {
-		disposed = true;
-		super.dispose();
-	}
+        setTitle("Run " + testStructure.getRunName() + " - " + this.editorInput.getPath().getFileName().toString());
 
-	public boolean isDisposed() {
-		return disposed;
-	}
+        new FetchStoredArtifactJob(this, editorInput.getPath()).schedule();
+    }
 
-	public void setText(String text) {
-		if (disposed) {
-			return;
-		}
-		
-		//*** This method has to run on the UI thread, so switch if required
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				public void run() {
-					setText(text);
-				}
-			});
-			return;
-		}
+    @Override
+    public void createPartControl(Composite parent) {
+        parent.setLayout(new GridLayout(1, true));
 
-		//*** Now running on the UI thread
+        Composite lvComposite = new Composite(parent, SWT.NONE);
+        lvComposite.setLayout(new FillLayout());
 
-		this.doc.set(text);
-	}
-	
+        textViewer = new TextViewer(lvComposite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+
+        GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gd.heightHint = 0;
+        gd.widthHint = 0;
+
+        lvComposite.setLayoutData(gd);
+
+        textViewer.setEditable(false);
+        doc = new Document();
+        textViewer.setDocument(doc);
+        doc.set("Loading, please wait...");
+
+        textViewer.getTextWidget().setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
+    }
+
+    @Override
+    public void doSave(IProgressMonitor arg0) {
+
+    }
+
+    @Override
+    public void doSaveAs() {
+    }
+
+    @Override
+    public boolean isDirty() {
+        return false;
+    }
+
+    @Override
+    public boolean isSaveAsAllowed() {
+        return false;
+    }
+
+    @Override
+    public void setFocus() {
+        textViewer.getControl().setFocus();
+
+    }
+
+    @Override
+    public void dispose() {
+        disposed = true;
+        super.dispose();
+    }
+
+    public boolean isDisposed() {
+        return disposed;
+    }
+
+    public void setText(String text) {
+        if (disposed) {
+            return;
+        }
+
+        // *** This method has to run on the UI thread, so switch if required
+        if (Display.getCurrent() == null) {
+            Display.getDefault().asyncExec(new Runnable() {
+                public void run() {
+                    setText(text);
+                }
+            });
+            return;
+        }
+
+        // *** Now running on the UI thread
+
+        this.doc.set(text);
+    }
+
 }

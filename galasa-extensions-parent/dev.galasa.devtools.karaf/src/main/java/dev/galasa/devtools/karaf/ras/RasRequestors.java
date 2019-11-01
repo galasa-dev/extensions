@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.devtools.karaf.ras;
 
 import java.util.Collections;
@@ -15,29 +20,29 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 @Service
 public class RasRequestors implements Action {
 
-	@Override
-	public Object execute() throws Exception {
+    @Override
+    public Object execute() throws Exception {
 
-		final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
 
-		if (!devEnv.isFrameworkInitialised()) {
-			System.err.println("The Framework has not been initialised, use cirillo:init");
-			return null;
-		}
+        if (!devEnv.isFrameworkInitialised()) {
+            System.err.println("The Framework has not been initialised, use cirillo:init");
+            return null;
+        }
 
-		IResultArchiveStore ras = devEnv.getFramework().getResultArchiveStore();
-		List<IResultArchiveStoreDirectoryService> rasDir = ras.getDirectoryServices();
-		
-		List<String> requestors = rasDir.get(0).getRequestors();
-		
-		//*** Sort by test name
-		Collections.sort(requestors);
-		
-		for(String requestor : requestors) {
-			System.out.println(requestor);
-		}
-		
-		return null;
-	}
+        IResultArchiveStore ras = devEnv.getFramework().getResultArchiveStore();
+        List<IResultArchiveStoreDirectoryService> rasDir = ras.getDirectoryServices();
+
+        List<String> requestors = rasDir.get(0).getRequestors();
+
+        // *** Sort by test name
+        Collections.sort(requestors);
+
+        for (String requestor : requestors) {
+            System.out.println(requestor);
+        }
+
+        return null;
+    }
 
 }

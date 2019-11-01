@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.run.storedartifacts;
 
 import java.nio.file.Files;
@@ -17,8 +22,8 @@ public class ArtifactFile implements IArtifact {
 
     protected ArtifactFile(IRunResult runResult, Path path) {
         this.runResult = runResult;
-        this.path      = path;
-        this.name      = path.getFileName().toString();
+        this.path = path;
+        this.name = path.getFileName().toString();
     }
 
     @Override
@@ -62,7 +67,7 @@ public class ArtifactFile implements IArtifact {
             if ("plain/text".equals(contentType)) {
                 site.getPage().openEditor(new ArtifactEditorInput(this.runResult, this.path), ArtifactEditor.ID);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             Activator.log(e);
         }
     }

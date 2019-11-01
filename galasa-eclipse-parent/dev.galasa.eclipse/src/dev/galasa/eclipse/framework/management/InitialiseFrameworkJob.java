@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.framework.management;
 
 import java.io.InputStream;
@@ -18,57 +23,57 @@ import dev.galasa.framework.FrameworkInitialisation;
 
 public class InitialiseFrameworkJob extends Job {
 
-	public InitialiseFrameworkJob() {
-		super("Initialise Galasa Framework");
+    public InitialiseFrameworkJob() {
+        super("Initialise Galasa Framework");
 
-		this.setUser(true);
-	}
+        this.setUser(true);
+    }
 
-	@Override
-	protected IStatus run(IProgressMonitor monitor) {
+    @Override
+    protected IStatus run(IProgressMonitor monitor) {
 
-		monitor.beginTask("Initialising", 1);
-		setProperty(IProgressConstants.KEEP_PROPERTY, Boolean.TRUE);
+        monitor.beginTask("Initialising", 1);
+        setProperty(IProgressConstants.KEEP_PROPERTY, Boolean.TRUE);
 
-		try {
-			Properties bootstrapProperties = new Properties();
-			Properties overrideProperties = new Properties();
-			
-			//*** Request that the default local ras is included
-			overrideProperties.put("framework.resultarchive.store.include.default.local", "true");
+        try {
+            Properties bootstrapProperties = new Properties();
+            Properties overrideProperties = new Properties();
 
-			//*** Retrieve the preferences
-			IPreferenceStore preferenceStore = Activator.getInstance().getPreferenceStore();
-			String bootstrapUri   = preferenceStore.getString(PreferenceConstants.P_BOOTSTRAP_URI);
-			String overrideUri    = preferenceStore.getString(PreferenceConstants.P_OVERRIDES_URI);
+            // *** Request that the default local ras is included
+            overrideProperties.put("framework.resultarchive.store.include.default.local", "true");
 
-			URL bootstrapURL = new URL(bootstrapUri);
-			try (InputStream is = bootstrapURL.openStream()) {
-				bootstrapProperties.load(is);
-			}
+            // *** Retrieve the preferences
+            IPreferenceStore preferenceStore = Activator.getInstance().getPreferenceStore();
+            String bootstrapUri = preferenceStore.getString(PreferenceConstants.P_BOOTSTRAP_URI);
+            String overrideUri = preferenceStore.getString(PreferenceConstants.P_OVERRIDES_URI);
 
-			if (!overrideUri.isEmpty()) {  
-				URL overridesUrl = new URL(overrideUri);
-				try (InputStream is = overridesUrl.openStream()) {
-					overrideProperties.load(is);
-				}
-			}
-			
-			//Add the bootstrap url to the overrides for the benefit of the managers
-			overrideProperties.put("framework.bootstrap.url", bootstrapUri);
+            URL bootstrapURL = new URL(bootstrapUri);
+            try (InputStream is = bootstrapURL.openStream()) {
+                bootstrapProperties.load(is);
+            }
 
-			ConsoleLog console = Activator.getInstance().getConsole();
+            if (!overrideUri.isEmpty()) {
+                URL overridesUrl = new URL(overrideUri);
+                try (InputStream is = overridesUrl.openStream()) {
+                    overrideProperties.load(is);
+                }
+            }
 
-			FrameworkInitialisation fi = new FrameworkInitialisation(bootstrapProperties, overrideProperties, false, console);
-			
-			Activator.frameworkChange(fi.getFramework().isInitialised());
-		} catch (Exception e) {
-			return new Status(Status.ERROR, Activator.PLUGIN_ID,
-					"Failed", e);
+            // Add the bootstrap url to the overrides for the benefit of the managers
+            overrideProperties.put("framework.bootstrap.url", bootstrapUri);
 
-		}
+            ConsoleLog console = Activator.getInstance().getConsole();
 
-		return new Status(Status.OK, Activator.PLUGIN_ID, "Galasa Framework initialised");
-	}
+            FrameworkInitialisation fi = new FrameworkInitialisation(bootstrapProperties, overrideProperties, false,
+                    console);
+
+            Activator.frameworkChange(fi.getFramework().isInitialised());
+        } catch (Exception e) {
+            return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
+
+        }
+
+        return new Status(Status.OK, Activator.PLUGIN_ID, "Galasa Framework initialised");
+    }
 
 }

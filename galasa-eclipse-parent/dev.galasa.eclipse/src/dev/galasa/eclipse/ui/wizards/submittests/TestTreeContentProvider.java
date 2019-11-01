@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.eclipse.ui.wizards.submittests;
 
 import java.util.ArrayList;
@@ -16,29 +21,29 @@ import dev.galasa.eclipse.ui.wizards.submittests.model.TestBranch;
  * @author Michael Baylis
  *
  */
-public class TestTreeContentProvider implements IStructuredContentProvider,ITreeContentProvider {
-	
-	Pattern pattern = Pattern.compile("");
-	List<String> selectedClasses = new ArrayList<String>();
+public class TestTreeContentProvider implements IStructuredContentProvider, ITreeContentProvider {
 
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		
-		return;
-	}
+    Pattern      pattern         = Pattern.compile("");
+    List<String> selectedClasses = new ArrayList<String>();
 
-	public Object[] getElements(Object inputElement) {
-		return getChildren(inputElement);
-	}
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 
-	public Object[] getChildren(Object parentElement) {
-		
-		if (parentElement instanceof TestBranch) {
-			return ((TestBranch)parentElement).getChildren();
-		}
-		
-		return new Object[0];
-	}
-	
+        return;
+    }
+
+    public Object[] getElements(Object inputElement) {
+        return getChildren(inputElement);
+    }
+
+    public Object[] getChildren(Object parentElement) {
+
+        if (parentElement instanceof TestBranch) {
+            return ((TestBranch) parentElement).getChildren();
+        }
+
+        return new Object[0];
+    }
+
 //	private boolean findMatchingTestClasses(TestCollection tc){
 //		
 //		if (tc.testClasses != null){
@@ -63,25 +68,25 @@ public class TestTreeContentProvider implements IStructuredContentProvider,ITree
 //		return false;
 //		
 //	}
-	
+
 //	public void updateSearchText(String newSearchText, List<String> selectedClasses){
 //		pattern = Pattern.compile(newSearchText, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
 //		this.selectedClasses = selectedClasses;
 //	}
 
-	public Object getParent(Object element) {
-		return null;
-	}
+    public Object getParent(Object element) {
+        return null;
+    }
 
-	public boolean hasChildren(Object element) {
-		if (element instanceof TestBranch) {
-			return ((TestBranch)element).hasChildren();
-		}
-		
-		return false;
-	}
+    public boolean hasChildren(Object element) {
+        if (element instanceof TestBranch) {
+            return ((TestBranch) element).hasChildren();
+        }
 
-	public void dispose() {
-	}
+        return false;
+    }
+
+    public void dispose() {
+    }
 
 }

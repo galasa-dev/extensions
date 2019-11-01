@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package dev.galasa.devtools.karaf.ras;
 
 import java.util.ArrayList;
@@ -17,51 +22,52 @@ import dev.galasa.framework.spi.IRunResult;
 @Service
 public class RasLog implements Action {
 
-	@Argument(index = 0, name = "runName", description = "The run to display", required = false)
-	private String    runName;
-	
-	@Override
-	public Object execute() throws Exception {
+    @Argument(index = 0, name = "runName", description = "The run to display", required = false)
+    private String runName;
 
-		final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
-	
-		if (!devEnv.isFrameworkInitialised()) {
-			System.err.println("The Framework has not been initialised, use cirillo:init");
-			return null;
-		}
-		
-		if (this.runName == null) {
-			this.runName = devEnv.getRunName();
-		}
+    @Override
+    public Object execute() throws Exception {
 
-		if (this.runName == null) {
-			System.err.println("No Run name has been provided");
-			return null;
-		}
+        final DevEnvironment devEnv = DevEnvironment.getDevEnvironment();
 
-		this.runName = runName.toUpperCase();
+        if (!devEnv.isFrameworkInitialised()) {
+            System.err.println("The Framework has not been initialised, use cirillo:init");
+            return null;
+        }
 
-		IResultArchiveStore ras = devEnv.getFramework().getResultArchiveStore();
-		List<IResultArchiveStoreDirectoryService> rasDirs = ras.getDirectoryServices();
-		
-		ArrayList<IRunResult> allRuns = new ArrayList<>();
-		for(IResultArchiveStoreDirectoryService rasDir : rasDirs) {
-			allRuns.addAll(rasDir.getRuns(this.runName));
-		}
-		if (allRuns.isEmpty()) {
-			System.err.println("Unable to locate run " + this.runName);
-			return null;
-		}
+        if (this.runName == null) {
+            this.runName = devEnv.getRunName();
+        }
 
-		if (allRuns.size() > 1) {
-			System.err.println("The RAS has returned multiple runs for this run name, at the moment I can't handle that, because my developer was lazy");
-			return null;
-		}
+        if (this.runName == null) {
+            System.err.println("No Run name has been provided");
+            return null;
+        }
 
-		IRunResult run = allRuns.get(0);
-		
-		System.out.println(run.getLog());
-		
-		return null;
-	}
+        this.runName = runName.toUpperCase();
+
+        IResultArchiveStore ras = devEnv.getFramework().getResultArchiveStore();
+        List<IResultArchiveStoreDirectoryService> rasDirs = ras.getDirectoryServices();
+
+        ArrayList<IRunResult> allRuns = new ArrayList<>();
+        for (IResultArchiveStoreDirectoryService rasDir : rasDirs) {
+            allRuns.addAll(rasDir.getRuns(this.runName));
+        }
+        if (allRuns.isEmpty()) {
+            System.err.println("Unable to locate run " + this.runName);
+            return null;
+        }
+
+        if (allRuns.size() > 1) {
+            System.err.println(
+                    "The RAS has returned multiple runs for this run name, at the moment I can't handle that, because my developer was lazy");
+            return null;
+        }
+
+        IRunResult run = allRuns.get(0);
+
+        System.out.println(run.getLog());
+
+        return null;
+    }
 }
