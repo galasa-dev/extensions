@@ -12,7 +12,7 @@
 	<artifactId>dev.galasa.eclipse</artifactId>
 	<version>0.3.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-	<name>Galasa Eclipse</name>
+	<name>Galasa Eclipse Core Plugin</name>
 
 	<dependencies>
 		<dependency>

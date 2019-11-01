@@ -13,7 +13,7 @@
 	<!-- <groupId>io.jenkins.plugins</groupId> -->	
 	<artifactId>dev.galasa.jenkins</artifactId>
 	<packaging>hpi</packaging>
-	<name>Galasa Plugin</name>
+	<name>Galasa Jenkins Core Plugin</name>
 	
 	<parent>
 		<groupId>dev.galasa</groupId>

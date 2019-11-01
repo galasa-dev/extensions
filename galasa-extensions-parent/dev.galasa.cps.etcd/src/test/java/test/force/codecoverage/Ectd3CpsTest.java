@@ -1,3 +1,8 @@
+/*
+ * Licensed Materials - Property of IBM
+ * 
+ * (c) Copyright IBM Corp. 2019.
+ */
 package test.force.codecoverage;
 
 import static com.google.common.base.Charsets.UTF_8;
