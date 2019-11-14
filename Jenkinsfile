@@ -23,7 +23,7 @@ pipeline {
          }
          steps {
             script {
-               mvnProfile        = 'staging'
+               mvnProfile        = 'dev'
                mvnGoal           = 'deploy sonar:sonar'
                galasaSignJarSkip = 'false'
             }
