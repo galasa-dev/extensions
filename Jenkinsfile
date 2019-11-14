@@ -1,4 +1,4 @@
-def mvnProfile    = 'galasa-dev'
+def mvnProfile    = 'dev'
 def galasaSignJarSkip = 'true'
 
 pipeline {
@@ -23,22 +23,25 @@ pipeline {
          }
          steps {
             script {
-               mvnGoal       = 'deploy sonar:sonar'
+               mvnProfile        = 'staging'
+               mvnGoal           = 'deploy sonar:sonar'
                galasaSignJarSkip = 'false'
             }
          }
       }
-// If the test-preprod tag,  then set as appropriate
-//      stage('set-test-preprod') {
-//         when {
-//           environment name: 'GIT_BRANCH', value: 'origin/testpreprod'
-//         }
-//         steps {
-//            script {
-//               mvnProfile    = 'galasa-preprod'
-//            }
-//         }
-//     }
+// If it is the staging branch
+      stage('set-staging') {
+         when {
+           environment name: 'GIT_BRANCH', value: 'origin/staging'
+         }
+         steps {
+            script {
+               mvnGoal           = 'deploy'
+               mvnProfile        = 'staging'
+               galasaSignJarSkip = 'false'
+            }
+         }
+      }
 
 // for debugging purposes
       stage('report') {
@@ -67,47 +70,51 @@ pipeline {
 
       stage('Extensions Maven') {
          steps {
-            withSonarQubeEnv('GalasaSonarQube') {
-               dir('galasa-extensions-parent') {
-                  sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+            withCredentials([string(credentialsId: 'galasa-gpg', variable: 'GPG')]) {
+               withSonarQubeEnv('GalasaSonarQube') {
+                  dir('galasa-extensions-parent') {
+                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
 
-                  dir('dev.galasa.cps.etcd') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
-                  }
+                     dir('dev.galasa.cps.etcd') {
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
 
-                  dir('dev.galasa.ras.couchdb') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
-                  }
+                     dir('dev.galasa.ras.couchdb') {
+                       sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
 
-                  dir('dev.galasa.extensions.obr') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
-                  }
+                     dir('dev.galasa.extensions.obr') {
+                       sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
 
-                  dir('dev.galasa.devtools.karaf') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
-                  }
+                     dir('dev.galasa.devtools.karaf') {
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
 
-                  dir('dev.galasa.jenkins') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -DskipTests -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     dir('dev.galasa.jenkins') {
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -DskipTests -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
                   }
-              }
+               }
             }
          }
       }
       stage('Eclipse Maven') {
          steps {
-            withSonarQubeEnv('GalasaSonarQube') {
-               dir('galasa-eclipse-parent') {
-                  sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+            withCredentials([string(credentialsId: 'galasa-gpg', variable: 'GPG')]) {
+               withSonarQubeEnv('GalasaSonarQube') {
+                  dir('galasa-eclipse-parent') {
+                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
 
-                  dir('dev.galasa.eclipse') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
-                  }
+                     dir('dev.galasa.eclipse') {
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
 
-                  dir('dev.galasa.eclipse.feature') {
-                     sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     dir('dev.galasa.eclipse.feature') {
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -Djarsigner.skip=${galasaSignJarSkip} -Dgpg.skip=false -Dgpg.passphrase=$GPG -P ${mvnProfile} -B -e -fae --non-recursive ${mvnGoal}"
+                     }
                   }
-              }
+               }
             }
          }
       }
