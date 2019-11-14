@@ -1,4 +1,4 @@
-def mvnProfile    = 'galasa-dev'
+def mvnProfile    = 'dev'
 def galasaSignJarSkip = 'true'
 
 pipeline {
@@ -23,7 +23,8 @@ pipeline {
          }
          steps {
             script {
-               mvnGoal       = 'deploy sonar:sonar'
+               mvnProfile        = 'staging'
+               mvnGoal           = 'deploy sonar:sonar'
                galasaSignJarSkip = 'false'
             }
          }
