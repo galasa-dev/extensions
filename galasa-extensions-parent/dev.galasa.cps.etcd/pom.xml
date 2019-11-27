@@ -33,7 +33,7 @@
 		<dependency>
 			<groupId>io.etcd</groupId>
 			<artifactId>jetcd-core</artifactId>
-			<version>0.3.0</version>
+			<version>0.4.1</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
