@@ -12,7 +12,7 @@
 
 	<artifactId>dev.galasa.eclipse.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	
+
 	<name>Galasa Eclipse Feature</name>
 	<description>The main Galasa Eclipse feature</description>
 
@@ -41,6 +41,11 @@
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.ras.couchdb</artifactId>
 			<version>0.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.8.5</version>
 		</dependency>
 	</dependencies>
 
