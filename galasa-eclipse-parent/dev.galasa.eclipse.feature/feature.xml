@@ -346,11 +346,4 @@ version(s), and exceptions or additional permissions here}.&quot;
          install-size="0"
          version="0.3.0.qualifier"/>
 
-   <plugin
-         id="com.google.gson"
-         download-size="0"
-         install-size="0"
-         version="2.8.5"
-         unpack="false"/>
-
 </feature>
