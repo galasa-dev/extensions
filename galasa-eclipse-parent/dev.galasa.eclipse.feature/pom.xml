@@ -12,6 +12,8 @@
 
 	<artifactId>dev.galasa.eclipse.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
+	<!-- If updating version,  update in build/eclipse/dev.galasa.eclipse.site/pom.xml (multiple entries) and category.xml -->
+	<version>0.3.1</version>
 
 	<name>Galasa Eclipse Feature</name>
 	<description>The main Galasa Eclipse feature</description>
@@ -30,7 +32,7 @@
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.framework</artifactId>
-			<version>0.3.0</version>
+			<version>0.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
@@ -40,7 +42,7 @@
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.ras.couchdb</artifactId>
-			<version>0.3.0</version>
+			<version>0.3.1</version>
 		</dependency>
 	</dependencies>
 
