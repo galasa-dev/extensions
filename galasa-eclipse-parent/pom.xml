@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>dev.galasa</groupId>
 		<artifactId>galasa-parent</artifactId>
-		<version>0.3.0</version>
+		<version>0.4.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>galasa-eclipse-parent</artifactId>
-	<version>0.3.0</version>
+	<version>0.4.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Galasa Eclipse Parent</name>
@@ -23,10 +23,9 @@
 		<developerConnection>scm:git:git:://github.com/galasa-dev/extensions</developerConnection>
 	</scm>
 
-
 	<modules>
 		<module>dev.galasa.eclipse</module>
-		<module>dev.galasa.eclipse.feature</module>
+	 	<module>dev.galasa.eclipse.feature</module>
 	</modules>
 
 	<repositories>
