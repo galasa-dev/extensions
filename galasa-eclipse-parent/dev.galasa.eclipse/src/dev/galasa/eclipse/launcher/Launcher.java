@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -411,7 +412,7 @@ public class Launcher extends JavaLaunchDelegate {
                         "The galasa-boot.jar is missing from the plugin"));
             }
             bootUrl = FileLocator.toFileURL(bootUrl);
-            return Paths.get(bootUrl.toURI()).toFile().getAbsoluteFile(); // TODO handle spaces in dir name
+            return Paths.get(toUri(bootUrl)).toFile().getAbsoluteFile(); 
         } catch (Exception e) {
             throw new CoreException(new Status(Status.ERROR, Activator.PLUGIN_ID,
                     "Problem locating the galasa-boot.jar in the plugin", e));
@@ -456,6 +457,14 @@ public class Launcher extends JavaLaunchDelegate {
         MessageConsoleStream messageConsoleStreamBlue = console.newMessageStream();
         messageConsoleStreamBlue.setColor(new Color(null, new RGB(0, 0, 255)));
         consoleBlue = new PrintStream(messageConsoleStreamBlue, true);
+    }
+    
+    public static URI toUri(URL url) throws URISyntaxException {
+        String sUrl = url.toString();
+        
+        sUrl = sUrl.replaceAll(" ", "%20");
+        
+        return new URI(sUrl);
     }
 
 }
