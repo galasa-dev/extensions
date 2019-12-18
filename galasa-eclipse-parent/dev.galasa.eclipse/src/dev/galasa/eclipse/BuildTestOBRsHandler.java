@@ -85,12 +85,12 @@ public class BuildTestOBRsHandler extends AbstractHandler {
 
     private static final String INCLUDE_SELF_PROPERTY       = "includeSelf";
 
-    private static final String VORAS_GROUPID               = "dev.galasa";
+    private static final String GALASA_GROUPID               = "dev.galasa";
 
-    private static final String VORAS_ARTIFACT_ID           = "dev.galasa";
-    private static final String VORAS_FRAMEWORK_ARTIFACT_ID = "dev.galasa.framework";
+    private static final String GALASA_ARTIFACT_ID           = "dev.galasa";
+    private static final String GALASA_FRAMEWORK_ARTIFACT_ID = "dev.galasa.framework";
 
-    private static final String MAVEN_BUILD_TEST_OBR_GOAL   = "package " + VORAS_GROUPID
+    private static final String MAVEN_BUILD_TEST_OBR_GOAL   = "package " + GALASA_GROUPID
             + ":galasa-maven-plugin::obrresources";
 
     private static final String MAVEN_NATURE                = "org.eclipse.m2e.core.maven2Nature";
@@ -381,8 +381,8 @@ public class BuildTestOBRsHandler extends AbstractHandler {
                         + "\" is not a Maven Bundle project and will not be included in the workspace OBR.");
             } else if (!hasGalasaDependency(workspaceProject, progressMonitor)) {
                 writeInfo(PROJECT + " \"" + workspaceProject.getName() + "\" does not have a Maven dependency on "
-                        + VORAS_GROUPID + ":" + VORAS_ARTIFACT_ID + " or " + VORAS_GROUPID + ":"
-                        + VORAS_FRAMEWORK_ARTIFACT_ID + " and will not be included in the workspace OBR.");
+                        + GALASA_GROUPID + ":" + GALASA_ARTIFACT_ID + " or " + GALASA_GROUPID + ":"
+                        + GALASA_FRAMEWORK_ARTIFACT_ID + " and will not be included in the workspace OBR.");
             } else if (!hasManifest(workspaceProject, progressMonitor)) {
                 writeInfo(PROJECT + " \"" + workspaceProject.getName()
                         + "\" does not have META-INF/MANIFEST.MF file built and will not be included in the workspace OBR.");
@@ -445,7 +445,7 @@ public class BuildTestOBRsHandler extends AbstractHandler {
         for (Dependency dependecy : dependancies) {
             writeDebug(
                     "      " + dependecy.getGroupId() + ":" + dependecy.getArtifactId() + ":" + dependecy.getVersion());
-            if (dependecy.getGroupId().equals(VORAS_GROUPID) && dependecy.getArtifactId().equals(VORAS_ARTIFACT_ID)) {
+            if (dependecy.getGroupId().equals(GALASA_GROUPID) && dependecy.getArtifactId().equals(GALASA_ARTIFACT_ID)) {
                 hasGalasaDependency = true;
             }
         }
