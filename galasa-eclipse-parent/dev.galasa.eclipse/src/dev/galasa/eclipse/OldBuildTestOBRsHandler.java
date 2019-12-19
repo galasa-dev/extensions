@@ -30,11 +30,11 @@ public class OldBuildTestOBRsHandler /* extends AbstractHandler */ {
 //
 //	private static final String INCLUDE_SELF_PROPERTY = "includeSelf";
 //
-//	private static final String VORAS_GROUPID = "dev.galasa";
+//	private static final String GALASA_GROUPID = "dev.galasa";
 //
-//	private static final String VORAS_ARTIFACT_ID = "dev.galasa";
+//	private static final String GALASA_ARTIFACT_ID = "dev.galasa";
 //
-//	private static final String MAVEN_BUILD_TEST_OBR_GOAL = "package " + VORAS_GROUPID + ":galasa-maven-plugin::obrresources";
+//	private static final String MAVEN_BUILD_TEST_OBR_GOAL = "package " + GALASA_GROUPID + ":galasa-maven-plugin::obrresources";
 //
 //	private static final String MAVEN_NATURE = "org.eclipse.m2e.core.maven2Nature";
 //
@@ -301,7 +301,7 @@ public class OldBuildTestOBRsHandler /* extends AbstractHandler */ {
 //			} else if (!isMavenBundle(workspaceProject)) {
 //				writeInfo(PROJECT + " \"" + workspaceProject.getName() + "\" is not a Maven Bundle project and will not be built.");
 //			} else if (!hasGalasaDependency(workspaceProject, progressMonitor)) {
-//				writeInfo(PROJECT + " \"" + workspaceProject.getName() + "\" does not have a Maven dependency on " + VORAS_GROUPID + ":" + VORAS_ARTIFACT_ID + " and will not be built.");
+//				writeInfo(PROJECT + " \"" + workspaceProject.getName() + "\" does not have a Maven dependency on " + GALASA_GROUPID + ":" + GALASA_ARTIFACT_ID + " and will not be built.");
 //			} else {
 //				projectList.add(workspaceProject);
 //				setMaxProjectNameLength(workspaceProject.getName().length());
@@ -353,7 +353,7 @@ public class OldBuildTestOBRsHandler /* extends AbstractHandler */ {
 //		writeDebug("    Dependencies:");
 //		for (Dependency dependecy : dependancies) {
 //			writeDebug("      " + dependecy.getGroupId() + ":" + dependecy.getArtifactId() + ":" + dependecy.getVersion());
-//			if (dependecy.getGroupId().equals(VORAS_GROUPID) && dependecy.getArtifactId().equals(VORAS_ARTIFACT_ID)) {
+//			if (dependecy.getGroupId().equals(GALASA_GROUPID) && dependecy.getArtifactId().equals(GALASA_ARTIFACT_ID)) {
 //				hasGalasaDependency = true;
 //			}
 //		}
