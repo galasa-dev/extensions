@@ -240,7 +240,7 @@ public class Launcher extends JavaLaunchDelegate {
         programArguments.add("--obr");
         programArguments.add(workspaceOBR.toURI().toString());
         programArguments.add("--obr");
-        programArguments.add("mvn:dev.galasa/dev.galasa.uber.obr/0.3.1/obr");
+        programArguments.add("mvn:dev.galasa/dev.galasa.uber.obr/0.4.0-SNAPSHOT/obr");
         if (trace) {
             programArguments.add("--trace");
         }
