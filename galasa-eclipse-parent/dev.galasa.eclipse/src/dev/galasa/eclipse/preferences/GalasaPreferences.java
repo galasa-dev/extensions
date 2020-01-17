@@ -19,6 +19,7 @@ public class GalasaPreferences extends FieldEditorPreferencePage implements IWor
     StringFieldEditor overridesField;
     StringFieldEditor requestorField;
     StringFieldEditor remoteMavenField;
+    StringFieldEditor obrVersion;
 
     public GalasaPreferences() {
         super(GRID);
@@ -45,6 +46,8 @@ public class GalasaPreferences extends FieldEditorPreferencePage implements IWor
                 getFieldEditorParent());
         remoteMavenField = new StringFieldEditor(PreferenceConstants.P_REMOTEMAVEN_URI, "Remote Maven URI:",
                 getFieldEditorParent());
+        obrVersion = new StringFieldEditor(PreferenceConstants.P_OBRVERSION, "OBR Version:",
+                getFieldEditorParent());
 
         bootstrapField.setErrorMessage("Bootstrap URI is required");
         bootstrapField.setEmptyStringAllowed(false);
@@ -53,6 +56,7 @@ public class GalasaPreferences extends FieldEditorPreferencePage implements IWor
         addField(overridesField);
         addField(requestorField);
         addField(remoteMavenField);
+        addField(obrVersion);
     }
 
 }
