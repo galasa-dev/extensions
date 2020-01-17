@@ -92,12 +92,17 @@ public class Launcher extends JavaLaunchDelegate {
         String overrideUri = preferenceStore.getString(PreferenceConstants.P_OVERRIDES_URI);
         String remoteMavenUri = preferenceStore.getString(PreferenceConstants.P_REMOTEMAVEN_URI);
         String requestorId = preferenceStore.getString(PreferenceConstants.P_REQUESTOR_ID);
+        String obrVersion = preferenceStore.getString(PreferenceConstants.P_OBRVERSION);
 
         if (bootstrapUri.isEmpty()) {
             bootstrapUri = preferenceStore.getDefaultString(PreferenceConstants.P_BOOTSTRAP_URI);
         }
         if (requestorId.isEmpty()) {
             requestorId = preferenceStore.getDefaultString(PreferenceConstants.P_REQUESTOR_ID);
+        }
+        obrVersion = obrVersion.trim();
+        if (obrVersion.isEmpty()) {
+            obrVersion = "0.4.0-SNAPSHOT";
         }
 
         // *** Get the project, classname and bundleName
@@ -240,7 +245,7 @@ public class Launcher extends JavaLaunchDelegate {
         programArguments.add("--obr");
         programArguments.add(workspaceOBR.toURI().toString());
         programArguments.add("--obr");
-        programArguments.add("mvn:dev.galasa/dev.galasa.uber.obr/0.3.1/obr");
+        programArguments.add("mvn:dev.galasa/dev.galasa.uber.obr/" + obrVersion + "/obr");
         if (trace) {
             programArguments.add("--trace");
         }
