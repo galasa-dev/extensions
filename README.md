@@ -1,6 +1,5 @@
 # Galasa Extensions
-This respository contains the Eclipse plug-in that enables you to run a Galasa test against SimBank or against your own application. 
-Contains implementations of extensions that are required by the Galasa infrastructure, including RAS (ResultArchiveStore), etcd and CouchDB databases for storing test information and a Jenkins plugin to support continuous integration testing as part of a DevOps strategy.
+This respository contains implementations of extensions that are required by the Galasa infrastructure, including RAS (ResultArchiveStore), Kubernetes etcd and CouchDB databases for storing test information and a Jenkins plugin to support continuous integration testing as part of a DevOps strategy.
 
 ## Documentation
 
