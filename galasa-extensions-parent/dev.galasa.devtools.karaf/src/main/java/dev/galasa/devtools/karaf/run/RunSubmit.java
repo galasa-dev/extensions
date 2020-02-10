@@ -80,7 +80,7 @@ public class RunSubmit implements Action {
 
         for (int i = 0; i < this.count; i++) {
             IRun run = runs.submitRun(type, requestor, bundle, test, repo, obr, stream, groupName, false,
-                    Boolean.parseBoolean(trace), null);
+                    Boolean.parseBoolean(trace), null, null, null);
             System.out.println("Run " + run.getName() + " submitted");
             devEnv.setRunName(run.getName());
         }

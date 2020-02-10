@@ -86,7 +86,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
     private String                              mavenRepository        = "";
 
     private static final int                    NUMBER_OF_RUNS_DEFAULT = 1;
-    private static final int                    POLL_TIME_DEFAULT      = 120;
+    private static final int                    POLL_TIME_DEFAULT      = 30;
 
     private GalasaConfiguration                 galasaConfiguration;
     private StandardUsernamePasswordCredentials credentials            = null;
@@ -287,7 +287,13 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
 
         logger.println("Tests ignored:");
         for (TestCase test : currentTests.values()) {
-            if (test.getRunDetails().getResult() == null || "Ignored".equals(test.getRunDetails().getResult())) {
+            if ("Ignored".equals(test.getRunDetails().getResult())) {
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+            }
+        }
+        logger.println("Tests lost:");
+        for (TestCase test : currentTests.values()) {
+            if (test.getRunDetails().getResult() == null) {
                 this.failedTests++;
                 logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
             }
@@ -343,7 +349,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
             ScheduleStatus status = getTestStatus(context);
             if (status == null) {
                 this.pollFailures++;
-                if (pollFailures >= this.TOTAL_FAILURES) {
+                if (pollFailures >= TOTAL_FAILURES) {
                     logger.println("Total number of poll attempts exceeds total failures, abandoning run");
                     return false;
                 } else
