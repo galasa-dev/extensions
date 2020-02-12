@@ -2,3 +2,4 @@
 .apt_generated_tests/
 *.versionsBackup
 galasa-eclipse-parent/target
+/.project
