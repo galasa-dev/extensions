@@ -25,7 +25,6 @@ pipeline {
             script {
                mvnProfile        = 'dev'
                mvnGoal           = 'deploy sonar:sonar'
-               galasaSignJarSkip = 'false'
             }
          }
       }
