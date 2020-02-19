@@ -186,7 +186,7 @@ public class ApiComms {
         try {
             scheduleRequestString = new Gson().toJson(request);
 
-            HttpPost postRequest = new HttpPost(galasaContext.getGalasaURI() + "run/" + uuid.toString());
+            HttpPost postRequest = new HttpPost(galasaContext.getGalasaURI() + "runs/" + uuid.toString());
             postRequest.addHeader("Accept", "application/json");
             postRequest.addHeader("Content-Type", "application/json");
             postRequest.setEntity(new StringEntity(scheduleRequestString));
@@ -209,7 +209,7 @@ public class ApiComms {
         String scheduleResponseString = null;
         ScheduleStatus scheduleStatus = null;
         try {
-            HttpGet getRequest = new HttpGet(this.galasaContext.getGalasaURI() + "run/" + uuid.toString());
+            HttpGet getRequest = new HttpGet(this.galasaContext.getGalasaURI() + "runs/" + uuid.toString());
             getRequest.addHeader("Accept", "application/json");
 
             scheduleResponseString = this.galasaContext.execute(getRequest, logger);

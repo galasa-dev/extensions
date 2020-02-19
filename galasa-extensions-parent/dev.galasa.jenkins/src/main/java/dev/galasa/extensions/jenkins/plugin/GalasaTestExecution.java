@@ -325,7 +325,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         try {
             scheduleRequestString = new Gson().toJson(request);
 
-            HttpPost postRequest = new HttpPost(context.getGalasaURI() + "run/" + this.uuid.toString());
+            HttpPost postRequest = new HttpPost(context.getGalasaURI() + "runs/" + this.uuid.toString());
             postRequest.addHeader("Accept", "application/json");
             postRequest.addHeader("Content-Type", "application/json");
             postRequest.setEntity(new StringEntity(scheduleRequestString));
@@ -371,7 +371,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         String scheduleResponseString = null;
         ScheduleStatus scheduleStatus = null;
         try {
-            HttpGet getRequest = new HttpGet(context.getGalasaURI() + "run/" + this.uuid.toString());
+            HttpGet getRequest = new HttpGet(context.getGalasaURI() + "runs/" + this.uuid.toString());
             getRequest.addHeader("Accept", "application/json");
 
             scheduleResponseString = context.execute(getRequest, logger);

@@ -171,7 +171,7 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
 
         logger.println("Galasa Server Poll time is: " + this.pollTime + " seconds");
         
-        submitTestToSchedule(test, runName, comms);
+        submitTestToSchedule(test, runName, this.overrides, comms);
         
         ScheduleStatus lastStatus = null;
         
@@ -233,7 +233,11 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
     }
 
 
-    private String submitTestToSchedule(String test, String runName, ApiComms comms) throws AbortException {
+    private String submitTestToSchedule(String test, 
+            String runName,
+            Properties overrides,
+            ApiComms comms) throws AbortException {
+        
         ScheduleRequest request = new ScheduleRequest();
         request.setRequestorType(RequestorType.JENKINS);
         request.setTestStream(this.stream);
@@ -251,6 +255,8 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
         }
         
         request.getClassNames().add(test);
+        
+        request.setRunProperties(overrides);
         
         return comms.submitTests(request, uuid);
     }
