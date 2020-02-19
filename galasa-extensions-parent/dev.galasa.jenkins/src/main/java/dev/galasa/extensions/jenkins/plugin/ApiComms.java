@@ -42,8 +42,8 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import dev.galasa.framework.api.runs.bind.ScheduleRequest;
-import dev.galasa.framework.api.runs.bind.ScheduleStatus;
+import dev.galasa.api.runs.ScheduleRequest;
+import dev.galasa.api.runs.ScheduleStatus;
 import hudson.AbortException;
 import hudson.model.Run;
 
@@ -233,9 +233,5 @@ public class ApiComms {
             return null;
         }
     }
-    
-
-
-
 
 }
