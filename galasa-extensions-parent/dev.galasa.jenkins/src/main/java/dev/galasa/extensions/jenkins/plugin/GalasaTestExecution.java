@@ -49,20 +49,18 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
-import dev.galasa.framework.SerializedRun;
-import dev.galasa.framework.api.runs.bind.RequestorType;
-import dev.galasa.framework.api.runs.bind.ScheduleRequest;
-import dev.galasa.framework.api.runs.bind.ScheduleStatus;
-import dev.galasa.framework.api.runs.bind.Status;
-import dev.galasa.framework.api.runs.bind.TestCase;
-import dev.galasa.framework.api.runs.bind.TestRun;
+import dev.galasa.api.run.Run;
+import dev.galasa.api.runs.ScheduleRequest;
+import dev.galasa.api.runs.ScheduleStatus;
+import dev.galasa.extensions.jenkins.plugin.bind.Status;
+import dev.galasa.extensions.jenkins.plugin.bind.TestCase;
+import dev.galasa.extensions.jenkins.plugin.bind.TestRun;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -73,7 +71,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
     private String[]                            tests;
     private String                              testInstance;
     private String                              stream;
-    private String                              envProps;
+    private String[]                            envProps;
     private Properties                          overrides;
     private int                                 numberOfRuns           = 0;
     private int                                 pollTime               = 0;
@@ -99,13 +97,13 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
 
     private Properties                          properties;
 
-    private Run                                 run;
+    private hudson.model.Run<?,?>               run;
     private String                              jwt;
 
     private UUID                                uuid;
 
     @DataBoundConstructor
-    public GalasaTestExecution(String[] tests, String stream, String envProps) {
+    public GalasaTestExecution(String[] tests, String stream, String[] envProps) {
         this.tests = tests.clone();
         this.stream = stream;
         this.envProps = envProps;
@@ -162,8 +160,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
             this.testInstance = "default";
         }
 
-        if (this.envProps == null || envProps.trim().isEmpty()) {
-            this.envProps = "";
+        if (this.envProps == null) {
+            this.envProps = new String[0];
         }
 
         if (this.numberOfRuns == 0) {
@@ -180,10 +178,10 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
+    public void perform(hudson.model.Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
-        this.run = run;
         this.logger = listener.getLogger();
+        this.run = run;
 
         logger.println("************************************************************");
         logger.println("** Galasa Test Selection starting                        ***");
@@ -205,8 +203,14 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         }
 
         // add envProps to overrideString if specified
-        if (this.envProps != null && !this.envProps.trim().isEmpty()) {
-            properties.load(new StringReader(envProps));
+        for(String override : this.envProps) {
+            override = override.trim();
+            if (!override.isEmpty()) {
+                int equals = override.indexOf('=');
+                if (equals > 0) {
+                    this.overrides.put(override.substring(0, equals), override.substring(equals + 1));
+                }
+            }
         }
 
         // *** Select tests
@@ -303,10 +307,11 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
     private void submitAllTestsToSchedule(Collection<TestCase> collection, GalasaContext context)
             throws AbortException {
         ScheduleRequest request = new ScheduleRequest();
-        request.setRequestorType(RequestorType.JENKINS);
+        request.setRequestorType("JENKINS");
         request.setTestStream(this.stream);
         request.setClassNames(new ArrayList<String>());
         request.setTrace(this.trace);
+        request.setOverrides(this.overrides);
 
         if (!this.mavenRepository.equals("")) {
             request.setMavenRepository(this.mavenRepository);
@@ -355,8 +360,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
                 } else
                     continue;
             }
-            testFinished = status.getScheduleStatus().isRunComplete();
-            if (testFinished)
+            if (status.isComplete())
                 return true;
             try {
                 Thread.sleep(this.pollTime * 1000);
@@ -479,9 +483,9 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
 
         boolean updated = false;
 
-        for (SerializedRun run : scheduleStatus.getRuns()) {
+        for (Run run : scheduleStatus.getRuns()) {
             TestCase test = currentTests.get(run.getTest());
-            SerializedRun oldRunDetails = test.getRunDetails();
+            Run oldRunDetails = test.getRunDetails();
             if (oldRunDetails != null) {
                 if (!oldRunDetails.getStatus().equals(run.getStatus())) {
                     updated = true;
@@ -505,7 +509,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         return stream;
     }
 
-    public String getEnvProps() {
+    public String[] getEnvProps() {
         return envProps;
     }
 

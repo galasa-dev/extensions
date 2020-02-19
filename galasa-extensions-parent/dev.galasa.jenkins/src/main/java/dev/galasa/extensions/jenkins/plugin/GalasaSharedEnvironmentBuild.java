@@ -17,17 +17,15 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 
-import dev.galasa.framework.SerializedRun;
-import dev.galasa.framework.api.runs.bind.RequestorType;
-import dev.galasa.framework.api.runs.bind.ScheduleRequest;
-import dev.galasa.framework.api.runs.bind.ScheduleStatus;
+import dev.galasa.api.run.Run;
+import dev.galasa.api.runs.ScheduleRequest;
+import dev.galasa.api.runs.ScheduleStatus;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -52,15 +50,8 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
 
     private static final int                    POLL_TIME_DEFAULT      = 30;
 
-    private GalasaConfiguration                 galasaConfiguration;
-    private StandardUsernamePasswordCredentials credentials            = null;
-
     private PrintStream                         logger;
 
-    private Properties                          properties;
-
-    private Run                                 run;
-    
     private UUID uuid;
 
     @DataBoundConstructor
@@ -128,9 +119,8 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
     }
 
     @Override
-    public void perform(Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
+    public void perform(hudson.model.Run<?, ?> run, FilePath workspace, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
-        this.run = run;
         this.logger = listener.getLogger();
         
         setDefaults();
@@ -186,8 +176,7 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
                     continue;
             } else {
             }
-            testFinished = lastStatus.getScheduleStatus().isRunComplete();
-            if (testFinished)
+            if (lastStatus.isComplete())
                 break;
             try {
                 Thread.sleep(this.pollTime * 1000);
@@ -202,7 +191,7 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
             throw new AbortException("Lost build run or there are too many of them for schedule id " + this.uuid.toString());
         }
         
-        SerializedRun runResult = lastStatus.getRuns().get(0);
+        Run runResult = lastStatus.getRuns().get(0);
         
         if (!"up".equalsIgnoreCase(runResult.getStatus())) {
             logger.println("Shared Environment Build failed - " + runResult.getName());
@@ -239,7 +228,7 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
             ApiComms comms) throws AbortException {
         
         ScheduleRequest request = new ScheduleRequest();
-        request.setRequestorType(RequestorType.JENKINS);
+        request.setRequestorType("JENKINS");
         request.setTestStream(this.stream);
         request.setClassNames(new ArrayList<String>());
         request.setTrace(this.trace);
@@ -256,7 +245,7 @@ public class GalasaSharedEnvironmentBuild extends Builder implements SimpleBuild
         
         request.getClassNames().add(test);
         
-        request.setRunProperties(overrides);
+        request.setOverrides(overrides);
         
         return comms.submitTests(request, uuid);
     }
