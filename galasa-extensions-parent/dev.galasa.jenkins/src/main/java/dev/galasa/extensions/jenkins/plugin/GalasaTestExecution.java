@@ -55,6 +55,7 @@ import dev.galasa.api.runs.ScheduleStatus;
 import dev.galasa.extensions.jenkins.plugin.bind.Status;
 import dev.galasa.extensions.jenkins.plugin.bind.TestCase;
 import dev.galasa.extensions.jenkins.plugin.bind.TestRun;
+import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.FilePath;
@@ -101,6 +102,8 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
     private String                              jwt;
 
     private UUID                                uuid;
+    
+    private final Gson        gson = GalasaGsonBuilder.build();
 
     @DataBoundConstructor
     public GalasaTestExecution(String[] tests, String stream, String[] envProps) {
@@ -328,7 +331,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         String scheduleRequestString = null;
         String scheduleResponseString = null;
         try {
-            scheduleRequestString = new Gson().toJson(request);
+            scheduleRequestString = gson.toJson(request);
 
             HttpPost postRequest = new HttpPost(context.getGalasaURI() + "runs/" + this.uuid.toString());
             postRequest.addHeader("Accept", "application/json");
@@ -379,7 +382,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
             getRequest.addHeader("Accept", "application/json");
 
             scheduleResponseString = context.execute(getRequest, logger);
-            scheduleStatus = new Gson().fromJson(scheduleResponseString, ScheduleStatus.class);
+            scheduleStatus = gson.fromJson(scheduleResponseString, ScheduleStatus.class);
             updateTestStatus(scheduleStatus, logger);
             return scheduleStatus;
         } catch (AbortException e) {

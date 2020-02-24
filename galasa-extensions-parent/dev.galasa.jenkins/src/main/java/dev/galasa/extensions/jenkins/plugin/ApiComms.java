@@ -44,6 +44,7 @@ import com.google.gson.JsonSyntaxException;
 
 import dev.galasa.api.runs.ScheduleRequest;
 import dev.galasa.api.runs.ScheduleStatus;
+import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import hudson.AbortException;
 import hudson.model.Run;
 
@@ -55,6 +56,7 @@ public class ApiComms {
     private StandardUsernamePasswordCredentials credentials;
     private Run<?, ?> run;
     private String                              jwt;
+    private final Gson        gson = GalasaGsonBuilder.build();
 
     public ApiComms(PrintStream logger, Run<?, ?> run) throws MalformedURLException, AbortException {
         this.logger = logger;
@@ -184,7 +186,7 @@ public class ApiComms {
         String scheduleRequestString = null;
         String scheduleResponseString = null;
         try {
-            scheduleRequestString = new Gson().toJson(request);
+            scheduleRequestString = gson.toJson(request);
 
             HttpPost postRequest = new HttpPost(galasaContext.getGalasaURI() + "runs/" + uuid.toString());
             postRequest.addHeader("Accept", "application/json");
@@ -213,7 +215,7 @@ public class ApiComms {
             getRequest.addHeader("Accept", "application/json");
 
             scheduleResponseString = this.galasaContext.execute(getRequest, logger);
-            scheduleStatus = new Gson().fromJson(scheduleResponseString, ScheduleStatus.class);
+            scheduleStatus = gson.fromJson(scheduleResponseString, ScheduleStatus.class);
             return scheduleStatus;
         } catch (AbortException e) {
             throw e;
