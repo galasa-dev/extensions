@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>dev.galasa</groupId>
 		<artifactId>galasa-parent</artifactId>
-		<version>0.5.0</version>
+		<version>0.6.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>galasa-eclipse-parent</artifactId>
-	<version>0.5.0</version>
+	<version>0.6.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Galasa Eclipse Parent</name>
@@ -39,6 +39,7 @@
 	<properties>
 		<tycho-version>1.4.0</tycho-version>
 		<tycho-extras.version>1.4.0</tycho-extras.version>
+		<tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
 		<!-- Exclude tests until Jenkins display issue resolved -->
 		<skipTests>true</skipTests>
 	</properties>
@@ -70,12 +71,12 @@
 			<dependency>
 				<groupId>dev.galasa</groupId>
 				<artifactId>dev.galasa</artifactId>
-				<version>0.5.0</version>
+				<version>0.6.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>dev.galasa</groupId>
 				<artifactId>dev.galasa.framework</artifactId>
-				<version>0.5.0</version>
+				<version>0.6.0-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -130,9 +131,7 @@
 				</dependencies>
 				<configuration>
 					<timestampProvider>jgit</timestampProvider>
-					<jgit.ignore>
-						pom.xml
-					</jgit.ignore>
+					<jgit.ignore></jgit.ignore>
 					<forceContextQualfier>true</forceContextQualfier>
 					<jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
 					<strictVersions>false</strictVersions>
