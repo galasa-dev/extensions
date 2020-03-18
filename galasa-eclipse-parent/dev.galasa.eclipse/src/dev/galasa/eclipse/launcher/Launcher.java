@@ -101,8 +101,8 @@ public class Launcher extends JavaLaunchDelegate {
             requestorId = preferenceStore.getDefaultString(PreferenceConstants.P_REQUESTOR_ID);
         }
         obrVersion = obrVersion.trim();
-        if (obrVersion.isEmpty()) {
-            obrVersion = "0.6.0-SNAPSHOT";
+        if (obrVersion.isEmpty() || obrVersion.equalsIgnoreCase("LATEST")) {
+            obrVersion = "LATEST";
         }
 
         // *** Get the project, classname and bundleName
