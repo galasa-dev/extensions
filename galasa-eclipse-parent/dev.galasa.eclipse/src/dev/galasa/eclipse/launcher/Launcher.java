@@ -101,7 +101,7 @@ public class Launcher extends JavaLaunchDelegate {
             requestorId = preferenceStore.getDefaultString(PreferenceConstants.P_REQUESTOR_ID);
         }
         obrVersion = obrVersion.trim();
-        if (obrVersion.isEmpty()) {
+        if (obrVersion.isEmpty() || obrVersion.equalsIgnoreCase("LATEST")) {
             obrVersion = "LATEST";
         }
 
