@@ -102,7 +102,7 @@ public class Launcher extends JavaLaunchDelegate {
         }
         obrVersion = obrVersion.trim();
         if (obrVersion.isEmpty()) {
-            obrVersion = "0.6.0-SNAPSHOT";
+            obrVersion = "LATEST";
         }
 
         // *** Get the project, classname and bundleName
