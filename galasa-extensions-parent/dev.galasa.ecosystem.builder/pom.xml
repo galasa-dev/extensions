@@ -10,6 +10,6 @@
   		<artifactId>dev.galasa.ecosystem.builder</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   		<name>Galasa Ecosystem Builder</name>
-  		<description>Builds Galasa Ecosystem using default or user defined properties</description>
+  		<description>Builds Galasa Ecosystem using default or user defined properties, currently only working for docker</description>
   	
 </project>
