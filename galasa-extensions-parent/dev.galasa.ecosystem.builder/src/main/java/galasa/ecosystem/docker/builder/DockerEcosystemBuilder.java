@@ -29,9 +29,6 @@ public class DockerEcosystemBuilder {
 		  String cpsVolSrc = null;
 		  String cpsVolTrg = null;
 		  String cpsPort = null;
-		  String cdbiName = "init";
-		  String cdbiVolSrc = "init";
-		  String cdbiVolTrg = "init";
 		  String cdbName = null;
 		  String cdbResPol = null;
 		  String cdbEnv = null;
