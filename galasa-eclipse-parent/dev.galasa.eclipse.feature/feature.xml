@@ -2,7 +2,7 @@
 <feature
       id="dev.galasa.eclipse.feature"
       label="Galasa Core"
-      version="0.6.0.qualifier"
+      version="0.7.0.qualifier"
       provider-name="IBM">
 
    <copyright>
@@ -320,30 +320,30 @@ version(s), and exceptions or additional permissions here}.&quot;
          id="dev.galasa.eclipse"
          download-size="0"
          install-size="0"
-         version="0.6.0.qualifier"/>
+         version="0.7.0.qualifier"/>
 
    <plugin
          id="dev.galasa"
          download-size="0"
          install-size="0"
-         version="0.6.0.qualifier"/>
+         version="0.7.0.qualifier"/>
 
    <plugin
          id="dev.galasa.framework"
          download-size="0"
          install-size="0"
-         version="0.6.0.qualifier"/>
+         version="0.7.0.qualifier"/>
 
    <plugin
          id="dev.galasa.cps.etcd"
          download-size="0"
          install-size="0"
-         version="0.6.0.qualifier"/>
+         version="0.7.0.qualifier"/>
 
    <plugin
          id="dev.galasa.ras.couchdb"
          download-size="0"
          install-size="0"
-         version="0.6.0.qualifier"/>
+         version="0.7.0.qualifier"/>
 
 </feature>
