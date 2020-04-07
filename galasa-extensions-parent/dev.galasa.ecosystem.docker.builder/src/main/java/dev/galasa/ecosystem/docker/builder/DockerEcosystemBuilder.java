@@ -20,7 +20,7 @@ public class DockerEcosystemBuilder {
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Welcome to the Galasa Ecosystem manager for Docker" + "\n");
 		System.out.println("Here is your current configuration for the Ecosystem:" + "\n");
-		String configLocation = "src/main/resources/docker/";
+		String configLocation = "src/main/resources/";
 		
 		try {
 			BufferedReader dis = new BufferedReader(new FileReader("config.yml"));
@@ -332,7 +332,7 @@ public class DockerEcosystemBuilder {
 	
 	static void updateyml (String key, String value) throws FileNotFoundException {
 		
-		String configLocation = "src/main/resources/docker/";
+		String configLocation = "src/main/resources/";
 		String path = System.getProperty("user.dir");
 		System.out.println(path);
 		Yaml yaml = new Yaml();
@@ -348,6 +348,7 @@ public class DockerEcosystemBuilder {
 	
 	static void ymlgen (Map<String, Object> obj) throws FileNotFoundException {
 		
+		String configLocation = "src/main/resources/";		
 		File yaml = new File("config.yml");
 		if (yaml.exists()) {
 			yaml.delete();
@@ -380,7 +381,7 @@ public class DockerEcosystemBuilder {
 	
 	static void generateScript () throws FileNotFoundException, UnsupportedEncodingException {
 		
-		String configLocation = "src/main/resources/docker/";
+		String configLocation = "src/main/resources/";
 		String path = System.getProperty("user.dir");
 		Yaml yaml = new Yaml();
 		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream("config.yml");
