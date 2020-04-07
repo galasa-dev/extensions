@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -16,7 +15,7 @@ import org.yaml.snakeyaml.Yaml;
 
 public class DockerEcosystemBuilder {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Welcome to the Galasa Ecosystem manager for Docker" + "\n");
@@ -50,9 +49,8 @@ public class DockerEcosystemBuilder {
 			alterProps();
 		
 		}
-		else {
+		else if (reuse.toUpperCase().equals("N")){
 			System.out.println("Generating script..." + "\n");
-				snakeyml();
 			try {
 				generateScript();
 			} catch (FileNotFoundException e) {
@@ -67,8 +65,8 @@ public class DockerEcosystemBuilder {
 		
 	}
 	
-	static void alterProps() {
-		System.out.println("\n" + "Which of these properties would you like to change? Please enter the property name(s) from above you wish to change all one line withs spaces between each");
+	static void alterProps() throws FileNotFoundException {
+		System.out.println("\n" + "Which of these properties would you like to change? Please enter the property name(s) from above you wish to change all one line with spaces between each");
 		System.out.println("\n" + "Enter exit to return to the main screen");
 		Scanner scanner = new Scanner(System.in);
 		String propList = scanner.nextLine();
@@ -84,11 +82,18 @@ public class DockerEcosystemBuilder {
 			System.out.println("What would you like to update the hostname the docker container will use to?" + "\n");
 			String hostname = scanner.nextLine();
 			System.out.println("Hostname will be changed to " + hostname + "\n");
+			String key = "hostname";
+			String value = hostname;
+			updateyml(key, value);
+			
 		}
 		if (propList.toUpperCase().contains("NETWORKNAME")) {
 			System.out.println("What would you like to update the network name to?" + "\n");
 			String netName = scanner.nextLine();
 			System.out.println("Network name will be changed to " + netName + "\n");
+			String key = "networkName";
+			String value = netName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESTARTPOLICY")) {
 			System.out.println("What would you like to set the restart policy as - no, on-failure, always or unless-stopped (default always):");
@@ -98,22 +103,34 @@ public class DockerEcosystemBuilder {
 			      ResPol = scanner.nextLine();
 				}
 			System.out.println("Restart Policy set to: " + ResPol);
+			String key = "restartPolicy";
+			String value = ResPol;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("APICONTAINERNAME")) {
 			System.out.println("What would you like the API container name set to: " + "\n");
 			String apiName = scanner.nextLine();
 			System.out.println("API container name set to: " + apiName);
+			String key = "apiContainerName";
+			String value = apiName;
+			updateyml(key, value);
 			
 		}
 		if (propList.toUpperCase().contains("APIVOLNAME")) {
 			System.out.println("Please enter the name of the volume you would like to create for the API container: " + "\n");
 			String apiVol = scanner.nextLine();
 			System.out.println("Api Volume name set to: " + apiVol);
+			String key = "apiVolName";
+			String value = apiVol;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("APIMOUNTTARGET")) {
 			System.out.println("Please enter the directory you would like the volume mounted to: " + "\n");
 			String apiMount = scanner.nextLine();
 			System.out.println("Api Mount point set to: " + apiMount);
+			String key = "apiMountTarget";
+			String value = apiMount;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("APIPORT")) {
 			System.out.println("what port would you like the API server to listen on? (Default 8181)");
@@ -133,26 +150,41 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("Api Port set to: " + apiPort);
+				String key = "apiPort";
+				String value = apiPort;
+				updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("CONTROLLERCONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the controller container: " + "\n");
 			String contName = scanner.nextLine();
 			System.out.println("Controller container name set to: " + contName);
+			String key = "controllerContainerName";
+			String value = contName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("CPSCONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the cps container: " + "\n");
 			String cpsName = scanner.nextLine();
 			System.out.println("CPS Container name set to: " + cpsName);
+			String key = "cpsContainerName";
+			String value = cpsName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("CPSVOLNAME")) {
 			System.out.println("Please enter the name of the volume you would like to create for the CPS container: " + "\n");
 			String cpsVol = scanner.nextLine();
 			System.out.println("CPS Volume name set to: " + cpsVol);
+			String key = "cpsVolName";
+			String value = cpsVol;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("CPSMOUNTTARGET")) {
 			System.out.println("Please enter the directory location to mount the CPS volume: " + "\n");
 			String cpsMount = scanner.nextLine();
 			System.out.println("CPS Mount target name set to: " + cpsMount);
+			String key = "cpsMountTarget";
+			String value = cpsMount;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("CPSPORT")) {
 			System.out.println("what port would you like the CPS server to listen on? (Default 2379)");
@@ -172,21 +204,33 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("CPS Port set to: " + cpsPort);
+				String key = "cpsPort";
+				String value = cpsPort;
+				updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RASCONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the RAS container: " + "\n");
 			String rasName = scanner.nextLine();
 			System.out.println("RAS container name set to: " + rasName);
+			String key = "rasContainerName";
+			String value = rasName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RASVOLNAME")) {
 			System.out.println("Please enter name of the volume you would like to create for the RAS container: " + "\n");
 			String rasVol = scanner.nextLine();
 			System.out.println("RAS volume name set to: " + rasVol);
+			String key = "rasVolName";
+			String value = rasVol;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RASMOUNTTARGET")) {
 			System.out.println("Please enter the directory location to mount the RAS volume: " + "\n");
 			String rasMount = scanner.nextLine();
 			System.out.println("RAS Mount target name set to: " + rasMount);
+			String key = "rasMountTarget";
+			String value = rasMount;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RASPORT")) {
 			System.out.println("what port would you like the RAS server to listen on? (Default 5984)");
@@ -206,16 +250,25 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("RAS Port set to: " + rasPort);
+			 String key = "rasPort";
+			 String value = rasPort;
+			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the Resource Monitor container: " + "\n");
 			String resmonName = scanner.nextLine();
-			System.out.println("Resource monitor container name set to: " + resmonName);
+			System.out.println("Resource monitor container name to be set to: " + resmonName);
+			String key = "resourceMonitorContainerName";
+			String value = resmonName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCECONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the Resource container" + "\n");
 			String resName = scanner.nextLine();
 			System.out.println("Resource container name will be changed to " + resName + "\n");
+			String key = "resourceContainerName";
+			String value = resName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCEPORT")) {
 			System.out.println("what port would you like the RAS server to listen on? (Default 8080)");
@@ -235,11 +288,17 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("Resource Port set to: " + resPort);
+			 String key = "resPort";
+			 String value = resPort;
+			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("SIMBANKCONTAINERNAME")) {
 			System.out.println("Please enter the name you would like for the SimBank container" + "\n");
 			String sbName = scanner.nextLine();
 			System.out.println("Hostname will be changed to " + sbName + "\n");
+			String key = "simbankContainerName";
+			String value = sbName;
+			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("SIMBANKPORT")) {
 			System.out.println("what port would you like the SimBank server to listen on? (Default 2080)");
@@ -259,58 +318,100 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("SimBank Port set to: " + sbPort);
+			 String key = "simbankPort";
+			 String value = sbPort;
+			 updateyml(key, value);
 		}
-		else if (!(propList.toUpperCase().contains("HOSTNAME") || propList.toUpperCase().contains("NETWORKNAME") || propList.toUpperCase().contains("APICONTAINERNAME") || propList.toUpperCase().contains("APIVOLNAME") || propList.toUpperCase().contains("APIMOUNTTARGET") || propList.toUpperCase().contains("APIPORT") || propList.toUpperCase().contains("CONTROLLERCONTAINERNAME") || propList.toUpperCase().contains("CPSCONTAINERNAME") || propList.toUpperCase().contains("CPSVOLNAME") || propList.toUpperCase().contains("CPSMOUNTTARGET") || propList.toUpperCase().contains("CPSPORT") || propList.toUpperCase().contains("RASCONTAINERNAME") || propList.toUpperCase().contains("RASVOLNAME") || propList.toUpperCase().contains("RASMOUNTTARGET") || propList.toUpperCase().contains("RASPORT") || propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME") || propList.toUpperCase().contains("RESOURCECONTAINERNAME") || propList.toUpperCase().contains("RESOURCEPORT") || propList.toUpperCase().contains("SIMBANKCONTAINERNAME") || propList.toUpperCase().contains("SIMBANKPORT"))) {
+		else if (!(propList.toUpperCase().contains("HOSTNAME") || propList.toUpperCase().contains("NETWORKNAME") || propList.toUpperCase().contains("APICONTAINERNAME") || propList.toUpperCase().contains("APIVOLNAME") || propList.toUpperCase().contains("APIMOUNTTARGET") || propList.toUpperCase().contains("APIPORT") || propList.toUpperCase().contains("CONTROLLERCONTAINERNAME") || propList.toUpperCase().contains("CPSCONTAINERNAME") || propList.toUpperCase().contains("CPSVOLNAME") || propList.toUpperCase().contains("CPSMOUNTTARGET") || propList.toUpperCase().contains("CPSPORT") || propList.toUpperCase().contains("RASCONTAINERNAME") || propList.toUpperCase().contains("RASVOLNAME") || propList.toUpperCase().contains("RASMOUNTTARGET") || propList.toUpperCase().contains("RASPORT") || propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME") || propList.toUpperCase().contains("RESOURCECONTAINERNAME") || propList.toUpperCase().contains("RESOURCEPORT") || propList.toUpperCase().contains("SIMBANKCONTAINERNAME") || propList.toUpperCase().contains("SIMBANKPORT") || propList.contains(" "))) {
 			System.out.println("Error - Ensure you have spelled properties correctly, none found with those names");
 			alterProps();
 		}
-		
 		System.out.println("Properties updated, returning to main menu" + "\n");
 		main(null);
 	}
 	
-	static void snakeyml () {
-
+	static void updateyml (String key, String value) throws FileNotFoundException {
 		
 		String configLocation = "src/main/resources/docker/";
-		System.out.println("Snake yaml section");
 		String path = System.getProperty("user.dir");
 		System.out.println(path);
 		Yaml yaml = new Yaml();
 		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream("config.yml");
 		Map<String, Object> obj = yaml.load(inputStream);
-		System.out.println(obj);
-		System.out.println("That was the snake yaml");
+		System.out.println(key + " was: " + obj.get(key));
+		obj.replace(key, value);
+		System.out.println(key + " updated to: " + obj.get(key));
+		ymlgen(obj);
 		
+		
+	}
+	
+	static void ymlgen (Map<String, Object> obj) throws FileNotFoundException {
+		
+		File yaml = new File("config.yml");
+		if (yaml.exists()) {
+			yaml.delete();
+		}
+		
+		PrintWriter writer = new PrintWriter("config.yml");
+		writer.println("hostname: " + obj.get("hostname") + "\n");
+		writer.println("networkName: " + obj.get("networkName") + "\n");
+		writer.println("restartPolicy: " + obj.get("restartPolicy") + "\n");
+		writer.println("apiContainerName: " + obj.get("apiContainerName") + "\n");
+		writer.println("apiVolName: " + obj.get("apiVolName") + "\n");
+		writer.println("apiMountTarget: " + obj.get("apiMountTarget") + "\n");
+		writer.println("apiPort: " + obj.get("apiPort") + "\n");
+		writer.println("controllerContainerName: " + obj.get("controllerContainerName") + "\n");
+		writer.println("cpsContainerName: " + obj.get("cpsContainerName") + "\n");
+		writer.println("cpsVolName: " + obj.get("cpsVolName") + "\n");
+		writer.println("cpsMountTarget: " + obj.get("cpsMountTarget") + "\n");
+		writer.println("rasContainerName: " + obj.get("rasContainerName") + "\n");
+		writer.println("rasVolName: " + obj.get("rasVolName") + "\n");
+		writer.println("rasMountTarget: " + obj.get("rasMountTarget") + "\n");
+		writer.println("resourceMonitorContainerName: " + obj.get("resourceMonitorContainerName") + "\n");
+		writer.println("resourceContainerName: " + obj.get("resourceContainerName") + "\n");
+		writer.println("resourcePort: " + obj.get("resourcePort") + "\n");
+		writer.println("simbankContainerName: " + obj.get("simbankContainerName") + "\n");
+		writer.println("simbankPort: " + obj.get("simbankPort") + "\n");
+		writer.close();
 		
 	}
 	
 	
 	static void generateScript () throws FileNotFoundException, UnsupportedEncodingException {
 		
-		String resourceVersion = "0.5.1";
-		String bootVersion = "0.5.0";
-		String versionSP = "0.5.0-SNAPSHOT";
-		String networkName = "galasa";
-		String resPol = "always";
-		String cpsMountSource = "galasa-etcd";
-		String rasMountSource = "galasa-ras";
-		String apiPort = "8181";
-		String apiMountSource = "galasa-api";
-		String apiMountTarget = "/var/var/var";
-		String apiContainerName = "galasa-api";
-		String controllerContainerName = "galasa-controller";
-		String cpsContainerName = "galasa-cps";
-		String cpsMountTarget = "/var/var/var";
-		String cpsPort = "2379";
-		String rasContainerName = "galasa-ras";
-		String rasMountTarget = "/var/var/var";
-		String rasPort = "5984";
-		String resourceMonitorContainerName = "galasa-resmon";
-		String resourceContainerName = "galasa-res";
-		String resourcePort = "8080";
-		String sbName = "galasa";
-		String sbPort = "2080";
+		String configLocation = "src/main/resources/docker/";
+		String path = System.getProperty("user.dir");
+		Yaml yaml = new Yaml();
+		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream("config.yml");
+		Map<String, Object> obj = yaml.load(inputStream);
+		
+		String resourceVersion = "0.6.0";
+		String bootVersion = "0.6.0";
+		String apiVersion = "0.5.0-SNAPSHOT";
+		
+		
+		Object hostname = obj.get("hostname");
+		Object networkName = obj.get("networkName");
+		Object resPol = obj.get("restartPolicy");
+		Object cpsMountSource = obj.get("cpsVolName");
+		Object rasMountSource = obj.get("rasVolName");
+		Object apiPort = obj.get("apiPort");
+		Object apiMountSource = obj.get("apiVolName");
+		Object apiMountTarget = obj.get("apiMountTarget");
+		Object apiContainerName = obj.get("apiContainerName");
+		Object controllerContainerName = obj.get("controllerContainerName");
+		Object cpsContainerName = obj.get("cpsContainerName");
+		Object cpsMountTarget = obj.get("cpsMountTarget");
+		Object cpsPort = obj.get("cpsPort");
+		Object rasContainerName = obj.get("rasContainerName");
+		Object rasMountTarget = obj.get("rasMountTarget");
+		Object rasPort = obj.get("rasPort");
+		Object resourceMonitorContainerName = obj.get("resourceMonitorContainerName");
+		Object resourceContainerName = obj.get("resourceContainerName");
+		Object resourcePort = obj.get("resourcePort");
+		Object sbName = obj.get("simbankContainerName");
+		Object sbPort = obj.get("simbankPort");
 		
 		
 		String dockerNet = "docker network create \\\n" + 
@@ -327,16 +428,20 @@ public class DockerEcosystemBuilder {
 				"           --mount source=" + apiMountSource + ",target=" + apiMountTarget + " \\\n" + 
 				"           --publish " + apiPort + ":8181 \\\n" + 
 				"           --publish 127.0.0.1:8101:8101 \\\n" + 
-				"           docker.galasa.dev/galasa-master-api-amd64:" + versionSP + " \\\n" + 
+				"           docker.galasa.dev/galasa-master-api-amd64:" + apiVersion + " \\\n" + 
 				"           /galasa/bin/karaf server\n";
 		
 		String contCont = "docker run --name " + controllerContainerName +  " \\\n" + 
 				"           --network " + networkName + " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
-				"           --detach \\\n" +  
+				"           --detach \\\n" +
+				"           --env engine_image=galasa/galasa-boot-embedded-amd64:" + bootVersion + "\\\n" +
+				"           --env run_poll=10 \\\n" +
+				"           --env max_engines=2 \\\n" +
+				"           --env network=" + networkName + "\\\n" +
 				"           -e CONFIG=file:/$controllerVolume TO BE REPLACED \\\n" + 
-				"           docker.galasa.dev/galasa-boot-embedded-amd64:" + versionSP + "\\\n" + 
-				"           java -jar boot.jar --obr file:galasa.obr --dockercontroller --bootstrap http://galasa-api:8181/bootstrap" + "\n";
+				"           docker.galasa.dev/galasa-boot-embedded-amd64:" + bootVersion + "\\\n" + 
+				"           java -jar boot.jar --obr file:galasa.obr --dockercontroller --bootstrap http://" + apiMountSource + ":8181/bootstrap" + "\n";
 		String cpsCont = "docker run --name " + cpsContainerName + "\\\n" + 
 				"           --network " + networkName +  " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
@@ -349,7 +454,8 @@ public class DockerEcosystemBuilder {
 				"           --network " + networkName + " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
 				"           --detach \\\n" + 
-				"           --env-file docker/$rasEnvFile TO BE REPLACED \\\n" + 
+				"           --env COUCHDB_USER=galasa \\\n" +
+				"           --env COUCHDB_PASSWORD=galasa \\\n" +
 				"           --mount source=" + rasMountSource + ",target=" + rasMountTarget + " \\\n" + 
 				"           --publish " + rasPort + ":5984 \\\n" + 
 				"           couchdb:2 \n" ;
@@ -358,7 +464,7 @@ public class DockerEcosystemBuilder {
 				"           --restart " + resPol + " \\\n" + 
 				"           --detach \\\n" + 
 				"           docker.galasa.dev/galasa-boot-embedded-amd64:" + bootVersion + " \\\n" + 
-				"           java -jar boot.jar --obr file:galasa.obr --resourcemanagement --bootstrap http://galasa-api:8181/bootstrap \n";
+				"           java -jar boot.jar --obr file:galasa.obr --resourcemanagement --bootstrap http://" + apiMountSource + ":8181/bootstrap \n";
 		String resCont = "docker run --name " + resourceContainerName + " \\\n" + 
 				"           --network " + networkName + " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
@@ -403,7 +509,11 @@ public class DockerEcosystemBuilder {
 		
 		System.out.println("Permissions updated \n");
 		
-		System.out.println("");
+		System.out.println("---The script docker-ecosystem-setup.sh has been created--- \n");
+		
+		System.out.println("---If you want to run this script execute it with ./docker-ecosystem-setup.sh--- \n");
+		
+		System.out.println("---Use a text editor of your choice if you wish to check and make any edits in the script--- \n");
 	}
 
 }
