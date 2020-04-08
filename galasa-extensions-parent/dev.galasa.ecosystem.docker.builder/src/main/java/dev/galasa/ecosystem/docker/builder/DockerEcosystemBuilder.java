@@ -289,7 +289,7 @@ public class DockerEcosystemBuilder {
 				    }
 				}
 			 System.out.println("Resource Port set to: " + resPort);
-			 String key = "resPort";
+			 String key = "resourcePort";
 			 String value = resPort;
 			 updateyml(key, value);
 		}
