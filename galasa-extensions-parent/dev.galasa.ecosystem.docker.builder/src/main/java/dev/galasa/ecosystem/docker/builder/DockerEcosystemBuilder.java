@@ -18,9 +18,9 @@ public class DockerEcosystemBuilder {
 	public static void main(String[] args) throws FileNotFoundException {
 		
 		Scanner scanner = new Scanner(System.in);
-		System.out.println("Welcome to the Galasa Ecosystem manager for Docker" + "\n");
+		System.out.println("Welcome to the Galasa Ecosystem manager for Docker \n");
 		System.out.println("If you have not run this program before, default values for the configuration have been supplied \n");
-		System.out.println("Here is your current configuration for the Ecosystem:" + "\n");
+		System.out.println("Here is your current configuration for the Ecosystem: \n");
 		String configLocation = "src/main/resources/";
 		
 		try {
@@ -103,6 +103,9 @@ public class DockerEcosystemBuilder {
 			      System.out.println("I'm sorry but that isn't a valid input, please ensure you have entered a restart policy listed above");
 			      ResPol = scanner.nextLine();
 				}
+			  if (ResPol.isEmpty() || ResPol.toUpperCase().equals("ALWAYS")) {
+				  ResPol = "always";
+			  }
 			System.out.println("Restart Policy set to: " + ResPol);
 			String key = "restartPolicy";
 			String value = ResPol;
@@ -323,7 +326,7 @@ public class DockerEcosystemBuilder {
 			 String value = sbPort;
 			 updateyml(key, value);
 		}
-		else if (!(propList.toUpperCase().contains("HOSTNAME") || propList.toUpperCase().contains("NETWORKNAME") || propList.toUpperCase().contains("APICONTAINERNAME") || propList.toUpperCase().contains("APIVOLNAME") || propList.toUpperCase().contains("APIMOUNTTARGET") || propList.toUpperCase().contains("APIPORT") || propList.toUpperCase().contains("CONTROLLERCONTAINERNAME") || propList.toUpperCase().contains("CPSCONTAINERNAME") || propList.toUpperCase().contains("CPSVOLNAME") || propList.toUpperCase().contains("CPSMOUNTTARGET") || propList.toUpperCase().contains("CPSPORT") || propList.toUpperCase().contains("RASCONTAINERNAME") || propList.toUpperCase().contains("RASVOLNAME") || propList.toUpperCase().contains("RASMOUNTTARGET") || propList.toUpperCase().contains("RASPORT") || propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME") || propList.toUpperCase().contains("RESOURCECONTAINERNAME") || propList.toUpperCase().contains("RESOURCEPORT") || propList.toUpperCase().contains("SIMBANKCONTAINERNAME") || propList.toUpperCase().contains("SIMBANKPORT") || propList.contains(" "))) {
+		else if (!(propList.toUpperCase().contains("HOSTNAME") || propList.toUpperCase().contains("NETWORKNAME") || propList.toUpperCase().contains("RESTARTPOLICY") || propList.toUpperCase().contains("APICONTAINERNAME") || propList.toUpperCase().contains("APIVOLNAME") || propList.toUpperCase().contains("APIMOUNTTARGET") || propList.toUpperCase().contains("APIPORT") || propList.toUpperCase().contains("CONTROLLERCONTAINERNAME") || propList.toUpperCase().contains("CPSCONTAINERNAME") || propList.toUpperCase().contains("CPSVOLNAME") || propList.toUpperCase().contains("CPSMOUNTTARGET") || propList.toUpperCase().contains("CPSPORT") || propList.toUpperCase().contains("RASCONTAINERNAME") || propList.toUpperCase().contains("RASVOLNAME") || propList.toUpperCase().contains("RASMOUNTTARGET") || propList.toUpperCase().contains("RASPORT") || propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME") || propList.toUpperCase().contains("RESOURCECONTAINERNAME") || propList.toUpperCase().contains("RESOURCEPORT") || propList.toUpperCase().contains("SIMBANKCONTAINERNAME") || propList.toUpperCase().contains("SIMBANKPORT") || propList.contains(" "))) {
 			System.out.println("Error - Ensure you have spelled properties correctly, none found with those names");
 			alterProps();
 		}
@@ -349,7 +352,6 @@ public class DockerEcosystemBuilder {
 	
 	static void ymlgen (Map<String, Object> obj) throws FileNotFoundException {
 		
-		String configLocation = "src/main/resources/";		
 		File yaml = new File("config.yml");
 		if (yaml.exists()) {
 			yaml.delete();
