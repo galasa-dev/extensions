@@ -19,6 +19,7 @@ public class DockerEcosystemBuilder {
 		
 		Scanner scanner = new Scanner(System.in);
 		System.out.println("Welcome to the Galasa Ecosystem manager for Docker" + "\n");
+		System.out.println("If you have not run this program before, default values for the configuration have been supplied \n");
 		System.out.println("Here is your current configuration for the Ecosystem:" + "\n");
 		String configLocation = "src/main/resources/";
 		
