@@ -49,7 +49,7 @@ pipeline {
                         sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -DskipTests -Dgpg.skip=${GPG_SKIP} -Dgpg.passphrase=$GPG -P ${MAVEN_PROFILE} -B -e -fae --non-recursive ${MAVEN_GOAL}"
                      }
                      dir('dev.galasa.ecosystem.docker.builder') {
-                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository"
+                        sh "mvn --settings ${workspace}/settings.xml -Dmaven.repo.local=${workspace}/repository -DskipTests -Dgpg.skip=${GPG_SKIP} -Dgpg.passphrase=$GPG -P ${MAVEN_PROFILE} -B -e -fae --non-recursive ${MAVEN_GOAL}""
                      }
                   }
                } }
