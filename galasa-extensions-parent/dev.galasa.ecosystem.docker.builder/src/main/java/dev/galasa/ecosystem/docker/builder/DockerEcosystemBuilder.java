@@ -439,18 +439,17 @@ public class DockerEcosystemBuilder {
 				"           --network " + networkName + " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
 				"           --detach \\\n" +
-				"           --env engine_image=galasa/galasa-boot-embedded-amd64:" + bootVersion + "\\\n" +
+				"           --env engine_image=galasa/galasa-boot-embedded-amd64:" + bootVersion + " \\\n" +
 				"           --env run_poll=10 \\\n" +
 				"           --env max_engines=2 \\\n" +
-				"           --env network=" + networkName + "\\\n" +
-				"           -e CONFIG=file:/$controllerVolume TO BE REPLACED \\\n" + 
-				"           docker.galasa.dev/galasa-boot-embedded-amd64:" + bootVersion + "\\\n" + 
+				"           --env network=" + networkName + " \\\n" +
+				"           docker.galasa.dev/galasa-boot-embedded-amd64:" + bootVersion + " \\\n" + 
 				"           java -jar boot.jar --obr file:galasa.obr --dockercontroller --bootstrap http://" + apiMountSource + ":8181/bootstrap" + "\n";
-		String cpsCont = "docker run --name " + cpsContainerName + "\\\n" + 
+		String cpsCont = "docker run --name " + cpsContainerName + " \\\n" + 
 				"           --network " + networkName +  " \\\n" + 
 				"           --restart " + resPol + " \\\n" + 
 				"           --detach \\\n" + 
-				"           --mount source=" + cpsMountSource + ",target=" + cpsMountTarget + "\\\n" + 
+				"           --mount source=" + cpsMountSource + ",target=" + cpsMountTarget + " \\\n" + 
 				"           --publish " + cpsPort + ":2379 \\\n" + 
 				"           quay.io/coreos/etcd:v3.2.25 \\\n" + 
 				"           etcd --data-dir /var/run/etcd/default.etcd --initial-cluster default=http://127.0.0.1:2380 --listen-client-urls http://0.0.0.0:2379 --listen-peer-urls http://0.0.0.0:2380 --initial-advertise-peer-urls http://127.0.0.1:2380 --advertise-client-urls http://127.0.0.1:2379\n";
