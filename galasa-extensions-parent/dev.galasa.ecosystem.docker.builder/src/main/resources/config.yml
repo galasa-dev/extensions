@@ -1,0 +1,41 @@
+hostname: 0.0.0.0
+
+networkName: galasa
+
+restartPolicy: always
+
+apiContainerName: galasa-api
+
+apiVolName: galasa-api
+
+apiMountTarget: /galasa/data/galasa
+
+apiPort: 8181
+
+controllerContainerName: galasa-controller
+
+cpsContainerName: galasa-cps
+
+cpsVolName: galasa-etcd
+
+cpsMountTarget: /var/run/etcd/default.etcd
+
+cpsPort: 2379
+
+rasContainerName: galasa-ras
+
+rasVolName: galasa-couchdb
+
+rasMountTarget: /var/run/etcd/default.etcd
+
+rasPort: 5984
+
+resourceMonitorContainerName: galasa-resmon
+
+resourceContainerName: galasa-resources
+
+resourcePort: 8080
+
+simbankContainerName: galasa
+
+simbankPort: 2080
