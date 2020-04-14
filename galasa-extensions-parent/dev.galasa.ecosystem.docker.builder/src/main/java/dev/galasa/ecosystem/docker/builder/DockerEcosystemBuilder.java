@@ -259,7 +259,7 @@ public class DockerEcosystemBuilder {
 			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the Resource Monitor container: " + "\n");
+			System.out.println("Please enter the name you would like for the Resource Monitor container: ");
 			String resmonName = scanner.nextLine();
 			System.out.println("Resource monitor container name to be set to: " + resmonName);
 			String key = "resourceMonitorContainerName";
@@ -267,7 +267,7 @@ public class DockerEcosystemBuilder {
 			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCECONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the Resource container" + "\n");
+			System.out.println("Please enter the name you would like for the Resource container");
 			String resName = scanner.nextLine();
 			System.out.println("Resource container name will be changed to " + resName + "\n");
 			String key = "resourceContainerName";
@@ -297,7 +297,7 @@ public class DockerEcosystemBuilder {
 			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("SIMBANKCONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the SimBank container" + "\n");
+			System.out.println("Please enter the name you would like for the SimBank container");
 			String sbName = scanner.nextLine();
 			System.out.println("Hostname will be changed to " + sbName + "\n");
 			String key = "simbankContainerName";
