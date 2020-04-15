@@ -259,7 +259,7 @@ public class DockerEcosystemBuilder {
 			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCEMONITORCONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the Resource Monitor container: ");
+			System.out.println("Please enter the name you would like for the Resource Monitor container: " + "\n");
 			String resmonName = scanner.nextLine();
 			System.out.println("Resource monitor container name to be set to: " + resmonName);
 			String key = "resourceMonitorContainerName";
@@ -267,7 +267,7 @@ public class DockerEcosystemBuilder {
 			updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("RESOURCECONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the Resource container");
+			System.out.println("Please enter the name you would like for the Resource container" + "\n");
 			String resName = scanner.nextLine();
 			System.out.println("Resource container name will be changed to " + resName + "\n");
 			String key = "resourceContainerName";
@@ -297,7 +297,7 @@ public class DockerEcosystemBuilder {
 			 updateyml(key, value);
 		}
 		if (propList.toUpperCase().contains("SIMBANKCONTAINERNAME")) {
-			System.out.println("Please enter the name you would like for the SimBank container");
+			System.out.println("Please enter the name you would like for the SimBank container" + "\n");
 			String sbName = scanner.nextLine();
 			System.out.println("Hostname will be changed to " + sbName + "\n");
 			String key = "simbankContainerName";
@@ -338,7 +338,7 @@ public class DockerEcosystemBuilder {
 		
 		String configLocation = "classes/";
 		Yaml yaml = new Yaml();
-		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream(configLocation + "config.yml");
+		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream("config.yml");
 		Map<String, Object> obj = yaml.load(inputStream);
 		System.out.println(key + " was: " + obj.get(key));
 		obj.replace(key, value);
@@ -351,7 +351,7 @@ public class DockerEcosystemBuilder {
 		
 		String configLocation = "classes/";
 		
-		File yaml = new File(configLocation + "config.yml");
+		File yaml = new File("config.yml");
 		if (yaml.exists()) {
 			yaml.delete();
 		}
@@ -386,8 +386,11 @@ public class DockerEcosystemBuilder {
 	static void generateScript () throws FileNotFoundException, UnsupportedEncodingException {
 		
 		String configLocation = "classes/";
+		String dir = System.getProperty("user.dir");
+		System.out.println(dir);
+		System.out.println(dir + "/" + configLocation + "config.yml");
 		Yaml yaml = new Yaml();
-		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream(configLocation + "config.yml");
+		InputStream inputStream = yaml.getClass().getClassLoader().getResourceAsStream("config.yml");
 		Map<String, Object> obj = yaml.load(inputStream);
 		
 		String resourceVersion = "0.6.0";
