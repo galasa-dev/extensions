@@ -1,41 +1,42 @@
-hostname: 0.0.0.0
+1-Docker_server_hostname: 0.0.0.0
 
-networkName: galasa
+2-Docker_network_name: galasa
 
-restartPolicy: always
+3-Container_restart_policy: always
 
-apiContainerName: galasa-api
+4-Api_container_name: galasa-api
 
-apiVolName: galasa-api
+5-Api_volume_name: galasa-api
 
-apiMountTarget: /galasa/data/galasa
+6-Api_mount_target: /galasa/data/galasa
 
-apiPort: 8181
+7-Api_container_port: 8181
 
-controllerContainerName: galasa-controller
+8-Controller_container_name: galasa-controller
 
-cpsContainerName: galasa-cps
+9-Cps_container_name: galasa-cps
 
-cpsVolName: galasa-etcd
+10-Cps_volume_name: galasa-etcd
 
-cpsMountTarget: /var/run/etcd/default.etcd
+11-Cps_mount_target: /var/run/etcd/default.etcd
 
-cpsPort: 2379
+12-Cps_container_port: 2379
 
-rasContainerName: galasa-ras
+13-Ras_container_name: galasa-ras
 
-rasVolName: galasa-couchdb
+14-Ras_volume_name: galasa-couchdb
 
-rasMountTarget: /var/run/etcd/default.etcd
+15-Ras_mount_target: /var/run/etcd/default.etcd
 
-rasPort: 5984
+16-Ras_container_port: 5984
 
-resourceMonitorContainerName: galasa-resmon
+17-ResourceMonitor_container_name: galasa-resmon
 
-resourceContainerName: galasa-resources
+18-Resource_container_name: galasa-resources
 
-resourcePort: 8080
+19-Resource_container_port: 8080
 
-simbankContainerName: galasa
+20-Simbank_container_name: galasa
 
-simbankPort: 2080
+21-Simbank_port: 2080
+
