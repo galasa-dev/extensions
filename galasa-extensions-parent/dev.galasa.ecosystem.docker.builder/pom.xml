@@ -21,37 +21,16 @@
   		
   		<dependencies> 
   		  <dependency>
-    	    <groupId>org.yaml</groupId>
-    	    <artifactId>snakeyaml</artifactId>
-    	    <version>1.25</version>
-    	    <type>jar</type>
+    	    	    <groupId>org.yaml</groupId>
+    	    	    <artifactId>snakeyaml</artifactId>
+    	    	    <version>1.25</version>
+    	    	    <type>jar</type>
   		  </dependency>
-  		  <dependency>
-  		    <groupId>org.apache.maven.plugins</groupId>
-  		    <artifactId>maven-jar-plugin</artifactId>
-  		    <version>2.4</version>
-  		  </dependency>
-  		</dependencies>
+  	        </dependencies>
   		
   		
   <build>
    <plugins>
-   <plugin>
-     <groupId>org.apache.maven.plugins</groupId>
-     <artifactId>maven-dependency-plugin</artifactId>
-     <executions>
-      <execution>
-       <id>copy-dependencies</id>
-       <phase>prepare-package</phase>
-       <goals>
-         <goal>copy-dependencies</goal>
-       </goals>
-       <configuration>
-        <outputDirectory>${project.build.directory}/${project.build.finalName}.lib</outputDirectory>
-       </configuration>
-      </execution>
-    </executions>
-    </plugin>
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-jar-plugin</artifactId>
@@ -66,6 +45,24 @@
         </archive>
       </configuration>
     </plugin>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.3</version>
+        <configuration>
+          <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+            <mainClass>dev.galasa.ecosystem.docker.builder.DockerEcosystemBuilder</mainClass>
+          </transformer>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
   </plugins>
   <resources>
     <resource>
