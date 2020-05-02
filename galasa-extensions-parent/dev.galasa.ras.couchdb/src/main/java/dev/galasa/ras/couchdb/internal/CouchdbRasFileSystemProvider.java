@@ -8,6 +8,7 @@ package dev.galasa.ras.couchdb.internal;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.file.AccessMode;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileStore;
@@ -51,10 +52,16 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 
     protected void addPath(CouchdbArtifactPath path) {
         path = path.toAbsolutePath();
+        if (paths.contains(path)) {
+            return;
+        }
         paths.add(path);
 
         CouchdbArtifactPath parentPath = (CouchdbArtifactPath) path.getParent();
         while (parentPath != null && !paths.contains(parentPath)) {
+            if (paths.contains(parentPath)) {
+                return;
+            }
             paths.add(parentPath);
             parentPath = parentPath.getParent();
         }
@@ -92,7 +99,7 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
             passThroughOptions.add(StandardOpenOption.WRITE);
             passThroughOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
 
-            return new CouchdbRasWriteByteChannel(this.couchdbRasStore, absolute, contentType, passThroughOptions,
+            return new CouchdbRasWriteByteChannel(this, this.couchdbRasStore, absolute, contentType, passThroughOptions,
                     attrs);
         } else {
             CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
@@ -186,6 +193,30 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
         }
 
         return returnAttrs;
+    }
+    
+    @Override
+    public void checkAccess(Path path, AccessMode... modes) throws IOException {
+        if (modes.length == 0) { // Check the file exists
+            for(CouchdbArtifactPath p : this.paths) {
+                if (p.compareTo(path) == 0) {
+                    return;
+                }
+            }
+            throw new IOException("Path " + path.toString() + " is missing");
+        }
+        
+        for (final AccessMode mode : modes) {
+            switch (mode) {
+                case EXECUTE:
+                    throw new UnsupportedOperationException("Path '" + path.toString() + " is not executable");
+                case READ:
+                case WRITE:
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
     }
 
 }

@@ -6,7 +6,6 @@
 package dev.galasa.ras.couchdb.internal;
 
 import java.nio.file.FileSystem;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -97,6 +96,16 @@ public class CouchdbArtifactPath extends ResultArchiveStorePath {
 
     public String getContentType() {
         return contentType;
+    }
+    
+    @Override
+    protected ResultArchiveStorePath newPathObject(String newPath) {
+        return new CouchdbArtifactPath(fileSystem, newPath);
+    }
+    
+    @Override
+    protected ResultArchiveStorePath newPathObject(boolean absolute, List<String> nameElements, int start, int end) {
+        return new CouchdbArtifactPath(this.fileSystem, absolute, nameElements, start, end);
     }
 
 }
