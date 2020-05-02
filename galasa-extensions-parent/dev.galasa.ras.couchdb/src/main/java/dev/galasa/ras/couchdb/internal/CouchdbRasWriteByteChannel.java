@@ -31,7 +31,7 @@ import dev.galasa.ResultArchiveStoreContentType;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 /**
- * Dummy Byte Channel for a null Result Archive Store
+ * CouchDBRAS Byte Channel
  *
  * @author Michael Baylis
  *
@@ -48,11 +48,13 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
     private final Path                          remotePath;
     private final ResultArchiveStoreContentType remoteContentType;
     private final CouchdbRasStore               couchdbRasStore;
+    private final CouchdbRasFileSystemProvider  couchdbRasFileSystemProvider;
 
-    CouchdbRasWriteByteChannel(CouchdbRasStore couchdbRasStore, Path remotePath,
+    CouchdbRasWriteByteChannel(CouchdbRasFileSystemProvider couchdbRasFileSystemProvider, CouchdbRasStore couchdbRasStore, Path remotePath,
             ResultArchiveStoreContentType remoteContentType, Set<? extends OpenOption> options,
             FileAttribute<?>[] attrs) throws IOException {
         this.couchdbRasStore = couchdbRasStore;
+        this.couchdbRasFileSystemProvider = couchdbRasFileSystemProvider;
         this.remotePath = remotePath;
 
         if (remoteContentType != null) {
@@ -115,6 +117,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                 throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
             }
             this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
+            this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
 
             logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
                     + this.remoteContentType.value());
