@@ -8,7 +8,9 @@ package dev.galasa.cps.etcd.internal;
 import static com.google.common.base.Charsets.UTF_8;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -22,6 +24,7 @@ import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.kv.GetResponse;
+import io.etcd.jetcd.options.GetOption;
 
 /**
  * This class impletements the CPS for etcd using the JETCD client.
@@ -43,7 +46,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     }
 
     /**
-     * This is the only method for CPS as managers should only need to gegt
+     * This is the only method for CPS as managers should only need to get
      * properties from the CPS and not set or watch any.
      * 
      * @param key
@@ -59,9 +62,38 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
                 return null;
             }
             return kvs.get(0).getValue().toString(UTF_8);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new ConfigurationPropertyStoreException("Could not retrieve key.", e);
+            throw new ConfigurationPropertyStoreException("Could not retrieve key, interrupted", e);
+        } catch (ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationPropertyStoreException("Could not retrieve key", e);
+        }
+    }
+
+    @Override
+    public @NotNull Map<String, String> getPrefixedProperties(@NotNull String prefix)
+            throws ConfigurationPropertyStoreException {
+        
+        HashMap<String, String> returnValues = new HashMap<>();
+        
+        ByteSequence bsKey = ByteSequence.from(prefix, UTF_8);
+        GetOption option = GetOption.newBuilder().withPrefix(bsKey).build();
+        CompletableFuture<GetResponse> getFuture = kvClient.get(bsKey, option);  
+        try {
+            GetResponse response = getFuture.get();
+            List<KeyValue> kvs = response.getKvs();
+            for(KeyValue kv : kvs) {
+                returnValues.put(kv.getKey().toString(UTF_8), kv.getValue().toString(UTF_8));
+            }
+
+            return returnValues;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationPropertyStoreException("Could not retrieve key, interrupted", e);
+        } catch (ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationPropertyStoreException("Could not retrieve key", e);
         }
     }
 
