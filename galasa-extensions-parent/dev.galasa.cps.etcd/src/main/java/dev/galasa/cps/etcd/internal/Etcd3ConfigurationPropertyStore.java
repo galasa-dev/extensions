@@ -8,6 +8,7 @@ package dev.galasa.cps.etcd.internal;
 import static com.google.common.base.Charsets.UTF_8;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ import io.etcd.jetcd.options.GetOption;
  */
 public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {
     private final Client client;
-    private final KV     kvClient;
+    private final KV kvClient;
 
     /**
      * This constructor create a priate KVClient from JETCD for store interactions.
@@ -101,6 +102,69 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     public void shutdown() throws ConfigurationPropertyStoreException {
         kvClient.close();
         client.close();
+    }
+
+    @Override
+    public void setProperty(@NotNull String key, @NotNull String value) throws ConfigurationPropertyStoreException {
+        ByteSequence bytesKey = ByteSequence.from(key, UTF_8);
+        ByteSequence bytesValue = ByteSequence.from(value, UTF_8);
+        try {
+            kvClient.put(bytesKey, bytesValue).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationPropertyStoreException("Could not set key and value.", e);
+        }
+    }
+
+    @Override
+    public Map<String, String> getPropertiesFromNamespace(String namespace) {
+        ByteSequence empty = ByteSequence.from("\0", UTF_8);
+        GetOption option = GetOption.newBuilder()
+                .withSortField(GetOption.SortTarget.KEY)
+                .withSortOrder(GetOption.SortOrder.DESCEND)
+                .withRange(empty)
+                .withPrefix(ByteSequence.from(namespace, UTF_8))
+                .build();
+
+        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(empty, option);
+        Map<String, String> results = new HashMap<>();
+        try {
+            GetResponse response = futureResponse.get();
+            List<KeyValue> kvs = response.getKvs();
+            for(KeyValue kv : kvs) {
+                results.put(kv.getKey().toString(UTF_8), kv.getValue().toString(UTF_8));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+        }
+        return results;
+    }
+
+    @Override
+    public List<String> getNamespaces() {
+        ByteSequence empty = ByteSequence.from("\0", UTF_8);
+        GetOption option = GetOption.newBuilder()
+                .withSortField(GetOption.SortTarget.KEY)
+                .withSortOrder(GetOption.SortOrder.DESCEND)
+                .withRange(empty)
+                .build();
+
+        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(empty, option);
+        List<String> results = new ArrayList<>();
+        try {
+            GetResponse response = futureResponse.get();
+            List<KeyValue> kvs = response.getKvs();
+            for(KeyValue kv : kvs) {
+                String key = kv.getKey().toString(UTF_8);
+                key = key.substring(0,key.indexOf("."));
+                if(!results.contains(key)) {
+                    results.add(key);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+        }
+        return results;
     }
 
 }
