@@ -89,11 +89,18 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 
     @Override
     public Map<String, String> getPropertiesFromNamespace(String namespace) {
-        GetOption go = GetOption.newBuilder().withPrefix(ByteSequence.from(namespace, UTF_8)).build();
-        CompletableFuture<GetResponse> getFuture = kvClient.get(ByteSequence.from("", UTF_8), go);
+        ByteSequence empty = ByteSequence.from("\0", UTF_8);
+        GetOption option = GetOption.newBuilder()
+                .withSortField(GetOption.SortTarget.KEY)
+                .withSortOrder(GetOption.SortOrder.DESCEND)
+                .withRange(empty)
+                .withPrefix(ByteSequence.from(namespace, UTF_8))
+                .build();
+
+        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(empty, option);
         Map<String, String> results = new HashMap<>();
         try {
-            GetResponse response = getFuture.get();
+            GetResponse response = futureResponse.get();
             List<KeyValue> kvs = response.getKvs();
             for(KeyValue kv : kvs) {
                 results.put(kv.getKey().toString(UTF_8), kv.getValue().toString(UTF_8));
@@ -106,11 +113,17 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 
     @Override
     public List<String> getNamespaces() {
-        GetOption go = GetOption.newBuilder().withPrefix(ByteSequence.from("", UTF_8)).build();
-        CompletableFuture<GetResponse> getFuture = kvClient.get(ByteSequence.from("", UTF_8), go);
+        ByteSequence empty = ByteSequence.from("\0", UTF_8);
+        GetOption option = GetOption.newBuilder()
+                .withSortField(GetOption.SortTarget.KEY)
+                .withSortOrder(GetOption.SortOrder.DESCEND)
+                .withRange(empty)
+                .build();
+
+        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(empty, option);
         List<String> results = new ArrayList<>();
         try {
-            GetResponse response = getFuture.get();
+            GetResponse response = futureResponse.get();
             List<KeyValue> kvs = response.getKvs();
             for(KeyValue kv : kvs) {
                 String key = kv.getKey().toString(UTF_8);
