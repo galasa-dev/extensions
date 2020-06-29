@@ -9,8 +9,8 @@
 	</parent>
 	
 	<artifactId>dev.galasa.jenkins</artifactId>
-	<packaging>hpi</packaging>
     <version>0.9.0-SNAPSHOT</version>
+	<packaging>hpi</packaging>
 	<name>Galasa Jenkins Core Plugin</name>
 	
 	<properties>
