@@ -4,14 +4,15 @@
 	<parent>
 		<groupId>dev.galasa</groupId>
 		<artifactId>galasa-extensions-parent</artifactId>
-		<version>0.9.0-SNAPSHOT</version>
+		<version>0.9.0</version>
 	</parent>
 
 	<artifactId>dev.galasa.ras.couchdb</artifactId>
+	<version>0.9.0</version>
 	<!-- If you change this version, you must update the pom.xml in the following projects:- 
 	dev.galasa.extensions.obr
 	dev.galasa.eclipse.feature (including feature.xml)
-	-->	<version>0.9.0-SNAPSHOT</version>
+	-->
 	<packaging>bundle</packaging>
 
 	<name>Galasa RAS - CouchDB</name>
@@ -20,13 +21,13 @@
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.framework</artifactId>
-			<version>0.9.0-SNAPSHOT</version>
+			<version>0.9.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
