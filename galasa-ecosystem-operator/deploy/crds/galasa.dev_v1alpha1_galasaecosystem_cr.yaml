@@ -1,0 +1,7 @@
+apiVersion: galasa.dev/v1alpha1
+kind: GalasaEcosystem
+metadata:
+  name: example-galasaecosystem
+spec:
+  propertystore:
+    replicas: 1
