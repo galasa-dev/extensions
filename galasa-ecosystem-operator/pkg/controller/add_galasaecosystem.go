@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/extensions/galasa-ecosystem-operator/pkg/controller/galasaecosystem"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/controller/galasaecosystem"
 )
 
 func init() {

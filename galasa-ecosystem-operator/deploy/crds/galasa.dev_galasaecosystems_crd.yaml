@@ -31,6 +31,60 @@ spec:
           spec:
             description: GalasaEcosystemSpec defines the desired state of GalasaEcosystem
             properties:
+              apiserver:
+                description: Config for the ApiServer
+                properties:
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    description: Number of replicas
+                    format: int32
+                    type: integer
+                type: object
+              dockerRegistry:
+                type: string
+              engineController:
+                properties:
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
+              engineResmon:
+                properties:
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
+              externalip:
+                type: string
+              galasaVersion:
+                type: string
+              monitoring:
+                properties:
+                  grafanaReplicas:
+                    format: int32
+                    type: integer
+                  metricsReplicas:
+                    format: int32
+                    type: integer
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  prometheusReplicas:
+                    format: int32
+                    type: integer
+                type: object
               propertystore:
                 description: PropertyStoreCluster spec for the CPS cluster
                 properties:
@@ -40,6 +94,10 @@ spec:
                     items:
                       type: string
                     type: array
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   property_cluster_size:
                     description: This size of the etcd cluster which hosts the CPS
                       and DSS Default size is 1
@@ -76,8 +134,39 @@ spec:
                         type: object
                     type: object
                 type: object
+              rasSpec:
+                description: Config for the RasSpec
+                properties:
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    description: Number of replicas
+                    format: int32
+                    type: integer
+                type: object
+              simbank:
+                properties:
+                  nodeselector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
             required:
+            - apiserver
+            - dockerRegistry
+            - engineController
+            - engineResmon
+            - externalip
+            - galasaVersion
+            - monitoring
             - propertystore
+            - rasSpec
+            - simbank
             type: object
           status:
             description: GalasaEcosystemStatus defines the observed state of GalasaEcosystem

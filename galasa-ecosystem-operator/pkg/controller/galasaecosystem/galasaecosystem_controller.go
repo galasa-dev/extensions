@@ -3,15 +3,19 @@ package galasaecosystem
 import (
 	"context"
 
-	galasav1alpha1 "github.com/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
+	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apiserver"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/cps"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/engines"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/monitoring"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/ras"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/simbank"
+	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -51,7 +55,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Pods and requeue the owner GalasaEcosystem
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
+	err = c.Watch(&source.Kind{Type: &appsv1.StatefulSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
 	})
@@ -71,6 +75,18 @@ type ReconcileGalasaEcosystem struct {
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
 	scheme *runtime.Scheme
+}
+
+type ecosystem struct {
+	cps              *cps.CPS
+	apiServer        *apiserver.APIServer
+	ras              *ras.RAS
+	engineController *engines.Controller
+	resmon           *engines.Resmon
+	simbank          *simbank.Simbank
+	metrics          *monitoring.Metrics
+	// prometheus       *monitoring.Prometheus
+	// grafana          *monitoring.Grafana
 }
 
 // Reconcile reads that state of the cluster for a GalasaEcosystem object and makes changes based on the state read
@@ -98,259 +114,346 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 		return reconcile.Result{}, err
 	}
 
-	statefulSet := cpsStatefulSet(instance)
+	// So we want all the logic for the entire Galasa_ecosystem to come through this reconcile loop
+	// It has to be idempotent as it will operate against missing and existing resources.
 
-	if err := controllerutil.SetControllerReference(instance, statefulSet, r.scheme); err != nil {
+	// I think we might want some sort of struct in this controller for all the infomation that has to be formed by the cluster
+
+	/////////////////////// CPS ///////////////////////
+	cps := cps.New(instance)
+	if err := controllerutil.SetControllerReference(instance, cps.StatefulSet, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, cps.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, cps.ExposedService, r.scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	found := &appsv1.StatefulSet{}
+	if _, err := r.reconcileService(cps.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(cps.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileStatefulSet(cps.StatefulSet, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
 
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: statefulSet.Name, Namespace: statefulSet.Namespace}, found)
+	/////////////////////// API Server ///////////////////////
+	apiServer := apiserver.New(instance, cps.ExposedService)
+	if err := controllerutil.SetControllerReference(instance, apiServer.BootstrapConf, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, apiServer.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, apiServer.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, apiServer.PersistentVol, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, apiServer.TestCatalog, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, apiServer.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(apiServer.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(apiServer.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(apiServer.BootstrapConf, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcilePersistentVolume(apiServer.PersistentVol, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(apiServer.TestCatalog, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(apiServer.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	/////////////////////// RAS ///////////////////////
+	ras := ras.New(instance)
+	if err := controllerutil.SetControllerReference(instance, ras.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, ras.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, ras.StatefulSet, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(ras.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(ras.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileStatefulSet(ras.StatefulSet, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	/////////////////////// Engine Controller ///////////////////////
+	engineController := engines.NewController(instance, apiServer.InternalService)
+	if err := controllerutil.SetControllerReference(instance, engineController.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, engineController.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, engineController.ConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(engineController.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(engineController.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(engineController.ConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	/////////////////////// Resmon ///////////////////////
+	resmon := engines.NewResmon(instance)
+	if err := controllerutil.SetControllerReference(instance, resmon.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, resmon.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, resmon.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(resmon.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(resmon.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(resmon.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	/////////////////////// Simbank ///////////////////////
+	simbank := simbank.New(instance)
+	if err := controllerutil.SetControllerReference(instance, simbank.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, simbank.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(simbank.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(simbank.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	/////////////////////// Monitoring ///////////////////////
+	metrics := monitoring.NewMetrics(instance)
+	grafana := monitoring.NewGrafana(instance)
+	prometheus := monitoring.NewPrometheus(instance)
+	if err := controllerutil.SetControllerReference(instance, metrics.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, metrics.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, metrics.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.ConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.AutoDashboardConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.DashboardConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.ProvisioningConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, grafana.PersistentVolumeClaim, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, prometheus.ConfigMap, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, prometheus.Deployment, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, prometheus.ExposedService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, prometheus.InternalService, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+	if err := controllerutil.SetControllerReference(instance, prometheus.PersistentVolumeClaim, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if _, err := r.reconcileService(metrics.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(metrics.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(metrics.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(grafana.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(grafana.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(grafana.ConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(grafana.DashboardConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(grafana.AutoDashboardConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(grafana.ProvisioningConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcilePersistentVolume(grafana.PersistentVolumeClaim, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(grafana.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileConfigMap(prometheus.ConfigMap, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(prometheus.InternalService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileService(prometheus.ExposedService, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcilePersistentVolume(prometheus.PersistentVolumeClaim, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+	if _, err := r.reconcileDeployment(prometheus.Deployment, reqLogger); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileGalasaEcosystem) reconcileDeployment(deployment *appsv1.Deployment, reqLogger logr.Logger) (reconcile.Result, error) {
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, deployment)
 	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the CPS stateful set", "Namespace", statefulSet.Namespace, "Name", statefulSet.Name)
-		err = r.client.Create(context.TODO(), statefulSet)
+		reqLogger.Info("Creating the Deployment", "Namespace", deployment, "Name", deployment.Name)
+		err = r.client.Create(context.TODO(), deployment)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-
-		// StatefulSet created successfully - don't requeue
 		return reconcile.Result{}, nil
 	} else if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: StatfulSet already exists", "StatefulSet.Namespace", found.Namespace, "StatefulSet.Name", found.Name)
+	// Service already exists - don't requeue
+	reqLogger.Info("Skip reconcile: Deployment already exists", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
 	return reconcile.Result{}, nil
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-
-func cpsStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet {
-	labels := map[string]string{
-		"app": cr.Name + "-cps",
+func (r *ReconcileGalasaEcosystem) reconcilePersistentVolume(pvc *corev1.PersistentVolumeClaim, reqLogger logr.Logger) (reconcile.Result, error) {
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: pvc.Name, Namespace: pvc.Namespace}, pvc)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating the PVC", "Namespace", pvc, "Name", pvc.Name)
+		err = r.client.Create(context.TODO(), pvc)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
 	}
-	return &appsv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-cps",
-			Namespace: cr.Namespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.StatefulSetSpec{
-			ServiceName: cr.Name + "-service",
-			Replicas:    cr.Spec.Propertystore.Replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   cr.Name + "-cps",
-					Labels: labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:            "etcd",
-							Image:           "quay.io/coreos/etcd:v3.4.3",
-							ImagePullPolicy: "IfNotPresent",
-							Ports: []corev1.ContainerPort{
-								{
-									Name:          "peer",
-									ContainerPort: int32(2379),
-								},
-								{
-									Name:          "client",
-									ContainerPort: int32(2380),
-								},
-							},
-							LivenessProbe: &corev1.Probe{
-								InitialDelaySeconds: 60,
-								PeriodSeconds:       60,
-								Handler: corev1.Handler{
-									TCPSocket: &corev1.TCPSocketAction{
-										Port: intstr.FromInt(2379),
-									},
-								},
-							},
-							Env: []corev1.EnvVar{
-								{
-									Name:  "INITIAL_CLUSTER_SIZE",
-									Value: "1",
-								},
-								{
-									Name:  "SET_NAME",
-									Value: "cps",
-								},
-							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "datadir",
-									MountPath: "/var/run/etcd",
-								},
-							},
-							Lifecycle: &corev1.Lifecycle{
-								PreStop: &corev1.Handler{
-									Exec: &corev1.ExecAction{
-										Command: []string{
-											"/bin/sh",
-											"-ec",
-											`
-											EPS=""
-											for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
-												EPS="${EPS}${EPS:+,}http://${SET_NAME}-${i}.${SET_NAME}:2379"
-											done
 
-											HOSTNAME=$(hostname)
+	// Service already exists - don't requeue
+	reqLogger.Info("Skip reconcile: PVC already exists", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
+	return reconcile.Result{}, nil
+}
 
-											member_hash() {
-												etcdctl member list | grep http://${HOSTNAME}.${SET_NAME}:2380 | cut -d':' -f1 | cut -d'[' -f1
-											}
-
-											SET_ID=${HOSTNAME##*[^0-9]}
-
-											if [ "${SET_ID}" -ge ${INITIAL_CLUSTER_SIZE} ]; then
-												echo "Removing ${HOSTNAME} from etcd cluster"
-												ETCDCTL_ENDPOINT=${EPS} etcdctl member remove $(member_hash)
-												if [ $? -eq 0 ]; then
-													# Remove everything otherwise the cluster will no longer scale-up
-													rm -rf /var/run/etcd/*
-												fi
-											fi
-											`,
-										},
-									},
-								},
-							},
-							Command: []string{
-								"/bin/sh",
-								"-ec",
-								`
-								HOSTNAME=$(hostname)
-
-								# store member id into PVC for later member replacement
-								collect_member() {
-									while ! etcdctl member list &>/dev/null; do sleep 1; done
-									etcdctl member list | grep http://${HOSTNAME}.${SET_NAME}:2380 | cut -d':' -f1 | cut -d'[' -f1 > /var/run/etcd/member_id
-									exit 0
-								}
-
-								eps() {
-									EPS=""
-									for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
-										EPS="${EPS}${EPS:+,}http://${SET_NAME}-${i}.${SET_NAME}:2379"
-									done
-									echo ${EPS}
-								}
-
-								member_hash() {
-									etcdctl member list | grep http://${HOSTNAME}.${SET_NAME}:2380 | cut -d':' -f1 | cut -d'[' -f1
-								}
-
-								# we should wait for other pods to be up before trying to join
-								# otherwise we got "no such host" errors when trying to resolve other members
-								for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
-									while true; do
-										echo "Waiting for ${SET_NAME}-${i}.${SET_NAME} to come up"
-										ping -W 1 -c 1 ${SET_NAME}-${i}.${SET_NAME} > /dev/null && break
-										sleep 1s
-									done
-								done
-
-								# re-joining after failure?
-								if [ -e /var/run/etcd/default.etcd ]; then
-									echo "Re-joining etcd member"
-									member_id=$(cat /var/run/etcd/member_id)
-
-									# re-join member
-									ETCDCTL_ENDPOINT=$(eps) etcdctl member update ${member_id} http://${HOSTNAME}.${SET_NAME}:2380 | true
-									exec etcd --name ${HOSTNAME} \
-										--listen-peer-urls http://0.0.0.0:2380 \
-										--listen-client-urls http://0.0.0.0:2379\
-										--advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
-										--data-dir /var/run/etcd/default.etcd
-								fi
-
-								# etcd-SET_ID
-								SET_ID=${HOSTNAME##*[^0-9]}
-
-								# adding a new member to existing cluster (assuming all initial pods are available)
-								if [ "${SET_ID}" -ge ${INITIAL_CLUSTER_SIZE} ]; then
-									export ETCDCTL_ENDPOINT=$(eps)
-
-									# member already added?
-									MEMBER_HASH=$(member_hash)
-									if [ -n "${MEMBER_HASH}" ]; then
-										# the member hash exists but for some reason etcd failed
-										# as the datadir has not be created, we can remove the member
-										# and retrieve new hash
-										etcdctl member remove ${MEMBER_HASH}
-									fi
-
-									echo "Adding new member"
-									etcdctl member add ${HOSTNAME} http://${HOSTNAME}.${SET_NAME}:2380 | grep "^ETCD_" > /var/run/etcd/new_member_envs
-
-									if [ $? -ne 0 ]; then
-										echo "Exiting"
-										rm -f /var/run/etcd/new_member_envs
-										exit 1
-									fi
-
-									cat /var/run/etcd/new_member_envs
-									source /var/run/etcd/new_member_envs
-
-									collect_member &
-
-									exec etcd --name ${HOSTNAME} \
-										--listen-peer-urls http://0.0.0.0:2380 \
-										--listen-client-urls http://0.0.0.0:2379 \
-										--advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
-										--data-dir /var/run/etcd/default.etcd \
-										--initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-										--initial-cluster ${ETCD_INITIAL_CLUSTER} \
-										--initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE}
-								fi
-
-								PEERS=""
-								for i in $(seq 0 $((${INITIAL_CLUSTER_SIZE} - 1))); do
-									PEERS="${PEERS}${PEERS:+,}${SET_NAME}-${i}=http://${SET_NAME}-${i}.${SET_NAME}:2380"
-								done
-
-								collect_member &
-
-								# join member
-								exec etcd --name ${HOSTNAME} \
-									--initial-advertise-peer-urls http://${HOSTNAME}.${SET_NAME}:2380 \
-									--listen-peer-urls http://0.0.0.0:2380 \
-									--listen-client-urls http://0.0.0.0:2379 \
-									--advertise-client-urls http://${HOSTNAME}.${SET_NAME}:2379 \
-									--initial-cluster-token etcd-cluster-1 \
-									--initial-cluster ${PEERS} \
-									--initial-cluster-state new \
-									--data-dir /var/run/etcd/default.etcd
-								`,
-							},
-						},
-					},
-				},
-			},
-			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
-				{
-					ObjectMeta: metav1.ObjectMeta{
-						Name: "datadir",
-					},
-					Spec: corev1.PersistentVolumeClaimSpec{
-						AccessModes: []corev1.PersistentVolumeAccessMode{
-							"ReadWriteOnce",
-						},
-						Resources: corev1.ResourceRequirements{
-							Requests: corev1.ResourceList{
-								corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
-							},
-						},
-					},
-				},
-			},
-		},
+func (r *ReconcileGalasaEcosystem) reconcileConfigMap(configMap *corev1.ConfigMap, reqLogger logr.Logger) (reconcile.Result, error) {
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: configMap.Name, Namespace: configMap.Namespace}, configMap)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating the Service", "Namespace", configMap, "Name", configMap.Name)
+		err = r.client.Create(context.TODO(), configMap)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
 	}
+
+	// Service already exists - don't requeue
+	reqLogger.Info("Skip reconcile: ConfigMap already exists", "ConfigMap.Namespace", configMap.Namespace, "ConfigMap.Name", configMap.Name)
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileGalasaEcosystem) reconcileService(service *corev1.Service, reqLogger logr.Logger) (reconcile.Result, error) {
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, service)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating the Service", "Namespace", service, "Name", service.Name)
+		err = r.client.Create(context.TODO(), service)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Service already exists - don't requeue
+	reqLogger.Info("Skip reconcile: Service already exists", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileGalasaEcosystem) reconcileStatefulSet(statefulSet *appsv1.StatefulSet, reqLogger logr.Logger) (reconcile.Result, error) {
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: statefulSet.Name, Namespace: statefulSet.Namespace}, statefulSet)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating the Service", "Namespace", statefulSet, "Name", statefulSet.Name)
+		err = r.client.Create(context.TODO(), statefulSet)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+		return reconcile.Result{}, nil
+	} else if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Service already exists - don't requeue
+	reqLogger.Info("Skip reconcile: Service already exists", "Service.Namespace", statefulSet.Namespace, "Service.Name", statefulSet.Name)
+	return reconcile.Result{}, nil
 }

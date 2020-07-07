@@ -13,11 +13,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"github.com/extensions/galasa-ecosystem-operator/pkg/apis"
-	"github.com/extensions/galasa-ecosystem-operator/pkg/controller"
-	"github.com/extensions/galasa-ecosystem-operator/version"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/controller"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
+
 	kubemetrics "github.com/operator-framework/operator-sdk/pkg/kube-metrics"
 	"github.com/operator-framework/operator-sdk/pkg/leader"
 	"github.com/operator-framework/operator-sdk/pkg/log/zap"

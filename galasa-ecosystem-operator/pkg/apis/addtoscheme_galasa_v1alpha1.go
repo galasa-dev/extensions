@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"github.com/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
 )
 
 func init() {

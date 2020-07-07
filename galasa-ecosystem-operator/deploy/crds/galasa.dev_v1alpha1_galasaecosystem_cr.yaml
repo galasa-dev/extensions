@@ -3,5 +3,22 @@ kind: GalasaEcosystem
 metadata:
   name: example-galasaecosystem
 spec:
+  galasaVersion: "0.9.0"
+  dockerRegistry: "docker.galasa.dev"
+  externalip: "http://35.233.20.196"
+  engineController:
+    replicas: 1
+  engineResmon:
+    replicas: 1
+  apiserver:
+    replicas: 1
   propertystore:
     replicas: 1
+  rasSpec:
+    replicas: 1
+  simbank:
+    replicas: 1
+  monitoring:
+    grafanaReplicas: 1
+    prometheusReplicas: 1
+    metricsReplicas: 1

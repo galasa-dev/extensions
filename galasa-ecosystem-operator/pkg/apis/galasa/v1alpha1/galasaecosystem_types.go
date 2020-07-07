@@ -5,12 +5,56 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // GalasaEcosystemSpec defines the desired state of GalasaEcosystem
 type GalasaEcosystemSpec struct {
-	Propertystore PropertyStoreCluster `json:"propertystore"`
+	GalasaVersion    string               `json:"galasaVersion"`
+	DockerRegistry   string               `json:"dockerRegistry"`
+	ExternalIP       string               `json:"externalip"`
+	Propertystore    PropertyStoreCluster `json:"propertystore"`
+	APIServer        ApiServer            `json:"apiserver"`
+	RasSpec          RasSpec              `json:"rasSpec"`
+	EngineController EngineController     `json:"engineController"`
+	EngineResmon     ResourceMonitor      `json:"engineResmon"`
+	Simbank          Simbank              `json:"simbank"`
+	Monitoring       Monitoring           `json:"monitoring"`
+}
+
+type Monitoring struct {
+	MetricsReplicas    *int32            `json:"metricsReplicas,omitempty"`
+	PrometheusReplicas *int32            `json:"prometheusReplicas,omitempty"`
+	GrafanaReplicas    *int32            `json:"grafanaReplicas,omitempty"`
+	NodeSelector       map[string]string `json:"nodeselector,omitempty"`
+}
+
+type Simbank struct {
+	Replicas     *int32            `json:"replicas,omitempty"`
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
+}
+
+type EngineController struct {
+	Replicas     *int32            `json:"replicas,omitempty"`
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
+}
+
+type ResourceMonitor struct {
+	Replicas     *int32            `json:"replicas,omitempty"`
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
+}
+
+//Config for the ApiServer
+type ApiServer struct {
+	// Number of replicas
+	Replicas *int32 `json:"replicas,omitempty"`
+
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
+}
+
+//Config for the RasSpec
+type RasSpec struct {
+	// Number of replicas
+	Replicas *int32 `json:"replicas,omitempty"`
+
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
 }
 
 // PropertyStoreCluster spec for the CPS cluster
@@ -28,6 +72,8 @@ type PropertyStoreCluster struct {
 
 	// Any additional properties to be added to the CPS upon initialization
 	InitProps []string `json:"init_props,omitempty"`
+
+	NodeSelector map[string]string `json:"nodeselector,omitempty"`
 }
 
 // GalasaEcosystemStatus defines the observed state of GalasaEcosystem
