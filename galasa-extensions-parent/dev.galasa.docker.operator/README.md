@@ -2,7 +2,7 @@
 
 ## What is an Galasa ecosystem
 
-A Galasa ecosystem contains all the servers and monitors required to run Galasa tests in an automated environment or pipeline.  The ecosystem contains the following server:-
+A Galasa ecosystem contains all the servers and monitors required to run Galasa tests in an automated environment or pipeline.  The ecosystem contains the following servers:-
 
 * **etcd** - Contains the Configuration Property Store (CPS), the Dynamic Status Store (DSS) and the Credentials Store (CREDs).  The CPS, DSS are for use with by all users, the CREDs are for automation runs only
 * **couchdb** - Contains the Result Archive Store (RAS) which contains the full record of an automated run
