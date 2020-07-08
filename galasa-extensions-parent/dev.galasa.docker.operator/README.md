@@ -64,7 +64,7 @@ Change the {hostname} to be your hostname.  Note the 2 spaces on the last 2 line
 To deploy the Galasa ecosystem, issue the following Docker command:-
 
 ```
-docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v {path}/config.yaml:/config.yaml docker.galasa.dev/galasa-docker-operator:0.9.0
+docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v {path}/config.yaml:/config.yaml docker.galasa.dev/galasa-docker-operator-amd64:0.9.0
 ```
 
 where {path} is the full pathname to the directory containing your config.yaml.
