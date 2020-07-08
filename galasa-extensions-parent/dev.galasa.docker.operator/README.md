@@ -4,23 +4,23 @@
 
 A Galasa ecosystem contains all the servers and monitors required to run Galasa tests in an automated environment or pipeline.  The ecosystem contains the following server:-
 
-..* **etcd** - Contains the Configuration Property Store (CPS), the Dynamic Status Store (DSS) and the Credentials Store (CREDs).  The CPS, DSS are for use with by all users, the CREDs are for automation runs only
-..* **couchdb** - Contains the Result Archive Store (RAS) which contains the full record of an automated run
-..* **API** - Is the Galasa API server which includes the bootstrap
-..* **RESMAN** - The Resource Manager service, handles the cleaning up and management of resources in Galasa
-..* **ENGINE** - The Engine Controller is responsible for spinning up docker containers to execute individual Galasa automation runs.
-..* **METRICS** - A metrics server to indicate the health of the ecosystem to a Prometheus server
+* **etcd** - Contains the Configuration Property Store (CPS), the Dynamic Status Store (DSS) and the Credentials Store (CREDs).  The CPS, DSS are for use with by all users, the CREDs are for automation runs only
+* **couchdb** - Contains the Result Archive Store (RAS) which contains the full record of an automated run
+* **API** - Is the Galasa API server which includes the bootstrap
+* **RESMAN** - The Resource Manager service, handles the cleaning up and management of resources in Galasa
+* **ENGINE** - The Engine Controller is responsible for spinning up docker containers to execute individual Galasa automation runs.
+* **METRICS** - A metrics server to indicate the health of the ecosystem to a Prometheus server
 
 The following are not required by the ecosystem but are deployed by the Docker Operator to help understand how everything works:-
-..* **NEXUS** - A Nexus server to provide an easy entry for deploying Maven artifacts to the ecosystem.
-..* **JENKINS** - A demonstration Jenkins server to show how to run Galasa tests in a pipeline
-..* **SIMPLATFORM** - Provide an instance of SimBank so that IVTs and demonstration pipelines can be run.
+* **NEXUS** - A Nexus server to provide an easy entry for deploying Maven artifacts to the ecosystem.
+* **JENKINS** - A demonstration Jenkins server to show how to run Galasa tests in a pipeline
+* **SIMPLATFORM** - Provide an instance of SimBank so that IVTs and demonstration pipelines can be run.
 
 The following services will be included in future updates to the Docker Operator:-
-..* **ELASTIC** Provides an Elastic search instance to record the results of automated test runs
-..* **KABANA** A dashboard for the Elastic search database
-..* **PROMETHEUS** A prometheus server to record the health metrics of the ecosystem
-..* **GRAFANA** A dashboard for the prometheus metrics.
+* **ELASTIC** Provides an Elastic search instance to record the results of automated test runs
+* **KABANA** A dashboard for the Elastic search database
+* **PROMETHEUS** A prometheus server to record the health metrics of the ecosystem
+* **GRAFANA** A dashboard for the prometheus metrics.
 
 ## Notes
 
@@ -38,11 +38,11 @@ We are not aware of a minimum version of Docker Engine the Docker Operator requi
 
 If the server/workstation has a firewall running, you may need to open the following ports:-
 
-..* 2379 - etcd
-..* 5984 - couchdb
-..* 8080 - API
-..* 8081 - Nexus
-..* 8082 - Jenkins
+* 2379 - etcd
+* 5984 - couchdb
+* 8080 - API
+* 8081 - Nexus
+* 8082 - Jenkins
 
 ## Installing a Galasa ecosystem in a Docker Engine
 
