@@ -17,10 +17,10 @@ The following are not required by the ecosystem but are deployed by the Docker O
 * **SIMPLATFORM** - Provide an instance of SimBank so that IVTs and demonstration pipelines can be run.
 
 The following services will be included in future updates to the Docker Operator:-
-* **ELASTIC** Provides an Elastic search instance to record the results of automated test runs
-* **KABANA** A dashboard for the Elastic search database
-* **PROMETHEUS** A prometheus server to record the health metrics of the ecosystem
-* **GRAFANA** A dashboard for the prometheus metrics.
+* **ELASTIC** - Provides an Elastic search instance to record the results of automated test runs
+* **KABANA** - A dashboard for the Elastic search database
+* **PROMETHEUS** - A prometheus server to record the health metrics of the ecosystem
+* **GRAFANA** - A dashboard for the prometheus metrics.
 
 ## Notes
 
