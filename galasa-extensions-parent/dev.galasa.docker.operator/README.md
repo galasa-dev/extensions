@@ -48,7 +48,7 @@ If the server/workstation has a firewall running, you may need to open the follo
 
 Due to the way the various servers communicate, the ecosystem will need to know the hostname or ip address of the server/workstation the Docker Engine is running on.  Due to the way Docker works, you will not be able to use 127.0.0.1 or localhost, will need to be the actual workstation/server hostname or ip address. This will be provided in a config.yaml.
 
-Also, as the Docker Operator is being distributed from 0.10.0-SNAPSHOT, an unreleased version of Galasa, certain version of the Galasa ecosystem will need to be provided in the config.yaml.  Please copy the following YAML and create a config.yaml file on your server/workstation and note the full path of the file:-
+Also, as the Docker Operator is being distributed from 0.10.0-SNAPSHOT, an unreleased version of Galasa, certain versions of the Galasa ecosystem servers will need to be provided in the config.yaml.  Please copy the following YAML and create a config.yaml file on your server/workstation and note the full path of the file:-
 
 ```
 hostname: {hostname}
