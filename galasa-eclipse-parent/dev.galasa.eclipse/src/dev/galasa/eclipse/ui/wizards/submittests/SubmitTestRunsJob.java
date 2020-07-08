@@ -91,7 +91,8 @@ public class SubmitTestRunsJob extends Job {
                 IRun run = runs.submitRun("request", // TODO provide option
                         requestorId, klass.getBundle(), klass.getName(), null, // TODO provide a means to enter a group
                                                                                // name or default
-                        mavenRepository, obr, testStream.getId(), false, trace, generatedOverrides, null, null);
+                        mavenRepository, obr, testStream.getId(), false, trace, generatedOverrides, null, null,
+                        "java");
 
                 if (sb.length() > 0) {
                     sb.append(",");

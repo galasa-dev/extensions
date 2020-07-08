@@ -20,6 +20,7 @@
 		<module>dev.galasa.ras.couchdb</module>
 		<module>dev.galasa.extensions.obr</module>
         <module>dev.galasa.jenkins</module>
+        <module>dev.galasa.docker.operator</module>
 	</modules>
 
 	<dependencies>
