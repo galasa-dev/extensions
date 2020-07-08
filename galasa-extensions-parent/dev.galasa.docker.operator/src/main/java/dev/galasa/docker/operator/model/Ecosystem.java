@@ -29,7 +29,7 @@ public class Ecosystem {
         this.resources.add(new Cps(this));
         this.resources.add(new Ras(this));
         this.resources.add(new Api(this));
-        this.resources.add(new ResMon(this));
+        this.resources.add(new ResMan(this));
         this.resources.add(new Metrics(this));
         this.resources.add(new EngineController(this));
         this.resources.add(new Nexus(this));

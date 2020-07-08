@@ -5,7 +5,7 @@
  */
 package dev.galasa.docker.operator.config;
 
-public class ResMonConfiguration {
+public class ResManConfiguration {
 
     private String image;
     
