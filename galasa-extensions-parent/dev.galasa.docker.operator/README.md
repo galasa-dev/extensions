@@ -69,7 +69,7 @@ docker run -it -v /var/run/docker.sock:/var/run/docker.sock -v {path}/config.yam
 
 where {path} is the full pathname to the directory containing your config.yaml.
 
-When the command is complete all 9 docker containers should be running.
+When the command is complete all 9 docker containers should be running, you can use the command `docker ps` to list the active containers.
 
 ## Test the ecosystem
 
