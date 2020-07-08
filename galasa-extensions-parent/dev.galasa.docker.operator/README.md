@@ -84,10 +84,10 @@ You can also submit automation tests from within Eclipse instead of Jenkins, on 
 
 ## Reporting problems
 
-This version the code is very much a prototype and we are trying to discover any problem that may exist in the many difference configurations that exist in the world.
+This version of the code is very much a prototype and we are trying to discover any problems that may exist in the many difference configurations that exist in the world.
 
 If you have a problem with the Docker Operator or any of the ecosystem servers, then please raise an issue at https://github.com/galasa-dev/projectmanagement/issues .
 
 ## Production use of the Ecosystem
 
-The Galasa ecosystem has been designed for scale to allow a pipeline to run 100s, maybe even 1000s, of automated tests in parallel.  However, the ecosystem the Docker Operator creates will not be able to manage high levels of parallel runs.  The Docker Operator is there to provide a demonstration ecosystem to allow people to understand what is needed and how it all connects together.  For long term production usage, the Galasa team recommends running Galasa in a Kuberenetes environment.   However, if that is not possible, you can still achieve scale using multiple Docker Engines, but this will require manual setup at this time.  If there is demand, then the Docker Operator could be extended to support multiple Docker Enngines and setting up etcd/couchdb clusters, if you would like this, please raise an issue.
+The Galasa ecosystem has been designed for scale to allow a pipeline to run 100s, maybe even 1000s, of automated tests in parallel.  However, the ecosystem the Docker Operator creates will not be able to manage high levels of parallel runs.  The Docker Operator is there to provide a demonstration ecosystem to allow people to understand what is needed and how it all connects together.  For long term production usage, the Galasa team recommends running Galasa in a Kuberenetes environment.   However, if that is not possible, you can still achieve scale using multiple Docker Engines, but this will require manual setup at this time.  If there is demand, then the Docker Operator could be extended to support multiple Docker Engines and setting up etcd/couchdb clusters, if you would like this, please raise an issue.
