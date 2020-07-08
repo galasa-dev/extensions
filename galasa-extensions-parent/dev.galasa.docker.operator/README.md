@@ -71,9 +71,9 @@ where {path} is the full pathname to the directory containing your config.yaml.
 
 When the command is complete all 9 docker containers should be running, you can use the command `docker ps` to list the active containers.
 
-## Test the ecosystem
+## Testing the ecosystem
 
-The Jenkins server will have a SimBankIVT build job that will run a Jenkins pipeline to request the SimBankIVT test run in the Galasa ecosystem.   Go to http://{hostname}:8082, use the username of `admin` and password of `galasaadmin`.
+The Jenkins server will have a SimBank_IVT build job that will run a Jenkins pipeline to request the SimBankIVT test run in the Galasa ecosystem.   Go to http://{hostname}:8082, use the username of `admin` and password of `galasaadmin` (would be wise if you changed the password at some point).
 Run the SimBankIVT job and follow it's progress in the job console.   You can also issue the docker command `docker ps -a` to see the run container being created.  The run should finish and the jenkins job should report that the test passed.
 
 To view the output of the automated run, change the Eclipse preferences for Galasa, the bootstrap preference should be set to `http://{hostname}:8080/bootstrap`.  After applying and closing the preferences,  select, on the Eclipse menu, the Galasa->Initialise Galasa Framework.  You should see the Galasa console reporting that all is ok.  On the Eclipse toolbar is the Galasa icon, click that.   Two new Galasa views should open, Galasa Results and Galasa Runs.  Depended on how quickly you actioned the Eclipse side of things, you may still see the run from Jenkins in Galasa Runs.  You can always run the Jenkins job again to see the new run on the view.

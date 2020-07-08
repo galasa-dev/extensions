@@ -144,7 +144,7 @@ public abstract class AbstractContainerResource extends AbstractResource {
             return response.getId();
         } catch(NotFoundException e) {
             try {
-                System.out.println("Pulling CPS image '" + imageName + "'");
+                System.out.println("Pulling image '" + imageName + "'");
                 PullImageCmd cmd = dockerClient.pullImageCmd(imageName);
                 PullImageResultCallback callback = new PullImageResultCallback();
                 cmd.exec(callback);
