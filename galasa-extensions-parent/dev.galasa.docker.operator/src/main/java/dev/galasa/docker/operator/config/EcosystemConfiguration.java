@@ -16,7 +16,7 @@ public class EcosystemConfiguration {
     private CpsConfiguration cps;
     private RasConfiguration ras;
     private ApiConfiguration api;
-    private ResMonConfiguration      resourceManagement;
+    private ResManConfiguration      resourceManagement;
     private MetricsConfiguration     metrics;
     private EngineConfiguration      engineController;
     private SimPlatformConfiguration simplatform;
@@ -64,7 +64,7 @@ public class EcosystemConfiguration {
         this.api.normalise();
         
         if (this.resourceManagement == null) {
-            this.resourceManagement = new ResMonConfiguration();
+            this.resourceManagement = new ResManConfiguration();
         }
         this.resourceManagement.normalise();
         
@@ -126,11 +126,11 @@ public class EcosystemConfiguration {
         this.api = api;
     }
 
-    public ResMonConfiguration getResourceManagement() {
+    public ResManConfiguration getResourceManagement() {
         return resourceManagement;
     }
 
-    public void setResourceManagement(ResMonConfiguration resourceManagement) {
+    public void setResourceManagement(ResManConfiguration resourceManagement) {
         this.resourceManagement = resourceManagement;
     }
 

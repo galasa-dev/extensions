@@ -12,9 +12,9 @@ import com.github.dockerjava.api.exception.NotFoundException;
 
 import dev.galasa.docker.operator.DockerOperatorException;
 import dev.galasa.docker.operator.config.EcosystemConfiguration;
-import dev.galasa.docker.operator.config.ResMonConfiguration;
+import dev.galasa.docker.operator.config.ResManConfiguration;
 
-public class ResMon extends AbstractContainerResource {
+public class ResMan extends AbstractContainerResource {
 
     private static final String RESOURCE_NAME = "galasa_resource_management";
 
@@ -22,7 +22,7 @@ public class ResMon extends AbstractContainerResource {
     private final Ras               ras;
     private final Api               api;
 
-    public ResMon(Ecosystem ecosystem) {
+    public ResMan(Ecosystem ecosystem) {
         super(ecosystem, RESOURCE_NAME);
 
         this.cps = ecosystem.getResource(Cps.class);
@@ -45,7 +45,7 @@ public class ResMon extends AbstractContainerResource {
         try {
             imageId = getImageId(targetImageName);
         } catch(Exception e) {
-            throw new DockerOperatorException("Problem determining RESMON image id", e);
+            throw new DockerOperatorException("Problem determining RESMAN image id", e);
         }
 
         boolean found   = true;
@@ -61,7 +61,7 @@ public class ResMon extends AbstractContainerResource {
         } catch(NotFoundException e) {
             found = false;
         } catch(Exception e) {
-            throw new DockerOperatorException("Problem inspecting RESMON container", e);
+            throw new DockerOperatorException("Problem inspecting RESMAN container", e);
         }
 
         if (found && correct) {
@@ -78,7 +78,7 @@ public class ResMon extends AbstractContainerResource {
         }
 
         try {
-            System.out.println("Defining the RESMON container");
+            System.out.println("Defining the RESMAN container");
             CreateContainerCmd cmd = dockerClient.createContainerCmd(RESOURCE_NAME);
             cmd.withName(RESOURCE_NAME);
             cmd.withImage(targetImageName);
@@ -96,7 +96,7 @@ public class ResMon extends AbstractContainerResource {
             cmd.exec();
 
         } catch(Exception e) {
-            throw new DockerOperatorException("Problem creating RESMON container", e);
+            throw new DockerOperatorException("Problem creating RESMAN container", e);
         }
     }
 
@@ -111,26 +111,26 @@ public class ResMon extends AbstractContainerResource {
         if (isContainerRunning(false)) {
             return;
         }
-        System.out.println("RESMON Container is down, requires start up");
+        System.out.println("RESMAN Container is down, requires start up");
 
         for(AbstractResource dependency : getDependencies()) {
             dependency.dependencyChanging(DependencyEvent.STARTING, this);
         }
 
         try {
-            System.out.println("Starting RESMON container");
+            System.out.println("Starting RESMAN container");
             startContainer();
         } catch(Exception e) {
-            throw new DockerOperatorException("Problem starting RESMON container", e);
+            throw new DockerOperatorException("Problem starting RESMAN container", e);
         }
 
         try {
             checkLog("Resource Manager has started", 120);
-            System.out.println("RESMON container is up");
+            System.out.println("RESMAN container is up");
         } catch(Exception e) {
-            System.out.println("Failed to detect RESMON up message, deleting container to force rebuild");
+            System.out.println("Failed to detect RESMAN up message, deleting container to force rebuild");
             deleteContainer();
-            throw new DockerOperatorException("Problem waiting for RESMON container started message", e);
+            throw new DockerOperatorException("Problem waiting for RESMAN container started message", e);
         }
     }
 
@@ -144,21 +144,21 @@ public class ResMon extends AbstractContainerResource {
             case STOPPING:
                 if (resource == this.cps) {
                     if (this.isContainerRunning(false)) {
-                        System.out.println("CPS container status is changing, stopping RESMON");
+                        System.out.println("CPS container status is changing, stopping RESMAN");
                     }
                     stopContainer();
                     return;
                 }
                 if (resource == this.ras) {
                     if (this.isContainerRunning(false)) {
-                        System.out.println("RAS container status is changing, stopping RESMON");
+                        System.out.println("RAS container status is changing, stopping RESMAN");
                     }
                     stopContainer();
                     return;
                 }
                 if (resource == this.api) {
                     if (this.isContainerRunning(false)) {
-                        System.out.println("API container status is changing, stopping RESMON");
+                        System.out.println("API container status is changing, stopping RESMAN");
                     }
                     stopContainer();
                     return;
@@ -172,8 +172,8 @@ public class ResMon extends AbstractContainerResource {
 
     private String getTargetImageName() {
         EcosystemConfiguration ecoConfig = getEcosystem().getConfiguration();
-        ResMonConfiguration resmonConfig = ecoConfig.getResourceManagement();
-        return ecoConfig.getGalasaRegistry() + "/" + resmonConfig.getImage() + ":" + ecoConfig.getVersion();
+        ResManConfiguration resmanConfig = ecoConfig.getResourceManagement();
+        return ecoConfig.getGalasaRegistry() + "/" + resmanConfig.getImage() + ":" + ecoConfig.getVersion();
     }
 
 
