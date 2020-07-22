@@ -101,7 +101,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 					"steppedLine": false,
 					"targets": [
 					  {
-						"expr": "rate(cirillo_runs_automated_started_total[1m])*60",
+						"expr": "rate(galasa_runs_automated_started_total[1m])*60",
 						"format": "time_series",
 						"intervalFactor": 1,
 						"refId": "A"
@@ -185,7 +185,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 					"steppedLine": false,
 					"targets": [
 					  {
-						"expr": "rate(cirillo_runs_local_started_total[1m])*60",
+						"expr": "rate(galasa_runs_local_started_total[1m])*60",
 						"format": "time_series",
 						"intervalFactor": 1,
 						"refId": "A"
@@ -234,7 +234,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 				  },
 				  {
 					"aliasColors": {
-					  "{groups=\"test\",instance=\"metrics:9010\",job=\"metrics\"}": "dark-orange"
+					  "{groups=\"test\",instance=\"galasa-ecosystem-metrics-external-service:9010\",job=\"metrics\"}": "dark-orange"
 					},
 					"bars": false,
 					"dashLength": 10,
@@ -271,7 +271,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 					"steppedLine": false,
 					"targets": [
 					  {
-						"expr": "rate(cirillo_runs_made_to_wait_total[1m])*60",
+						"expr": "rate(galasa_runs_made_to_wait_total[1m])*60",
 						"format": "time_series",
 						"intervalFactor": 1,
 						"refId": "A"
@@ -320,7 +320,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 				  },
 				  {
 					"aliasColors": {
-					  "{groups=\"test\",instance=\"metrics:9010\",job=\"metrics\"}": "dark-orange"
+					  "{groups=\"test\",instance=\"galasa-ecosystem-metrics-external-service:9010\",job=\"metrics\"}": "dark-orange"
 					},
 					"bars": false,
 					"dashLength": 10,
@@ -357,7 +357,7 @@ func generateAutoDashboardConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 					"steppedLine": false,
 					"targets": [
 					  {
-						"expr": "rate(cirillo_zos_insufficent_slots_total[1m])*60",
+						"expr": "rate(galasa_zos_insufficent_slots_total[1m])*60",
 						"format": "time_series",
 						"intervalFactor": 1,
 						"refId": "A"
@@ -492,7 +492,7 @@ apiVersion: 1
 datasources:
   - name: prometheus
     type: prometheus
-    url: http://${PROMETHEUS_SERVER_SERVICE_HOST}:$PROMETHEUS_SERVER_SERVICE_PORT_METRICS
+    url: http://` + cr.Name + `-prometheus-internal-service:9090  
     access: proxy
     basicAuth: false
     isDefault: true
@@ -570,7 +570,7 @@ func generateGrafanaConfig(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap
 
 # The full public facing url you use in browser, used for redirects and emails
 # If you use reverse proxy and sub path specify full url (with sub path)
-;root_url = http://localhost:3000
+;root_url = http://localhost:3000/grafana
 
 # Log web requests
 ;router_logging = false
@@ -1069,6 +1069,7 @@ func generateGrafanaPVC(cr *galasav1alpha1.GalasaEcosystem) *corev1.PersistentVo
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				corev1.ReadWriteOnce,
 			},
+			StorageClassName: cr.Spec.StorageClassName,
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
 					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
@@ -1221,11 +1222,8 @@ func generateGrafanaDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 func generateGrafanaExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-grafana-internal-service",
+			Name:      cr.Name + "-grafana-external-service",
 			Namespace: cr.Namespace,
-			Labels: map[string]string{
-				"app": cr.Name + "-grafana",
-			},
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceType(corev1.ServiceTypeNodePort),

@@ -54,11 +54,8 @@ func generateMetricsInternalService(cr *galasav1alpha1.GalasaEcosystem) *corev1.
 func generateMetricsExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-metrics-internal-service",
+			Name:      cr.Name + "-metrics-external-service",
 			Namespace: cr.Namespace,
-			Labels: map[string]string{
-				"app": cr.Name + "-metrics",
-			},
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceType(corev1.ServiceTypeNodePort),
@@ -100,7 +97,7 @@ func generateMetricsDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 					},
 				},
 				Spec: corev1.PodSpec{
-					NodeSelector: cr.Spec.EngineResmon.NodeSelector,
+					NodeSelector: cr.Spec.Monitoring.NodeSelector,
 					Containers: []corev1.Container{
 						{
 							Name:            "metrics",

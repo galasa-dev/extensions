@@ -4,6 +4,7 @@ import (
 	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -16,6 +17,7 @@ type APIServer struct {
 	TestCatalog     *corev1.ConfigMap
 	PersistentVol   *corev1.PersistentVolumeClaim
 	Deployment      *appsv1.Deployment
+	Ingress         *v1beta1.Ingress
 }
 
 func New(cr *galasav1alpha1.GalasaEcosystem, cps *corev1.Service) *APIServer {
@@ -24,7 +26,7 @@ func New(cr *galasav1alpha1.GalasaEcosystem, cps *corev1.Service) *APIServer {
 	for _, p := range ports {
 		nodePort = p.NodePort
 	}
-	cpsURI := cr.Spec.ExternalIP + ":" + String(nodePort)
+	cpsURI := cr.Spec.ExternalHostname + ":" + String(nodePort)
 	return &APIServer{
 		InternalService: generateInternalService(cr),
 		ExposedService:  generateExposedService(cr),
@@ -32,6 +34,37 @@ func New(cr *galasav1alpha1.GalasaEcosystem, cps *corev1.Service) *APIServer {
 		TestCatalog:     generateTestCatalogConfigMap(cr),
 		PersistentVol:   generatePersistentVolumeClaim(cr),
 		Deployment:      generateDeployment(cr),
+		Ingress:         generateIngress(cr),
+	}
+}
+func generateIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress {
+	return &v1beta1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name + "-apiserver-ingress",
+			Namespace: cr.Namespace,
+			Labels: map[string]string{
+				"app": cr.Name + "-apiserver",
+			},
+		},
+		Spec: v1beta1.IngressSpec{
+			Rules: []v1beta1.IngressRule{
+				{
+					IngressRuleValue: v1beta1.IngressRuleValue{
+						HTTP: &v1beta1.HTTPIngressRuleValue{
+							Paths: []v1beta1.HTTPIngressPath{
+								{
+									Path: "/bootstrap",
+									Backend: v1beta1.IngressBackend{
+										ServiceName: cr.Name + "-api-external-service",
+										ServicePort: intstr.FromInt(8080),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -192,9 +225,10 @@ func generatePersistentVolumeClaim(cr *galasav1alpha1.GalasaEcosystem) *corev1.P
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				"ReadWriteOnce",
 			},
+			StorageClassName: cr.Spec.StorageClassName,
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
+					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.APIServer.Storage),
 				},
 			},
 		},

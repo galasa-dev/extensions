@@ -23,17 +23,23 @@ func NewController(cr *galasav1alpha1.GalasaEcosystem, apiService *corev1.Servic
 }
 
 func generateControllerConfigMap(cr *galasav1alpha1.GalasaEcosystem, apiService *corev1.Service) *corev1.ConfigMap {
+	user := cr.Spec.Config
+	config := map[string]string{
+		"bootstrap":    "http://" + apiService.Name + ":8080/bootstrap",
+		"max_engines":  "10",
+		"engine_label": "k8s-standard-engine",
+		"engine_image": cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+	}
+	for k, v := range user {
+		config[k] = v
+	}
+
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "config",
 			Namespace: cr.Namespace,
 		},
-		Data: map[string]string{
-			"bootstrap":    "http://" + apiService.Name + ":8080/bootstrap",
-			"max_engines":  "10",
-			"engine_label": "k8s-standard-engine",
-			"engine_image": cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
-		},
+		Data: config,
 	}
 }
 

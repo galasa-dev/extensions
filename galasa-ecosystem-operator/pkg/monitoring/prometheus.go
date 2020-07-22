@@ -146,19 +146,19 @@ scrape_configs:
   - job_name: 'resource-monitor'
     scrape_interval: 5s
     static_configs:
-      - targets: ['resource-monitor:9010']
+      - targets: ['` + cr.Name + `-resource-monitor-internal-service:9010']
         labels:
           groups: 'test'
   - job_name: 'engine-controller'
     scrape_interval: 5s
     static_configs:
-      - targets: ['engine-controller:9010']
+      - targets: ['` + cr.Name + `-engine-controller-internal-service:9010']
         labels:
           groups: 'test'
   - job_name: 'metrics'
     scrape_interval: 5s
     static_configs:
-      - targets: ['metrics:9010']
+      - targets: ['` + cr.Name + `-metrics-internal-service:9010']
         labels:
           groups: 'test'
 `,
@@ -180,6 +180,7 @@ func generatePrometheusPVC(cr *galasav1alpha1.GalasaEcosystem) *corev1.Persisten
 			AccessModes: []corev1.PersistentVolumeAccessMode{
 				corev1.ReadWriteOnce,
 			},
+			StorageClassName: cr.Spec.StorageClassName,
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
 					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
@@ -218,9 +219,6 @@ func generatePrometheusExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-prometheus-external-service",
 			Namespace: cr.Namespace,
-			Labels: map[string]string{
-				"app": cr.Name + "-prometheus",
-			},
 		},
 		Spec: corev1.ServiceSpec{
 			Type: corev1.ServiceType(corev1.ServiceTypeNodePort),

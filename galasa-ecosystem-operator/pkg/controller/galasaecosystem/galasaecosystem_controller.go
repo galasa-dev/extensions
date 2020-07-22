@@ -1,7 +1,13 @@
 package galasaecosystem
 
 import (
+	"bytes"
 	"context"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
 
 	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
 	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apiserver"
@@ -13,7 +19,10 @@ import (
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,6 +36,8 @@ import (
 )
 
 var log = logf.Log.WithName("controller_galasaecosystem")
+var newCpsPvc = false
+var ecosystemReady = false
 
 // Add creates a new GalasaEcosystem Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -53,9 +64,43 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Pods and requeue the owner GalasaEcosystem
 	err = c.Watch(&source.Kind{Type: &appsv1.StatefulSet{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
+	})
+	if err != nil {
+		return err
+	}
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
+	})
+	if err != nil {
+		return err
+	}
+	err = c.Watch(&source.Kind{Type: &corev1.PersistentVolumeClaim{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
+	})
+	if err != nil {
+		return err
+	}
+	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
+	})
+	if err != nil {
+		return err
+	}
+	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
+	})
+	if err != nil {
+		return err
+	}
+	err = c.Watch(&source.Kind{Type: &v1beta1.Ingress{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &galasav1alpha1.GalasaEcosystem{},
 	})
@@ -77,18 +122,6 @@ type ReconcileGalasaEcosystem struct {
 	scheme *runtime.Scheme
 }
 
-type ecosystem struct {
-	cps              *cps.CPS
-	apiServer        *apiserver.APIServer
-	ras              *ras.RAS
-	engineController *engines.Controller
-	resmon           *engines.Resmon
-	simbank          *simbank.Simbank
-	metrics          *monitoring.Metrics
-	// prometheus       *monitoring.Prometheus
-	// grafana          *monitoring.Grafana
-}
-
 // Reconcile reads that state of the cluster for a GalasaEcosystem object and makes changes based on the state read
 // and what is in the GalasaEcosystem.Spec
 // TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
@@ -97,7 +130,7 @@ type ecosystem struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger := log.WithName("Operator-Log") //("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling GalasaEcosystem")
 
 	// Fetch the GalasaEcosystem instance
@@ -111,349 +144,588 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
 
-	// So we want all the logic for the entire Galasa_ecosystem to come through this reconcile loop
-	// It has to be idempotent as it will operate against missing and existing resources.
+	// Generate the Ecosystem objects.
 
-	// I think we might want some sort of struct in this controller for all the infomation that has to be formed by the cluster
-
-	/////////////////////// CPS ///////////////////////
-	cps := cps.New(instance)
-	if err := controllerutil.SetControllerReference(instance, cps.StatefulSet, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, cps.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, cps.ExposedService, r.scheme); err != nil {
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ CPS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+	cps := cpsP{cps.New(instance)}
+	reqLogger.Info("Check operator controller for CPS resource")
+	if err := r.setOperatorController(instance, &cps); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
 
-	if _, err := r.reconcileService(cps.InternalService, reqLogger); err != nil {
+	// Check for if PVC is already defined. If not load InitProps
+	cpsPVCs := &corev1.PersistentVolumeClaimList{}
+	if err := r.client.List(context.TODO(), cpsPVCs, &client.ListOptions{LabelSelector: client.MatchingLabelsSelector{labels.SelectorFromSet(labels.Set{"app": "galasa-ecosystem-cps"})}}); err != nil {
+		reqLogger.Info("Error", "error", err)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileService(cps.ExposedService, reqLogger); err != nil {
+	if len(cpsPVCs.Items) < 1 {
+		reqLogger.Info("No backing PVC for CPS. PVC will be defined and Init props loaded.", "error", err)
+		newCpsPvc = true
+	} else {
+		reqLogger.Info("No requirement to enter InitProps")
+	}
+
+	reqLogger.Info("Reconcile CPS resource")
+	if err := r.reconcileResources(&cps, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileStatefulSet(cps.StatefulSet, reqLogger); err != nil {
+	// Wait for CPS to be ready
+	reqLogger.Info("Waiting for CPS to become ready", "Current ready replicas", cps.StatefulSet.Status.ReadyReplicas)
+	if cps.StatefulSet.Status.ReadyReplicas < 1 {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{RequeueAfter: time.Second * 5, Requeue: true}, nil
+	}
+
+	// Load Init Props from Ecosystem Spec
+	if newCpsPvc {
+		reqLogger.Info("Loading Init Props")
+		if err := cps.LoadInitProps(instance); err != nil {
+			r.ecosystemReady(false, instance)
+			return reconcile.Result{}, err
+		}
+		newCpsPvc = false
+	}
+
+	//Load DSS and CREDS location
+	nodePort := getNodePort(cps.ExposedService, "etcd-client")
+	cpsURI := "etcd:" + instance.Spec.ExternalHostname + ":" + nodePort
+	cps.LoadProp("framework.dynamicstatus.store", cpsURI)
+	cps.LoadProp("framework.credentials.store", cpsURI)
+
+	// Update the Galasa Ecosystem status
+	reqLogger.Info("Updating Galasa Ecosystem Status")
+	instance.Status.CPSReadyReplicas = cps.StatefulSet.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+	ras := rasP{ras.New(instance)}
+	if err := r.setOperatorController(instance, &ras); err != nil {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{}, err
+	}
+	if err := r.reconcileResources(&ras, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{}, err
+	}
+	reqLogger.Info("Waiting for RAS to become ready", "Current ready replicas", ras.StatefulSet.Status.ReadyReplicas)
+	if ras.StatefulSet.Status.ReadyReplicas < 1 {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{RequeueAfter: time.Second * 5, Requeue: true}, nil
+	}
+
+	nodePort = getNodePort(ras.ExposedService, "couchdbport")
+	cps.LoadProp("framework.resultarchive.store", "couchdb:"+instance.Spec.ExternalHostname+":"+nodePort)
+
+	// if len(ras.Ingress.Status.LoadBalancer.Ingress) < 1 {
+	// 	r.ecosystemReady(false, instance)
+	// 	return reconcile.Result{RequeueAfter: time.Second * 30, Requeue: true}, nil
+	// }
+
+	// // This appears to be a solution that works for GCP
+	// annotation := ras.Ingress.Annotations
+	// state := annotation["ingress.kubernetes.io/backends"]
+	// reqLogger.Info("The state", "state", state)
+	// if strings.Contains(state, "UNHEALTHY") || strings.Contains(state, "Unknown") {
+	// 	r.ecosystemReady(false, instance)
+	// 	return reconcile.Result{RequeueAfter: time.Second * 30, Requeue: true}, nil
+	// }
+
+	instance.Status.RASReadyReplicas = ras.StatefulSet.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ API ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+	apiserver := apiP{apiserver.New(instance, cps.ExposedService)}
+	if err := r.setOperatorController(instance, &apiserver); err != nil {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{}, err
+	}
+	if err := r.reconcileResources(&apiserver, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{}, err
+	}
+	if apiserver.Deployment.Status.ReadyReplicas < 1 {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{RequeueAfter: time.Second * 10, Requeue: true}, nil
+	}
+
+	instance.Status.APIReadyReplicas = apiserver.Deployment.Status.ReadyReplicas
+	reqLogger.Info("Setting boostrap", "URL", instance.Spec.ExternalHostname+":"+getNodePort(apiserver.ExposedService, "http"))
+	instance.Status.BootstrapURL = instance.Spec.ExternalHostname + ":" + getNodePort(apiserver.ExposedService, "http") + "/boostrap"
+	r.client.Update(context.TODO(), instance)
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Engine Controller ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+	engineController := engineControllerP{engines.NewController(instance, apiserver.ExposedService)}
+	if err := r.setOperatorController(instance, &engineController); err != nil {
+		r.ecosystemReady(false, instance)
+		return reconcile.Result{}, err
+	}
+	if err := r.reconcileResources(&engineController, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
 
-	/////////////////////// API Server ///////////////////////
-	apiServer := apiserver.New(instance, cps.ExposedService)
-	if err := controllerutil.SetControllerReference(instance, apiServer.BootstrapConf, r.scheme); err != nil {
+	instance.Status.EngineControllerReadyReplicas = engineController.Deployment.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RESMAN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+	resmon := resmonP{engines.NewResmon(instance)}
+	if err := r.setOperatorController(instance, &resmon); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if err := controllerutil.SetControllerReference(instance, apiServer.InternalService, r.scheme); err != nil {
+	if err := r.reconcileResources(&resmon, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if err := controllerutil.SetControllerReference(instance, apiServer.ExposedService, r.scheme); err != nil {
+	instance.Status.ResmonReadyReplicas = resmon.Deployment.Status.ReadyReplicas
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Simbank ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+	r.client.Update(context.TODO(), instance)
+	simbank := simbankP{simbank.New(instance)}
+	if err := r.setOperatorController(instance, &simbank); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if err := controllerutil.SetControllerReference(instance, apiServer.PersistentVol, r.scheme); err != nil {
+	if err := r.reconcileResources(&simbank, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if err := controllerutil.SetControllerReference(instance, apiServer.TestCatalog, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, apiServer.Deployment, r.scheme); err != nil {
+	if err := simbankSetup(instance, apiserver, cps, simbank); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if _, err := r.reconcileService(apiServer.InternalService, reqLogger); err != nil {
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Monitoring ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+	grafana := grafanaP{monitoring.NewGrafana(instance)}
+	if err := r.setOperatorController(instance, &grafana); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileService(apiServer.ExposedService, reqLogger); err != nil {
+	if err := r.reconcileResources(&grafana, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileConfigMap(apiServer.BootstrapConf, reqLogger); err != nil {
+	prometheus := prometheusP{monitoring.NewPrometheus(instance)}
+	if err := r.setOperatorController(instance, &prometheus); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcilePersistentVolume(apiServer.PersistentVol, reqLogger); err != nil {
+	if err := r.reconcileResources(&prometheus, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileConfigMap(apiServer.TestCatalog, reqLogger); err != nil {
+	metrics := metricsP{monitoring.NewMetrics(instance)}
+	if err := r.setOperatorController(instance, &metrics); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
-	if _, err := r.reconcileDeployment(apiServer.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	/////////////////////// RAS ///////////////////////
-	ras := ras.New(instance)
-	if err := controllerutil.SetControllerReference(instance, ras.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, ras.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, ras.StatefulSet, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if _, err := r.reconcileService(ras.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(ras.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileStatefulSet(ras.StatefulSet, reqLogger); err != nil {
+	if err := r.reconcileResources(&metrics, reqLogger); err != nil {
+		r.ecosystemReady(false, instance)
 		return reconcile.Result{}, err
 	}
 
-	/////////////////////// Engine Controller ///////////////////////
-	engineController := engines.NewController(instance, apiServer.InternalService)
-	if err := controllerutil.SetControllerReference(instance, engineController.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, engineController.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, engineController.ConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
+	instance.Status.MonitoringReadyReplicas = metrics.Deployment.Status.ReadyReplicas + prometheus.Deployment.Status.ReadyReplicas + grafana.Deployment.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
 
-	if _, err := r.reconcileService(engineController.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(engineController.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(engineController.ConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	/////////////////////// Resmon ///////////////////////
-	resmon := engines.NewResmon(instance)
-	if err := controllerutil.SetControllerReference(instance, resmon.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, resmon.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, resmon.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if _, err := r.reconcileService(resmon.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(resmon.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(resmon.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	/////////////////////// Simbank ///////////////////////
-	simbank := simbank.New(instance)
-	if err := controllerutil.SetControllerReference(instance, simbank.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, simbank.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if _, err := r.reconcileService(simbank.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(simbank.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	/////////////////////// Monitoring ///////////////////////
-	metrics := monitoring.NewMetrics(instance)
-	grafana := monitoring.NewGrafana(instance)
-	prometheus := monitoring.NewPrometheus(instance)
-	if err := controllerutil.SetControllerReference(instance, metrics.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, metrics.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, metrics.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.ConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.AutoDashboardConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.DashboardConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.ProvisioningConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, grafana.PersistentVolumeClaim, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, prometheus.ConfigMap, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, prometheus.Deployment, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, prometheus.ExposedService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, prometheus.InternalService, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-	if err := controllerutil.SetControllerReference(instance, prometheus.PersistentVolumeClaim, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	if _, err := r.reconcileService(metrics.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(metrics.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(metrics.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(grafana.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(grafana.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(grafana.ConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(grafana.DashboardConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(grafana.AutoDashboardConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(grafana.ProvisioningConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcilePersistentVolume(grafana.PersistentVolumeClaim, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(grafana.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileConfigMap(prometheus.ConfigMap, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(prometheus.InternalService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileService(prometheus.ExposedService, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcilePersistentVolume(prometheus.PersistentVolumeClaim, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-	if _, err := r.reconcileDeployment(prometheus.Deployment, reqLogger); err != nil {
-		return reconcile.Result{}, err
-	}
-
+	r.ecosystemReady(true, instance)
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileGalasaEcosystem) reconcileDeployment(deployment *appsv1.Deployment, reqLogger logr.Logger) (reconcile.Result, error) {
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, deployment)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the Deployment", "Namespace", deployment, "Name", deployment.Name)
-		err = r.client.Create(context.TODO(), deployment)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Service already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Deployment already exists", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
-	return reconcile.Result{}, nil
+func (r *ReconcileGalasaEcosystem) ecosystemReady(ready bool, instance *galasav1alpha1.GalasaEcosystem) {
+	ecosystemReady = ready
+	instance.Status.EcosystemReady = ecosystemReady
+	r.client.Update(context.TODO(), instance)
 }
 
-func (r *ReconcileGalasaEcosystem) reconcilePersistentVolume(pvc *corev1.PersistentVolumeClaim, reqLogger logr.Logger) (reconcile.Result, error) {
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: pvc.Name, Namespace: pvc.Namespace}, pvc)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the PVC", "Namespace", pvc, "Name", pvc.Name)
-		err = r.client.Create(context.TODO(), pvc)
-		if err != nil {
-			return reconcile.Result{}, err
+func (r *ReconcileGalasaEcosystem) setOperatorController(instance *galasav1alpha1.GalasaEcosystem, v1Objects galasaObject) error {
+	for _, object := range v1Objects.getResourceObjects() {
+		if err := controllerutil.SetControllerReference(instance, object.Meta, r.scheme); err != nil {
+			return err
 		}
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
 	}
-
-	// Service already exists - don't requeue
-	reqLogger.Info("Skip reconcile: PVC already exists", "PVC.Namespace", pvc.Namespace, "PVC.Name", pvc.Name)
-	return reconcile.Result{}, nil
+	return nil
 }
 
-func (r *ReconcileGalasaEcosystem) reconcileConfigMap(configMap *corev1.ConfigMap, reqLogger logr.Logger) (reconcile.Result, error) {
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: configMap.Name, Namespace: configMap.Namespace}, configMap)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the Service", "Namespace", configMap, "Name", configMap.Name)
-		err = r.client.Create(context.TODO(), configMap)
-		if err != nil {
-			return reconcile.Result{}, err
+func (r *ReconcileGalasaEcosystem) reconcileResources(v1Objects galasaObject, reqLogger logr.Logger) error {
+	for _, object := range v1Objects.getResourceObjects() {
+		err := r.client.Get(context.TODO(), types.NamespacedName{Name: object.Meta.GetName(), Namespace: object.Meta.GetNamespace()}, object.Runtime)
+		if err != nil && errors.IsNotFound(err) {
+			reqLogger.Info("Creating the Object", "Name", object.Meta.GetName())
+			err = r.client.Create(context.TODO(), object.Runtime)
+			if err != nil {
+				return err
+			}
+			return nil
+		} else if err != nil {
+			return err
 		}
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
 
-	// Service already exists - don't requeue
-	reqLogger.Info("Skip reconcile: ConfigMap already exists", "ConfigMap.Namespace", configMap.Namespace, "ConfigMap.Name", configMap.Name)
-	return reconcile.Result{}, nil
+		// Resource already exists - don't requeue
+		reqLogger.Info("Skip reconcile: Resource already exists", "Name", object.Meta.GetName())
+	}
+	return nil
 }
 
-func (r *ReconcileGalasaEcosystem) reconcileService(service *corev1.Service, reqLogger logr.Logger) (reconcile.Result, error) {
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: service.Name, Namespace: service.Namespace}, service)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the Service", "Namespace", service, "Name", service.Name)
-		err = r.client.Create(context.TODO(), service)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
+func getPodNames(pods []corev1.Pod) []string {
+	var podNames []string
+	for _, pod := range pods {
+		podNames = append(podNames, pod.Name)
 	}
-
-	// Service already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Service already exists", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
-	return reconcile.Result{}, nil
+	return podNames
 }
 
-func (r *ReconcileGalasaEcosystem) reconcileStatefulSet(statefulSet *appsv1.StatefulSet, reqLogger logr.Logger) (reconcile.Result, error) {
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: statefulSet.Name, Namespace: statefulSet.Namespace}, statefulSet)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating the Service", "Namespace", statefulSet, "Name", statefulSet.Name)
-		err = r.client.Create(context.TODO(), statefulSet)
-		if err != nil {
-			return reconcile.Result{}, err
+type resourceObjects struct {
+	Meta    metav1.Object
+	Runtime runtime.Object
+}
+
+type galasaObject interface {
+	getResourceObjects() []resourceObjects
+}
+type cpsP struct {
+	*cps.CPS
+}
+type apiP struct {
+	*apiserver.APIServer
+}
+type rasP struct {
+	*ras.RAS
+}
+type engineControllerP struct {
+	*engines.Controller
+}
+type resmonP struct {
+	*engines.Resmon
+}
+type simbankP struct {
+	*simbank.Simbank
+}
+type metricsP struct {
+	*monitoring.Metrics
+}
+type prometheusP struct {
+	*monitoring.Prometheus
+}
+type grafanaP struct {
+	*monitoring.Grafana
+}
+
+func (c *cpsP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(c.PersistentVolumeClaim),
+			Runtime: runtime.Object(c.PersistentVolumeClaim),
+		},
+		{
+			Meta:    metav1.Object(c.ExposedService),
+			Runtime: runtime.Object(c.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(c.InternalService),
+			Runtime: runtime.Object(c.InternalService),
+		},
+		{
+			Meta:    metav1.Object(c.StatefulSet),
+			Runtime: runtime.Object(c.StatefulSet),
+		},
+	}
+}
+
+func (a *apiP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(a.TestCatalog),
+			Runtime: runtime.Object(a.TestCatalog),
+		},
+		{
+			Meta:    metav1.Object(a.BootstrapConf),
+			Runtime: runtime.Object(a.BootstrapConf),
+		},
+		{
+			Meta:    metav1.Object(a.ExposedService),
+			Runtime: runtime.Object(a.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(a.InternalService),
+			Runtime: runtime.Object(a.InternalService),
+		},
+		{
+			Meta:    metav1.Object(a.Ingress),
+			Runtime: runtime.Object(a.Ingress),
+		},
+		{
+			Meta:    metav1.Object(a.PersistentVol),
+			Runtime: runtime.Object(a.PersistentVol),
+		},
+		{
+			Meta:    metav1.Object(a.Deployment),
+			Runtime: runtime.Object(a.Deployment),
+		},
+	}
+}
+
+func (r *rasP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(r.PersistentVolumeClaim),
+			Runtime: runtime.Object(r.PersistentVolumeClaim),
+		},
+		{
+			Meta:    metav1.Object(r.InternalService),
+			Runtime: runtime.Object(r.InternalService),
+		},
+		{
+			Meta:    metav1.Object(r.ExposedService),
+			Runtime: runtime.Object(r.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(r.StatefulSet),
+			Runtime: runtime.Object(r.StatefulSet),
+		},
+		{
+			Meta:    metav1.Object(r.Ingress),
+			Runtime: runtime.Object(r.Ingress),
+		},
+	}
+}
+
+func (e *engineControllerP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(e.ConfigMap),
+			Runtime: runtime.Object(e.ConfigMap),
+		},
+		{
+			Meta:    metav1.Object(e.InternalService),
+			Runtime: runtime.Object(e.InternalService),
+		},
+		{
+			Meta:    metav1.Object(e.Deployment),
+			Runtime: runtime.Object(e.Deployment),
+		},
+	}
+}
+
+func (r *resmonP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(r.InternalService),
+			Runtime: runtime.Object(r.InternalService),
+		},
+		{
+			Meta:    metav1.Object(r.ExposedService),
+			Runtime: runtime.Object(r.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(r.Deployment),
+			Runtime: runtime.Object(r.Deployment),
+		},
+	}
+}
+
+func (s *simbankP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(s.ExposedService),
+			Runtime: runtime.Object(s.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(s.Deployment),
+			Runtime: runtime.Object(s.Deployment),
+		},
+	}
+}
+
+func (m *metricsP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(m.InternalService),
+			Runtime: runtime.Object(m.InternalService),
+		},
+		{
+			Meta:    metav1.Object(m.ExposedService),
+			Runtime: runtime.Object(m.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(m.Deployment),
+			Runtime: runtime.Object(m.Deployment),
+		},
+	}
+}
+
+func (p *prometheusP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(p.ConfigMap),
+			Runtime: runtime.Object(p.ConfigMap),
+		},
+		{
+			Meta:    metav1.Object(p.ExposedService),
+			Runtime: runtime.Object(p.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(p.InternalService),
+			Runtime: runtime.Object(p.InternalService),
+		},
+		{
+			Meta:    metav1.Object(p.PersistentVolumeClaim),
+			Runtime: runtime.Object(p.PersistentVolumeClaim),
+		},
+		{
+			Meta:    metav1.Object(p.Deployment),
+			Runtime: runtime.Object(p.Deployment),
+		},
+	}
+}
+
+func (g *grafanaP) getResourceObjects() []resourceObjects {
+	return []resourceObjects{
+		{
+			Meta:    metav1.Object(g.ConfigMap),
+			Runtime: runtime.Object(g.ConfigMap),
+		},
+		{
+			Meta:    metav1.Object(g.DashboardConfigMap),
+			Runtime: runtime.Object(g.DashboardConfigMap),
+		},
+		{
+			Meta:    metav1.Object(g.AutoDashboardConfigMap),
+			Runtime: runtime.Object(g.AutoDashboardConfigMap),
+		},
+		{
+			Meta:    metav1.Object(g.InternalService),
+			Runtime: runtime.Object(g.InternalService),
+		},
+		{
+			Meta:    metav1.Object(g.ExposedService),
+			Runtime: runtime.Object(g.ExposedService),
+		},
+		{
+			Meta:    metav1.Object(g.PersistentVolumeClaim),
+			Runtime: runtime.Object(g.PersistentVolumeClaim),
+		},
+		{
+			Meta:    metav1.Object(g.ProvisioningConfigMap),
+			Runtime: runtime.Object(g.ProvisioningConfigMap),
+		},
+		{
+			Meta:    metav1.Object(g.Deployment),
+			Runtime: runtime.Object(g.Deployment),
+		},
+	}
+}
+
+func getNodePort(service *corev1.Service, name string) string {
+	ports := service.Spec.Ports
+	for _, p := range ports {
+		if p.Name == name {
+			return String(p.NodePort)
 		}
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
+	}
+	return ""
+}
+
+func simbankSetup(cr *galasav1alpha1.GalasaEcosystem, api apiP, cps cpsP, simbank simbankP) error {
+	simlog := log.WithName("SimLog")
+	required := false
+	hostname, _ := url.Parse(cr.Spec.ExternalHostname)
+	location := cr.Spec.ExternalHostname + ":" + getNodePort(api.ExposedService, "http") + "/testcatalog/simbank"
+	simlog.Info("Test catatlog location", "location", location)
+	streams, _ := cps.GetProp("framework.test.streams")
+	simlog.Info("Streams", "Streams", streams)
+	if streams == " " {
+		simlog.Info("No stream set, applying first stream", "Stream", "SIMBANK")
+		cps.LoadProp("framework.test.streams", "SIMBANK")
+		required = true
+
+	} else {
+		if strings.Contains(streams, "SIMBANK") {
+			simlog.Info("Simbank already a test stream")
+		} else {
+			cps.LoadProp("framework.test.streams", streams+",SIMBANK")
+			required = true
+		}
+		simlog.Info("No setup required, skipping")
 	}
 
-	// Service already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Service already exists", "Service.Namespace", statefulSet.Namespace, "Service.Name", statefulSet.Name)
-	return reconcile.Result{}, nil
+	if required {
+		simlog.Info("Putting simbank CPS properties")
+		cps.LoadProp("framework.test.stream.SIMBANK.description", "Simbank tests")
+		cps.LoadProp("framework.test.stream.SIMBANK.location", location)
+		cps.LoadProp("framework.test.stream.SIMBANK.obr", "mvn:dev.galasa/dev.galasa.simbank.obr/"+cr.Spec.GalasaVersion+"/obr")
+		cps.LoadProp("framework.test.stream.SIMBANK.repo", cr.Spec.MavenRepository)
+
+		//Test props
+		cps.LoadProp("secure.credentials.SIMBANK.username", "IBMUSER")
+		cps.LoadProp("secure.credentials.SIMBANK.password", "SYS1")
+
+		cps.LoadProp("zos.dse.tag.SIMBANK.imageid", "SIMBANK")
+		cps.LoadProp("zos.dse.tag.SIMBANK.clusterid", "SIMBANK")
+		cps.LoadProp("zos.image.SIMBANK.ipv4.hostname", hostname.Host)
+		cps.LoadProp("zos.image.SIMBANK.telnet.port", getNodePort(simbank.ExposedService, "simbank-telnet"))
+		cps.LoadProp("zos.image.SIMBANK.telnet.tls", "false")
+		cps.LoadProp("zos.image.SIMBANK.credentials", "SIMBANK")
+		cps.LoadProp("zosmf.server.SIMBANK.images", "SIMBANK")
+		cps.LoadProp("zosmf.server.SIMBANK.hostname", hostname.Host)
+		cps.LoadProp("zosmf.server.SIMBANK.port", getNodePort(simbank.ExposedService, "simbank-mf"))
+
+		cps.LoadProp("simbank.dse.instance.name", "SIMBANK")
+		cps.LoadProp("simbank.instance.SIMBANK.zos.image", "SIMBANK")
+		cps.LoadProp("simbank.instance.SIMBANK.database.port", getNodePort(simbank.ExposedService, "simbank-database"))
+		cps.LoadProp("simbank.instance.SIMBANK.webnet.port", getNodePort(simbank.ExposedService, "simbank-webservice"))
+	}
+
+	if resp, err := http.Get(location); err == nil && resp.StatusCode == 404 {
+		simlog.Info("Checking", "resp", resp, "err", err)
+		simlog.Info("Puting test catalog from simbank tests")
+		if data, err := ioutil.ReadFile("/usr/local/bin/galasa-resources/simplatform-testcatalog.json"); err == nil {
+			client := &http.Client{}
+			req, err := http.NewRequest(http.MethodPut, location, bytes.NewReader(data))
+			if err != nil {
+				return err
+			}
+			req.Header.Set("Content-Type", "application/json")
+			simlog.Info("Sending testcatalog request")
+			resp, err = client.Do(req)
+			if err != nil {
+				simlog.Info("Failed", "resp", resp, "err", err)
+				return err
+			}
+		} else {
+			return err
+		}
+	} else {
+		simlog.Info("Checking", "resp", resp.StatusCode, "err", err)
+	}
+	return nil
+}
+
+func String(n int32) string {
+	buf := [11]byte{}
+	pos := len(buf)
+	i := int64(n)
+	signed := i < 0
+	if signed {
+		i = -i
+	}
+	for {
+		pos--
+		buf[pos], i = '0'+byte(i%10), i/10
+		if i == 0 {
+			if signed {
+				pos--
+				buf[pos] = '-'
+			}
+			return string(buf[pos:])
+		}
+	}
 }
