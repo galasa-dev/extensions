@@ -41,7 +41,7 @@ public class EcosystemConfiguration {
         }
 
         if (this.version == null || this.version.isEmpty()) {
-            this.version = "0.9.0";
+            this.version = "0.10.0";
         }
         
         if (this.galasaRegistry == null || this.galasaRegistry.isEmpty()) {
