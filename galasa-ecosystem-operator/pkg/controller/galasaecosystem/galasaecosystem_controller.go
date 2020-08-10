@@ -16,7 +16,6 @@ import (
 	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/monitoring"
 	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/ras"
 	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/simbank"
-	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/networking/v1beta1"
@@ -122,13 +121,6 @@ type ReconcileGalasaEcosystem struct {
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a GalasaEcosystem object and makes changes based on the state read
-// and what is in the GalasaEcosystem.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithName("Operator-Log") //("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling GalasaEcosystem")
@@ -144,17 +136,18 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
 
 	// Generate the Ecosystem objects.
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ CPS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-	cps := cpsP{cps.New(instance)}
+	cpsCluster := cpsP{cps.New(instance)}
+
 	reqLogger.Info("Check operator controller for CPS resource")
-	if err := r.setOperatorController(instance, &cps); err != nil {
-		r.ecosystemReady(false, instance)
+	if err := r.setOperatorController(instance, &cpsCluster); err != nil {
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
 
@@ -171,106 +164,265 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 		reqLogger.Info("No requirement to enter InitProps")
 	}
 
-	reqLogger.Info("Reconcile CPS resource")
-	if err := r.reconcileResources(&cps, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+	// Create all CPS resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: cpsCluster.StatefulSet.Name, Namespace: cpsCluster.StatefulSet.Namespace}, cpsCluster.StatefulSet)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(cpsCluster.StatefulSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create CPS Statefulset.", "Name", cpsCluster.StatefulSet.Name)
+			return reconcile.Result{}, err
+		}
 	}
+	instance.Status.CPSReadyReplicas = cpsCluster.StatefulSet.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: cpsCluster.ExposedService.Name, Namespace: cpsCluster.ExposedService.Namespace}, cpsCluster.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(cpsCluster.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create CPS Service.", "Name", cpsCluster.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: cpsCluster.InternalService.Name, Namespace: cpsCluster.InternalService.Namespace}, cpsCluster.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(cpsCluster.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create CPS Service.", "Name", cpsCluster.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	clusterSize := instance.Spec.Propertystore.PropertyClusterSize
+	if *cpsCluster.StatefulSet.Spec.Replicas != clusterSize {
+		cpsCluster.StatefulSet.Spec.Replicas = &clusterSize
+		err = r.updateResource(cpsCluster.StatefulSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update CPS Stateful set.", "Name", cpsCluster.StatefulSet.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
 	// Wait for CPS to be ready
-	reqLogger.Info("Waiting for CPS to become ready", "Current ready replicas", cps.StatefulSet.Status.ReadyReplicas)
-	if cps.StatefulSet.Status.ReadyReplicas < 1 {
-		r.ecosystemReady(false, instance)
+	r.client.Get(context.TODO(), types.NamespacedName{Name: cpsCluster.StatefulSet.GetName(), Namespace: cpsCluster.StatefulSet.GetNamespace()}, cpsCluster.StatefulSet)
+	reqLogger.Info("Waiting for CPS to become ready", "Current ready replicas", cpsCluster.StatefulSet.Status.ReadyReplicas)
+	if cpsCluster.StatefulSet.Status.ReadyReplicas < 1 {
+		r.reset(instance, cpsCluster)
+		r.ecosystemReady(instance)
 		return reconcile.Result{RequeueAfter: time.Second * 5, Requeue: true}, nil
 	}
 
 	// Load Init Props from Ecosystem Spec
 	if newCpsPvc {
 		reqLogger.Info("Loading Init Props")
-		if err := cps.LoadInitProps(instance); err != nil {
-			r.ecosystemReady(false, instance)
+		if err := cpsCluster.LoadInitProps(instance); err != nil {
+			r.ecosystemReady(instance)
 			return reconcile.Result{}, err
 		}
 		newCpsPvc = false
 	}
 
-	//Load DSS and CREDS location
-	nodePort := getNodePort(cps.ExposedService, "etcd-client")
+	// Load DSS and CREDS location
+	nodePort := getNodePort(cpsCluster.ExposedService, "etcd-client")
 	cpsURI := "etcd:" + instance.Spec.ExternalHostname + ":" + nodePort
-	cps.LoadProp("framework.dynamicstatus.store", cpsURI)
-	cps.LoadProp("framework.credentials.store", cpsURI)
-
-	// Update the Galasa Ecosystem status
-	reqLogger.Info("Updating Galasa Ecosystem Status")
-	instance.Status.CPSReadyReplicas = cps.StatefulSet.Status.ReadyReplicas
-	r.client.Update(context.TODO(), instance)
+	cpsCluster.LoadProp("framework.dynamicstatus.store", cpsURI)
+	cpsCluster.LoadProp("framework.credentials.store", cpsURI)
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RAS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-	ras := rasP{ras.New(instance)}
-	if err := r.setOperatorController(instance, &ras); err != nil {
-		r.ecosystemReady(false, instance)
+	rasDB := rasP{ras.New(instance)}
+	if err := r.setOperatorController(instance, &rasDB); err != nil {
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&ras, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all RAS resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: rasDB.StatefulSet.Name, Namespace: rasDB.StatefulSet.Namespace}, rasDB.StatefulSet)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(rasDB.StatefulSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create RAS Statefulset.", "Name", rasDB.StatefulSet.Name)
+			return reconcile.Result{}, err
+		}
 	}
-	reqLogger.Info("Waiting for RAS to become ready", "Current ready replicas", ras.StatefulSet.Status.ReadyReplicas)
-	if ras.StatefulSet.Status.ReadyReplicas < 1 {
-		r.ecosystemReady(false, instance)
+	instance.Status.RASReadyReplicas = rasDB.StatefulSet.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: rasDB.ExposedService.Name, Namespace: rasDB.ExposedService.Namespace}, rasDB.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(rasDB.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create RAS Service.", "Name", rasDB.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: rasDB.InternalService.Name, Namespace: rasDB.InternalService.Namespace}, rasDB.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(rasDB.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create RAS Service.", "Name", rasDB.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *rasDB.StatefulSet.Spec.Replicas != *instance.Spec.RasSpec.Replicas {
+		rasDB.StatefulSet.Spec.Replicas = instance.Spec.RasSpec.Replicas
+		err = r.updateResource(rasDB.StatefulSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update RAS Stateful set.", "Name", rasDB.StatefulSet.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	reqLogger.Info("Waiting for RAS to become ready", "Current ready replicas", rasDB.StatefulSet.Status.ReadyReplicas)
+	if rasDB.StatefulSet.Status.ReadyReplicas < 1 {
+		r.reset(instance, cpsCluster)
+		r.ecosystemReady(instance)
 		return reconcile.Result{RequeueAfter: time.Second * 5, Requeue: true}, nil
 	}
 
-	nodePort = getNodePort(ras.ExposedService, "couchdbport")
-	cps.LoadProp("framework.resultarchive.store", "couchdb:"+instance.Spec.ExternalHostname+":"+nodePort)
+	nodePort = getNodePort(rasDB.ExposedService, "couchdbport")
+	cpsCluster.LoadProp("framework.resultarchive.store", "couchdb:"+instance.Spec.ExternalHostname+":"+nodePort)
 
-	// if len(ras.Ingress.Status.LoadBalancer.Ingress) < 1 {
-	// 	r.ecosystemReady(false, instance)
-	// 	return reconcile.Result{RequeueAfter: time.Second * 30, Requeue: true}, nil
-	// }
-
-	// // This appears to be a solution that works for GCP
-	// annotation := ras.Ingress.Annotations
-	// state := annotation["ingress.kubernetes.io/backends"]
-	// reqLogger.Info("The state", "state", state)
-	// if strings.Contains(state, "UNHEALTHY") || strings.Contains(state, "Unknown") {
-	// 	r.ecosystemReady(false, instance)
-	// 	return reconcile.Result{RequeueAfter: time.Second * 30, Requeue: true}, nil
-	// }
-
-	instance.Status.RASReadyReplicas = ras.StatefulSet.Status.ReadyReplicas
+	instance.Status.RASReadyReplicas = rasDB.StatefulSet.Status.ReadyReplicas
 	r.client.Update(context.TODO(), instance)
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ API ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+	apiServer := apiP{apiserver.New(instance, cpsCluster.ExposedService)}
+	if err := r.setOperatorController(instance, &apiServer); err != nil {
+		r.ecosystemReady(instance)
+		return reconcile.Result{}, err
+	}
 
-	apiserver := apiP{apiserver.New(instance, cps.ExposedService)}
-	if err := r.setOperatorController(instance, &apiserver); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+	// Create all API resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.PersistentVol.Name, Namespace: apiServer.PersistentVol.Namespace}, apiServer.PersistentVol)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.PersistentVol)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API PVC.", "Name", apiServer.PersistentVol.Name)
+			return reconcile.Result{}, err
+		}
 	}
-	if err := r.reconcileResources(&apiserver, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.Deployment.Name, Namespace: apiServer.Deployment.Namespace}, apiServer.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API Deployment.", "Name", apiServer.Deployment.Name)
+			return reconcile.Result{}, err
+		}
 	}
-	if apiserver.Deployment.Status.ReadyReplicas < 1 {
-		r.ecosystemReady(false, instance)
+	instance.Status.APIReadyReplicas = apiServer.Deployment.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.BootstrapConf.Name, Namespace: apiServer.BootstrapConf.Namespace}, apiServer.BootstrapConf)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.BootstrapConf)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API ConfigMap.", "Name", apiServer.BootstrapConf.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.ExposedService.Name, Namespace: apiServer.ExposedService.Namespace}, apiServer.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API Service.", "Name", apiServer.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.InternalService.Name, Namespace: apiServer.InternalService.Namespace}, apiServer.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API Service.", "Name", apiServer.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.Ingress.Name, Namespace: apiServer.Ingress.Namespace}, apiServer.Ingress)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.Ingress)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API Ingress.", "Name", apiServer.Ingress.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: apiServer.TestCatalog.Name, Namespace: apiServer.TestCatalog.Namespace}, apiServer.TestCatalog)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(apiServer.TestCatalog)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create API Test Catalog.", "Name", apiServer.TestCatalog.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *apiServer.Deployment.Spec.Replicas != *instance.Spec.APIServer.Replicas {
+		apiServer.Deployment.Spec.Replicas = instance.Spec.APIServer.Replicas
+		err = r.updateResource(apiServer.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update API Deployment.", "Deployment.Name", apiServer.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	if apiServer.Deployment.Status.ReadyReplicas < 1 {
+		r.ecosystemReady(instance)
 		return reconcile.Result{RequeueAfter: time.Second * 10, Requeue: true}, nil
 	}
 
-	instance.Status.APIReadyReplicas = apiserver.Deployment.Status.ReadyReplicas
-	reqLogger.Info("Setting boostrap", "URL", instance.Spec.ExternalHostname+":"+getNodePort(apiserver.ExposedService, "http"))
-	instance.Status.BootstrapURL = instance.Spec.ExternalHostname + ":" + getNodePort(apiserver.ExposedService, "http") + "/boostrap"
+	instance.Status.APIReadyReplicas = apiServer.Deployment.Status.ReadyReplicas
+	if instance.Spec.IngressHostname != "" {
+		reqLogger.Info("Setting boostrap", "URL", instance.Spec.IngressHostname+"/bootstrap")
+		instance.Status.BootstrapURL = instance.Spec.IngressHostname + "/bootstrap"
+	} else {
+		reqLogger.Info("Setting boostrap", "URL", instance.Spec.ExternalHostname+":"+getNodePort(apiServer.ExposedService, "http"))
+		instance.Status.BootstrapURL = instance.Spec.ExternalHostname + ":" + getNodePort(apiServer.ExposedService, "http") + "/bootstrap"
+	}
+
 	r.client.Update(context.TODO(), instance)
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Engine Controller ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-	engineController := engineControllerP{engines.NewController(instance, apiserver.ExposedService)}
+	engineController := engineControllerP{engines.NewController(instance, apiServer.ExposedService)}
 	if err := r.setOperatorController(instance, &engineController); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&engineController, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all EngineController resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: engineController.Deployment.Name, Namespace: engineController.Deployment.Namespace}, engineController.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(engineController.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create EngineController Deployment.", "Name", engineController.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	instance.Status.EngineControllerReadyReplicas = engineController.Deployment.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: engineController.ConfigMap.Name, Namespace: engineController.ConfigMap.Namespace}, engineController.ConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(engineController.ConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create EngineController ConfigMap.", "Name", engineController.ConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: engineController.InternalService.Name, Namespace: engineController.InternalService.Namespace}, engineController.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(engineController.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create EngineController Service.", "Name", engineController.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *engineController.Deployment.Spec.Replicas != *instance.Spec.EngineController.Replicas {
+		engineController.Deployment.Spec.Replicas = instance.Spec.EngineController.Replicas
+		err = r.updateResource(engineController.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update API Deployment.", "Deployment.Name", engineController.Deployment.Name)
+			return reconcile.Result{}, err
+		}
 	}
 
 	instance.Status.EngineControllerReadyReplicas = engineController.Deployment.Status.ReadyReplicas
@@ -279,13 +431,47 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RESMAN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 	resmon := resmonP{engines.NewResmon(instance)}
 	if err := r.setOperatorController(instance, &resmon); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&resmon, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+	// Create all Resmon resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: resmon.Deployment.Name, Namespace: resmon.Deployment.Namespace}, resmon.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(resmon.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Resmon Deployment.", "Name", resmon.Deployment.Name)
+			return reconcile.Result{}, err
+		}
 	}
+	instance.Status.ResmonReadyReplicas = resmon.Deployment.Status.ReadyReplicas
+	r.client.Update(context.TODO(), instance)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: resmon.InternalService.Name, Namespace: resmon.InternalService.Namespace}, resmon.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(resmon.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Resmon Service.", "Name", resmon.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: resmon.ExposedService.Name, Namespace: resmon.ExposedService.Namespace}, resmon.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(resmon.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Resmon Service.", "Name", resmon.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *resmon.Deployment.Spec.Replicas != *instance.Spec.EngineResmon.Replicas {
+		resmon.Deployment.Spec.Replicas = instance.Spec.EngineResmon.Replicas
+		err = r.updateResource(resmon.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Resmon Deployment.", "Deployment.Name", resmon.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
 	instance.Status.ResmonReadyReplicas = resmon.Deployment.Status.ReadyReplicas
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Simbank ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -293,57 +479,302 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 	r.client.Update(context.TODO(), instance)
 	simbank := simbankP{simbank.New(instance)}
 	if err := r.setOperatorController(instance, &simbank); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&simbank, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all Simbank resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: simbank.Deployment.Name, Namespace: simbank.Deployment.Namespace}, simbank.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(simbank.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Simbank Deployment.", "Name", simbank.Deployment.Name)
+			return reconcile.Result{}, err
+		}
 	}
-	if err := simbankSetup(instance, apiserver, cps, simbank); err != nil {
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: simbank.ExposedService.Name, Namespace: simbank.ExposedService.Namespace}, simbank.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(simbank.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Simbank Service.", "Name", simbank.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *simbank.Deployment.Spec.Replicas != *instance.Spec.Simbank.Replicas {
+		simbank.Deployment.Spec.Replicas = instance.Spec.Simbank.Replicas
+		err = r.updateResource(simbank.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Simbank Deployment.", "Deployment.Name", simbank.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	if err := simbankSetup(instance, apiServer, cpsCluster, simbank); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Monitoring ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 	grafana := grafanaP{monitoring.NewGrafana(instance)}
 	if err := r.setOperatorController(instance, &grafana); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&grafana, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all Grafana resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.PersistentVolumeClaim.Name, Namespace: grafana.PersistentVolumeClaim.Namespace}, grafana.PersistentVolumeClaim)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.PersistentVolumeClaim)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana PVC.", "Name", grafana.PersistentVolumeClaim.Name)
+			return reconcile.Result{}, err
+		}
 	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.Deployment.Name, Namespace: grafana.Deployment.Namespace}, grafana.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana Deployment.", "Name", grafana.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.AutoDashboardConfigMap.Name, Namespace: grafana.AutoDashboardConfigMap.Namespace}, grafana.AutoDashboardConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.AutoDashboardConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana ConfigMap.", "Name", grafana.AutoDashboardConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.ConfigMap.Name, Namespace: grafana.ConfigMap.Namespace}, grafana.ConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.ConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana ConfigMap.", "Name", grafana.ConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.DashboardConfigMap.Name, Namespace: grafana.DashboardConfigMap.Namespace}, grafana.DashboardConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.DashboardConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana ConfigMap.", "Name", grafana.DashboardConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.ProvisioningConfigMap.Name, Namespace: grafana.ProvisioningConfigMap.Namespace}, grafana.ProvisioningConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.ProvisioningConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana ConfigMap.", "Name", grafana.ProvisioningConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.ExposedService.Name, Namespace: grafana.ExposedService.Namespace}, grafana.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana Service.", "Name", grafana.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.InternalService.Name, Namespace: grafana.InternalService.Namespace}, grafana.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana Service.", "Name", grafana.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: grafana.Ingress.Name, Namespace: grafana.Ingress.Namespace}, grafana.Ingress)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(grafana.Ingress)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Grafana Ingress.", "Name", grafana.Ingress.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	if instance.Spec.IngressHostname != "" {
+		instance.Status.GrafanaURL = instance.Spec.IngressHostname + "/galasa-grafana"
+	} else {
+		instance.Status.GrafanaURL = instance.Spec.ExternalHostname + ":" + getNodePort(grafana.ExposedService, instance.Name+"-grafana-external-service") + "/galasa-grafana"
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *grafana.Deployment.Spec.Replicas != *instance.Spec.Monitoring.GrafanaReplicas {
+		grafana.Deployment.Spec.Replicas = instance.Spec.Monitoring.GrafanaReplicas
+		err = r.updateResource(grafana.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Grafana Deployment.", "Deployment.Name", grafana.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
 	prometheus := prometheusP{monitoring.NewPrometheus(instance)}
 	if err := r.setOperatorController(instance, &prometheus); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&prometheus, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all Prometheus resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: prometheus.PersistentVolumeClaim.Name, Namespace: prometheus.PersistentVolumeClaim.Namespace}, prometheus.PersistentVolumeClaim)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(prometheus.PersistentVolumeClaim)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus PVC.", "Name", prometheus.PersistentVolumeClaim.Name)
+			return reconcile.Result{}, err
+		}
 	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: prometheus.Deployment.Name, Namespace: prometheus.Deployment.Namespace}, prometheus.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(prometheus.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Deployment.", "Name", prometheus.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: prometheus.ConfigMap.Name, Namespace: prometheus.ConfigMap.Namespace}, prometheus.ConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(prometheus.ConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus ConfigMap.", "Name", prometheus.ConfigMap.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: prometheus.ExposedService.Name, Namespace: prometheus.ExposedService.Namespace}, prometheus.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(prometheus.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Service.", "Name", prometheus.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: prometheus.InternalService.Name, Namespace: prometheus.InternalService.Namespace}, prometheus.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(prometheus.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Service.", "Name", prometheus.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *prometheus.Deployment.Spec.Replicas != *instance.Spec.Monitoring.PrometheusReplicas {
+		prometheus.Deployment.Spec.Replicas = instance.Spec.Monitoring.PrometheusReplicas
+		err = r.updateResource(prometheus.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Grafana Deployment.", "Deployment.Name", prometheus.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
 	metrics := metricsP{monitoring.NewMetrics(instance)}
 	if err := r.setOperatorController(instance, &metrics); err != nil {
-		r.ecosystemReady(false, instance)
+		r.ecosystemReady(instance)
 		return reconcile.Result{}, err
 	}
-	if err := r.reconcileResources(&metrics, reqLogger); err != nil {
-		r.ecosystemReady(false, instance)
-		return reconcile.Result{}, err
+
+	// Create all metrics resources if not exisisting
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: metrics.Deployment.Name, Namespace: metrics.Deployment.Namespace}, metrics.Deployment)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(metrics.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Deployment.", "Name", metrics.Deployment.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: metrics.InternalService.Name, Namespace: metrics.InternalService.Namespace}, metrics.InternalService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(metrics.InternalService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Service.", "Name", metrics.InternalService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: metrics.ExposedService.Name, Namespace: metrics.ExposedService.Namespace}, metrics.ExposedService)
+	if err != nil && errors.IsNotFound(err) {
+		err = r.createResource(metrics.ExposedService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to Create Prometheus Service.", "Name", metrics.ExposedService.Name)
+			return reconcile.Result{}, err
+		}
+	}
+
+	// Check all updateable fields from the GalasaEcosystem CRD.
+	if *metrics.Deployment.Spec.Replicas != *instance.Spec.Monitoring.MetricsReplicas {
+		metrics.Deployment.Spec.Replicas = instance.Spec.Monitoring.MetricsReplicas
+		err = r.updateResource(metrics.Deployment)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update Metrics Deployment.", "Deployment.Name", metrics.Deployment.Name)
+			return reconcile.Result{}, err
+		}
 	}
 
 	instance.Status.MonitoringReadyReplicas = metrics.Deployment.Status.ReadyReplicas + prometheus.Deployment.Status.ReadyReplicas + grafana.Deployment.Status.ReadyReplicas
 	r.client.Update(context.TODO(), instance)
 
-	r.ecosystemReady(true, instance)
+	r.ecosystemReady(instance)
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileGalasaEcosystem) ecosystemReady(ready bool, instance *galasav1alpha1.GalasaEcosystem) {
-	ecosystemReady = ready
+func ecosystemCheck(instance *galasav1alpha1.GalasaEcosystem) bool {
+	checkLog := log.WithName("Check-Log")
+	checkLog.Info("Instance", "Instance", instance)
+	if instance.Status.CPSReadyReplicas != instance.Spec.Propertystore.PropertyClusterSize {
+		checkLog.Info("Etcd cluster not ready", "Required", instance.Spec.Propertystore.PropertyClusterSize, "Available", String(instance.Status.CPSReadyReplicas))
+		return false
+	}
+	if instance.Status.RASReadyReplicas != *instance.Spec.RasSpec.Replicas {
+		checkLog.Info("RAS not ready", "Required", *instance.Spec.RasSpec.Replicas, "Available", instance.Status.RASReadyReplicas)
+		return false
+	}
+	if instance.Status.APIReadyReplicas != *instance.Spec.APIServer.Replicas {
+		checkLog.Info("API server not ready", "Required", *instance.Spec.APIServer.Replicas, "Available", instance.Status.APIReadyReplicas)
+		return false
+	}
+	if instance.Status.MonitoringReadyReplicas != *instance.Spec.Monitoring.PrometheusReplicas+*instance.Spec.Monitoring.GrafanaReplicas+*instance.Spec.Monitoring.MetricsReplicas {
+		checkLog.Info("Monitoring not ready", "Required", *instance.Spec.Monitoring.PrometheusReplicas+*instance.Spec.Monitoring.GrafanaReplicas+*instance.Spec.Monitoring.MetricsReplicas, "Available", instance.Status.MonitoringReadyReplicas)
+		return false
+	}
+	if instance.Status.EngineControllerReadyReplicas != *instance.Spec.EngineController.Replicas {
+		checkLog.Info("Engine Controller not ready", "Required", *instance.Spec.EngineController.Replicas, "Available", instance.Status.EngineControllerReadyReplicas)
+		return false
+	}
+	if instance.Status.ResmonReadyReplicas != *instance.Spec.EngineResmon.Replicas {
+		checkLog.Info("Resource Management not ready", "Required", *instance.Spec.EngineResmon.Replicas, "Available", instance.Status.ResmonReadyReplicas)
+		return false
+	}
+	return true
+}
+
+func (r *ReconcileGalasaEcosystem) ecosystemReady(instance *galasav1alpha1.GalasaEcosystem) {
+	ecosystemReady = ecosystemCheck(instance)
 	instance.Status.EcosystemReady = ecosystemReady
 	r.client.Update(context.TODO(), instance)
+}
+
+func (r *ReconcileGalasaEcosystem) reset(instance *galasav1alpha1.GalasaEcosystem, cps cpsP) {
+	zero := int32(0)
+	resetLog := log.WithName("Operator-Log")
+
+	if instance.Status.APIReadyReplicas > 0 {
+		resetLog.Info("Scaling down any APIservers")
+		apiServer := apiP{apiserver.New(instance, cps.ExposedService)}
+		if err := r.setOperatorController(instance, &apiServer); err != nil {
+			r.ecosystemReady(instance)
+			resetLog.Error(err, "Failed to set operator as controller")
+			return
+		}
+
+		apiServer.Deployment.Spec.Replicas = &zero
+		resetLog.Info("Object For API", "Object", apiServer.Deployment)
+		err := r.client.Update(context.TODO(), apiServer.Deployment)
+		resetLog.Info("Resp", "Err", err)
+		apiServer.Deployment.Spec.Replicas = instance.Spec.APIServer.Replicas
+		return
+	}
+	resetLog.Info("Nothing to reset")
 }
 
 func (r *ReconcileGalasaEcosystem) setOperatorController(instance *galasav1alpha1.GalasaEcosystem, v1Objects galasaObject) error {
@@ -355,22 +786,22 @@ func (r *ReconcileGalasaEcosystem) setOperatorController(instance *galasav1alpha
 	return nil
 }
 
-func (r *ReconcileGalasaEcosystem) reconcileResources(v1Objects galasaObject, reqLogger logr.Logger) error {
-	for _, object := range v1Objects.getResourceObjects() {
-		err := r.client.Get(context.TODO(), types.NamespacedName{Name: object.Meta.GetName(), Namespace: object.Meta.GetNamespace()}, object.Runtime)
-		if err != nil && errors.IsNotFound(err) {
-			reqLogger.Info("Creating the Object", "Name", object.Meta.GetName())
-			err = r.client.Create(context.TODO(), object.Runtime)
-			if err != nil {
-				return err
-			}
-			return nil
-		} else if err != nil {
-			return err
-		}
+func (r *ReconcileGalasaEcosystem) updateResource(object runtime.Object) error {
+	updateLogger := log.WithName("UpdateLog")
+	updateLogger.Info("Updating the Object", "Object", object)
+	err := r.client.Update(context.TODO(), object)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-		// Resource already exists - don't requeue
-		reqLogger.Info("Skip reconcile: Resource already exists", "Name", object.Meta.GetName())
+func (r *ReconcileGalasaEcosystem) createResource(object runtime.Object) error {
+	createLogger := log.WithName("CreateLog")
+	createLogger.Info("Creating the Object", "Object", object)
+	err := r.client.Create(context.TODO(), object)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -422,10 +853,6 @@ type grafanaP struct {
 func (c *cpsP) getResourceObjects() []resourceObjects {
 	return []resourceObjects{
 		{
-			Meta:    metav1.Object(c.PersistentVolumeClaim),
-			Runtime: runtime.Object(c.PersistentVolumeClaim),
-		},
-		{
 			Meta:    metav1.Object(c.ExposedService),
 			Runtime: runtime.Object(c.ExposedService),
 		},
@@ -476,10 +903,6 @@ func (a *apiP) getResourceObjects() []resourceObjects {
 func (r *rasP) getResourceObjects() []resourceObjects {
 	return []resourceObjects{
 		{
-			Meta:    metav1.Object(r.PersistentVolumeClaim),
-			Runtime: runtime.Object(r.PersistentVolumeClaim),
-		},
-		{
 			Meta:    metav1.Object(r.InternalService),
 			Runtime: runtime.Object(r.InternalService),
 		},
@@ -490,10 +913,6 @@ func (r *rasP) getResourceObjects() []resourceObjects {
 		{
 			Meta:    metav1.Object(r.StatefulSet),
 			Runtime: runtime.Object(r.StatefulSet),
-		},
-		{
-			Meta:    metav1.Object(r.Ingress),
-			Runtime: runtime.Object(r.Ingress),
 		},
 	}
 }
@@ -592,6 +1011,10 @@ func (g *grafanaP) getResourceObjects() []resourceObjects {
 		{
 			Meta:    metav1.Object(g.ConfigMap),
 			Runtime: runtime.Object(g.ConfigMap),
+		},
+		{
+			Meta:    metav1.Object(g.Ingress),
+			Runtime: runtime.Object(g.Ingress),
 		},
 		{
 			Meta:    metav1.Object(g.DashboardConfigMap),

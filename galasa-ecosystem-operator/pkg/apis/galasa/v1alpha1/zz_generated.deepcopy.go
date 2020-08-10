@@ -220,11 +220,6 @@ func (in *Monitoring) DeepCopy() *Monitoring {
 func (in *PropertyStoreCluster) DeepCopyInto(out *PropertyStoreCluster) {
 	*out = *in
 	in.Resources.DeepCopyInto(&out.Resources)
-	if in.Replicas != nil {
-		in, out := &in.Replicas, &out.Replicas
-		*out = new(int32)
-		**out = **in
-	}
 	if in.InitProps != nil {
 		in, out := &in.InitProps, &out.InitProps
 		*out = make(map[string]string, len(*in))

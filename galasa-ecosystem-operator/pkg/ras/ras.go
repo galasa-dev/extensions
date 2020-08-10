@@ -4,58 +4,23 @@ import (
 	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type RAS struct {
-	InternalService       *corev1.Service
-	ExposedService        *corev1.Service
-	StatefulSet           *appsv1.StatefulSet
-	Ingress               *v1beta1.Ingress
-	PersistentVolumeClaim *corev1.PersistentVolumeClaim
+	InternalService *corev1.Service
+	ExposedService  *corev1.Service
+	StatefulSet     *appsv1.StatefulSet
+	// Ingress         *v1beta1.Ingress
 }
 
 func New(cr *galasav1alpha1.GalasaEcosystem) *RAS {
 	return &RAS{
-		InternalService:       generateInternalService(cr),
-		ExposedService:        generateExposedService(cr),
-		StatefulSet:           generateStatefulSet(cr),
-		Ingress:               generateIngress(cr),
-		PersistentVolumeClaim: generatePVC(cr),
-	}
-}
-
-func generateIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress {
-	return &v1beta1.Ingress{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-ras-ingress",
-			Namespace: cr.Namespace,
-			Labels: map[string]string{
-				"app": cr.Name + "-ras",
-			},
-		},
-		Spec: v1beta1.IngressSpec{
-			Rules: []v1beta1.IngressRule{
-				{
-					IngressRuleValue: v1beta1.IngressRuleValue{
-						HTTP: &v1beta1.HTTPIngressRuleValue{
-							Paths: []v1beta1.HTTPIngressPath{
-								{
-									Path: "/*",
-									Backend: v1beta1.IngressBackend{
-										ServiceName: cr.Name + "-ras-external-service",
-										ServicePort: intstr.FromInt(5984),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
+		InternalService: generateInternalService(cr),
+		ExposedService:  generateExposedService(cr),
+		StatefulSet:     generateStatefulSet(cr),
 	}
 }
 
@@ -106,7 +71,7 @@ func generateExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev1.Service 
 }
 
 func generateStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet {
-	// trueBool := true
+	trueBool := true
 	return &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-ras",
@@ -173,53 +138,32 @@ func generateStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet
 					},
 				},
 			},
-			// VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
-			// 	{
-			// 		ObjectMeta: metav1.ObjectMeta{
-			// 			Name: "data-disk",
-			// 			OwnerReferences: []metav1.OwnerReference{
-			// 				metav1.OwnerReference{
-			// 					APIVersion:         cr.Kind,
-			// 					Name:               cr.Name,
-			// 					Controller:         &trueBool,
-			// 					BlockOwnerDeletion: &trueBool,
-			// 				},
-			// 			},
-			// 		},
-			// 		Spec: corev1.PersistentVolumeClaimSpec{
-			// 			AccessModes: []corev1.PersistentVolumeAccessMode{
-			// 				corev1.PersistentVolumeAccessMode("ReadWriteOnce"),
-			// 			},
-			// 			StorageClassName: cr.Spec.StorageClassName,
-			// 			Resources: corev1.ResourceRequirements{
-			// 				Requests: corev1.ResourceList{
-			// 					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.RasSpec.Storage),
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// },
-		},
-	}
-}
-
-func generatePVC(cr *galasav1alpha1.GalasaEcosystem) *corev1.PersistentVolumeClaim {
-	return &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-ras-pvc",
-			Namespace: cr.Namespace,
-			Labels: map[string]string{
-				"app": cr.Name + "-ras",
-			},
-		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{
-				"ReadWriteOnce",
-			},
-			StorageClassName: cr.Spec.StorageClassName,
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.RasSpec.Storage),
+			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "data-disk",
+						OwnerReferences: []metav1.OwnerReference{
+							{
+								APIVersion:         cr.APIVersion,
+								Kind:               cr.Kind,
+								Name:               cr.Name,
+								Controller:         &trueBool,
+								BlockOwnerDeletion: &trueBool,
+								UID:                cr.UID,
+							},
+						},
+					},
+					Spec: corev1.PersistentVolumeClaimSpec{
+						AccessModes: []corev1.PersistentVolumeAccessMode{
+							corev1.PersistentVolumeAccessMode("ReadWriteOnce"),
+						},
+						StorageClassName: cr.Spec.StorageClassName,
+						Resources: corev1.ResourceRequirements{
+							Requests: corev1.ResourceList{
+								corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.RasSpec.Storage),
+							},
+						},
+					},
 				},
 			},
 		},

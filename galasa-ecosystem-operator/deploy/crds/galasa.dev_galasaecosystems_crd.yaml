@@ -18,6 +18,9 @@ spec:
     - jsonPath: .status.BootstrapURL
       name: BOOTSTRAPURL
       type: string
+    - jsonPath: .status.GrafanaURL
+      name: GRAFANAURL
+      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -163,6 +166,10 @@ spec:
                 type: string
               galasaVersion:
                 type: string
+              ingressClass:
+                type: string
+              ingressHostname:
+                type: string
               mavenRepository:
                 type: string
               monitoring:
@@ -198,16 +205,13 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  clusterSize:
+                    format: int32
+                    type: integer
                   nodeSelector:
                     additionalProperties:
                       type: string
                     type: object
-                  property_cluster_size:
-                    format: int32
-                    type: integer
-                  replicas:
-                    format: int32
-                    type: integer
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
@@ -350,6 +354,8 @@ spec:
               EngineControllerReadyReplicas:
                 format: int32
                 type: integer
+              GrafanaURL:
+                type: string
               MonitoringReadyReplicas:
                 format: int32
                 type: integer
@@ -365,6 +371,7 @@ spec:
             - CPSReadyReplicas
             - EcosystemReady
             - EngineControllerReadyReplicas
+            - GrafanaURL
             - MonitoringReadyReplicas
             - RASReadyReplicas
             - ResmonReadyReplicas

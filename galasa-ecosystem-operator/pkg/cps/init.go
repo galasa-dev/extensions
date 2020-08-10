@@ -19,27 +19,29 @@ import (
 
 var log = logf.Log.WithName("controller_galasaecosystem")
 
-func (c *CPS) putInitProps(cr *galasav1alpha1.GalasaEcosystem) error {
+func (c *CPS) LoadInitProps(cr *galasav1alpha1.GalasaEcosystem) error {
 	initProps := cr.Spec.Propertystore.InitProps
 	if initProps == nil {
 		return nil
 	}
+	log.Info("Found props:", "props", initProps)
 	for k, v := range initProps {
-		if err := c.putProp(k, v); err != nil {
+		log.Info("Prop:", "key", k, "value", v)
+		if err := c.LoadProp(k, v); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *CPS) putProp(key string, value string) error {
+func (c *CPS) LoadProp(key string, value string) error {
 	cmd := []string{"etcdctl put " + key + " " + value}
 	_, err := c.execCmd(cmd)
 	return err
 
 }
 
-func (c *CPS) getProp(key string) (value string, err error) {
+func (c *CPS) GetProp(key string) (value string, err error) {
 	cmd := []string{"etcdctl get " + key}
 	v, execErr := c.execCmd(cmd)
 	if execErr != nil {
@@ -61,10 +63,14 @@ func (c *CPS) execCmd(cmd []string) (stdO string, err error) {
 		return "", err
 	}
 
-	set := labels.Set(c.StatefulSet.Labels)
+	set := labels.Set(c.StatefulSet.Labels) //map[string]string{"app": "galasa-ecosystem-etcd-cluster"})
 	pods, err := clientSet.CoreV1().Pods(c.StatefulSet.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: set.AsSelector().String()})
 	if err != nil {
 		return "", err
+	}
+	log.Info("found pods", "First pod name", pods.Items[0].GetName())
+	if len(pods.Items) < 1 {
+		return "", &errorString{"No pods found"}
 	}
 	req := clientSet.CoreV1().RESTClient().Post().Resource("pods").Name(pods.Items[0].Name).Namespace(c.StatefulSet.Namespace).SubResource("exec")
 
@@ -82,6 +88,7 @@ func (c *CPS) execCmd(cmd []string) (stdO string, err error) {
 
 	exec, err := remotecommand.NewSPDYExecutor(config, "POST", req.URL())
 	if err != nil {
+		log.Info("err", "err", err)
 		return "", err
 	}
 	var stdout, stderr bytes.Buffer
@@ -90,9 +97,19 @@ func (c *CPS) execCmd(cmd []string) (stdO string, err error) {
 		Stdout: &stdout,
 		Stderr: &stderr,
 	})
+	log.Info("Exec Done", "stdout", stdout, "stderr", stderr)
 
 	if err != nil {
+		log.Info("err", "err", err)
 		return "", err
 	}
 	return stdout.String(), nil
+}
+
+type errorString struct {
+	s string
+}
+
+func (e *errorString) Error() string {
+	return e.s
 }

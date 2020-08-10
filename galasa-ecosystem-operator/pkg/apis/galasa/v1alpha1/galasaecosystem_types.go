@@ -13,6 +13,8 @@ type GalasaEcosystemSpec struct {
 	DockerRegistry   string               `json:"dockerRegistry"`
 	MavenRepository  string               `json:"mavenRepository"`
 	ExternalHostname string               `json:"externalhostname"`
+	IngressClass     string               `json:"ingressClass,omitempty"`
+	IngressHostname  string               `json:"ingressHostname,omitempty"`
 	Propertystore    PropertyStoreCluster `json:"propertystore"`
 	APIServer        ApiServer            `json:"apiserver"`
 	RasSpec          RasSpec              `json:"rasSpec"`
@@ -68,8 +70,7 @@ type RasSpec struct {
 // PropertyStoreCluster spec for the CPS cluster
 type PropertyStoreCluster struct {
 	Resources           corev1.ResourceRequirements `json:"resources,omitempty"`
-	Replicas            *int32                      `json:"replicas,omitempty"`
-	PropertyClusterSize int32                       `json:"property_cluster_size,omitempty"`
+	PropertyClusterSize int32                       `json:"clusterSize,omitempty"`
 	InitProps           map[string]string           `json:"InitProps,omitempty"`
 	NodeSelector        map[string]string           `json:"nodeSelector,omitempty"`
 	Storage             string                      `json:"storage"`
@@ -81,6 +82,7 @@ type GalasaEcosystemStatus struct {
 	APIReadyReplicas              int32  `json:"APIReadyReplicas"`
 	RASReadyReplicas              int32  `json:"RASReadyReplicas"`
 	BootstrapURL                  string `json:"BootstrapURL"`
+	GrafanaURL                    string `json:"GrafanaURL"`
 	EngineControllerReadyReplicas int32  `json:"EngineControllerReadyReplicas"`
 	ResmonReadyReplicas           int32  `json:"ResmonReadyReplicas"`
 	MonitoringReadyReplicas       int32  `json:"MonitoringReadyReplicas"`
@@ -91,6 +93,7 @@ type GalasaEcosystemStatus struct {
 // kubebuilder:subresource:status
 // +kubebuilder:printcolumn:JSONPath=".status.EcosystemReady",name=READY,type=boolean
 // +kubebuilder:printcolumn:JSONPath=".status.BootstrapURL",name=BOOTSTRAPURL,type=string
+// +kubebuilder:printcolumn:JSONPath=".status.GrafanaURL",name=GRAFANAURL,type=string
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type GalasaEcosystem struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -45,6 +45,9 @@ func generateIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress {
 			Labels: map[string]string{
 				"app": cr.Name + "-apiserver",
 			},
+			Annotations: map[string]string{
+				"kubernetes.io/ingress.class": cr.Spec.IngressClass,
+			},
 		},
 		Spec: v1beta1.IngressSpec{
 			Rules: []v1beta1.IngressRule{

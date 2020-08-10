@@ -1,9 +1,12 @@
 package monitoring
 
 import (
+	"strings"
+
 	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -18,6 +21,7 @@ type Grafana struct {
 	Deployment             *appsv1.Deployment
 	InternalService        *corev1.Service
 	ExposedService         *corev1.Service
+	Ingress                *v1beta1.Ingress
 }
 
 func NewGrafana(cr *galasav1alpha1.GalasaEcosystem) *Grafana {
@@ -30,6 +34,41 @@ func NewGrafana(cr *galasav1alpha1.GalasaEcosystem) *Grafana {
 		ProvisioningConfigMap:  generateProvisioningConfigMap(cr),
 		DashboardConfigMap:     generateDashboardConfigMap(cr),
 		AutoDashboardConfigMap: generateAutoDashboardConfigMap(cr),
+		Ingress:                generateGrafanaIngress(cr),
+	}
+}
+
+func generateGrafanaIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress {
+	return &v1beta1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cr.Name + "-grafana-ingress",
+			Namespace: cr.Namespace,
+			Labels: map[string]string{
+				"app": cr.Name + "-grafana",
+			},
+			Annotations: map[string]string{
+				"kubernetes.io/ingress.class": cr.Spec.IngressClass,
+			},
+		},
+		Spec: v1beta1.IngressSpec{
+			Rules: []v1beta1.IngressRule{
+				{
+					IngressRuleValue: v1beta1.IngressRuleValue{
+						HTTP: &v1beta1.HTTPIngressRuleValue{
+							Paths: []v1beta1.HTTPIngressPath{
+								{
+									Path: "/galasa-grafana",
+									Backend: v1beta1.IngressBackend{
+										ServiceName: cr.Name + "-grafana-external-service",
+										ServicePort: intstr.FromInt(3000),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -512,6 +551,13 @@ datasources:
 }
 
 func generateGrafanaConfig(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap {
+	var domain string
+	if cr.Spec.IngressHostname != "" {
+		domain = strings.Replace(cr.Spec.IngressHostname, "https://", "", 1)
+	} else {
+		domain = strings.Replace(cr.Spec.ExternalHostname, "http://", "", 1)
+	}
+
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "grafana-config",
@@ -562,7 +608,7 @@ func generateGrafanaConfig(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap
 ;http_port = 3000
 
 # The public facing domain name used to access grafana from a browser
-;domain = localhost
+domain = ` + domain + `
 
 # Redirect to correct domain if host header does not match domain
 # Prevents DNS rebinding attacks
@@ -570,7 +616,8 @@ func generateGrafanaConfig(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap
 
 # The full public facing url you use in browser, used for redirects and emails
 # If you use reverse proxy and sub path specify full url (with sub path)
-;root_url = http://localhost:3000/grafana
+root_url = %(protocol)s://%(domain)s:%(http_port)s/galasa-grafana/
+serve_from_sub_path = true
 
 # Log web requests
 ;router_logging = false

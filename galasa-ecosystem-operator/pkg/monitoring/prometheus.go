@@ -81,6 +81,8 @@ func generatePrometheusDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 							Args: []string{
 								"--config.file=/etc/prometheus/prometheus.yml",
 								"--storage.tsdb.path=/prometheus",
+								"--web.external-url=" + cr.Spec.ExternalHostname + ":9090/galasa-prometheus",
+								"--web.route-prefix=/",
 							},
 							Ports: []corev1.ContainerPort{
 								{
