@@ -16,9 +16,9 @@ spec:
   # The external hostname or IP for the k8's cluster being used
   externalhostname: "HOSTNAME"
   # If you want the bootstrap URL and the Grafana to be ingressed, can can use the nginx-ingress controller
-  ingressClass: "nginx-cit"
+  ingressClass: "nginx-example"
   # The external URL of the ingress endpoint
-  ingressHostname: https://cicscit.hursley.ibm.com
+  ingressHostname: https://hostname.example.com
   # Allow to specify the storage class name, omit if you want to use the default
   storageClassName: className
   

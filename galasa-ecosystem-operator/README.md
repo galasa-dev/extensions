@@ -17,12 +17,11 @@ Before deploying the operator, you will have to first define a ServiceAccount an
 kubectl apply -f deploy/operator.yaml
 ```
 
-Once up, the operator in then active and waiting for any work.
-
+v
 The operator and definitions are now installed and are ready to bring up a Galasa ecosystem. There is a sample definition for a Galasa ecosystem provided, and if you do not want to change any of the defaults (You will still need to add a externalHostname to the yaml) you can run: 
 
 ```
-apply -f deploy/crds/galasa.dev_v1alpha1_galasaecosystem_cr.yaml
+kubectl apply -f deploy/crds/galasa.dev_v1alpha1_galasaecosystem_cr.yaml
 ```
 
 This will take a few minutes to install, but the status can found by performing a:
