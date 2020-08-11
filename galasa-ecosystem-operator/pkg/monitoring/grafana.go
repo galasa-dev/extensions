@@ -57,7 +57,7 @@ func generateGrafanaIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress
 						HTTP: &v1beta1.HTTPIngressRuleValue{
 							Paths: []v1beta1.HTTPIngressPath{
 								{
-									Path: "/galasa-grafana",
+									Path: "/" + cr.Name + "-grafana",
 									Backend: v1beta1.IngressBackend{
 										ServiceName: cr.Name + "-grafana-external-service",
 										ServicePort: intstr.FromInt(3000),
@@ -551,12 +551,8 @@ datasources:
 }
 
 func generateGrafanaConfig(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap {
-	var domain string
-	if cr.Spec.IngressHostname != "" {
-		domain = strings.Replace(cr.Spec.IngressHostname, "https://", "", 1)
-	} else {
-		domain = strings.Replace(cr.Spec.ExternalHostname, "http://", "", 1)
-	}
+	domain := strings.Replace(cr.Spec.IngressHostname, "https://", "", 1)
+	domain = strings.Replace(cr.Spec.ExternalHostname, "http://", "", 1)
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -616,7 +612,7 @@ domain = ` + domain + `
 
 # The full public facing url you use in browser, used for redirects and emails
 # If you use reverse proxy and sub path specify full url (with sub path)
-root_url = %(protocol)s://%(domain)s:%(http_port)s/galasa-grafana/
+root_url = %(protocol)s://%(domain)s:%(http_port)s/` + cr.Name + `-grafana/
 serve_from_sub_path = true
 
 # Log web requests
@@ -1119,7 +1115,7 @@ func generateGrafanaPVC(cr *galasav1alpha1.GalasaEcosystem) *corev1.PersistentVo
 			StorageClassName: cr.Spec.StorageClassName,
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
+					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.Monitoring.GrafanaStorage),
 				},
 			},
 		},

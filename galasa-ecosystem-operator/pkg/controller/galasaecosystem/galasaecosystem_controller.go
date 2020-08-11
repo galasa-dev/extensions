@@ -596,7 +596,7 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 		}
 	}
 	if instance.Spec.IngressHostname != "" {
-		instance.Status.GrafanaURL = instance.Spec.IngressHostname + "/galasa-grafana"
+		instance.Status.GrafanaURL = instance.Spec.IngressHostname + "/" + instance.Name + "-grafana"
 	} else {
 		instance.Status.GrafanaURL = instance.Spec.ExternalHostname + ":" + getNodePort(grafana.ExposedService, instance.Name+"-grafana-external-service") + "/galasa-grafana"
 	}

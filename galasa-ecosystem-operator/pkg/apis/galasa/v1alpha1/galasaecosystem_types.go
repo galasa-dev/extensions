@@ -28,7 +28,6 @@ type Monitoring struct {
 	MetricsReplicas    *int32            `json:"metricsReplicas,omitempty"`
 	PrometheusReplicas *int32            `json:"prometheusReplicas,omitempty"`
 	GrafanaReplicas    *int32            `json:"grafanaReplicas,omitempty"`
-	MetricsStorage     string            `json:"metricsStorage"`
 	PrometheusStorage  string            `json:"prometheusStorage"`
 	GrafanaStorage     string            `json:"grafanaStorage"`
 	NodeSelector       map[string]string `json:"nodeSelector,omitempty"`

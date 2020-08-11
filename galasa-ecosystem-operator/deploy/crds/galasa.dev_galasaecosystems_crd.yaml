@@ -182,8 +182,6 @@ spec:
                   metricsReplicas:
                     format: int32
                     type: integer
-                  metricsStorage:
-                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -195,7 +193,6 @@ spec:
                     type: string
                 required:
                 - grafanaStorage
-                - metricsStorage
                 - prometheusStorage
                 type: object
               propertystore:

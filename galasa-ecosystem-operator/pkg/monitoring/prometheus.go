@@ -185,7 +185,7 @@ func generatePrometheusPVC(cr *galasav1alpha1.GalasaEcosystem) *corev1.Persisten
 			StorageClassName: cr.Spec.StorageClassName,
 			Resources: corev1.ResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse("200m"),
+					corev1.ResourceName(corev1.ResourceStorage): resource.MustParse(cr.Spec.Monitoring.PrometheusStorage),
 				},
 			},
 		},
