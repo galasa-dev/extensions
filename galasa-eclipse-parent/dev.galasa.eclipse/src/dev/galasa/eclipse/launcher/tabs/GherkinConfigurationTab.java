@@ -1,13 +1,10 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2020.
  */
 package dev.galasa.eclipse.launcher.tabs;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
@@ -18,18 +15,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.m2e.core.MavenPlugin;
-import org.eclipse.m2e.core.project.IMavenProjectFacade;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
@@ -46,16 +36,14 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 
 import dev.galasa.eclipse.Activator;
-import dev.galasa.eclipse.launcher.Launcher;
+import dev.galasa.eclipse.launcher.GherkinLauncher;
 
-public class ConfigurationTab extends AbstractLaunchConfigurationTab
-        implements IConfigurationTab, SelectionListener, ModifyListener, FocusListener {
-
-    private static final String             MAVEN_NATURE        = "org.eclipse.m2e.core.maven2Nature";
+public class GherkinConfigurationTab extends AbstractLaunchConfigurationTab
+implements IConfigurationTab, SelectionListener, ModifyListener, FocusListener {
 
     private Composite                       comp;
 
-    private TestClassSelectionWidget        testClassSelector;
+    private FeatureSelectionWidget          featureSelector;
 
     private Button                          trace;
     private Button                          includeWorkspaceOverrides;
@@ -65,10 +53,10 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
 
     private ArrayList<IConfigurationGroups> configurationGroups = new ArrayList<>();
 
-    public ConfigurationTab() {
+    public GherkinConfigurationTab() {
         IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
         IConfigurationElement[] extensions = extensionRegistry
-                .getConfigurationElementsFor("dev.galasa.eclipse.extension.launcher.configuration");
+                .getConfigurationElementsFor("dev.galasa.eclipse.extension.launcher.gherkin.configuration");
         for (IConfigurationElement extension : extensions) {
             try {
                 configurationGroups.add((IConfigurationGroups) extension.createExecutableExtension("class"));
@@ -85,7 +73,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
         GridLayout topLayout = new GridLayout(1, false);
         comp.setLayout(topLayout);
 
-        createTestSelectionControls(comp);
+        createFeatureSelectionControls(comp);
 
         createOverridesControler(comp);
 
@@ -104,7 +92,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
 
     @Override
     public String getName() {
-        return "Galasa Java Configuration";
+        return "Galasa Gherkin Configuration";
     }
 
     /**
@@ -112,7 +100,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
      * 
      * @param parent
      */
-    private void createTestSelectionControls(Composite parent) {
+    private void createFeatureSelectionControls(Composite parent) {
         Group group = new Group(parent, SWT.NONE);
         group.setText("Test Selection");
         GridData gd = new GridData();
@@ -123,8 +111,8 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
         GridLayout topLayout = new GridLayout(1, false);
         group.setLayout(topLayout);
 
-        testClassSelector = new TestClassSelectionWidget(getLaunchConfigurationDialog(), group, SWT.NONE);
-        testClassSelector.addModifyListener(this);
+        featureSelector = new FeatureSelectionWidget(getLaunchConfigurationDialog(), group, SWT.NONE);
+        featureSelector.addModifyListener(this);
     }
 
     /**
@@ -217,7 +205,7 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
     private boolean validateTestSelection() {
 
         try {
-            String sProject = testClassSelector.getProjectText();
+            String sProject = featureSelector.getProjectText();
             if (sProject == null || sProject.trim().isEmpty()) {
                 setErrorMessage("A test project must be provided");
                 return false;
@@ -231,51 +219,15 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
                 return false;
             }
 
-            if (!project.hasNature(MAVEN_NATURE)) {
-                setErrorMessage("Test project is not a Maven project");
+            // *** Validate the Feature file
+            String feature = featureSelector.getFeatureText();
+            if (feature == null || feature.trim().isEmpty()) {
+                setErrorMessage("A feature file must be provided");
                 return false;
             }
-            if (!project.hasNature(JavaCore.NATURE_ID)) {
-                setErrorMessage("Test project is not a Java project");
-                return false;
-            }
-
-            IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(project);
-            IPath outputPath = mavenProjectFacade.getOutputLocation();
-            if (outputPath == null) {
-                setErrorMessage("Test project does have a build directory");
-                return false;
-            }
-
-            IResource actualOutputPath = workspaceRoot.findMember(outputPath);
-            if (actualOutputPath == null) {
-                setErrorMessage("Test project build directory does not exist");
-                return false;
-            }
-            Path projectDirectory = Paths.get(actualOutputPath.getRawLocationURI());
-            Path manifestFile = projectDirectory.resolve("META-INF").resolve("MANIFEST.MF");
-            if (!Files.exists(manifestFile)) {
-                setErrorMessage("Test project does not a META-INF/MANIFEST.MF built");
-                return false;
-            }
-
-            // *** Validate the Class
-            String sClass = testClassSelector.getClassText();
-            if (sClass == null || sClass.trim().isEmpty()) {
-                setErrorMessage("A test class must be provided");
-                return false;
-            }
-            sProject = sProject.trim();
-
-            IJavaProject javaProject = JavaCore.create(project);
-            if (javaProject == null) {
-                setErrorMessage("Test project did not resolve to a java project");
-                return false;
-            }
-
-            IType type = javaProject.findType(sClass);
-            if (type == null || !type.isClass()) {
-                setErrorMessage("Unable to locate test class");
+            IFile file = project.getFile(feature);
+            if (file == null || !file.exists()) {
+                setErrorMessage("Unable to locate feature file");
                 return false;
             }
 
@@ -285,13 +237,13 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
             return false;
         }
 
-        // if(automationRunTest.getSelection()) {
-        // String errorMessage = automationRunSelector.validate();
-        // if(errorMessage!=null) {
-        // setErrorMessage(errorMessage);
-        // return false;
-        // }
-        // }
+        //        if(automationRunTest.getSelection()) {
+        //            String errorMessage = automationRunSelector.validate();
+        //            if(errorMessage!=null) {
+        //                setErrorMessage(errorMessage);
+        //                return false;
+        //            }
+        //        }
 
         return true;
     }
@@ -301,15 +253,15 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
         String projectName = "";
 
         try {
-            projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
-            trace.setSelection(config.getAttribute(Launcher.TRACE, false));
-            includeWorkspaceOverrides.setSelection(config.getAttribute(Launcher.WORKSPACE_OVERRIDES, true));
+            projectName = config.getAttribute(GherkinLauncher.PROJECT, "");
+            trace.setSelection(config.getAttribute(GherkinLauncher.TRACE, false));
+            includeWorkspaceOverrides.setSelection(config.getAttribute(GherkinLauncher.WORKSPACE_OVERRIDES, true));
 
             // set the project name
-            testClassSelector.setProjectText(projectName);
-            testClassSelector.setClass(config.getAttribute(Launcher.TEST_CLASS, ""));
+            featureSelector.setProjectText(projectName);
+            featureSelector.setFeature(config.getAttribute(GherkinLauncher.FEATURE, ""));
 
-            String path = config.getAttribute(Launcher.OVERRIDES, "");
+            String path = config.getAttribute(GherkinLauncher.OVERRIDES, "");
             if (path.isEmpty()) {
                 propertiesFile.setText("");
                 propertiesFilePath = null;
@@ -334,15 +286,14 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
 
     @Override
     public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-        configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-                testClassSelector.getProjectText());
-        configuration.setAttribute(Launcher.TEST_CLASS, testClassSelector.getClassText());
-        configuration.setAttribute(Launcher.TRACE, trace.getSelection());
-        configuration.setAttribute(Launcher.WORKSPACE_OVERRIDES, includeWorkspaceOverrides.getSelection());
+                configuration.setAttribute(GherkinLauncher.PROJECT, featureSelector.getProjectText());
+                configuration.setAttribute(GherkinLauncher.FEATURE, featureSelector.getFeatureText());
+        configuration.setAttribute(GherkinLauncher.TRACE, trace.getSelection());
+        configuration.setAttribute(GherkinLauncher.WORKSPACE_OVERRIDES, includeWorkspaceOverrides.getSelection());
         if (propertiesFilePath == null) {
-            configuration.setAttribute(Launcher.OVERRIDES, "");
+            configuration.setAttribute(GherkinLauncher.OVERRIDES, "");
         } else {
-            configuration.setAttribute(Launcher.OVERRIDES, propertiesFilePath.getLocation().toString());
+            configuration.setAttribute(GherkinLauncher.OVERRIDES, propertiesFilePath.getLocation().toString());
         }
 
         for (IConfigurationGroups group : configurationGroups) {
@@ -353,10 +304,11 @@ public class ConfigurationTab extends AbstractLaunchConfigurationTab
 
     @Override
     public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-        config.setAttribute(Launcher.TEST_CLASS, "");
-        config.setAttribute(Launcher.TRACE, false);
-        config.setAttribute(Launcher.WORKSPACE_OVERRIDES, true);
-        config.setAttribute(Launcher.OVERRIDES, "");
+        config.setAttribute(GherkinLauncher.PROJECT, "");
+        config.setAttribute(GherkinLauncher.FEATURE, "");
+        config.setAttribute(GherkinLauncher.TRACE, false);
+        config.setAttribute(GherkinLauncher.WORKSPACE_OVERRIDES, true);
+        config.setAttribute(GherkinLauncher.OVERRIDES, "");
 
         for (IConfigurationGroups group : configurationGroups) {
             group.setDefaults(config);
