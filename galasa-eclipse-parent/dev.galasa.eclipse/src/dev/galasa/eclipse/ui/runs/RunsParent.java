@@ -175,7 +175,9 @@ public class RunsParent implements IUIParent, IPropertyListener, IDynamicStatusS
     @Override
     public synchronized void propertyUpdateComplete() {
         if (!runs.isEmpty()) {
-            view.expand(this);
+            if (view != null) {
+                view.expand(this);
+            }
         }
     }
 
