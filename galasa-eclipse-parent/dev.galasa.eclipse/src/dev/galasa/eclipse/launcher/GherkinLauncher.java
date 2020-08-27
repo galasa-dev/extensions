@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMRunner;
@@ -130,7 +129,6 @@ public class GherkinLauncher extends JavaLaunchDelegate {
 
         // *** Find all the information necessary to run
         File bootJarFile = findBootJar();
-        bootJarFile = new File("/Users/mikebyls/git/galasa/framework/galasa-parent/galasa-boot/target/galasa-boot-0.11.0-SNAPSHOT.jar");
         consoleDefault.append("Galasa boot jar is located at " + bootJarFile.toURI().toString() + "\n");
         File mavenRepository = locateMavenRepository(project);
         consoleDefault.append("Maven local repository is at " + mavenRepository.toString() + "\n");
