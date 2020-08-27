@@ -52,7 +52,7 @@ public class NexusVolume extends AbstractResource {
         try {
             System.out.println("Creating Nexus volume seeding container");
             EcosystemConfiguration ecoConfig = getEcosystem().getConfiguration();
-            String seedImage = ecoConfig.getGalasaRegistry() + "/galasa-seed-amd64:" + ecoConfig.getVersion();
+            String seedImage = ecoConfig.getGalasaRegistry() + "/galasa-seed-amd64:" + ecoConfig.getSeedVersion();
             String imageId = getImageId(seedImage);
             
             

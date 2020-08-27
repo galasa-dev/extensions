@@ -60,7 +60,7 @@ public class JenkinsVolume extends AbstractResource {
             EcosystemConfiguration ecoConfig = getEcosystem().getConfiguration();
             JenkinsConfiguration jenkinsConfig = ecoConfig.getJenkins();
 
-            String seedImage = ecoConfig.getGalasaRegistry() + "/galasa-seed-amd64:" + ecoConfig.getVersion();
+            String seedImage = ecoConfig.getGalasaRegistry() + "/galasa-seed-amd64:" + ecoConfig.getSeedVersion();
             String imageId = getImageId(seedImage);
             
             

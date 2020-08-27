@@ -12,6 +12,7 @@ public class EcosystemConfiguration {
     private String hostname;
     private String galasaRegistry;
     private String version;
+    private String seedVersion;
     
     private CpsConfiguration cps;
     private RasConfiguration ras;
@@ -180,6 +181,14 @@ public class EcosystemConfiguration {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public void setSeedVersion(String seedVersion) {
+        this.seedVersion = seedVersion;
+    }
+
+    public String getSeedVersion() {
+        return this.seedVersion;
     }
     
     
