@@ -292,7 +292,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
             }
             if ("EnvFail".equals(test.getRunDetails().getResult())) {
                 this.failedTests++;
-                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ") - ENVIRONMENT FAILURE");
             }
         }
 
