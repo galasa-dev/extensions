@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:c="/lib/credentials" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:section title="Galasa Configuration">
-  <f:entry title="Galasa Bootstrap URL" field="url">
+  <f:entry title="Galasa API Server URL" field="url">
     <f:textbox />
   </f:entry>
   <f:entry title="Galasa Credentials" field="serverCredentials">

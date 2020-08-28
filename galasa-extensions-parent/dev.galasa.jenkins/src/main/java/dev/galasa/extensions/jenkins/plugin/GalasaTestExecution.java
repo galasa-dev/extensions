@@ -275,7 +275,7 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
                 completedTests++;
             }
         }
-        logger.println("Galasa has completed " + completedTests + " out of " + totalTests + "tests");
+        logger.println("Galasa has completed " + completedTests + " out of " + totalTests + " tests");
 
         logger.println("Tests passed:");
         for (TestCase test : currentTests.values()) {
@@ -290,6 +290,10 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
                 this.failedTests++;
                 logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
             }
+            if ("EnvFail".equals(test.getRunDetails().getResult())) {
+                this.failedTests++;
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ") - ENVIRONMENT FAILURE");
+            }
         }
 
         logger.println("Tests ignored:");
@@ -300,6 +304,9 @@ public class GalasaTestExecution extends Builder implements SimpleBuildStep {
         }
         logger.println("Tests lost:");
         for (TestCase test : currentTests.values()) {
+            if ("UNKNOWN".equals(test.getRunDetails().getResult())) {
+                logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");
+            }
             if (test.getRunDetails().getResult() == null) {
                 this.failedTests++;
                 logger.println(test.getFullName() + " - RunID(" + test.getRunDetails().getName() + ")");

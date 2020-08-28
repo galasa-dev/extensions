@@ -70,9 +70,6 @@ public class ApiComms {
         Properties configurationProperties = new Properties();
         
         String host = galasaConfiguration.getUrl();
-        if (!host.endsWith("/")) {
-            host += "/";
-        }
 
         if (this.jwt == null) {
             logger.println("Authenticating with Galasa auth Service");
