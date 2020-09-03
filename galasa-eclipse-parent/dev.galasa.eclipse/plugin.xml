@@ -134,13 +134,21 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             delegate="dev.galasa.eclipse.launcher.Launcher"
-            delegateDescription="Run Galasa tests from within Eclipse"
-            delegateName="Galasa Launcher"
+            delegateDescription="Run Galasa Java tests from within Eclipse"
+            delegateName="Galasa Java Launcher"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer"
             id="dev.galasa.eclipse.launcher.Launcher"
             modes="run, debug"
-            name="Galasa">
+            name="Galasa - Java">
+      </launchConfigurationType>
+      <launchConfigurationType
+            delegate="dev.galasa.eclipse.launcher.GherkinLauncher"
+            delegateDescription="Run Galasa Gherkin tests from within Eclipse"
+            delegateName="Galasa Gherkin Launcher"
+            id="dev.galasa.eclipse.launcher.GherkinLauncher"
+            modes="run, debug"
+            name="Galasa - Gherkin">
       </launchConfigurationType>
    </extension>
    <extension
@@ -150,6 +158,11 @@
            configTypeID="dev.galasa.eclipse.launcher.Launcher"
             id="dev.galasa.eclipse.launcher.Launcher.image">
       </launchConfigurationTypeImage>
+      <launchConfigurationTypeImage
+             icon="icons/galasa-dark-new.png"
+           configTypeID="dev.galasa.eclipse.launcher.GherkinLauncher"
+            id="dev.galasa.eclipse.launcher.GherkinLauncher.image">
+      </launchConfigurationTypeImage>
    </extension>
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTabGroups">
@@ -157,6 +170,17 @@
             type="dev.galasa.eclipse.launcher.Launcher"
             class="dev.galasa.eclipse.launcher.LaunchTabGroup"
             id="dev.galasa.eclipse.launcher.LaunchTabGroup">
+         <launchMode
+               mode="debug">
+         </launchMode>
+         <launchMode
+               mode="run">
+         </launchMode>
+      </launchConfigurationTabGroup>
+      <launchConfigurationTabGroup
+            type="dev.galasa.eclipse.launcher.GherkinLauncher"
+            class="dev.galasa.eclipse.launcher.GherkinLaunchTabGroup"
+            id="dev.galasa.eclipse.launcher.GherkinLaunchTabGroup">
          <launchMode
                mode="debug">
          </launchMode>

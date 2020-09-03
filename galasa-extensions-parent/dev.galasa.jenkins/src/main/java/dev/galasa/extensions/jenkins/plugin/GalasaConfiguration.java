@@ -57,6 +57,10 @@ public class GalasaConfiguration extends GlobalConfiguration {
     }
 
     public void setUrl(String url) {
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        
         this.url = url;
         save();
     }
