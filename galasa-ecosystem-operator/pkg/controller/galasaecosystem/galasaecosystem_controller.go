@@ -1100,6 +1100,9 @@ func simbankSetup(cr *galasav1alpha1.GalasaEcosystem, api apiP, cps cpsP, simban
 		cps.LoadProp("zosmf.server.SIMBANK.images", "SIMBANK")
 		cps.LoadProp("zosmf.server.SIMBANK.hostname", hostname.Host)
 		cps.LoadProp("zosmf.server.SIMBANK.port", getNodePort(simbank.ExposedService, "simbank-mf"))
+		if hostname.Scheme == "http" {
+			cps.LoadProp("zosmf.server.SIMBANK.https", "false")
+		}
 
 		cps.LoadProp("simbank.dse.instance.name", "SIMBANK")
 		cps.LoadProp("simbank.instance.SIMBANK.zos.image", "SIMBANK")
