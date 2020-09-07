@@ -36,6 +36,7 @@ import com.google.gson.JsonObject;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
@@ -368,36 +369,37 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<String> getTests() throws ResultArchiveStoreException {
-        ArrayList<String> tests = new ArrayList<>();
+    public @NotNull List<RasTestClass> getTests() throws ResultArchiveStoreException {
+    //     ArrayList<String> tests = new ArrayList<>();
 
-        HttpGet httpGet = new HttpGet(
-                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/testnames-view?group=true");
-        httpGet.addHeader("Accept", "application/json");
+    //     HttpGet httpGet = new HttpGet(
+    //             store.getCouchdbUri() + "/galasa_run/_design/docs/_view/testnames-view?group=true");
+    //     httpGet.addHeader("Accept", "application/json");
 
-        try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbRasException("Unable to find tests - " + statusLine.toString());
-            }
+    //     try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
+    //         StatusLine statusLine = response.getStatusLine();
+    //         if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+    //             throw new CouchdbRasException("Unable to find tests - " + statusLine.toString());
+    //         }
 
-            HttpEntity entity = response.getEntity();
-            String responseEntity = EntityUtils.toString(entity);
-            ViewResponse view = store.getGson().fromJson(responseEntity, ViewResponse.class);
-            if (view.rows == null) {
-                throw new CouchdbRasException("Unable to find rows - Invalid JSON response");
-            }
+    //         HttpEntity entity = response.getEntity();
+    //         String responseEntity = EntityUtils.toString(entity);
+    //         ViewResponse view = store.getGson().fromJson(responseEntity, ViewResponse.class);
+    //         if (view.rows == null) {
+    //             throw new CouchdbRasException("Unable to find rows - Invalid JSON response");
+    //         }
 
-            for (ViewRow row : view.rows) {
-                tests.add(row.key);
-            }
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResultArchiveStoreException("Unable to find tests", e);
-        }
+    //         for (ViewRow row : view.rows) {
+    //             tests.add(row.key);
+    //         }
+    //     } catch (CouchdbRasException e) {
+    //         throw e;
+    //     } catch (Exception e) {
+    //         throw new ResultArchiveStoreException("Unable to find tests", e);
+    //     }
 
-        return tests;
+    //     return tests;    
+    return new ArrayList<RasTestClass>();
     }
 
 }
