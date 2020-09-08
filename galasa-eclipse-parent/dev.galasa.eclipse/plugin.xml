@@ -226,6 +226,15 @@
             name="Galasa Results"
             restorable="true">
       </view>
+      <view
+            allowMultiple="false"
+            category="dev.galasa.eclipse.views"
+            class="dev.galasa.eclipse.ui.run.storedartifacts.ImageView"
+            icon="icons/galasa-dark-new.png"
+            id="dev.galasa.eclipse.ui.run.storedartifacts.ImageView"
+            name="Galasa Image"
+            restorable="true">
+      </view>
    </extension>
    
    <!-- Editors --> 
