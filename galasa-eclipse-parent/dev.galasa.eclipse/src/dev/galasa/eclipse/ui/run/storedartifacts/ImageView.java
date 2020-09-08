@@ -70,13 +70,13 @@ public class ImageView extends ViewPart implements PaintListener {
 				cached = true;
 			}
 			
-			
+			Rectangle viewBounds = parent.getBounds();
 			Rectangle bounds = image.getBounds();
 			event.gc.drawImage(image,
 					0, 0,
 					bounds.width, bounds.height,
 					0, 0,
-					(int)parent.view.bounds().width, (int)parent.view.bounds().height);
+					viewBounds.width, viewBounds.height);
 			
 		} catch (IOException e) {
 			Activator.log(e);
