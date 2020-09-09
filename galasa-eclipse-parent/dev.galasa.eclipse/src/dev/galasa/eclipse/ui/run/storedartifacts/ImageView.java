@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -35,7 +36,7 @@ public class ImageView extends ViewPart implements PaintListener {
 	 private Composite 			 parent;
 	 private Action 			 saveImageToWorkspace;
 	 
-	 private boolean 			 cached = false;
+	 private boolean 			 loaded = false;
 	 private Path				 cachedPath;
 	 
 	 private Image				 image;
@@ -58,31 +59,26 @@ public class ImageView extends ViewPart implements PaintListener {
 
 	@Override
 	public void paintControl(PaintEvent event) {
-		try {
-			if (!cached) {
-				String fileName = this.path.getFileName().toString();
-				cachedPath = Activator.getCachePath().resolve(fileName);
-				Files.copy(this.path, cachedPath);
-				
-				InputStream is = Files.newInputStream(this.cachedPath);
-				this.image = new Image(canvas.getDisplay(), new ImageData(is));
-			
-				cached = true;
-			}
-			
-			Rectangle viewBounds = parent.getBounds();
-			Rectangle bounds = image.getBounds();
-			event.gc.drawImage(image,
-					0, 0,
-					bounds.width, bounds.height,
-					0, 0,
-					viewBounds.width, viewBounds.height);
-			
-		} catch (IOException e) {
-			Activator.log(e);
+		if (!loaded) {
+			displayMessage(event, "Loading Image");
 		}
 		
+		if (this.image == null) {
+			displayMessage(event, "Could not display image!");
+		}
 		
+		displayImage(event);
+
+	}
+	
+	public void displayImage(PaintEvent event) {
+		Rectangle viewBounds = parent.getBounds();
+		Rectangle bounds = this.image.getBounds();
+		event.gc.drawImage(this.image,
+				0, 0,
+				bounds.width, bounds.height,
+				0, 0,
+				viewBounds.width, viewBounds.height);
 	}
 	
 	public static void openView(Path path) {
@@ -93,8 +89,8 @@ public class ImageView extends ViewPart implements PaintListener {
 				try {
 					ImageView view = (ImageView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 							.showView(ImageView.ID, UUID.randomUUID().toString(), IWorkbenchPage.VIEW_ACTIVATE);
-					view.setImagePath(path);
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().activate(view);
+					view.loadImage(path);
 				} catch (PartInitException e) {
 					Activator.log(e);
 				}
@@ -104,8 +100,32 @@ public class ImageView extends ViewPart implements PaintListener {
 		
 	}
 	
-	public void setImagePath(Path path) {
-		this.path = path;
+	public void loadImagetoUI() {
+		try {
+			this.image = new Image(this.canvas.getDisplay(), new ImageData(Files.newInputStream(this.cachedPath)));
+		} catch (IOException e) {
+			Activator.log(e);
+		}
+		this.loaded = true;
+		redraw();		
+	}
+	
+	public void redraw() {
+		Display.getDefault().syncExec(new Runnable() {
+
+            @Override
+            public void run() {
+                ImageView.this.canvas.redraw();
+            }
+        });
+	}
+	
+	public void loadImage(Path path) {
+		new LoadImageJob(this, path).schedule();
+	}
+	
+	public void setCachedImagePath(Path cachedPath) {
+		this.cachedPath = cachedPath;
 	}
 	
 	private void createToolbar() {
@@ -123,16 +143,37 @@ public class ImageView extends ViewPart implements PaintListener {
 	}
 	
 	private void saveImage() {
-		String filename = this.path.getFileName().toString();
-		
-		Path workspace = Paths.get(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString())
-				.resolve(filename);
-		try {
-			Files.copy(this.path, workspace);
+		FileDialog fileDialog = new FileDialog(this.canvas.getShell(), 
+	            SWT.SAVE);
+	    String[] extensions = { "*.png" };
+	    fileDialog.setFilterExtensions(extensions);
+	    String filename = fileDialog.open();
+	    if (filename != null) {
+            if (!filename.endsWith(".png")) {
+                filename = filename + ".png";
+            }
+	    }
+	    
+	    try {
+			Files.copy(this.cachedPath, Paths.get(filename));
 		} catch (IOException e) {
 			Activator.log(e);
 		}
+	    
 	}
+	
+	private void displayMessage(PaintEvent event, String message) {
+        Rectangle clientArea = this.canvas.getClientArea();
+
+//        event.gc.setBackground(colourBackground);
+        event.gc.fillRectangle(clientArea);
+
+//        event.gc.setForeground(colourIntense);
+
+//        event.gc.setFont(fontText);
+
+        event.gc.drawText(message, 10, 10);
+    }
 
 }
 
