@@ -143,11 +143,11 @@ public class ImageView extends ViewPart implements PaintListener {
 	}
 	
 	private void saveImage() {
-		FileDialog fileDialog = new FileDialog(this.canvas.getShell(), 
-	            SWT.SAVE);
+		FileDialog dlgbox = new FileDialog(this.canvas.getShell(), SWT.SAVE);
 	    String[] extensions = { "*.png" };
-	    fileDialog.setFilterExtensions(extensions);
-	    String filename = fileDialog.open();
+	    dlgbox.setFilterExtensions(extensions);
+	    
+	    String filename = dlgbox.open();
 	    if (filename != null) {
             if (!filename.endsWith(".png")) {
                 filename = filename + ".png";
