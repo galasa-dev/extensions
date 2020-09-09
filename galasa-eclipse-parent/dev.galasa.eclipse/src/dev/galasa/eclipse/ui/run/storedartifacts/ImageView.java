@@ -135,7 +135,7 @@ public class ImageView extends ViewPart implements PaintListener {
     }
 	
 	private void createSaveAction() {
-		saveImageToWorkspace = new Action("Save Image to Workspace") {
+		saveImageToWorkspace = new Action("Save Image") {
 			public void run() {
 				saveImage();						
 			}
@@ -165,12 +165,7 @@ public class ImageView extends ViewPart implements PaintListener {
 	private void displayMessage(PaintEvent event, String message) {
         Rectangle clientArea = this.canvas.getClientArea();
 
-//        event.gc.setBackground(colourBackground);
         event.gc.fillRectangle(clientArea);
-
-//        event.gc.setForeground(colourIntense);
-
-//        event.gc.setFont(fontText);
 
         event.gc.drawText(message, 10, 10);
     }
