@@ -182,7 +182,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<IRunResult> getRuns(String requestor, Instant from, Instant to)
+    public @NotNull List<IRunResult> getRuns(String requestor, Instant from, Instant to, String testClass)
             throws ResultArchiveStoreException {
 
         if (requestor == null && from == null && to == null) {
