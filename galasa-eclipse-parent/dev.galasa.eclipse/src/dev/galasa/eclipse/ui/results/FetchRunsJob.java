@@ -25,10 +25,11 @@ public class FetchRunsJob extends Job {
     private final IResultArchiveStoreDirectoryService dirService;
     private final String                              requestor;
     private final String                              testClass;
+    private final String							  testName;
     private final Instant                             from;
     private final Instant                             to;
 
-    public FetchRunsJob(String requestor, String testClass, Instant from, Instant to,
+    public FetchRunsJob(String requestor, String testClass, Instant from, Instant to, String testName,
             IResultArchiveStoreDirectoryService dirService, IRunResultsListener listener) {
         super("Fetch Runs");
 
@@ -36,6 +37,7 @@ public class FetchRunsJob extends Job {
         this.dirService = dirService;
         this.requestor = requestor;
         this.testClass = testClass;
+        this.testName = testName;
         this.from = from;
         this.to = to;
 
@@ -51,7 +53,7 @@ public class FetchRunsJob extends Job {
                 return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
             }
 
-            List<IRunResult> runs = dirService.getRuns(requestor, from, to);
+            List<IRunResult> runs = dirService.getRuns(requestor, from, to, testName);
 
             listener.runsUpdate(runs);
         } catch (Exception e) {
