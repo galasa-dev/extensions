@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2020.
  */
 package dev.galasa.ras.couchdb.internal;
 
@@ -116,6 +116,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             checkIndex("galasa_run", "runName");
             checkIndex("galasa_run", "requestor");
             checkIndex("galasa_run", "queued");
+            checkIndex("galasa_run", "testName");
 
             logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
         } catch (CouchdbRasException e) {
@@ -321,6 +322,17 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         }
 
         if (checkView(testnames, "function (doc) { emit(doc.testName, 1); }", "_count")) {
+            updated = true;
+        }
+
+        JsonObject bundleTestnames = views.getAsJsonObject("bundle-testnames-view");
+        if (bundleTestnames == null) {
+            updated = true;
+            bundleTestnames = new JsonObject();
+            views.add("bundle-testnames-view", testnames);
+        }
+
+        if (checkView(testnames, "function (doc) { emit(doc.bundle + '/' + doc.testName, 1); }", "_count")) {
             updated = true;
         }
 
