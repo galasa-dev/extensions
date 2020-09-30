@@ -67,6 +67,9 @@ public class ArtifactFile implements IArtifact {
             if ("plain/text".equals(contentType)) {
                 site.getPage().openEditor(new ArtifactEditorInput(this.runResult, this.path), ArtifactEditor.ID);
             }
+            if ("image/png".equals(contentType)) {
+            	ImageView.openView(this.path);
+            }
         } catch (Exception e) {
             Activator.log(e);
         }
