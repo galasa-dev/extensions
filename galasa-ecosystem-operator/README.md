@@ -1,6 +1,6 @@
-# Galasa Ecosystem Operator
+# Galasa Ecosystem Kubernetes Operator
 
-This is the **V1ALPHA** version of the ecosystem operator. 
+This is the **V1ALPHA** version of the Kubernetes ecosystem operator. 
 
 Requirements are a Kubernetes cluster (version 1.16 or higher) and kubectl on the machine deploying the operator. At the current release, the only way to use the operator is to directly deploy the operator using the YAML provided in this repo.
 
