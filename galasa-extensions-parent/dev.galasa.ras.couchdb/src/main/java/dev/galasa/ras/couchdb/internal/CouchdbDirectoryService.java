@@ -36,6 +36,7 @@ import com.google.gson.JsonObject;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.ras.IRasSearchCriteria;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
@@ -182,10 +183,10 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<IRunResult> getRuns(String requestor, Instant from, Instant to)
+    public @NotNull List<IRunResult> getRuns(String requestor, Instant from, Instant to, String testName)
             throws ResultArchiveStoreException {
 
-        if (requestor == null && from == null && to == null) {
+        if (requestor == null && from == null && to == null && testName == null) {
             return getAllRuns();
         }
 
@@ -218,6 +219,14 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             JsonObject jto = new JsonObject();
             jto.addProperty("$lt", to.toString());
             criteria.add("queued", jto);
+            and.add(criteria);
+        }
+
+        if (testName != null) {
+            JsonObject criteria = new JsonObject();
+            JsonObject jtestName = new JsonObject();
+            jtestName.addProperty("$eq", testName.toString());
+            criteria.add("testName", jtestName);  // TODO check property name
             and.add(criteria);
         }
 
@@ -416,6 +425,19 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
          }
 
          return tests;    
+    }
+
+    @Override
+    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriteria)
+            throws ResultArchiveStoreException {
+        // TODO Auto-generated method stub
+        return new ArrayList<>();
+    }
+
+    @Override
+    public @NotNull List<String> getResultNames() throws ResultArchiveStoreException {
+        // TODO Auto-generated method stub
+        return new ArrayList<>();
     }
 
 }
