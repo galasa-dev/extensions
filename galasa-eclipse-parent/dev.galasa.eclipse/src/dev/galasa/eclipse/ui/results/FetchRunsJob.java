@@ -51,7 +51,7 @@ public class FetchRunsJob extends Job {
                 return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
             }
 
-            List<IRunResult> runs = dirService.getRuns(requestor, from, to);
+            List<IRunResult> runs = dirService.getRuns(requestor, from, to, null);
 
             listener.runsUpdate(runs);
         } catch (Exception e) {
