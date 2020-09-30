@@ -332,7 +332,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             views.add("bundle-testnames-view", testnames);
         }
 
-        if (checkView(testnames, "function (doc) { emit(doc.bundle + '/' + doc.testName, 1); }", "_count")) {
+        if (checkView(bundleTestnames, "function (doc) { emit(doc.bundle + '/' + doc.testName, 1); }", "_count")) {
             updated = true;
         }
 
