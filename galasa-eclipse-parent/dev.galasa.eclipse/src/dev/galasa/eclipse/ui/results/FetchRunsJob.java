@@ -64,6 +64,7 @@ public class FetchRunsJob extends Job {
            
             List<IRunResult> runs = dirService.getRuns(criteria);
 
+
             listener.runsUpdate(runs);
         } catch (Exception e) {
             return new Status(Status.ERROR, Activator.PLUGIN_ID, "Failed", e);
