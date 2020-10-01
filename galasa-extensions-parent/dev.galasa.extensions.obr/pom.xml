@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>dev.galasa</groupId>
 		<artifactId>galasa-extensions-parent</artifactId>
-		<version>0.11.0</version>
+		<version>0.12.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>dev.galasa.extensions.obr</artifactId>
-	<version>0.11.0</version>
+	<version>0.12.0-SNAPSHOT</version>
 	<!-- If updating version,  update in dev.galasa.uber.obr -->
 	<packaging>galasa-obr</packaging>
 
@@ -17,13 +17,13 @@
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.cps.etcd</artifactId>
-			<version>0.11.0</version>
+			<version>0.12.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>dev.galasa</groupId>
 			<artifactId>dev.galasa.ras.couchdb</artifactId>
-			<version>0.11.0</version>
+			<version>0.12.0-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
