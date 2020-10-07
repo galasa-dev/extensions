@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2020.
  */
 package dev.galasa.eclipse.ui.results;
 
@@ -18,6 +18,9 @@ import dev.galasa.eclipse.ui.IRunResultsListener;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
 
 public class FetchRunsJob extends Job {
 
@@ -51,7 +54,11 @@ public class FetchRunsJob extends Job {
                 return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
             }
 
-            List<IRunResult> runs = dirService.getRuns(requestor, from, to, null);
+            
+            List<IRunResult> runs = dirService.getRuns(new RasSearchCriteriaRequestor(this.requestor),
+                new RasSearchCriteriaQueuedFrom(this.from),
+                new RasSearchCriteriaQueuedTo(this.to)
+            );
 
             listener.runsUpdate(runs);
         } catch (Exception e) {
