@@ -118,18 +118,14 @@ public class Launcher extends JavaLaunchDelegate {
         // *** Get the project, classname and bundleName
         String project = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
         String testclass = configuration.getAttribute(Launcher.TEST_CLASS, "");
-        String bundleName = "test";
-        try {
-        	Manifest manifest = findManifest(project);
-        	bundleName = findBundleName(manifest);
-	        if (bundleName == null) {
-	            return;
-	        }
-	
-	        consoleDefault.append("\nLaunching Galasa test " + bundleName + "/" + testclass + "\n");
-        } catch (Exception e) {
-        	
+    	Manifest manifest = findManifest(project);
+    	String bundleName = findBundleName(manifest);
+        if (bundleName == null) {
+            return;
         }
+
+        consoleDefault.append("\nLaunching Galasa test " + bundleName + "/" + testclass + "\n");
+
 
         // *** Get other configuration properties
         boolean trace = configuration.getAttribute(Launcher.TRACE, false);
