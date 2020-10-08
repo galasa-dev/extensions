@@ -320,6 +320,10 @@ public class Launcher extends JavaLaunchDelegate {
                 }               
 
                 Manifest manifest = findManifest(workspaceProject.getName());
+                if (manifest == null) {
+                	rejectedBundles.put(workspaceProject.getName(), "No manifest");
+                    continue;
+                }
                 String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
                 if (bundleName == null || bundleName.trim().isEmpty()) {
                     rejectedBundles.put(workspaceProject.getName(), "not an OSGi bundle");
@@ -396,6 +400,9 @@ public class Launcher extends JavaLaunchDelegate {
 		        IResource actualOutputPath = workspaceRoot.findMember(outputPath);
 		        java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
 		        java.nio.file.Path manifestPath = realOutputPath.resolve("META-INF").resolve("MANIFEST.MF");
+		        if (!Files.exists(manifestPath)) {
+		        	return null;
+		        }
 		        return new Manifest(Files.newInputStream(manifestPath));      
 		    }
 		    
