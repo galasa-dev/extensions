@@ -14,7 +14,6 @@ import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -45,13 +44,8 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
@@ -79,6 +73,8 @@ public class Launcher extends JavaLaunchDelegate {
     public static final String TRACE               = "dev.galasa.eclipse.launcher.Trace";
     public static final String WORKSPACE_OVERRIDES = "dev.galasa.eclipse.launcher.WorkspaceOverrides";
     public static final String OVERRIDES           = "dev.galasa.eclipse.launcher.Overrides";
+    public static final String GRADLE_NATURE	   = "org.eclipse.buildship.core.gradleprojectnature";
+    public static final String MAVEN_NATURE	       = "org.eclipse.m2e.core.maven2Nature";
 
     private MessageConsole     console;
     private PrintStream        consoleDefault;
@@ -309,30 +305,44 @@ public class Launcher extends JavaLaunchDelegate {
                 if (!workspaceProject.hasNature(JavaCore.NATURE_ID)) {
                     continue;
                 }
-                java.nio.file.Path workspaceProjectpath = Paths.get(workspaceRoot.getLocationURI()).resolve(workspaceProject.getName());
-                java.nio.file.Path realOutputPath = workspaceProjectpath.resolve("target").resolve("classes");
-                
-                if (!Files.exists(realOutputPath)) {
-                	realOutputPath = workspaceProjectpath.resolve("build").resolve("libs");
-                	if (!Files.exists(realOutputPath)) {
-                     	throw new Exception("Could not resolve project output location");
-                     }
-                }               
-
-                Manifest manifest = findManifest(workspaceProject.getName());
-                if (manifest == null) {
-                	rejectedBundles.put(workspaceProject.getName(), "No manifest");
-                    continue;
+            	Manifest manifest = findManifest(workspaceProject.getName());
+            	if (manifest == null) {
+            		rejectedBundles.put(workspaceProject.getName(), "No manifest");
+            		continue;
                 }
-                String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
+            	
+            	String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
                 if (bundleName == null || bundleName.trim().isEmpty()) {
-                    rejectedBundles.put(workspaceProject.getName(), "not an OSGi bundle");
-                    continue;
+                	rejectedBundles.put(workspaceProject.getName(), "Not and OSGi bundle");
+            		continue;
                 }
-
+                IJavaProject javaProject = JavaCore.create(workspaceProject);
                 ResourceImpl newResource = (ResourceImpl) obrDataModelHelper
                         .createResource(manifest.getMainAttributes());
-                newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());
+                
+                if (workspaceProject.hasNature(GRADLE_NATURE)) {
+                	// Forcing gradle users to keep output in the build dir
+                    IPath outputLocation = workspaceRoot.getRawLocation()
+                    		.append(workspaceProject.getName())
+                    		.append("build");
+                    File[] outputFiles = outputLocation.append("libs").toFile().listFiles();
+                    
+                    for (File file : outputFiles) {
+                    	if (file.getName().endsWith(".jar")) {
+                    		newResource.put(ResourceImpl.URI, file.getAbsolutePath());
+                    		break;
+                    	}
+                    }
+                }
+                
+                if (workspaceProject.hasNature(MAVEN_NATURE)) {
+                	IPath outputLocation = javaProject.getOutputLocation();
+                	IResource actualOutputPath = workspaceRoot.findMember(outputLocation);
+                	java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
+                	
+                	newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());             
+                }
+                
                 newRepository.addResource(newResource);
                 if (workspaceProject.getName().equals(newResource.getSymbolicName())) {
                     consoleBlue.append("Added project/bundle " + newResource.getSymbolicName() + "\n");
@@ -391,32 +401,35 @@ public class Launcher extends JavaLaunchDelegate {
     
     private Manifest findManifest(String project) {
     	IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-    	IProject actualProject = workspaceRoot.getProject(project);
-    	try {
-	    	// Maven Project
-		    IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
-		    if (mavenProjectFacade != null) {
-		    	IPath outputPath = mavenProjectFacade.getOutputLocation();
-		        IResource actualOutputPath = workspaceRoot.findMember(outputPath);
-		        java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
-		        java.nio.file.Path manifestPath = realOutputPath.resolve("META-INF").resolve("MANIFEST.MF");
-		        if (!Files.exists(manifestPath)) {
-		        	return null;
-		        }
-		        return new Manifest(Files.newInputStream(manifestPath));      
-		    }
-		    
-		    // Gradle Project
-		    java.nio.file.Path jarLocation = Paths.get(workspaceRoot.getRawLocationURI()).resolve(project)
-		    		.resolve("build")
-		    		.resolve("libs");
-		    File[] files = jarLocation.toFile().listFiles();
-		    for (File file : files) {
-		    	if (file.getName().endsWith(".jar")) {
-		    		return extractManifestFromJar(new FileInputStream(file));
-		    	}
-		    }
-    	} catch (IOException e) {
+    	IProject actualProject = workspaceRoot.getProject(project);    	
+    	IPath workspace = workspaceRoot.getRawLocation();
+    	
+    	try {	    		
+    		if (actualProject.hasNature(GRADLE_NATURE)) {
+        		consoleDefault.append("This is a gradle project: " + project + "\n");
+        		// Enforcing that gradle projects must be build to the build dir for now
+        		IPath fullBuildDir = workspace.append(actualProject.getName()).append("build");
+        		
+        		for (File file : fullBuildDir.append("libs").toFile().listFiles()) {
+        			if (file.getName().endsWith(".jar")) {
+    		    		return extractManifestFromJar(new FileInputStream(file));
+    		    	}
+        		}
+        	}
+    		
+			if (actualProject.hasNature(MAVEN_NATURE)) {
+				consoleDefault.append("This is a maven project: " + project + "\n");
+				IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
+				IPath outputPath = workspace.append(mavenProjectFacade.getOutputLocation());
+				File outputTarget = outputPath.toFile().getParentFile();	
+				
+        		for (File file : outputTarget.listFiles()) {
+        			if (file.getName().endsWith(".jar")) {
+    		    		return extractManifestFromJar(new FileInputStream(file));
+    		    	}
+        		}
+			}
+    	} catch (IOException | CoreException e) {
     		consoleRed.append("Failed to open Manifest in project: " + project);
     	    return null;
     	}
@@ -429,9 +442,11 @@ public class Launcher extends JavaLaunchDelegate {
     	JarInputStream jarIn;
 		try {
 			jarIn = new JarInputStream(jar);
-			return jarIn.getManifest();
+			Manifest mf = jarIn.getManifest();
+			jarIn.close();
+			return mf;
 		} catch (IOException e) {
-			consoleRed.append("Could not find Manifest in jar.");
+			consoleRed.append("Could not open jar.");
 			return null;
 		}
     }
