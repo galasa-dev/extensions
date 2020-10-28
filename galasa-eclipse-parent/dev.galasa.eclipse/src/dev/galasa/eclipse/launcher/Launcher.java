@@ -6,7 +6,10 @@
 package dev.galasa.eclipse.launcher;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
 import org.apache.felix.bundlerepository.DataModelHelper;
@@ -69,6 +73,8 @@ public class Launcher extends JavaLaunchDelegate {
     public static final String TRACE               = "dev.galasa.eclipse.launcher.Trace";
     public static final String WORKSPACE_OVERRIDES = "dev.galasa.eclipse.launcher.WorkspaceOverrides";
     public static final String OVERRIDES           = "dev.galasa.eclipse.launcher.Overrides";
+    public static final String GRADLE_NATURE	   = "org.eclipse.buildship.core.gradleprojectnature";
+    public static final String MAVEN_NATURE	       = "org.eclipse.m2e.core.maven2Nature";
 
     private MessageConsole     console;
     private PrintStream        consoleDefault;
@@ -108,12 +114,14 @@ public class Launcher extends JavaLaunchDelegate {
         // *** Get the project, classname and bundleName
         String project = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");
         String testclass = configuration.getAttribute(Launcher.TEST_CLASS, "");
-        String bundleName = findBundleName(project);
+    	Manifest manifest = findManifest(project);
+    	String bundleName = findBundleName(manifest);
         if (bundleName == null) {
             return;
         }
 
         consoleDefault.append("\nLaunching Galasa test " + bundleName + "/" + testclass + "\n");
+
 
         // *** Get other configuration properties
         boolean trace = configuration.getAttribute(Launcher.TRACE, false);
@@ -292,32 +300,49 @@ public class Launcher extends JavaLaunchDelegate {
         IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
         IProject[] workspaceProjects = workspaceRoot.getProjects();
         for (IProject workspaceProject : workspaceProjects) {
+        	
             try {
                 if (!workspaceProject.hasNature(JavaCore.NATURE_ID)) {
                     continue;
                 }
-
-                IJavaProject javaProject = JavaCore.create(workspaceProject);
-                IPath outputLocation = javaProject.getOutputLocation();
-                IResource actualOutputPath = workspaceRoot.findMember(outputLocation);
-                java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
-                java.nio.file.Path manifestFile = realOutputPath.resolve("META-INF").resolve("MANIFEST.MF");
-
-                if (!Files.exists(manifestFile)) {
-                    rejectedBundles.put(workspaceProject.getName(), "no META-INF/MANIFEST.MF");
-                    continue;
+            	Manifest manifest = findManifest(workspaceProject.getName());
+            	if (manifest == null) {
+            		rejectedBundles.put(workspaceProject.getName(), "No manifest");
+            		continue;
                 }
-
-                Manifest manifest = new Manifest(Files.newInputStream(manifestFile));
-                String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
+            	
+            	String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
                 if (bundleName == null || bundleName.trim().isEmpty()) {
-                    rejectedBundles.put(workspaceProject.getName(), "not an OSGi bundle");
-                    continue;
+                	rejectedBundles.put(workspaceProject.getName(), "Not and OSGi bundle");
+            		continue;
                 }
-
+                IJavaProject javaProject = JavaCore.create(workspaceProject);
                 ResourceImpl newResource = (ResourceImpl) obrDataModelHelper
                         .createResource(manifest.getMainAttributes());
-                newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());
+                
+                if (workspaceProject.hasNature(GRADLE_NATURE)) {
+                	// Forcing gradle users to keep output in the build dir
+                    IPath outputLocation = workspaceRoot.getRawLocation()
+                    		.append(workspaceProject.getName())
+                    		.append("build");
+                    File[] outputFiles = outputLocation.append("libs").toFile().listFiles();
+                    
+                    for (File file : outputFiles) {
+                    	if (file.getName().endsWith(".jar")) {
+                    		newResource.put(ResourceImpl.URI, file.getAbsolutePath());
+                    		break;
+                    	}
+                    }
+                }
+                
+                if (workspaceProject.hasNature(MAVEN_NATURE)) {
+                	IPath outputLocation = javaProject.getOutputLocation();
+                	IResource actualOutputPath = workspaceRoot.findMember(outputLocation);
+                	java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
+                	
+                	newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());             
+                }
+                
                 newRepository.addResource(newResource);
                 if (workspaceProject.getName().equals(newResource.getSymbolicName())) {
                     consoleBlue.append("Added project/bundle " + newResource.getSymbolicName() + "\n");
@@ -373,25 +398,62 @@ public class Launcher extends JavaLaunchDelegate {
         }
 
     }
+    
+    private Manifest findManifest(String project) {
+    	IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+    	IProject actualProject = workspaceRoot.getProject(project);    	
+    	IPath workspace = workspaceRoot.getRawLocation();
+    	
+    	try {	    		
+    		if (actualProject.hasNature(GRADLE_NATURE)) {
+        		consoleDefault.append("This is a gradle project: " + project + "\n");
+        		// Enforcing that gradle projects must be build to the build dir for now
+        		IPath fullBuildDir = workspace.append(actualProject.getName()).append("build");
+        		
+        		for (File file : fullBuildDir.append("libs").toFile().listFiles()) {
+        			if (file.getName().endsWith(".jar")) {
+    		    		return extractManifestFromJar(new FileInputStream(file));
+    		    	}
+        		}
+        	}
+    		
+			if (actualProject.hasNature(MAVEN_NATURE)) {
+				consoleDefault.append("This is a maven project: " + project + "\n");
+				IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
+				IPath outputPath = workspace.append(mavenProjectFacade.getOutputLocation());
+				File outputTarget = outputPath.toFile().getParentFile();	
+				
+        		for (File file : outputTarget.listFiles()) {
+        			if (file.getName().endsWith(".jar")) {
+    		    		return extractManifestFromJar(new FileInputStream(file));
+    		    	}
+        		}
+			}
+    	} catch (IOException | CoreException e) {
+    		consoleRed.append("Failed to open Manifest in project: " + project);
+    	    return null;
+    	}
+	    
+	    consoleRed.append("The test project " + project + " does not have a MANIFEST.MF file");
+	    return null;
+    }
+    
+    private Manifest extractManifestFromJar(InputStream jar) {
+    	JarInputStream jarIn;
+		try {
+			jarIn = new JarInputStream(jar);
+			Manifest mf = jarIn.getManifest();
+			jarIn.close();
+			return mf;
+		} catch (IOException e) {
+			consoleRed.append("Could not open jar.");
+			return null;
+		}
+    }
 
-    private String findBundleName(String project) throws CoreException {
+    private String findBundleName(Manifest manifestFile) throws CoreException {
         try {
-            IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-            IProject actualProject = workspaceRoot.getProject(project);
-
-            IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
-            IPath outputPath = mavenProjectFacade.getOutputLocation();
-            IResource actualOutputPath = workspaceRoot.findMember(outputPath);
-            java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
-            java.nio.file.Path manifestFile = realOutputPath.resolve("META-INF").resolve("MANIFEST.MF");
-
-            if (!Files.exists(manifestFile)) {
-                consoleRed.append("The test project " + project + " does not have a META/MANIFEST.MF file");
-                return null;
-            }
-
-            Manifest manifest = new Manifest(Files.newInputStream(manifestFile));
-            String bundleName = manifest.getMainAttributes().getValue("Bundle-SymbolicName");
+            String bundleName = manifestFile.getMainAttributes().getValue("Bundle-SymbolicName");
             String[] split = bundleName.split(";");
             return split[0];
 
