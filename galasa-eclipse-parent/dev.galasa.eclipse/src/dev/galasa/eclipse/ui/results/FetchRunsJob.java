@@ -6,6 +6,7 @@
 package dev.galasa.eclipse.ui.results;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -18,9 +19,11 @@ import dev.galasa.eclipse.ui.IRunResultsListener;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
+import dev.galasa.framework.spi.ras.IRasSearchCriteria;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
 
 public class FetchRunsJob extends Job {
 
@@ -54,11 +57,21 @@ public class FetchRunsJob extends Job {
                 return new Status(Status.OK, Activator.PLUGIN_ID, "Runs not fetched - Framework not intialised");
             }
 
+            ArrayList<IRasSearchCriteria> criteria = new ArrayList<>();
+            if (this.requestor != null) {
+                criteria.add(new RasSearchCriteriaRequestor(this.requestor));
+            }
+            if (this.testClass != null) {
+                criteria.add(new RasSearchCriteriaTestName(this.testClass));
+            }
+            if (this.from != null) {
+                criteria.add(new RasSearchCriteriaQueuedFrom(this.from));
+            }
+            if (this.to != null) {
+                criteria.add(new RasSearchCriteriaQueuedTo(this.to));
+            }
             
-            List<IRunResult> runs = dirService.getRuns(new RasSearchCriteriaRequestor(this.requestor),
-                new RasSearchCriteriaQueuedFrom(this.from),
-                new RasSearchCriteriaQueuedTo(this.to)
-            );
+            List<IRunResult> runs = dirService.getRuns(criteria.toArray(new IRasSearchCriteria[criteria.size()]));
 
             listener.runsUpdate(runs);
         } catch (Exception e) {
