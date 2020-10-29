@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import javax.validation.constraints.NotNull;
 
 import dev.galasa.framework.spi.DynamicStatusStoreException;
+import dev.galasa.framework.spi.IDssAction;
 import dev.galasa.framework.spi.IDynamicStatusStore;
 import dev.galasa.framework.spi.IDynamicStatusStoreWatcher;
 import dev.galasa.framework.spi.IDynamicStatusStoreWatcher.Event;
@@ -453,6 +454,12 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
         watchClient.close();
         kvClient.close();
         client.close();
+    }
+
+    @Override
+    public void performActions(IDssAction... actions) throws DynamicStatusStoreException {
+        throw new DynamicStatusStoreException("Need to add support for actions");
+        
     }
 
 }
