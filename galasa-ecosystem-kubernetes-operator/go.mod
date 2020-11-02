@@ -1,4 +1,4 @@
-module github.com/galasa-dev/extensions/galasa-ecosystem-operator
+module github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator
 
 go 1.13
 

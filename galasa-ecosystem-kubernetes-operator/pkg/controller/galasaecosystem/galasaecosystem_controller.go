@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apiserver"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/cps"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/engines"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/monitoring"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/ras"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/simbank"
+	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/apis/galasa/v1alpha1"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/apiserver"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/cps"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/engines"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/monitoring"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/ras"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/simbank"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/networking/v1beta1"
@@ -598,7 +598,7 @@ func (r *ReconcileGalasaEcosystem) Reconcile(request reconcile.Request) (reconci
 	if instance.Spec.IngressHostname != "" {
 		instance.Status.GrafanaURL = instance.Spec.IngressHostname + "/" + instance.Name + "-grafana"
 	} else {
-		instance.Status.GrafanaURL = instance.Spec.ExternalHostname + ":" + getNodePort(grafana.ExposedService, instance.Name+"-grafana-external-service") + "/galasa-grafana"
+		instance.Status.GrafanaURL = instance.Spec.ExternalHostname + ":" + getNodePort(grafana.ExposedService, "grafana") + "/galasa-grafana"
 	}
 
 	// Check all updateable fields from the GalasaEcosystem CRD.
