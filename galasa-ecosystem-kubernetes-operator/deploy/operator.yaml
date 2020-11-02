@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: galasa-ecosystem-operator
+  name: galasa-ecosystem-kubernetes-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: galasa-ecosystem-operator
+      name: galasa-ecosystem-kubernetes-operator
   template:
     metadata:
       labels:
-        name: galasa-ecosystem-operator
+        name: galasa-ecosystem-kubernetes-operator
     spec:
       nodeSelector:
         beta.kubernetes.io/arch: amd64
-      serviceAccountName: galasa-ecosystem-operator
+      serviceAccountName: galasa-ecosystem-kubernetes-operator
       containers:
-        - name: galasa-ecosystem-operator
-          image: gcr.io/nice-diorama-280715/galasa-ecosystem-operator:latest
+        - name: galasa-ecosystem-kubernetes-operator
+          image: docker.galasa.dev/galasa-ecosystem-kubernetes-operator:0.12.0-SNAPSHOT
           command:
-          - galasa-ecosystem-operator
+          - galasa-ecosystem-kubernetes-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -31,4 +31,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "galasa-ecosystem-operator"
+              value: "galasa-ecosystem-kubernetes-operator"

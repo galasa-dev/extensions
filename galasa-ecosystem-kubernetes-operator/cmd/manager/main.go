@@ -13,9 +13,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/rest"
 
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/controller"
-	"github.com/galasa-dev/extensions/galasa-ecosystem-operator/version"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/apis"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/controller"
+	"github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/version"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
@@ -87,7 +87,7 @@ func main() {
 
 	ctx := context.TODO()
 	// Become the leader before proceeding
-	err = leader.Become(ctx, "galasa-ecosystem-operator-lock")
+	err = leader.Become(ctx, "galasa-ecosystem-kubernetes-operator-lock")
 	if err != nil {
 		log.Error(err, "")
 		os.Exit(1)

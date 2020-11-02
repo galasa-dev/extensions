@@ -1,12 +1,12 @@
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
-ENV OPERATOR=/usr/local/bin/galasa-ecosystem-operator \
+ENV OPERATOR=/usr/local/bin/galasa-ecosystem-kubernetes-operator \
     USER_UID=1001 \
-    USER_NAME=galasa-ecosystem-operator
+    USER_NAME=galasa-ecosystem-kubernetes-operator
 
 RUN mkdir /usr/local/bin/galasa-resources
 # install operator binary
-COPY build/_output/bin/galasa-ecosystem-operator ${OPERATOR}
+COPY build/_output/bin/galasa-ecosystem-kubernetes-operator ${OPERATOR}
 COPY resources /usr/local/bin/galasa-resources
 
 COPY build/bin /usr/local/bin
