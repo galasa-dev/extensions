@@ -420,10 +420,11 @@ public class Launcher extends JavaLaunchDelegate {
 			if (actualProject.hasNature(MAVEN_NATURE)) {
 				consoleDefault.append("This is a maven project: " + project + "\n");
 				IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
-				IPath outputPath = workspace.append(mavenProjectFacade.getOutputLocation());
-				File outputTarget = outputPath.toFile().getParentFile();	
+				IPath outputPath = mavenProjectFacade.getOutputLocation().removeLastSegments(1);
+				IResource actualOutputPath = workspaceRoot.findMember(outputPath);
+				java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
 				
-        		for (File file : outputTarget.listFiles()) {
+        		for (File file : realOutputPath.toFile().listFiles()) {
         			if (file.getName().endsWith(".jar")) {
     		    		return extractManifestFromJar(new FileInputStream(file));
     		    	}
