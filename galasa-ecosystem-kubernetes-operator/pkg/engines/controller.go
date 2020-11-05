@@ -1,7 +1,7 @@
 package engines
 
 import (
-	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-operator/pkg/apis/galasa/v1alpha1"
+	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/apis/galasa/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -130,7 +130,7 @@ func generateControllerDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 							},
 						},
 					},
-					ServiceAccountName: "galasa-ecosystem-operator",
+					ServiceAccountName: "galasa-ecosystem-kubernetes-operator",
 				},
 			},
 		},

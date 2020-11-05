@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   creationTimestamp: null
-  name: galasa-ecosystem-operator
+  name: galasa-ecosystem-kubernetes-operator
 rules:
 - apiGroups:
   - ""
@@ -73,7 +73,7 @@ rules:
 - apiGroups:
   - apps
   resourceNames:
-  - galasa-ecosystem-operator
+  - galasa-ecosystem-kubernetes-operator
   resources:
   - deployments/finalizers
   verbs:
