@@ -76,6 +76,21 @@ pipeline {
             }
          }
       }
+      stage('Kubernetes Operator') {
+         steps {
+            withCredentials([string(credentialsId: 'galasa-gpg', variable: 'GPG')]) {
+               withFolderProperties { withSonarQubeEnv('GalasaSonarQube') {
+                  dir('galasa-ecosystem-kubernetes-operator') {
+                     sh "operator-sdk generate crds"
+                     sh "operator-sdk generate k8s"
+                     sh "operator-sdk build galasa-ecosystem-kubernetes-operator"
+                     sh "docker tag galasa-ecosystem-kubernetes-operator docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                     sh "docker push docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                  }
+               } }
+            }
+         }
+      }
    }
    post {
        // triggered when red sign
