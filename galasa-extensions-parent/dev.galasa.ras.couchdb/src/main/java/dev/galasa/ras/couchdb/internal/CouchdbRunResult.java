@@ -42,4 +42,10 @@ public class CouchdbRunResult implements IRunResult {
         return this.store.getLog(this.testStructure);
     }
 
+	@Override
+	public void discard() throws ResultArchiveStoreException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

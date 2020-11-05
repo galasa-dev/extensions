@@ -117,6 +117,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             checkIndex("galasa_run", "requestor");
             checkIndex("galasa_run", "queued");
             checkIndex("galasa_run", "testName");
+            checkIndex("galasa_run", "bundle");
+            checkIndex("galasa_run", "result");
 
             logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
         } catch (CouchdbRasException e) {
@@ -311,6 +313,17 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         }
 
         if (checkView(requestors, "function (doc) { emit(doc.requestor, 1); }", "_count")) {
+            updated = true;
+        }
+        
+        JsonObject result = views.getAsJsonObject("result-view");
+        if (result == null) {
+            updated = true;
+            result = new JsonObject();
+            views.add("result-view", result);
+        }
+
+        if (checkView(result, "function (doc) { emit(doc.result, 1); }", "_count")) {
             updated = true;
         }
 

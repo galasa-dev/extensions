@@ -8,11 +8,9 @@ package dev.galasa.ras.couchdb.internal;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
@@ -37,12 +35,18 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
 import dev.galasa.ras.couchdb.internal.pojos.Row;
-import dev.galasa.ras.couchdb.internal.pojos.Selector;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
 import dev.galasa.ras.couchdb.internal.pojos.ViewResponse;
 import dev.galasa.ras.couchdb.internal.pojos.ViewRow;
@@ -69,67 +73,6 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return false;
     }
 
-//    @Override
-//    public @NotNull List<IRunResult> getRuns(@NotNull String runName) throws ResultArchiveStoreException {
-//        Objects.requireNonNull(runName);
-//
-//        ArrayList<IRunResult> runs = new ArrayList<>();
-//
-//        HttpPost httpPost = new HttpPost(store.getCouchdbUri() + "/galasa_run/_find");
-//        Find find = new Find();
-//        find.selector = new Selector();
-//        ((Selector) find.selector).runName = runName;
-//        find.execution_stats = true;
-//
-//        httpPost.addHeader("Accept", "application/json");
-//        httpPost.addHeader("Content-Type", "application/json");
-//
-//        while (true) {
-//            String requestContent = store.getGson().toJson(find);
-//            httpPost.setEntity(new StringEntity(requestContent, UTF8));
-//
-//            try (CloseableHttpResponse response = store.getHttpClient().execute(httpPost)) {
-//                StatusLine statusLine = response.getStatusLine();
-//                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-//                    throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
-//                }
-//
-//                HttpEntity entity = response.getEntity();
-//                String responseEntity = EntityUtils.toString(entity);
-//                FoundRuns found = store.getGson().fromJson(responseEntity, FoundRuns.class);
-//                if (found.docs == null) {
-//                    throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
-//                }
-//
-//                if (found.warning != null) {
-//                    logger.warn("CouchDB warning detected - " + found.warning);
-//                }
-//
-//                if (found.docs.isEmpty()) {
-//                    break;
-//                }
-//
-//                for (TestStructureCouchdb ts : found.docs) {
-//                    Path runArtifactPath = getRunArtifactPath(ts);
-//
-//                    // *** Add this run to the results
-//                    CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
-//                    runs.add(cdbrr);
-//                }
-//
-//                // *** find the next batch of runs
-//                find.bookmark = found.bookmark;
-//            } catch (CouchdbRasException e) {
-//                throw e;
-//            } catch (Exception e) {
-//                throw new ResultArchiveStoreException("Unable to find runs", e);
-//            }
-//
-//        }
-//
-//        return runs;
-//    }
-//
     private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
@@ -182,107 +125,6 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return runProvider.getRoot();
     }
 
-//    @Override
-//    public @NotNull List<IRunResult> getRuns(String requestor, Instant from, Instant to, String testName)
-//            throws ResultArchiveStoreException {
-//
-//        if (requestor == null && from == null && to == null && testName == null) {
-//            return getAllRuns();
-//        }
-//
-//        ArrayList<IRunResult> runs = new ArrayList<>();
-//
-//        HttpPost httpPost = new HttpPost(store.getCouchdbUri() + "/galasa_run/_find");
-//
-//        JsonObject selector = new JsonObject();
-//        JsonArray and = new JsonArray();
-//        selector.add("$and", and);
-//
-//        if (requestor != null) {
-//            JsonObject criteria = new JsonObject();
-//            JsonObject jRequestor = new JsonObject();
-//            jRequestor.addProperty("$eq", requestor);
-//            criteria.add("requestor", jRequestor);
-//            and.add(criteria);
-//        }
-//
-//        if (from != null) {
-//            JsonObject criteria = new JsonObject();
-//            JsonObject jfrom = new JsonObject();
-//            jfrom.addProperty("$gte", from.toString());
-//            criteria.add("queued", jfrom);
-//            and.add(criteria);
-//        }
-//
-//        if (to != null) {
-//            JsonObject criteria = new JsonObject();
-//            JsonObject jto = new JsonObject();
-//            jto.addProperty("$lt", to.toString());
-//            criteria.add("queued", jto);
-//            and.add(criteria);
-//        }
-//
-//        if (testName != null) {
-//            JsonObject criteria = new JsonObject();
-//            JsonObject jtestName = new JsonObject();
-//            jtestName.addProperty("$eq", testName.toString());
-//            criteria.add("testName", jtestName);  // TODO check property name
-//            and.add(criteria);
-//        }
-//
-//        Find find = new Find();
-//        find.selector = selector;
-//        find.execution_stats = true;
-//
-//        httpPost.addHeader("Accept", "application/json");
-//        httpPost.addHeader("Content-Type", "application/json");
-//
-//        while (true) {
-//            String requestContent = store.getGson().toJson(find);
-//            httpPost.setEntity(new StringEntity(requestContent, UTF8));
-//
-//            try (CloseableHttpResponse response = store.getHttpClient().execute(httpPost)) {
-//                StatusLine statusLine = response.getStatusLine();
-//                HttpEntity entity = response.getEntity();
-//                String responseEntity = EntityUtils.toString(entity);
-//
-//                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-//                    throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
-//                }
-//
-//                FoundRuns found = store.getGson().fromJson(responseEntity, FoundRuns.class);
-//                if (found.docs == null) {
-//                    throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
-//                }
-//
-//                if (found.warning != null) {
-//                    logger.warn("CouchDB warning detected - " + found.warning);
-//                }
-//
-//                if (found.docs.isEmpty()) {
-//                    break;
-//                }
-//
-//                for (TestStructureCouchdb ts : found.docs) {
-//                    Path runArtifactPath = getRunArtifactPath(ts);
-//
-//                    // *** Add this run to the results
-//                    CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
-//                    runs.add(cdbrr);
-//                }
-//
-//                // *** find the next batch of runs
-//                find.bookmark = found.bookmark;
-//            } catch (CouchdbRasException e) {
-//                throw e;
-//            } catch (Exception e) {
-//                throw new ResultArchiveStoreException("Unable to find runs", e);
-//            }
-//        }
-//
-//        return runs;
-//    }
-//
     private @NotNull List<IRunResult> getAllRuns() throws ResultArchiveStoreException {
 
         ArrayList<IRunResult> runs = new ArrayList<>();
@@ -378,66 +220,229 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<RasTestClass> getTests() throws ResultArchiveStoreException {
-         ArrayList<RasTestClass> tests = new ArrayList<>();
-
-         HttpGet httpGet = new HttpGet(
-                 store.getCouchdbUri() + "/galasa_run/_design/docs/_view/bundle-testnames-view?group=true");
-         httpGet.addHeader("Accept", "application/json");
-
-         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
-             StatusLine statusLine = response.getStatusLine();
-             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                 throw new CouchdbRasException("Unable to find tests - " + statusLine.toString());
-             }
-
-             HttpEntity entity = response.getEntity();
-             String responseEntity = EntityUtils.toString(entity);
-             ViewResponse view = store.getGson().fromJson(responseEntity, ViewResponse.class);
-             if (view.rows == null) {
-                 throw new CouchdbRasException("Unable to find rows - Invalid JSON response");
-             }
-
-             for (ViewRow row : view.rows) {
-                 String bundleTestname = row.key;
-                 if (bundleTestname == null) {
-                     continue;
-                 }
-                 if ("undefined/undefined".equals(bundleTestname)) {
-                     continue;
-                 }
-                 
-                 int posSlash = bundleTestname.indexOf('/');
-                 if (posSlash < 0) {
-                     continue;
-                 }
-                 
-                 String bundleName = bundleTestname.substring(0, posSlash);
-                 String testName = bundleTestname.substring(posSlash + 1);
-                 
-                 RasTestClass rasTestClass = new RasTestClass(testName, bundleName);
-                 tests.add(rasTestClass);
-             }
-         } catch (CouchdbRasException e) {
-             throw e;
-         } catch (Exception e) {
-             throw new ResultArchiveStoreException("Unable to find tests", e);
-         }
-
-         return tests;    
-    }
-
-    @Override
-    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriteria)
-            throws ResultArchiveStoreException {
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
-    }
-
-    @Override
     public @NotNull List<String> getResultNames() throws ResultArchiveStoreException {
-        // TODO Auto-generated method stub
-        return new ArrayList<>();
+        ArrayList<String> results = new ArrayList<>();
+
+        HttpGet httpGet = new HttpGet(
+                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/result-view?group=true");
+        httpGet.addHeader("Accept", "application/json");
+
+        try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                throw new CouchdbRasException("Unable to find results - " + statusLine.toString());
+            }
+
+            HttpEntity entity = response.getEntity();
+            String responseEntity = EntityUtils.toString(entity);
+            ViewResponse view = store.getGson().fromJson(responseEntity, ViewResponse.class);
+            if (view.rows == null) {
+                throw new CouchdbRasException("Unable to find results - Invalid JSON response");
+            }
+
+            for (ViewRow row : view.rows) {
+                if (row.key != null) {
+                    results.add(row.key);
+                }
+            }
+        } catch (CouchdbRasException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResultArchiveStoreException("Unable to find results", e);
+        }
+
+        return results;
+
+    }
+
+
+
+    @Override
+    public @NotNull List<RasTestClass> getTests() throws ResultArchiveStoreException {
+        ArrayList<RasTestClass> tests = new ArrayList<>();
+
+        HttpGet httpGet = new HttpGet(
+                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/bundle-testnames-view?group=true");
+        httpGet.addHeader("Accept", "application/json");
+
+        try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                throw new CouchdbRasException("Unable to find tests - " + statusLine.toString());
+            }
+
+            HttpEntity entity = response.getEntity();
+            String responseEntity = EntityUtils.toString(entity);
+            ViewResponse view = store.getGson().fromJson(responseEntity, ViewResponse.class);
+            if (view.rows == null) {
+                throw new CouchdbRasException("Unable to find rows - Invalid JSON response");
+            }
+
+            for (ViewRow row : view.rows) {
+                String bundleTestname = row.key;
+                if (bundleTestname == null) {
+                    continue;
+                }
+                if ("undefined/undefined".equals(bundleTestname)) {
+                    continue;
+                }
+
+                int posSlash = bundleTestname.indexOf('/');
+                if (posSlash < 0) {
+                    continue;
+                }
+
+                String bundleName = bundleTestname.substring(0, posSlash);
+                String testName = bundleTestname.substring(posSlash + 1);
+
+                RasTestClass rasTestClass = new RasTestClass(testName, bundleName);
+                tests.add(rasTestClass);
+            }
+        } catch (CouchdbRasException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResultArchiveStoreException("Unable to find tests", e);
+        }
+
+        return tests;    
+    }
+
+    @Override
+    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriterias)
+            throws ResultArchiveStoreException {
+
+        if (searchCriterias.length == 0) {
+            return getAllRuns();
+        }
+
+        ArrayList<IRunResult> runs = new ArrayList<>();
+
+        HttpPost httpPost = new HttpPost(store.getCouchdbUri() + "/galasa_run/_find");
+
+        JsonObject selector = new JsonObject();
+        JsonArray and = new JsonArray();
+        selector.add("$and", and);
+
+        for(IRasSearchCriteria searchCriteria : searchCriterias) {
+            if (searchCriteria instanceof RasSearchCriteriaRequestor) {
+                RasSearchCriteriaRequestor sRequestor = (RasSearchCriteriaRequestor) searchCriteria;
+
+                inArray(and, "requestor", sRequestor.getRequestors());
+            } else if (searchCriteria instanceof RasSearchCriteriaRunName) {
+                RasSearchCriteriaRunName sRunName = (RasSearchCriteriaRunName) searchCriteria;
+
+                inArray(and, "runName", sRunName.getRunNames());
+            } else if (searchCriteria instanceof RasSearchCriteriaQueuedFrom) {
+                RasSearchCriteriaQueuedFrom sFrom = (RasSearchCriteriaQueuedFrom) searchCriteria;
+
+                JsonObject criteria = new JsonObject();
+                JsonObject jFrom = new JsonObject();
+                jFrom.addProperty("$gte", sFrom.getFrom().toString());
+                criteria.add("queued", jFrom);
+                and.add(criteria);
+            } else if (searchCriteria instanceof RasSearchCriteriaQueuedTo) {
+                RasSearchCriteriaQueuedTo sTo = (RasSearchCriteriaQueuedTo) searchCriteria;
+
+                JsonObject criteria = new JsonObject();
+                JsonObject jTo = new JsonObject();
+                jTo.addProperty("$lt", sTo.getTo().toString());
+                criteria.add("queued", jTo);
+                and.add(criteria);
+            } else if (searchCriteria instanceof RasSearchCriteriaTestName) {
+                RasSearchCriteriaTestName sTestName = (RasSearchCriteriaTestName) searchCriteria;
+
+                inArray(and, "testName", sTestName.getTestNames());
+            } else if (searchCriteria instanceof RasSearchCriteriaBundle) {
+                RasSearchCriteriaBundle sBundle = (RasSearchCriteriaBundle) searchCriteria;
+
+                inArray(and, "bundle", sBundle.getBundles());
+            } else if (searchCriteria instanceof RasSearchCriteriaResult) {
+                RasSearchCriteriaResult sResult = (RasSearchCriteriaResult) searchCriteria;
+
+                inArray(and, "result", sResult.getResults());
+            } else {
+                throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
+            }
+        }
+
+        Find find = new Find();
+        find.selector = selector;
+        find.execution_stats = true;
+
+        httpPost.addHeader("Accept", "application/json");
+        httpPost.addHeader("Content-Type", "application/json");
+
+        while (true) {
+            String requestContent = store.getGson().toJson(find);
+            httpPost.setEntity(new StringEntity(requestContent, UTF8));
+
+            try (CloseableHttpResponse response = store.getHttpClient().execute(httpPost)) {
+                StatusLine statusLine = response.getStatusLine();
+                HttpEntity entity = response.getEntity();
+                String responseEntity = EntityUtils.toString(entity);
+
+                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                    throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
+                }
+
+                FoundRuns found = store.getGson().fromJson(responseEntity, FoundRuns.class);
+                if (found.docs == null) {
+                    throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
+                }
+
+                if (found.warning != null) {
+                    logger.warn("CouchDB warning detected - " + found.warning);
+                }
+
+                if (found.docs.isEmpty()) {
+                    break;
+                }
+
+                for (TestStructureCouchdb ts : found.docs) {
+                    Path runArtifactPath = getRunArtifactPath(ts);
+
+                    // *** Add this run to the results
+                    CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
+                    runs.add(cdbrr);
+                }
+
+                // *** find the next batch of runs
+                find.bookmark = found.bookmark;
+            } catch (CouchdbRasException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new ResultArchiveStoreException("Unable to find runs", e);
+            }
+        }
+
+        return runs;
+    }
+
+    private void inArray(JsonArray and, String field, String[] inArray) {
+        if (inArray == null || inArray.length < 1) {
+            return;
+        }
+
+        JsonArray jIns = new JsonArray();
+        for(String in : inArray) {
+            if (in == null || in.isEmpty()) {
+                continue;
+            }
+            jIns.add(in);
+        }
+        if (jIns.size() == 0) {
+            return;
+        }
+
+        JsonObject jIn = new JsonObject();
+        jIn.add("$in", jIns);
+        
+        JsonObject criteria = new JsonObject();
+        criteria.add(field, jIn);
+        
+        and.add(criteria);
+
+        return;
     }
 
 }
