@@ -10,17 +10,18 @@ import java.nio.file.Path;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.teststructure.TestStructure;
+import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
 
 public class CouchdbRunResult implements IRunResult {
 
-    private final TestStructure   testStructure;
+    private final TestStructureCouchdb   testStructure;
     private final Path            path;
     private final CouchdbRasStore store;
 
-    public CouchdbRunResult(CouchdbRasStore store, TestStructure testStructure, Path path) {
+    public CouchdbRunResult(CouchdbRasStore store, TestStructureCouchdb testStructure, Path path) {
         this.store = store;
         if (testStructure == null) {
-            this.testStructure = new TestStructure();
+            this.testStructure = new TestStructureCouchdb();
         } else {
             this.testStructure = testStructure;
         }
@@ -44,8 +45,8 @@ public class CouchdbRunResult implements IRunResult {
 
 	@Override
 	public void discard() throws ResultArchiveStoreException {
-		// TODO Auto-generated method stub
-		
+        CouchdbDirectoryService storeService =  (CouchdbDirectoryService) store.getDirectoryServices().get(0);
+        storeService.discardRun(this.testStructure._id);
 	}
 
 }
