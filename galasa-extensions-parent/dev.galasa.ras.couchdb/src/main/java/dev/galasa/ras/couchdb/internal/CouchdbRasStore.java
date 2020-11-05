@@ -117,6 +117,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             checkIndex("galasa_run", "requestor");
             checkIndex("galasa_run", "queued");
             checkIndex("galasa_run", "testName");
+            checkIndex("galasa_run", "bundle");
+            checkIndex("galasa_run", "result");
 
             logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
         } catch (CouchdbRasException e) {

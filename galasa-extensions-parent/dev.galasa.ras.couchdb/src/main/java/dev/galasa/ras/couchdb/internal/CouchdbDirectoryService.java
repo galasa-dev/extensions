@@ -35,9 +35,12 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
@@ -324,18 +327,11 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             if (searchCriteria instanceof RasSearchCriteriaRequestor) {
                 RasSearchCriteriaRequestor sRequestor = (RasSearchCriteriaRequestor) searchCriteria;
 
-                String[] requestors = sRequestor.getRequestors();
-                if (requestors.length > 0) {
-                    JsonArray jRequestors = new JsonArray();
-                    for(String requestor : requestors) {
-                        jRequestors.add(requestor);
-                    }
-                    JsonObject criteria = new JsonObject();
-                    JsonObject jRequestor = new JsonObject();
-                    jRequestor.add("$in", jRequestors);
-                    criteria.add("requestor", jRequestor);
-                    and.add(criteria);
-                }
+                inArray(and, "requestor", sRequestor.getRequestors());
+            } else if (searchCriteria instanceof RasSearchCriteriaRunName) {
+                RasSearchCriteriaRunName sRunName = (RasSearchCriteriaRunName) searchCriteria;
+
+                inArray(and, "runName", sRunName.getRunNames());
             } else if (searchCriteria instanceof RasSearchCriteriaQueuedFrom) {
                 RasSearchCriteriaQueuedFrom sFrom = (RasSearchCriteriaQueuedFrom) searchCriteria;
 
@@ -355,33 +351,20 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             } else if (searchCriteria instanceof RasSearchCriteriaTestName) {
                 RasSearchCriteriaTestName sTestName = (RasSearchCriteriaTestName) searchCriteria;
 
-                String[] testNames = sTestName.getTestNames();
-                if (testNames.length > 0) {
-                    JsonArray jTestNames = new JsonArray();
-                    for(String testName : testNames) {
-                        jTestNames.add(testName);
-                    }
-                    JsonObject criteria = new JsonObject();
-                    JsonObject jTestName = new JsonObject();
-                    jTestName.add("$in", jTestNames);
-                    criteria.add("testName", jTestName);
-                    and.add(criteria);
-                }
+                inArray(and, "testName", sTestName.getTestNames());
+            } else if (searchCriteria instanceof RasSearchCriteriaBundle) {
+                RasSearchCriteriaBundle sBundle = (RasSearchCriteriaBundle) searchCriteria;
+
+                inArray(and, "bundle", sBundle.getBundles());
+            } else if (searchCriteria instanceof RasSearchCriteriaResult) {
+                RasSearchCriteriaResult sResult = (RasSearchCriteriaResult) searchCriteria;
+
+                inArray(and, "result", sResult.getResults());
             } else {
                 throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
             }
         }
 
-
-
-        //      if (testName != null) {
-        //          JsonObject criteria = new JsonObject();
-        //          JsonObject jtestName = new JsonObject();
-        //          jtestName.addProperty("$eq", testName.toString());
-        //          criteria.add("testName", jtestName);  // TODO check property name
-        //          and.add(criteria);
-        //      }
-        //
         Find find = new Find();
         find.selector = selector;
         find.execution_stats = true;
@@ -433,6 +416,33 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         }
 
         return runs;
+    }
+
+    private void inArray(JsonArray and, String field, String[] inArray) {
+        if (inArray == null || inArray.length < 1) {
+            return;
+        }
+
+        JsonArray jIns = new JsonArray();
+        for(String in : inArray) {
+            if (in == null || in.isEmpty()) {
+                continue;
+            }
+            jIns.add(in);
+        }
+        if (jIns.size() == 0) {
+            return;
+        }
+
+        JsonObject jIn = new JsonObject();
+        jIn.add("$in", jIns);
+        
+        JsonObject criteria = new JsonObject();
+        criteria.add(field, jIn);
+        
+        and.add(criteria);
+
+        return;
     }
 
 }
