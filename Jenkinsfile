@@ -6,7 +6,7 @@ pipeline {
    environment {
 //Configure Maven from the maven tooling in Jenkins
       def mvnHome = tool 'Default'
-      PATH = "${mvnHome}/bin:${env.PATH}"
+      PATH = "${mvnHome}/bin:/usr/local/go/bin:${env.PATH}"
 
 //Set some defaults
       def workspace = pwd()
