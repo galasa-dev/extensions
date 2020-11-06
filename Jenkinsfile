@@ -84,8 +84,10 @@ pipeline {
                      sh "operator-sdk generate crds"
                      sh "operator-sdk generate k8s"
                      sh "operator-sdk build galasa-ecosystem-kubernetes-operator"
-                     sh "docker tag galasa-ecosystem-kubernetes-operator docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
-                     sh "docker push docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                     if (env.PULL_REQ != 'true') {
+                        sh "docker tag galasa-ecosystem-kubernetes-operator docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                        sh "docker push docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                     }
                   }
                } }
             }
