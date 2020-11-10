@@ -432,7 +432,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
             discardRecord("galasa_run", id);
         } catch (CouchdbRasException | ParseException | IOException e) {
-            throw new ResultArchiveStoreException("Failed to dsicrd run: " + id, e);
+            throw new ResultArchiveStoreException("Failed to discard run: " + id, e);
         }
     }
 
