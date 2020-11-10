@@ -6,7 +6,7 @@ pipeline {
    environment {
 //Configure Maven from the maven tooling in Jenkins
       def mvnHome = tool 'Default'
-      PATH = "${mvnHome}/bin:${env.PATH}"
+      PATH = "${mvnHome}/bin:/usr/local/go/bin:${env.PATH}"
 
 //Set some defaults
       def workspace = pwd()
@@ -73,6 +73,28 @@ pipeline {
                      }
                   }
                } }
+            }
+         }
+      }
+      stage('Kubernetes Operator') {
+         steps {
+            withCredentials([string(credentialsId: 'galasa-gpg', variable: 'GPG')]) {
+               withFolderProperties { withSonarQubeEnv('GalasaSonarQube') {
+                  dir('galasa-ecosystem-kubernetes-operator') {
+                     sh "operator-sdk generate crds"
+                     sh "operator-sdk generate k8s"
+                     sh "operator-sdk build galasa-ecosystem-kubernetes-operator"
+                     script {
+                           if (env.PULL_REQ == 'true') {
+                              echo 'Skipping docker operator publish'
+                           } else {
+                              sh "docker tag galasa-ecosystem-kubernetes-operator docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                              sh "docker push docker.galasa.dev/galasa-ecosystem-kubernetes-operator:${DOCKER_VERSION}"
+                           }
+                        }   
+                     }
+                  }
+               } 
             }
          }
       }
