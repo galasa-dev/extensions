@@ -420,17 +420,14 @@ public class Launcher extends JavaLaunchDelegate {
 			if (actualProject.hasNature(MAVEN_NATURE)) {
 				consoleDefault.append("This is a maven project: " + project + "\n");
 				IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
-				mavenProjectFacade.getArtifactKey().getVersion();
+				String version = mavenProjectFacade.getArtifactKey().getVersion();
+				
 				IPath outputPath = mavenProjectFacade.getOutputLocation().removeLastSegments(1);
 				IResource actualOutputPath = workspaceRoot.findMember(outputPath);
 				java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
 				
-        		for (File file : realOutputPath.toFile().listFiles()) {
-        			if (file.getName().endsWith(".jar")) {
-        				
-    		    		return extractManifestFromJar(new FileInputStream(file));
-    		    	}
-        		}
+				File jar = realOutputPath.resolve(project + "-" + version + ".jar").toFile();
+				return extractManifestFromJar(new FileInputStream(jar));
 			}
     	} catch (IOException | CoreException e) {
     		consoleRed.append("Failed to open Manifest in project: " + project);
