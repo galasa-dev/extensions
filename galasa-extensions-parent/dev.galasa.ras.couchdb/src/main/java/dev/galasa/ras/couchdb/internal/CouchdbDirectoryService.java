@@ -432,7 +432,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
             discardRecord("galasa_run", id);
         } catch (CouchdbRasException | ParseException | IOException e) {
-
+            throw new ResultArchiveStoreException("Failed to dsicrd run: " + id, e);
         }
     }
 
@@ -463,7 +463,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                     throw new CouchdbRasException("Unable to delete run "+ id +" - " + statusLine.toString());
                 }
             } catch (IOException e) {
-
+                throw new ResultArchiveStoreException("Failed to execute HTTP DELETE for run: " + id, e);
             }
         } catch (URISyntaxException e) {
             throw new ResultArchiveStoreException(e);
