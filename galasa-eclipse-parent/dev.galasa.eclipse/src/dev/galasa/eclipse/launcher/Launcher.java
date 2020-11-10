@@ -406,7 +406,7 @@ public class Launcher extends JavaLaunchDelegate {
     	
     	try {	    		
     		if (actualProject.hasNature(GRADLE_NATURE)) {
-        		consoleDefault.append("This is a gradle project: " + project + "\n");
+    			consoleDefault.append("This is a gradle project: " + project + "\n");
         		// Enforcing that gradle projects must be build to the build dir for now
         		IPath fullBuildDir = workspace.append(actualProject.getName()).append("build");
         		
@@ -420,12 +420,14 @@ public class Launcher extends JavaLaunchDelegate {
 			if (actualProject.hasNature(MAVEN_NATURE)) {
 				consoleDefault.append("This is a maven project: " + project + "\n");
 				IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(actualProject);
+				mavenProjectFacade.getArtifactKey().getVersion();
 				IPath outputPath = mavenProjectFacade.getOutputLocation().removeLastSegments(1);
 				IResource actualOutputPath = workspaceRoot.findMember(outputPath);
 				java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
 				
         		for (File file : realOutputPath.toFile().listFiles()) {
         			if (file.getName().endsWith(".jar")) {
+        				
     		    		return extractManifestFromJar(new FileInputStream(file));
     		    	}
         		}
