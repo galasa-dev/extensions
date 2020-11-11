@@ -6,6 +6,7 @@
 package dev.galasa.ras.couchdb.internal;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,6 +16,10 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -22,14 +27,12 @@ import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
@@ -46,6 +49,7 @@ import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
+import dev.galasa.ras.couchdb.internal.pojos.IdRev;
 import dev.galasa.ras.couchdb.internal.pojos.Row;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
 import dev.galasa.ras.couchdb.internal.pojos.ViewResponse;
@@ -418,6 +422,79 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return runs;
     }
 
+    public void discardRun(String id) throws ResultArchiveStoreException {
+        try {
+            CouchdbRunResult run = fetchRun(id);
+            TestStructureCouchdb testStructure = (TestStructureCouchdb) run.getTestStructure();
+
+            discardRunLogs(testStructure.getLogRecordIds());
+            discardRunArtifacts(testStructure.getArtifactRecordIds());
+
+            discardRecord("galasa_run", id);
+        } catch (CouchdbRasException | ParseException | IOException e) {
+            throw new ResultArchiveStoreException("Failed to discard run: " + id, e);
+        }
+    }
+
+    private void discardRunLogs(List<String> ids) throws ResultArchiveStoreException {
+        for (String id : ids) {
+            discardRecord("galasa_log", id);
+        }
+    }
+
+    private void discardRunArtifacts(List<String> ids) throws ResultArchiveStoreException {
+        for (String id : ids) {
+            discardRecord("galasa_artifacts", id);
+        }
+    }
+
+    private void discardRecord(String databaseName, String id) throws ResultArchiveStoreException {
+        URIBuilder builder;
+        try {
+            builder = new URIBuilder(store.getCouchdbUri() + "/" + databaseName + "/" + id);
+            builder.addParameter("rev", getRevision(databaseName, id));
+
+            HttpDelete httpDelete = new HttpDelete(builder.build());
+
+            try (CloseableHttpResponse response = store.getHttpClient().execute(httpDelete)) {
+                StatusLine statusLine = response.getStatusLine();
+
+                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                    throw new CouchdbRasException("Unable to delete run "+ id +" - " + statusLine.toString());
+                }
+            } catch (IOException e) {
+                throw new ResultArchiveStoreException("Failed to execute HTTP DELETE for run: " + id, e);
+            }
+        } catch (URISyntaxException e) {
+            throw new ResultArchiveStoreException(e);
+        }
+    }
+
+    private String getRevision(String databaseName, String id) throws ResultArchiveStoreException {
+        HttpGet httpGet = new HttpGet(store.getCouchdbUri() + "/"+ databaseName+"/"+id);
+
+        try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
+            StatusLine statusLine = response.getStatusLine();
+            HttpEntity entity = response.getEntity();
+            String responseEntity = EntityUtils.toString(entity);
+
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
+            }
+
+            IdRev found = store.getGson().fromJson(responseEntity, IdRev.class);
+            if (found._id == null) {
+                throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
+            }
+            if (found._rev == null) {
+                throw new CouchdbRasException("Unable to find rev - Invalid JSON response");
+            }
+            return found._rev;
+        } catch (Exception e) {
+            throw new ResultArchiveStoreException(e);
+        }
+    }
+
     private void inArray(JsonArray and, String field, String[] inArray) {
         if (inArray == null || inArray.length < 1) {
             return;
@@ -444,5 +521,5 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         return;
     }
-
 }
+
