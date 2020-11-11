@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2020.
  */
 package dev.galasa.cps.etcd.internal;
 
@@ -20,6 +20,11 @@ import java.util.concurrent.ExecutionException;
 
 import javax.validation.constraints.NotNull;
 
+import dev.galasa.framework.spi.DssAdd;
+import dev.galasa.framework.spi.DssDelete;
+import dev.galasa.framework.spi.DssDeletePrefix;
+import dev.galasa.framework.spi.DssSwap;
+import dev.galasa.framework.spi.DssUpdate;
 import dev.galasa.framework.spi.DynamicStatusStoreException;
 import dev.galasa.framework.spi.IDssAction;
 import dev.galasa.framework.spi.IDynamicStatusStore;
@@ -458,8 +463,146 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
 
     @Override
     public void performActions(IDssAction... actions) throws DynamicStatusStoreException {
-        throw new DynamicStatusStoreException("Need to add support for actions");
+        
+        Txn txn = kvClient.txn();
+        
+        // Go through the actions and collect all the IFs
+        
+        for(IDssAction action : actions) {
+            if (action instanceof DssAdd) {
+                txn = performActionsAddIf(txn, (DssAdd) action);
+            } else if (action instanceof DssDelete) {
+                txn = performActionsDeleteIf(txn, (DssDelete) action);
+            } else if (action instanceof DssDeletePrefix) {
+                txn = performActionsDeletePrefixIf(txn, (DssDeletePrefix) action);
+            } else if (action instanceof DssUpdate) {
+                txn = performActionsUpdateIf(txn, (DssUpdate) action);
+            } else if (action instanceof DssSwap) {
+                txn = performActionsSwapIf(txn, (DssSwap) action);
+            } else {
+                throw new DynamicStatusStoreException("Unrecognised DSS Action - " + action.getClass().getName());
+            }
+        }
+        
+        // Now get the Thens
+        for(IDssAction action : actions) {
+            if (action instanceof DssAdd) {
+                txn = performActionsAddThen(txn, (DssAdd) action);
+            } else if (action instanceof DssDelete) {
+                txn = performActionsDeleteThen(txn, (DssDelete) action);
+            } else if (action instanceof DssDeletePrefix) {
+                txn = performActionsDeletePrefixThen(txn, (DssDeletePrefix) action);
+            } else if (action instanceof DssUpdate) {
+                txn = performActionsUpdateThen(txn, (DssUpdate) action);
+            } else if (action instanceof DssSwap) {
+                txn = performActionsSwapThen(txn, (DssSwap) action);
+            } else {
+                throw new DynamicStatusStoreException("Unrecognised DSS Action - " + action.getClass().getName());
+            }
+        }
+
+        
+        CompletableFuture<TxnResponse> response = txn.commit();
+
+        try {
+            if (!response.get().isSucceeded()) {
+                throw new DynamicStatusStoreException("DSS transaction failed");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new DynamicStatusStoreException("DSS transaction failed", e);
+        }
         
     }
+
+    private Txn performActionsAddIf(Txn txn, DssAdd action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+
+        txn = txn.If(new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.version(0)));
+        
+        return txn;
+    }
+
+    private Txn performActionsAddThen(Txn txn, DssAdd action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        ByteSequence bsNewValue = ByteSequence.from(action.getValue(), UTF_8);
+        
+        PutOption option = PutOption.DEFAULT;
+
+        txn = txn.Then(Op.put(bsKey, bsNewValue, option));
+        
+        return txn;
+    }
+
+    private Txn performActionsUpdateIf(Txn txn, DssUpdate action) {
+        return txn;
+    }
+
+    private Txn performActionsUpdateThen(Txn txn, DssUpdate action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        ByteSequence bsNewValue = ByteSequence.from(action.getValue(), UTF_8);
+        
+        PutOption option = PutOption.DEFAULT;
+
+        txn = txn.Then(Op.put(bsKey, bsNewValue, option));
+        
+        return txn;
+    }
+
+    private Txn performActionsSwapIf(Txn txn, DssSwap action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        ByteSequence bsOldValue = ByteSequence.from(action.getOldValue(), UTF_8);
+        
+        txn = txn.If(new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.value(bsOldValue)));
+        
+        return txn;
+    }
+    
+    private Txn performActionsSwapThen(Txn txn, DssSwap action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        ByteSequence bsNewValue = ByteSequence.from(action.getNewValue(), UTF_8);
+        
+        PutOption option = PutOption.DEFAULT;
+        txn = txn.Then(Op.put(bsKey, bsNewValue, option));
+        
+        return txn;
+    }
+    
+    private Txn performActionsDeleteIf(Txn txn, DssDelete action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        
+        if (action.getOldValue() != null) {
+            ByteSequence bsOldValue = ByteSequence.from(action.getOldValue(), UTF_8);
+            txn = txn.If(new Cmp(bsKey, Cmp.Op.EQUAL, CmpTarget.value(bsOldValue)));
+        }
+        
+        return txn;
+    }
+
+    private Txn performActionsDeleteThen(Txn txn, DssDelete action) {
+        ByteSequence bsKey = ByteSequence.from(action.getKey(), UTF_8);
+        
+        DeleteOption option = DeleteOption.DEFAULT;
+        
+        txn = txn.Then(Op.delete(bsKey, option));
+        
+        return txn;
+    }
+
+    private Txn performActionsDeletePrefixIf(Txn txn, DssDeletePrefix action) {
+        return txn;
+    }
+
+    private Txn performActionsDeletePrefixThen(Txn txn, DssDeletePrefix action) {
+        ByteSequence bsKey = ByteSequence.from(action.getPrefix(), UTF_8);
+        
+        DeleteOption option = DeleteOption.newBuilder().withPrefix(bsKey).build();
+        
+        txn = txn.Then(Op.delete(bsKey, option));
+        
+        return txn;
+    }
+
+
 
 }
