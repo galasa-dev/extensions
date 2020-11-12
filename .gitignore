@@ -3,3 +3,4 @@
 *.versionsBackup
 galasa-eclipse-parent/target
 /.project
+dependency-reduced-pom.xml
