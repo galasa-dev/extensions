@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2020.
  */
 package dev.galasa.ras.couchdb.internal;
 
@@ -48,5 +48,10 @@ public class CouchdbRunResult implements IRunResult {
         CouchdbDirectoryService storeService =  (CouchdbDirectoryService) store.getDirectoryServices().get(0);
         storeService.discardRun(this.testStructure._id);
 	}
+
+    @Override
+    public String getRunId() {
+        return "cdb-" + this.testStructure._id;
+    }
 
 }
