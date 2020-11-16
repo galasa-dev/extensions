@@ -521,5 +521,20 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         return;
     }
+
+    @Override
+    public IRunResult getRunById(@NotNull String runId) throws ResultArchiveStoreException {
+        if (!runId.startsWith("cdb-")) {
+            return null;
+        }
+        
+        runId = runId.substring(4);
+        
+        try {
+            return fetchRun(runId);
+        } catch (Exception e) {
+            return null;  // This runid may not belong to this RAS, so ignore all errors
+        }
+    }
 }
 
