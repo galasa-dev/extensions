@@ -8,10 +8,14 @@ package dev.galasa.docker.operator.config;
 public class MetricsConfiguration {
 
     private String image;
+    private int    port;
     
     public void normalise() {
         if (this.image == null || this.image.isEmpty()) {
             this.image = "galasa-boot-embedded-amd64";
+        }
+        if (this.port == 0) {
+            this.port = 9010;
         }
     }
 
@@ -23,5 +27,12 @@ public class MetricsConfiguration {
         this.image = image;
     }
 
+    public int getPort() {
+        return this.port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
 
 }
