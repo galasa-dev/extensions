@@ -166,8 +166,8 @@ public class SimPlatform extends AbstractContainerResource {
             this.cps.checkCpsProperty("zos.image.SIMBANK.telnet.tls", "false");
             this.cps.checkCpsProperty("zos.image.SIMBANK.credentials", "SIMBANK");
             
-            this.cps.checkCpsProperty("zosmf.server.SIMBANK.images", "SIMBANK");
-            this.cps.checkCpsProperty("zosmf.server.SIMBANK.hostname", ecoConfig.getHostname());
+            this.cps.checkCpsProperty("zosmf.image.SIMBANK.servers", "SIMBANK");
+            this.cps.checkCpsProperty("zosmf.server.SIMBANK.image", "SIMBANK");
             this.cps.checkCpsProperty("zosmf.server.SIMBANK.port", Integer.toString(simConfig.getZosmfPort()));
             this.cps.checkCpsProperty("zosmf.server.SIMBANK.https", "false");
 

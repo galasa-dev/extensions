@@ -9,6 +9,10 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 import dev.galasa.docker.operator.DockerOperatorException;
 import dev.galasa.docker.operator.config.EcosystemConfiguration;
@@ -82,6 +86,15 @@ public class Metrics extends AbstractContainerResource {
             CreateContainerCmd cmd = dockerClient.createContainerCmd(RESOURCE_NAME);
             cmd.withName(RESOURCE_NAME);
             cmd.withImage(targetImageName);
+            
+            HostConfig hostConfig = new HostConfig();
+            cmd.withHostConfig(hostConfig);
+            
+            MetricsConfiguration metricsConfig = getEcosystem().getConfiguration().getMetrics();
+            
+            hostConfig.withPortBindings(
+                    new PortBinding(new Binding("0.0.0.0", Integer.toString(metricsConfig.getPort())), new ExposedPort(9010)));
+
 
             cmd.withCmd("java",
                     "-jar",
