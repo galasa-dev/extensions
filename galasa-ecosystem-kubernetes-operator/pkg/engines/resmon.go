@@ -107,7 +107,7 @@ func generateResmonDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deploy
 						{
 							Name:            "resource-monitor",
 							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",
 							},

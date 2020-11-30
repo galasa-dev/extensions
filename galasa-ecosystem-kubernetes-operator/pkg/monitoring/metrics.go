@@ -102,7 +102,7 @@ func generateMetricsDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 						{
 							Name:            "metrics",
 							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",
 							},

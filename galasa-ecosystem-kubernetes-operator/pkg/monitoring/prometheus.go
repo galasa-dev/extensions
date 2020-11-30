@@ -57,7 +57,7 @@ func generatePrometheusDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 						{
 							Name:            "init-chown-data",
 							Image:           "busybox:latest",
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"chown",
 								"-R",
@@ -77,7 +77,7 @@ func generatePrometheusDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 						{
 							Name:            "prometheus",
 							Image:           "prom/prometheus:v2.10.0",
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Args: []string{
 								"--config.file=/etc/prometheus/prometheus.yml",
 								"--storage.tsdb.path=/prometheus",
