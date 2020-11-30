@@ -48,6 +48,7 @@ spec:
                       type: string
                     type: object
                   replicas:
+                    default: 1
                     format: int32
                     type: integer
                   resources:
@@ -78,6 +79,7 @@ spec:
                         type: object
                     type: object
                   storage:
+                    default: 200Mi
                     type: string
                 required:
                 - storage
@@ -95,6 +97,7 @@ spec:
                       type: string
                     type: object
                   replicas:
+                    default: 1
                     format: int32
                     type: integer
                   resources:
@@ -132,6 +135,7 @@ spec:
                       type: string
                     type: object
                   replicas:
+                    default: 1
                     format: int32
                     type: integer
                   resources:
@@ -166,6 +170,10 @@ spec:
                 type: string
               galasaVersion:
                 type: string
+              imagePullPolicy:
+                default: if-not-present
+                description: The valid options are "always", "never" or "if-not-present"
+                type: string
               ingressClass:
                 type: string
               ingressHostname:
@@ -175,11 +183,14 @@ spec:
               monitoring:
                 properties:
                   grafanaReplicas:
+                    default: 1
                     format: int32
                     type: integer
                   grafanaStorage:
+                    default: 200Mi
                     type: string
                   metricsReplicas:
+                    default: 1
                     format: int32
                     type: integer
                   nodeSelector:
@@ -187,9 +198,11 @@ spec:
                       type: string
                     type: object
                   prometheusReplicas:
+                    default: 1
                     format: int32
                     type: integer
                   prometheusStorage:
+                    default: 200Mi
                     type: string
                 required:
                 - grafanaStorage
@@ -203,6 +216,7 @@ spec:
                       type: string
                     type: object
                   clusterSize:
+                    default: 1
                     format: int32
                     type: integer
                   nodeSelector:
@@ -237,6 +251,7 @@ spec:
                         type: object
                     type: object
                   storage:
+                    default: 1Gi
                     type: string
                 required:
                 - storage
@@ -249,6 +264,7 @@ spec:
                       type: string
                     type: object
                   replicas:
+                    default: 1
                     format: int32
                     type: integer
                   resources:
@@ -279,6 +295,7 @@ spec:
                         type: object
                     type: object
                   storage:
+                    default: 1Gi
                     type: string
                 required:
                 - storage
@@ -290,6 +307,7 @@ spec:
                       type: string
                     type: object
                   replicas:
+                    default: 1
                     format: int32
                     type: integer
                   resources:

@@ -15,7 +15,7 @@ spec:
       serviceAccountName: galasa-ecosystem-kubernetes-operator
       containers:
         - name: galasa-ecosystem-kubernetes-operator
-          image: docker.galasa.dev/galasa-ecosystem-kubernetes-operator:0.12.0-SNAPSHOT
+          image: docker.galasa.dev/galasa-ecosystem-kubernetes-operator:0.13.0-SNAPSHOT
           command:
           - galasa-ecosystem-kubernetes-operator
           imagePullPolicy: Always

@@ -12,7 +12,7 @@ type GalasaEcosystemSpec struct {
 	GalasaVersion    string            `json:"galasaVersion"`
 	// The valid options are "always", "never" or "if-not-present"
 	// +kubebuilder:default="if-not-present"
-	ImagePullPolicy  string               `json:"imagePullPolicy"`
+	ImagePullPolicy  string               `json:"imagePullPolicy,omitempty"`
 	DockerRegistry   string               `json:"dockerRegistry"`
 	MavenRepository  string               `json:"mavenRepository"`
 	ExternalHostname string               `json:"externalhostname"`
