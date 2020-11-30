@@ -171,8 +171,8 @@ spec:
               galasaVersion:
                 type: string
               imagePullPolicy:
-                default: if-not-present
-                description: The valid options are "always", "never" or "if-not-present"
+                default: IfNotPresent
+                description: The valid options are "Always", "Never" or "IfNotPresent"
                 type: string
               ingressClass:
                 type: string
