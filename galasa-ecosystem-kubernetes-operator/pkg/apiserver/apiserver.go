@@ -72,7 +72,6 @@ func generateIngress(cr *galasav1alpha1.GalasaEcosystem) *v1beta1.Ingress {
 }
 
 func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
-
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-apiserver",
@@ -101,7 +100,7 @@ func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
 						{
 							Name:            "init-chown-data",
 							Image:           "busybox:latest",
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"chown", "-R", "1000", "/data",
 							},
@@ -118,7 +117,7 @@ func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
 						{
 							Name:            cr.Name + "-resource-monitor",
 							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command:         []string{"java"},
 							Args: []string{
 								"-jar",

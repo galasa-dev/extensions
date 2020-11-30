@@ -101,7 +101,7 @@ func generateStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet
 						{
 							Name:            "couchdb",
 							Image:           "couchdb:2.3.1",
-							ImagePullPolicy: corev1.PullIfNotPresent,
+							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
 								{
 									Name:          "couchdbport",
