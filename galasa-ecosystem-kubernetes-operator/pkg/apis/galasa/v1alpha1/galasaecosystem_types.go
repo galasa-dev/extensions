@@ -10,8 +10,8 @@ type GalasaEcosystemSpec struct {
 	Config           map[string]string `json:"config,omitempty"`
 	StorageClassName *string           `json:"storageClassName,omitempty"`
 	GalasaVersion    string            `json:"galasaVersion"`
-	// The valid options are "always", "never" or "if-not-present"
-	// +kubebuilder:default="if-not-present"
+	// The valid options are "Always", "Never" or "IfNotPresent"
+	// +kubebuilder:default="IfNotPresent"
 	ImagePullPolicy  string               `json:"imagePullPolicy,omitempty"`
 	DockerRegistry   string               `json:"dockerRegistry"`
 	MavenRepository  string               `json:"mavenRepository"`
