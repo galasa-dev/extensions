@@ -116,11 +116,9 @@ func generateResmonDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deploy
 								"boot.jar",
 								"--obr",
 								"file:galasa.obr",
-								"--trace",
 								"--resourcemanagement",
 								"--bootstrap",
 								"$(BOOTSTRAP_URI)",
-								"--trace",
 							},
 							Env: []corev1.EnvVar{
 								{

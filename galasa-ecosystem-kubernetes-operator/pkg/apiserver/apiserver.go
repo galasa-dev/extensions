@@ -124,7 +124,6 @@ func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
 								"boot.jar",
 								"--obr",
 								"file:galasa.obr",
-								"--trace",
 								"--api",
 								"--bootstrap",
 								"file:/bootstrap.properties",

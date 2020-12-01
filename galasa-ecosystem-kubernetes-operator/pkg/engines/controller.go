@@ -81,11 +81,9 @@ func generateControllerDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 								"boot.jar",
 								"--obr",
 								"file:galasa.obr",
-								"--trace",
 								"--k8scontroller",
 								"--bootstrap",
 								"$(BOOTSTRAP_URI)",
-								"--trace",
 							},
 							Env: []corev1.EnvVar{
 								{
