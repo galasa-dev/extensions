@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,18 +108,18 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             }
 
             checkVersion(welcome.getVersion(), 2, 3, 1);
-            checkDatabasePresent("galasa_run");
-            checkDatabasePresent("galasa_log");
-            checkDatabasePresent("galasa_artifacts");
+            checkDatabasePresent(1, "galasa_run");
+            checkDatabasePresent(1, "galasa_log");
+            checkDatabasePresent(1, "galasa_artifacts");
 
-            checkRunDesignDocument();
+            checkRunDesignDocument(1);
 
-            checkIndex("galasa_run", "runName");
-            checkIndex("galasa_run", "requestor");
-            checkIndex("galasa_run", "queued");
-            checkIndex("galasa_run", "testName");
-            checkIndex("galasa_run", "bundle");
-            checkIndex("galasa_run", "result");
+            checkIndex(1, "galasa_run", "runName");
+            checkIndex(1, "galasa_run", "requestor");
+            checkIndex(1, "galasa_run", "queued");
+            checkIndex(1, "galasa_run", "testName");
+            checkIndex(1, "galasa_run", "bundle");
+            checkIndex(1, "galasa_run", "result");
 
             logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
         } catch (CouchdbRasException e) {
@@ -146,7 +147,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this);
     }
 
-    private void checkIndex(String dbName, String field) throws CouchdbRasException {
+    private void checkIndex(int attempts, String dbName, String field) throws CouchdbRasException {
         HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_index");
 
         String idxJson = null;
@@ -215,6 +216,19 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
                 StatusLine statusLine = response.getStatusLine();
                 EntityUtils.consumeQuietly(response.getEntity());
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == HttpStatus.SC_CONFLICT) {
+                    // Someone possibly updated
+                    attempts++;
+                    if (attempts > 10) {
+                        throw new CouchdbRasException(
+                                "Update of galasa_run index failed on CouchDB server due to conflicts, attempted 10 times");
+                    }
+                    Thread.sleep(1000 + new Random().nextInt(3000));
+                    checkIndex(attempts, dbName, field);
+                    return;
+                }
+
                 if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
                     throw new CouchdbRasException(
                             "Update of galasa_run index failed on CouchDB server - " + statusLine.toString());
@@ -229,7 +243,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     }
 
-    private void checkDatabasePresent(String dbName) throws CouchdbRasException {
+    private void checkDatabasePresent(int attempts, String dbName) throws CouchdbRasException {
         HttpHead httpHead = new HttpHead(rasUri + "/" + dbName);
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
@@ -254,6 +268,19 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode == HttpStatus.SC_CONFLICT) {
+                // Someone possibly updated
+                attempts++;
+                if (attempts > 10) {
+                    throw new CouchdbRasException(
+                            "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
+                }
+                Thread.sleep(1000 + new Random().nextInt(3000));
+                checkDatabasePresent(attempts, dbName);
+                return;
+            }
+
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
                 throw new CouchdbRasException(
@@ -268,7 +295,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         }
     }
 
-    private void checkRunDesignDocument() throws CouchdbRasException {
+    private void checkRunDesignDocument(int attempts) throws CouchdbRasException {
         HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_design/docs");
 
         String docJson = null;
@@ -363,7 +390,20 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
             try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
                 StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
+                int statusCode = statusLine.getStatusCode();
+                if (statusCode == HttpStatus.SC_CONFLICT) {
+                    // Someone possibly updated
+                    attempts++;
+                    if (attempts > 10) {
+                        throw new CouchdbRasException(
+                                "Update of galasa_run design document failed on CouchDB server due to conflicts, attempted 10 times");
+                    }
+                    Thread.sleep(1000 + new Random().nextInt(3000));
+                    checkRunDesignDocument(attempts);
+                    return;
+                }
+                
+                if (statusCode != HttpStatus.SC_CREATED) {
                     EntityUtils.consumeQuietly(response.getEntity());
                     throw new CouchdbRasException(
                             "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
