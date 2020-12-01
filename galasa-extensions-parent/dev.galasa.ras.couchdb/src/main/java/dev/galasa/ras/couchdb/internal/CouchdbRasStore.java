@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -223,6 +224,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                         throw new CouchdbRasException(
                                 "Update of galasa_run index failed on CouchDB server due to conflicts, attempted 10 times");
                     }
+                    Thread.sleep(1000 + new Random().nextInt(3000));
                     checkIndex(attempts, dbName, field);
                     return;
                 }
@@ -274,6 +276,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                     throw new CouchdbRasException(
                             "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
                 }
+                Thread.sleep(1000 + new Random().nextInt(3000));
                 checkDatabasePresent(attempts, dbName);
                 return;
             }
@@ -395,6 +398,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                         throw new CouchdbRasException(
                                 "Update of galasa_run design document failed on CouchDB server due to conflicts, attempted 10 times");
                     }
+                    Thread.sleep(1000 + new Random().nextInt(3000));
                     checkRunDesignDocument(attempts);
                     return;
                 }
