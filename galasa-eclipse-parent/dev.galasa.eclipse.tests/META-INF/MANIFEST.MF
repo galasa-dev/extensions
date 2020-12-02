@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Galasa Eclipse Tests
 Bundle-SymbolicName: dev.galasa.eclipse.tests
-Bundle-Version: 0.13.0.qualifier
+Bundle-Version: 0.14.0.qualifier
 Fragment-Host: dev.galasa.eclipse;bundle-version="[0.3.0,1.0.0)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.apache.commons.io;version="2.2.0",
