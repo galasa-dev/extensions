@@ -401,14 +401,15 @@ public class Launcher extends JavaLaunchDelegate {
     
     private Manifest findManifest(String project) {
     	IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-    	IProject actualProject = workspaceRoot.getProject(project);    	
-    	IPath workspace = workspaceRoot.getRawLocation();
+    	IProject actualProject = workspaceRoot.getProject(project);   
+    	IPath projectPath = actualProject.getRawLocation();
+
     	
     	try {	    		
     		if (actualProject.hasNature(GRADLE_NATURE)) {
     			consoleDefault.append("This is a gradle project: " + project + "\n");
         		// Enforcing that gradle projects must be build to the build dir for now
-        		IPath fullBuildDir = workspace.append(actualProject.getName()).append("build");
+        		IPath fullBuildDir = projectPath.append("build");
         		
         		for (File file : fullBuildDir.append("libs").toFile().listFiles()) {
         			if (file.getName().endsWith(".jar")) {
