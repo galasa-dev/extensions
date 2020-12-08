@@ -156,7 +156,9 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             for (Row row : found.rows) {
                 CouchdbRunResult cdbrr = fetchRun(row.id);
                 if (cdbrr != null) {
-                    runs.add(cdbrr);
+                    if (cdbrr.getTestStructure() != null && cdbrr.getTestStructure().isValid()) {
+                        runs.add(cdbrr);
+                    }
                 }
             }
         } catch (CouchdbRasException e) {
@@ -407,7 +409,9 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
                     // *** Add this run to the results
                     CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
-                    runs.add(cdbrr);
+                    if (ts.isValid()) {
+                        runs.add(cdbrr);
+                    }
                 }
 
                 // *** find the next batch of runs
@@ -513,10 +517,10 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         JsonObject jIn = new JsonObject();
         jIn.add("$in", jIns);
-        
+
         JsonObject criteria = new JsonObject();
         criteria.add(field, jIn);
-        
+
         and.add(criteria);
 
         return;
@@ -527,9 +531,9 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         if (!runId.startsWith("cdb-")) {
             return null;
         }
-        
+
         runId = runId.substring(4);
-        
+
         try {
             return fetchRun(runId);
         } catch (Exception e) {
