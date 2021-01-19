@@ -118,7 +118,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 
     @Override
     public Map<String, String> getPropertiesFromNamespace(String namespace) {
-        ByteSequence bsNamespace = ByteSequence.from(namespace, UTF_8);
+        ByteSequence bsNamespace = ByteSequence.from(namespace + ".", UTF_8);
         GetOption option = GetOption.newBuilder()
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)
