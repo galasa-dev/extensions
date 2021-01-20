@@ -91,43 +91,45 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
     public void close() throws IOException {
         cacheByteChannel.close();
 
-        String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
+        synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
+            String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
 
-        HttpPut request = new HttpPut(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
-                + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
-        request.setEntity(new FileEntity(cachePath.toFile()));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", remoteContentType.value());
-        request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
+            HttpPut request = new HttpPut(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
+                    + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
+            request.setEntity(new FileEntity(cachePath.toFile()));
+            request.addHeader("Accept", "application/json");
+            request.addHeader("Content-Type", remoteContentType.value());
+            request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
 
-        try (CloseableHttpResponse response = this.couchdbRasStore.getHttpClient().execute(request)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
-                    logger.error(
-                            "The run document has been updated by another engine, terminating now to avoid corruption");
-                    System.exit(0);
+            try (CloseableHttpResponse response = this.couchdbRasStore.getHttpClient().execute(request)) {
+                StatusLine statusLine = response.getStatusLine();
+                if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
+                    if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
+                        logger.error(
+                                "The run artifact document has been updated by another engine, terminating now to avoid corruption");
+                        System.exit(0);
+                    }
+                    throw new IOException("Unable to store the artifact attachment - " + statusLine.toString());
                 }
-                throw new IOException("Unable to store the artifact attachment - " + statusLine.toString());
-            }
-            HttpEntity entity = response.getEntity();
-            PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(EntityUtils.toString(entity),
-                    PutPostResponse.class);
-            if (putPostResponse.id == null || putPostResponse.rev == null) {
-                throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
-            }
-            this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
-            this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
+                HttpEntity entity = response.getEntity();
+                PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(EntityUtils.toString(entity),
+                        PutPostResponse.class);
+                if (putPostResponse.id == null || putPostResponse.rev == null) {
+                    throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
+                }
+                this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
+                this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
 
-            logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
-                    + this.remoteContentType.value());
-        } catch (Exception e) {
-            throw new IOException("Unable to store artifact attachment", e);
-        } finally {
-            try {
-                Files.delete(cachePath);
+                logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
+                        + this.remoteContentType.value());
             } catch (Exception e) {
-            } // *** Hide any delete problems
+                throw new IOException("Unable to store artifact attachment", e);
+            } finally {
+                try {
+                    Files.delete(cachePath);
+                } catch (Exception e) {
+                } // *** Hide any delete problems
+            }
         }
     }
 
