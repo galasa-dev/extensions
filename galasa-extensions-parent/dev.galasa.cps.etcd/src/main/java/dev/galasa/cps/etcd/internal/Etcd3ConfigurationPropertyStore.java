@@ -118,15 +118,15 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 
     @Override
     public Map<String, String> getPropertiesFromNamespace(String namespace) {
-        ByteSequence empty = ByteSequence.from("\0", UTF_8);
+        ByteSequence bsNamespace = ByteSequence.from(namespace + ".", UTF_8);
         GetOption option = GetOption.newBuilder()
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)
-                .withRange(empty)
+                .withRange(bsNamespace)
                 .withPrefix(ByteSequence.from(namespace, UTF_8))
                 .build();
 
-        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(empty, option);
+        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(bsNamespace, option);
         Map<String, String> results = new HashMap<>();
         try {
             GetResponse response = futureResponse.get();
