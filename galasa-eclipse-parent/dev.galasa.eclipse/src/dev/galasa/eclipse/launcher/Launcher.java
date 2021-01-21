@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -325,22 +326,38 @@ public class Launcher extends JavaLaunchDelegate {
                     IPath outputLocation = workspaceRoot.getRawLocation()
                     		.append(workspaceProject.getName())
                     		.append("build");
-                    File[] outputFiles = outputLocation.append("libs").toFile().listFiles();
+                    if (!workspaceRoot.exists(outputLocation)) {
+                        rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory");
+                        continue;
+                    }
+                    IPath libsLocation = outputLocation.append("libs");
+                    if (!workspaceRoot.exists(libsLocation)) {
+                        rejectedBundles.put(workspaceProject.getName(), "Gradle project build directory does not have libs directory");
+                        continue;
+                    }
+                    File[] outputFiles = libsLocation.toFile().listFiles();
                     
+                    boolean foundJar = false;
                     for (File file : outputFiles) {
                     	if (file.getName().endsWith(".jar")) {
                     		newResource.put(ResourceImpl.URI, file.getAbsolutePath());
+                    		foundJar = true;
                     		break;
                     	}
                     }
-                }
-                
-                if (workspaceProject.hasNature(MAVEN_NATURE)) {
+                    if (!foundJar) {
+                        rejectedBundles.put(workspaceProject.getName(), "Gradle project build libs directory does not have a jar");
+                        continue;
+                    }
+                } else if (workspaceProject.hasNature(MAVEN_NATURE)) {
                 	IPath outputLocation = javaProject.getOutputLocation();
                 	IResource actualOutputPath = workspaceRoot.findMember(outputLocation);
                 	java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
                 	
                 	newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());             
+                } else {
+                    rejectedBundles.put(workspaceProject.getName(), "Unrecognised project nature");
+                    continue;
                 }
                 
                 newRepository.addResource(newResource);
@@ -354,7 +371,8 @@ public class Launcher extends JavaLaunchDelegate {
 
             } catch (Exception e) {
                 rejectedBundles.put(workspaceProject.getName(), "error processing - " + e.getMessage());
-                Activator.log(e);
+                IStatus errorStatus = new Status(IStatus.ERROR, Activator.getPluginId(), IStatus.ERROR, "Workspace OBR error whilst processing workspace project " + workspaceProject.getName(), e);
+                Activator.log(errorStatus);
             }
 
         }
