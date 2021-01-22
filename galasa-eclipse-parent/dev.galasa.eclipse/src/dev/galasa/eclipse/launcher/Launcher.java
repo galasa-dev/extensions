@@ -323,14 +323,8 @@ public class Launcher extends JavaLaunchDelegate {
                 
                 if (workspaceProject.hasNature(GRADLE_NATURE)) {
                 	// Forcing gradle users to keep output in the build dir
-                    IPath outputLocation = workspaceRoot.getRawLocation()
-                    		.append(workspaceProject.getName())
+                    IPath outputLocation = workspaceProject.getRawLocation()
                     		.append("build");
-                    IPath actualPath = workspaceProject.getLocation();
-                    
-                    consoleDefault.append("Gradle project diagnostics " + workspaceProject.getName() + "\n");
-                    consoleDefault.append("Gradle project build path is " + outputLocation.toOSString() + "\n");
-                    consoleDefault.append("Gradle project actual build path is " + actualPath.toOSString() + "\n");
                     
                     if (!workspaceRoot.exists(outputLocation)) {
                         rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory");
@@ -459,7 +453,7 @@ public class Launcher extends JavaLaunchDelegate {
     	    return null;
     	}
 	    
-	    consoleRed.append("The test project " + project + " does not have a MANIFEST.MF file");
+	    consoleRed.append("The test project " + project + " does not have a MANIFEST.MF file\n");
 	    return null;
     }
     
