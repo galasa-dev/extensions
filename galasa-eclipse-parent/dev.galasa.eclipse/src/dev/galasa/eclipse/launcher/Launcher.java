@@ -326,6 +326,12 @@ public class Launcher extends JavaLaunchDelegate {
                     IPath outputLocation = workspaceRoot.getRawLocation()
                     		.append(workspaceProject.getName())
                     		.append("build");
+                    IPath actualPath = workspaceProject.getLocation();
+                    
+                    consoleDefault.append("Gradle project diagnostics " + workspaceProject.getName() + "\n");
+                    consoleDefault.append("Gradle project build path is " + outputLocation.toOSString() + "\n");
+                    consoleDefault.append("Gradle project actual build path is " + actualPath.toOSString() + "\n");
+                    
                     if (!workspaceRoot.exists(outputLocation)) {
                         rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory");
                         continue;
