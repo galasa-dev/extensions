@@ -326,16 +326,22 @@ public class Launcher extends JavaLaunchDelegate {
                     IPath outputLocation = workspaceProject.getRawLocation()
                     		.append("build");
                     
-                    if (!workspaceRoot.exists(outputLocation)) {
-                        rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory");
+                    
+                    consoleBlue.append("diag1 " + outputLocation.toOSString() + "\n");
+                    File fileOutputLocation = outputLocation.toFile();
+                    consoleBlue.append("diag2 " + fileOutputLocation + "\n");
+                    
+                    if (!fileOutputLocation.exists()) {
+                        rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory, path should be " + fileOutputLocation);
                         continue;
                     }
-                    IPath libsLocation = outputLocation.append("libs");
-                    if (!workspaceRoot.exists(libsLocation)) {
-                        rejectedBundles.put(workspaceProject.getName(), "Gradle project build directory does not have libs directory");
+                    File fileLibsLocation = new File(fileOutputLocation, "libs");
+                    consoleBlue.append("diag3 " + fileOutputLocation + "\n");
+                    if (!fileLibsLocation.exists()) {
+                        rejectedBundles.put(workspaceProject.getName(), "Gradle project build directory does not have libs directory, path should be " + fileLibsLocation);
                         continue;
                     }
-                    File[] outputFiles = libsLocation.toFile().listFiles();
+                    File[] outputFiles = fileLibsLocation.listFiles();
                     
                     boolean foundJar = false;
                     for (File file : outputFiles) {
@@ -449,7 +455,7 @@ public class Launcher extends JavaLaunchDelegate {
 				return extractManifestFromJar(new FileInputStream(jar));
 			}
     	} catch (IOException | CoreException e) {
-    		consoleRed.append("Failed to open Manifest in project: " + project);
+    		consoleRed.append("Failed to open Manifest in project: " + project + "\n");
     	    return null;
     	}
 	    
