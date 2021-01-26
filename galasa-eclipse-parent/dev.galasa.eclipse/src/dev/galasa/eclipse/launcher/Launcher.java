@@ -451,7 +451,17 @@ public class Launcher extends JavaLaunchDelegate {
 				IResource actualOutputPath = workspaceRoot.findMember(outputPath);
 				java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
 				
-				File jar = realOutputPath.resolve(project + "-" + version + ".jar").toFile();
+				String artifactId = mavenProjectFacade.getArtifactKey().getArtifactId();
+				if (artifactId == null) {
+				    consoleDefault.append("Artifact ID is missing from project: " + project + "\n");
+				    return null;
+				}
+				
+				File jar = realOutputPath.resolve(artifactId + "-" + version + ".jar").toFile();
+				if (!jar.exists()) {
+                    consoleDefault.append("Jar " + jar.getName() + " is missing from project: " + project + "\n");
+                    return null;
+				}
 				return extractManifestFromJar(new FileInputStream(jar));
 			}
     	} catch (IOException | CoreException e) {
