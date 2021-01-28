@@ -133,7 +133,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
         
         Map<String, String> results = new HashMap<>();
         
-        while(!completed && retryCount != maxRetries) {
+        while(!completed && retryCount <= maxRetries) {
             // Initialise Future
             CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(bsNamespace, option);
             
@@ -142,17 +142,18 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
                     Thread.sleep(100); // Wait for future to complete
                 }
                 
-                if (futureResponse.isCompletedExceptionally()) {
+                if (futureResponse.isCompletedExceptionally() && retryCount < maxRetries) {
                     retryCount++;
                     Thread.sleep(250); // Wait before re-initialising future
-                } else {
-                    GetResponse response = futureResponse.get();
-                    List<KeyValue> kvs = response.getKvs();
-                    for(KeyValue kv : kvs) {
-                        results.put(kv.getKey().toString(StandardCharsets.UTF_8), kv.getValue().toString(StandardCharsets.UTF_8));
-                    }
-                    completed = true;
+                    continue;
                 }
+                
+                GetResponse response = futureResponse.get();
+                List<KeyValue> kvs = response.getKvs();
+                for(KeyValue kv : kvs) {
+                    results.put(kv.getKey().toString(StandardCharsets.UTF_8), kv.getValue().toString(StandardCharsets.UTF_8));
+                }
+                completed = true;
                 
             } catch ( InterruptedException e ) {
                 Thread.currentThread().interrupt();
