@@ -8,6 +8,7 @@ package dev.galasa.cps.etcd.internal;
 import static com.google.common.base.Charsets.UTF_8;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,27 +118,51 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     }
 
     @Override
-    public Map<String, String> getPropertiesFromNamespace(String namespace) {
-        ByteSequence bsNamespace = ByteSequence.from(namespace + ".", UTF_8);
+    public Map<String, String> getPropertiesFromNamespace(String namespace) throws ConfigurationPropertyStoreException {
+        ByteSequence bsNamespace = ByteSequence.from(namespace + ".", StandardCharsets.UTF_8);
         GetOption option = GetOption.newBuilder()
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)
                 .withRange(bsNamespace)
-                .withPrefix(ByteSequence.from(namespace, UTF_8))
+                .withPrefix(ByteSequence.from(namespace + ".", StandardCharsets.UTF_8))
                 .build();
-
-        CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(bsNamespace, option);
+        
+        int retryCount      = 0 ;
+        int maxRetries      = 10;
+        boolean completed   = false;
+        
         Map<String, String> results = new HashMap<>();
-        try {
-            GetResponse response = futureResponse.get();
-            List<KeyValue> kvs = response.getKvs();
-            for(KeyValue kv : kvs) {
-                results.put(kv.getKey().toString(UTF_8), kv.getValue().toString(UTF_8));
+        
+        while(!completed && retryCount != maxRetries) {
+            // Initialise Future
+            CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(bsNamespace, option);
+            
+            try {
+                while(!futureResponse.isDone()) {
+                    Thread.sleep(100); // Wait for future to complete
+                }
+                
+                if (futureResponse.isCompletedExceptionally()) {
+                    retryCount++;
+                    Thread.sleep(250); // Wait before re-initialising future
+                } else {
+                    GetResponse response = futureResponse.get();
+                    List<KeyValue> kvs = response.getKvs();
+                    for(KeyValue kv : kvs) {
+                        results.put(kv.getKey().toString(StandardCharsets.UTF_8), kv.getValue().toString(StandardCharsets.UTF_8));
+                    }
+                    completed = true;
+                }
+                
+            } catch ( InterruptedException e ) {
+                Thread.currentThread().interrupt();
+            } catch ( ExecutionException e ) {
+                throw new ConfigurationPropertyStoreException("Error retrieving properties.", e);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
         }
+        
         return results;
+        
     }
 
     @Override
