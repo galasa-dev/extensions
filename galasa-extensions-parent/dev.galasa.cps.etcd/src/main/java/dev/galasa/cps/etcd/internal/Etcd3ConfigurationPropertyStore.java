@@ -123,7 +123,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
                 .withSortField(GetOption.SortTarget.KEY)
                 .withSortOrder(GetOption.SortOrder.DESCEND)
                 .withRange(bsNamespace)
-                .withPrefix(ByteSequence.from(namespace, UTF_8))
+                .withPrefix(ByteSequence.from(namespace + ".", UTF_8))
                 .build();
 
         CompletableFuture<GetResponse> futureResponse = client.getKVClient().get(bsNamespace, option);
