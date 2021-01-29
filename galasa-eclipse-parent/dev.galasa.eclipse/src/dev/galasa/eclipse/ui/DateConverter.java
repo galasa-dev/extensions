@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse.ui;
 
@@ -24,13 +24,13 @@ public class DateConverter {
         ZonedDateTime zdt = ZonedDateTime.now(zoneid);
 
         if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
-            return "Today, " + zdt.toLocalTime().toString();
+            return "Today, " + zonedDateTime.toLocalTime().toString();
         }
 
         zdt = zdt.minusDays(1);
 
         if (zdt.toLocalDate().equals(zonedDateTime.toLocalDate())) {
-            return "Yesterday, " + zdt.toLocalTime().toString();
+            return "Yesterday, " + zonedDateTime.toLocalTime().toString();
         }
 
         return zonedDateTime.format(dtf);
