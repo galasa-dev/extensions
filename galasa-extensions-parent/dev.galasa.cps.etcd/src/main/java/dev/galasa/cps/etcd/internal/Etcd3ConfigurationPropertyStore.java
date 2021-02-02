@@ -1,13 +1,14 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019, 2021.
  */
 package dev.galasa.cps.etcd.internal;
 
 import static com.google.common.base.Charsets.UTF_8;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import io.etcd.jetcd.options.GetOption;
  * This class impletements the CPS for etcd using the JETCD client.
  * 
  * @author James Davies
+ * @author Matthew Chivers
  */
 public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {
     private final Client client;
@@ -115,6 +117,17 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
             throw new ConfigurationPropertyStoreException("Could not set key and value.", e);
         }
     }
+    
+    @Override
+    public void deleteProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
+        ByteSequence bytesKey = ByteSequence.from(key, StandardCharsets.UTF_8);
+        try {
+            kvClient.delete(bytesKey).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new ConfigurationPropertyStoreException("Could not delete key.", e);
+        }
+    }
 
     @Override
     public Map<String, String> getPropertiesFromNamespace(String namespace) {
@@ -166,5 +179,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
         }
         return results;
     }
+
+
 
 }
