@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IVMRunner;
@@ -317,7 +316,6 @@ public class Launcher extends JavaLaunchDelegate {
                 	rejectedBundles.put(workspaceProject.getName(), "Not and OSGi bundle");
             		continue;
                 }
-                IJavaProject javaProject = JavaCore.create(workspaceProject);
                 ResourceImpl newResource = (ResourceImpl) obrDataModelHelper
                         .createResource(manifest.getMainAttributes());
                 
@@ -327,16 +325,13 @@ public class Launcher extends JavaLaunchDelegate {
                     		.append("build");
                     
                     
-                    consoleBlue.append("diag1 " + outputLocation.toOSString() + "\n");
                     File fileOutputLocation = outputLocation.toFile();
-                    consoleBlue.append("diag2 " + fileOutputLocation + "\n");
                     
                     if (!fileOutputLocation.exists()) {
                         rejectedBundles.put(workspaceProject.getName(), "Gradle project does not have build directory, path should be " + fileOutputLocation);
                         continue;
                     }
                     File fileLibsLocation = new File(fileOutputLocation, "libs");
-                    consoleBlue.append("diag3 " + fileOutputLocation + "\n");
                     if (!fileLibsLocation.exists()) {
                         rejectedBundles.put(workspaceProject.getName(), "Gradle project build directory does not have libs directory, path should be " + fileLibsLocation);
                         continue;
@@ -346,7 +341,7 @@ public class Launcher extends JavaLaunchDelegate {
                     boolean foundJar = false;
                     for (File file : outputFiles) {
                     	if (file.getName().endsWith(".jar")) {
-                    		newResource.put(ResourceImpl.URI, file.getAbsolutePath());
+                    		newResource.put(ResourceImpl.URI, "reference:" + new File(file.getAbsolutePath()).toURI().toString());
                     		foundJar = true;
                     		break;
                     	}
@@ -356,11 +351,26 @@ public class Launcher extends JavaLaunchDelegate {
                         continue;
                     }
                 } else if (workspaceProject.hasNature(MAVEN_NATURE)) {
-                	IPath outputLocation = javaProject.getOutputLocation();
-                	IResource actualOutputPath = workspaceRoot.findMember(outputLocation);
-                	java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
-                	
-                	newResource.put(ResourceImpl.URI, "reference:" + realOutputPath.toUri().toString());             
+                    IMavenProjectFacade mavenProjectFacade = MavenPlugin.getMavenProjectRegistry().getProject(workspaceProject);
+                    String version = mavenProjectFacade.getArtifactKey().getVersion();
+
+                    IPath outputPath = mavenProjectFacade.getOutputLocation().removeLastSegments(1);
+                    IResource actualOutputPath = workspaceRoot.findMember(outputPath);
+                    java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
+                    
+                    String artifactId = mavenProjectFacade.getArtifactKey().getArtifactId();
+                    if (artifactId == null) {
+                        rejectedBundles.put(workspaceProject.getName(), "Artifact ID is missing from project");
+                        continue;
+                    }
+                    
+                    File jar = realOutputPath.resolve(artifactId + "-" + version + ".jar").toFile();
+                    if (!jar.exists()) {
+                        rejectedBundles.put(workspaceProject.getName(), "Jar " + jar.getName() + " is missing from project");
+                        continue;
+                    }
+
+                    newResource.put(ResourceImpl.URI, "reference:" + new File(jar.getAbsolutePath()).toURI().toString());
                 } else {
                     rejectedBundles.put(workspaceProject.getName(), "Unrecognised project nature");
                     continue;
