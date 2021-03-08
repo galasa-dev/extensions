@@ -13,7 +13,6 @@ subprojects {
         gitHash = System.getenv('GIT_COMMIT')
     }
 
-
     group = galasaGroup
 
     // If a subproject/bundle holds a different version to the root project,
