@@ -1,0 +1,45 @@
+-snapshot ${tstamp}
+Bundle-Name: dev.galasa.cps.etcd
+Bundle-Description: Provides the CPS, DSS and Credential stores from a etcd3 server
+Bundle-License: https://www.eclipse.org/legal/epl-2.0/t
+Export-Package: dev.galasa.cps.etcd*
+Import-Package: dev.galasa,dev.galasa.cps.etcd,dev.galasa.framework.spi,dev.galasa.framework.spi.creds,javax.net.ssl,javax.security.cert
+Embed-Transitive: true
+Embed-Dependency: *;scope=compile
+-includeresource: gson-2.7.jar; lib:=true,\
+    jetcd-core-0.4.1.jar; lib:=true,\
+    jetcd-common-0.4.1.jar; lib:=true,\
+    jetcd-resolver-0.4.1.jar; lib:=true,\
+    grpc-core-1.24.0.jar; lib:=true,\
+    grpc-api-1.24.0.jar; lib:=true,\
+    grpc-context-1.24.0.jar; lib:=true,\
+    error_prone_annotations-2.3.2.jar; lib:=true,\
+    jsr305-3.0.2.jar; lib:=true,\
+    animal-sniffer-annotations-1.17.jar; lib:=true,\
+    annotations-4.1.1.4.jar; lib:=true,\
+    perfmark-api-0.17.0.jar; lib:=true,\
+    opencensus-api-0.21.0.jar; lib:=true,\
+    opencensus-contrib-grpc-metrics-0.21.0.jar; lib:=true,\
+    grpc-netty-1.24.0.jar; lib:=true,\
+    netty-codec-http2-4.1.38.Final.jar; lib:=true,\
+    netty-common-4.1.38.Final.jar; lib:=true,\
+    netty-buffer-4.1.38.Final.jar; lib:=true,\
+    netty-transport-4.1.38.Final.jar; lib:=true,\
+    netty-resolver-4.1.38.Final.jar; lib:=true,\
+    netty-codec-4.1.38.Final.jar; lib:=true,\
+    netty-handler-4.1.38.Final.jar; lib:=true,\
+    netty-codec-http-4.1.38.Final.jar; lib:=true,\
+    netty-handler-proxy-4.1.38.Final.jar; lib:=true,\
+    netty-codec-socks-4.1.38.Final.jar; lib:=true,\
+    grpc-protobuf-1.24.0.jar; lib:=true,\
+    protobuf-java-3.9.0.jar; lib:=true,\
+    guava-26.0-android.jar; lib:=true,\
+    checker-compat-qual-2.5.2.jar; lib:=true,\
+    j2objc-annotations-1.1.jar; lib:=true,\
+    proto-google-common-protos-1.12.0.jar; lib:=true,\
+    grpc-protobuf-lite-1.24.0.jar; lib:=true,\
+    grpc-stub-1.24.0.jar; lib:=true,\
+    grpc-grpclb-1.24.0.jar; lib:=true,\
+    protobuf-java-util-3.9.0.jar; lib:=true,\
+    slf4j-api-1.7.28.jar; lib:=true,\
+    failsafe-2.3.1.jar; lib:=true

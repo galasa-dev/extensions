@@ -2,6 +2,8 @@
 .apt_generated_tests/
 *.versionsBackup
 galasa-eclipse-parent/target
+**/.gradle/
+**/build/
 /.project
 dependency-reduced-pom.xml
 .DS_Store
