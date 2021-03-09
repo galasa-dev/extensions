@@ -7,7 +7,7 @@ pipeline {
     environment {
         // Configure Gradle from the tools definition in Jenkins
         def gradleHome = tool 'gradle'
-        PATH = "${gradleHome}/bin:${env.PATH}"
+        PATH = "${gradleHome}/bin:${env.PATH}:/usr/local/go/bin:${env.PATH}"
         
         //Set some defaults
         def workspace = pwd()
