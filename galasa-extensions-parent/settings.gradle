@@ -12,7 +12,7 @@ rootProject.name = "galasa-extensions-parent"
 include 'dev.galasa.cps.etcd'
 include 'dev.galasa.ras.couchdb'
 // include 'dev.galasa.extensions.obr' // Commented out until 'dev.galasa.obr' plugin is confirmed as working
-// include 'dev.galasa.jenkins' // Being built independently because of the Jenkins Plugin Functionality
+include 'dev.galasa.jenkins' // Being built independently because of the Jenkins Plugin Functionality
 
 include 'dev.galasa.docker.operator'
 
