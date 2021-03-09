@@ -9,6 +9,7 @@ jenkinsPlugin {
     jenkinsVersion = '2.204'
     displayName = description
     disabledTestInjection = true
+    configurePublishing = false
 }
 
 dependencies{
