@@ -1,0 +1,29 @@
+plugins {
+    id 'org.jenkins-ci.jpi' version '0.42.0'
+}
+
+description = 'Galasa Jenkins Core Plugin'
+
+jenkinsPlugin {
+
+    jenkinsVersion = '2.204'
+    displayName = description
+    disabledTestInjection = true
+    configurePublishing = false
+}
+
+dependencies{
+    implementation ('dev.galasa:dev.galasa:0.15.0-SNAPSHOT')
+    implementation ('dev.galasa:dev.galasa.framework:0.15.0-SNAPSHOT')
+    implementation ('com.google.code.gson:gson:2.8.5')
+    implementation ('io.swagger.core.v3:swagger-annotations:2.0.8')
+    implementation ('org.apache.httpcomponents:httpclient:4.5.8')
+    implementation ('org.apache.httpcomponents:fluent-hc:4.5.8')
+    implementation ('javax.servlet:javax.servlet-api:3.1.0')
+    implementation ('org.jenkins-ci.plugins:credentials:2.1.16')
+    implementation ('org.jenkins-ci.main:jenkins-core:2.204')
+    implementation ('commons-io:commons-io:2.8.0')
+
+
+    testImplementation ('org.jvnet.hudson.main:hudson-test-framework:2.2.1')
+}
