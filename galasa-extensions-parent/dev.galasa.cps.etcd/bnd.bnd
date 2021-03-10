@@ -2,7 +2,7 @@
 Bundle-Name: dev.galasa.cps.etcd
 Bundle-Description: Provides the CPS, DSS and Credential stores from a etcd3 server
 Bundle-License: https://www.eclipse.org/legal/epl-2.0/t
-Export-Package: dev.galasa.cps.etcd*
+Export-Package: !dev.galasa.cps.etcd.internal,dev.galasa.cps.etcd*
 Import-Package: dev.galasa,dev.galasa.cps.etcd,dev.galasa.framework.spi,dev.galasa.framework.spi.creds,javax.net.ssl,javax.security.cert
 Embed-Transitive: true
 Embed-Dependency: *;scope=compile
