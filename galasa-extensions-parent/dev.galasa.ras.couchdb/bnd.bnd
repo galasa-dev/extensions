@@ -1,0 +1,4 @@
+-snapshot ${tstamp}
+Bundle-Name: Galasa RAS - CouchDB
+Export-Package: dev.galasa*
+Import-Package javax.validation*;resolution:=optional,*
