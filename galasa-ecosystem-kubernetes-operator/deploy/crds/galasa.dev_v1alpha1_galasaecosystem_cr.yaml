@@ -6,7 +6,7 @@ metadata:
   name: galasa-ecosystem
 spec:
   # Version of galasa to use
-  galasaVersion: "0.10.0"
+  galasaVersion: "0.15.0"
   # Where to pull docker images from. Standard k8 images can be pulled from docker.galasa.dev, but 
   # customer repos can be used.
   dockerRegistry: "docker.galasa.dev"
