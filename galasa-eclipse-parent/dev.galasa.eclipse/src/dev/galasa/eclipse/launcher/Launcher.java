@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse.launcher;
 
@@ -321,8 +321,7 @@ public class Launcher extends JavaLaunchDelegate {
                 
                 if (workspaceProject.hasNature(GRADLE_NATURE)) {
                 	// Forcing gradle users to keep output in the build dir
-                    IPath outputLocation = workspaceProject.getRawLocation()
-                    		.append("build");
+                    IPath outputLocation = getLocation(workspaceProject).append("build");
                     
                     
                     File fileOutputLocation = outputLocation.toFile();
@@ -356,7 +355,7 @@ public class Launcher extends JavaLaunchDelegate {
 
                     IPath outputPath = mavenProjectFacade.getOutputLocation().removeLastSegments(1);
                     IResource actualOutputPath = workspaceRoot.findMember(outputPath);
-                    java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getRawLocationURI());
+                    java.nio.file.Path realOutputPath = Paths.get(actualOutputPath.getLocationURI());
                     
                     String artifactId = mavenProjectFacade.getArtifactKey().getArtifactId();
                     if (artifactId == null) {
@@ -436,8 +435,7 @@ public class Launcher extends JavaLaunchDelegate {
     private Manifest findManifest(String project) {
     	IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
     	IProject actualProject = workspaceRoot.getProject(project);   
-    	IPath projectPath = actualProject.getRawLocation();
-
+    	IPath projectPath = getLocation(actualProject);
     	
     	try {	    		
     		if (actualProject.hasNature(GRADLE_NATURE)) {
@@ -577,6 +575,15 @@ public class Launcher extends JavaLaunchDelegate {
         sUrl = sUrl.replaceAll(" ", "%20");
         
         return new URI(sUrl);
+    }
+    
+    private IPath getLocation(IProject project) {
+    	IPath location = project.getRawLocation();
+    	if (location != null) {
+    		return location;
+    	}
+    	
+    	return project.getLocation();
     }
 
 }
