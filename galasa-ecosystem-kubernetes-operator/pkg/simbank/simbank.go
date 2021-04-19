@@ -21,6 +21,10 @@ func New(cr *galasav1alpha1.GalasaEcosystem) *Simbank {
 }
 
 func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
+	version := cr.Spec.GalasaVersion
+	if cr.Spec.Simbank.SimbankImageVersion != "" {
+		version = cr.Spec.Simbank.SimbankImageVersion
+	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-simbank",
@@ -48,7 +52,7 @@ func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:            cr.Name + "-simbank",
-							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+							Image:           cr.Spec.Simbank.SimbankImageName + ":" + version,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",

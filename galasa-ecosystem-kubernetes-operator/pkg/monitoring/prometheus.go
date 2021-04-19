@@ -76,7 +76,7 @@ func generatePrometheusDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 					Containers: []corev1.Container{
 						{
 							Name:            "prometheus",
-							Image:           "prom/prometheus:v2.10.0",
+							Image:           cr.Spec.Monitoring.PrometheusImageName + ":" + cr.Spec.Monitoring.PrometheusImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Args: []string{
 								"--config.file=/etc/prometheus/prometheus.yml",

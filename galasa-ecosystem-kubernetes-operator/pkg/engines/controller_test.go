@@ -25,8 +25,7 @@ var instance = &galasav1alpha1.GalasaEcosystem{
 			Replicas:     &replicas,
 			NodeSelector: map[string]string{"Test": "TestNode"},
 		},
-		DockerRegistry: "docker.galasa.dev",
-		GalasaVersion:  "1.0.0",
+		GalasaVersion: "1.0.0",
 	},
 }
 

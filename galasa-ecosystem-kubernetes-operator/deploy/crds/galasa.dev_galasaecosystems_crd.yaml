@@ -43,6 +43,11 @@ spec:
             properties:
               apiserver:
                 properties:
+                  apiServerImageName:
+                    default: docker.galasa.dev/galasa-boot-embedded-amd64
+                    type: string
+                  apiServerImageVersion:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -88,10 +93,13 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              dockerRegistry:
-                type: string
               engineController:
                 properties:
+                  controllerImageName:
+                    default: docker.galasa.dev/galasa-boot-embedded-amd64
+                    type: string
+                  controllerImageVersion:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -138,6 +146,11 @@ spec:
                     default: 1
                     format: int32
                     type: integer
+                  resourceMonitorImageName:
+                    default: docker.galasa.dev/galasa-boot-embedded-amd64
+                    type: string
+                  resourceMonitorImageVersion:
+                    type: string
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
@@ -182,12 +195,23 @@ spec:
                 type: string
               monitoring:
                 properties:
+                  grafanaImageName:
+                    default: grafana/grafana
+                    type: string
+                  grafanaImageVersion:
+                    default: latest
+                    type: string
                   grafanaReplicas:
                     default: 1
                     format: int32
                     type: integer
                   grafanaStorage:
                     default: 200Mi
+                    type: string
+                  metricsImageName:
+                    default: docker.galasa.dev/galasa-boot-embedded-amd64
+                    type: string
+                  metricsImageVersion:
                     type: string
                   metricsReplicas:
                     default: 1
@@ -197,6 +221,12 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  prometheusImageName:
+                    default: prom/prometheus
+                    type: string
+                  prometheusImageVersion:
+                    default: v2.10.0
+                    type: string
                   prometheusReplicas:
                     default: 1
                     format: int32
@@ -223,6 +253,12 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  propertyStoreImageName:
+                    default: quay.io/coreos/etcd
+                    type: string
+                  propertyStoreImageVersion:
+                    default: v3.4.3
+                    type: string
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
@@ -263,6 +299,12 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  rasImageImageVersion:
+                    default: 2.3.1
+                    type: string
+                  rasImageName:
+                    default: couchdb
+                    type: string
                   replicas:
                     default: 1
                     format: int32
@@ -337,12 +379,16 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
+                  simbankImageName:
+                    default: docker.galasa.dev/galasa-boot-embedded-amd64
+                    type: string
+                  simbankImageVersion:
+                    type: string
                 type: object
               storageClassName:
                 type: string
             required:
             - apiserver
-            - dockerRegistry
             - engineController
             - engineResmon
             - externalhostname

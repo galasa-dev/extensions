@@ -79,6 +79,10 @@ func generateResmonExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev1.Se
 }
 
 func generateResmonDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
+	version := cr.Spec.GalasaVersion
+	if cr.Spec.EngineResmon.ResourceMonitorImageVersion != "" {
+		version = cr.Spec.EngineResmon.ResourceMonitorImageVersion
+	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-resource-monitor",
@@ -106,7 +110,7 @@ func generateResmonDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deploy
 					Containers: []corev1.Container{
 						{
 							Name:            "resource-monitor",
-							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+							Image:           cr.Spec.EngineResmon.ResourceMonitorImageName + ":" + version,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",

@@ -28,7 +28,7 @@ func generateControllerConfigMap(cr *galasav1alpha1.GalasaEcosystem, apiService 
 		"bootstrap":    "http://" + apiService.Name + ":8080/bootstrap",
 		"max_engines":  "10",
 		"engine_label": "k8s-standard-engine",
-		"engine_image": cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+		"engine_image": cr.Spec.EngineController.ControllerImageName + ":" + cr.Spec.GalasaVersion,
 	}
 	for k, v := range user {
 		config[k] = v
@@ -44,6 +44,10 @@ func generateControllerConfigMap(cr *galasav1alpha1.GalasaEcosystem, apiService 
 }
 
 func generateControllerDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
+	version := cr.Spec.GalasaVersion
+	if cr.Spec.EngineController.ControllerImageVersion != "" {
+		version = cr.Spec.EngineController.ControllerImageVersion
+	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-engine-controller",
@@ -71,7 +75,7 @@ func generateControllerDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 					Containers: []corev1.Container{
 						{
 							Name:            cr.Name + "-engine-controller",
-							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+							Image:           cr.Spec.EngineController.ControllerImageName + ":" + version,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",

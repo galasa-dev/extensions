@@ -74,6 +74,10 @@ func generateMetricsExposedService(cr *galasav1alpha1.GalasaEcosystem) *corev1.S
 }
 
 func generateMetricsDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
+	version := cr.Spec.GalasaVersion
+	if cr.Spec.Monitoring.MetricsImageVersion != "" {
+		version = cr.Spec.Monitoring.MetricsImageVersion
+	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cr.Name + "-metrics",
@@ -101,7 +105,7 @@ func generateMetricsDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 					Containers: []corev1.Container{
 						{
 							Name:            "metrics",
-							Image:           cr.Spec.DockerRegistry + "/galasa-boot-embedded-amd64:" + cr.Spec.GalasaVersion,
+							Image:           cr.Spec.Monitoring.MetricsImageName + ":" + version,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"java",
