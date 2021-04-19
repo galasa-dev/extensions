@@ -89,6 +89,12 @@ spec:
                 required:
                 - storage
                 type: object
+              busyboxImageName:
+                default: busybox
+                type: string
+              busyboxImageVersion:
+                default: latest
+                type: string
               config:
                 additionalProperties:
                   type: string

@@ -56,7 +56,7 @@ func generatePrometheusDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 					InitContainers: []corev1.Container{
 						{
 							Name:            "init-chown-data",
-							Image:           "busybox:latest",
+							Image:           cr.Spec.BusyBoxImageName + ":" + cr.Spec.BusyBoxImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"chown",
