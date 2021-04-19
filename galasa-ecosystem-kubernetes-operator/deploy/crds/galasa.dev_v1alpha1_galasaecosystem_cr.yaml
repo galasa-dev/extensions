@@ -5,11 +5,8 @@ metadata:
   # resource names. This also allows for multiple ecosystems to be brought up in the same namespace.
   name: galasa-ecosystem
 spec:
-  # Version of galasa to use
+  # Version of galasa to use. Individual components can be overridden.
   galasaVersion: "0.14.0"
-  # Where to pull docker images from. Standard k8 images can be pulled from docker.galasa.dev, but 
-  # customer repos can be used.
-  dockerRegistry: "docker.galasa.dev"
   # Its possible to use personal repo's if all the required artifacts are stored there. The basis 
   # for what is required can be found in the maven-prod at https://nexus.galasa.dev
   mavenRepository: "https://nexus.galasa.dev/repository/maven-prod/"
@@ -30,7 +27,9 @@ spec:
   # queues and active tests to ensure that it only runs what the backing infrastructure can support. 
   # Configuration that can be specified:
   # - Replicas: only one is required but scan be scaled to 0
-  # - NodeSelector: pass any labels if you want pods to be running on a specfic node
+  # - NodeSelector: pass any labels if you want pods to be running on a specific node
+  # - ControllerImageName: if pulling from a different repo, the name can be overriden from the docker.galasa.dev default image
+  # - Image Version: override the galasa default version for running different level components
   engineController:
     replicas: 1
 
@@ -38,7 +37,9 @@ spec:
   # any tests, ensuring resources are always prepared for the next test
   # Configuration that can be specified:
   # - Replicas: only one is required but scan be scaled to 0
-  # - NodeSelector: pass any labels if you want pods to be running on a specfic node
+  # - NodeSelector: pass any labels if you want pods to be running on a specific node
+  # - ResourceMonitorImageName: if pulling from a different repo, the name can be overriden from the docker.galasa.dev default image
+  # - Image Version: override the galasa default version for running different level components
   engineResmon:
     replicas: 1
 
@@ -46,8 +47,10 @@ spec:
   # and for pulling test results.
   # Configuration that can be specified:
   # - Replicas: only one is required but scan be scaled to 0
-  # - NodeSelector: pass any labels if you want pods to be running on a specfic node
+  # - NodeSelector: pass any labels if you want pods to be running on a specific node
   # - Storage: Size of the PVC the service will ask for
+  # - ApiServerImageName: if pulling from a different repo, the name can be overriden from the docker.galasa.dev default image
+  # - Image Version: override the galasa default version for running different level components
   apiserver:
     replicas: 1
     storage: "200m"
@@ -55,24 +58,28 @@ spec:
   # The property store hosts both the CPS (configuration property store) and the DSS (Dynamic status store). It is 
   # a ETCD cluster, but only currently supports cluster sizes of 1. Bigger clusters will be available soon
   # Configuration that can be specified:
-  # - Replicas: only 1 is suppoted but scan be scaled to 0
-  # - NodeSelector: pass any labels if you want pods to be running on a specfic node
+  # - Replicas: only 1 is supported but scan be scaled to 0
+  # - NodeSelector: pass any labels if you want pods to be running on a specific node
   # - InitProps: properties that will be added to the CPS upon a PVC's instantiation. More details for what properties 
   #   can be set can be fond at https://galasa.dev
   # - Storage: Size of the PVC the service will ask for
+  # - PropertyStoreImageName: if pulling from a different repo, the name can be overriden from the dockerhub default
+  # - Image Version: override the galasa default version for running different level components
   propertystore:
-    replicas: 1
+    clusterSize: 1
     storage: "200m"
     InitProps:
       framework.resource.management.dead.heartbeat.timeout: "30"
       framework.resource.management.finished.timeout: "40"
 
-  # The RAS (results archive store) stores all the test runs, artifacts and logs. Current implemnation and this operator 
+  # The RAS (results archive store) stores all the test runs, artifacts and logs. Current implementation and this operator 
   # use CouchDB
   # Configuration that can be specified:
-  # - Replicas: only 1 is suppoted but scan be scaled to 0
-  # - NodeSelector: pass any labels if you want pods to be running on a specfic node
+  # - Replicas: only 1 is supported but scan be scaled to 0
+  # - NodeSelector: pass any labels if you want pods to be running on a specific node
   # - Storage: Size of the PVC the service will ask for
+  # - RasImageName: if pulling from a different repo, the name can be overriden from the dockerhub default
+  # - Image Version: override the galasa default version for running different level components
   rasSpec:
     replicas: 1
     storage: "200m"
@@ -81,7 +88,10 @@ spec:
   # not differentiate Simbank from a normal mainframe application. This application can be used to test if the ecosystem is working 
   # correctly. Performing a 'kubectl get GalasaEcosystem', will show you all the ecosystems in the active namespace, whether 
   # the ecosystem is ready, and the bootstrap URL required for your IDE plugin. It also provides the URL to the grafana which can be
-  # to monitior the running tests
+  # to monitor the running tests
+  # Configuration that can be specified:
+    # - SimbankImageName: if pulling from a different repo, the name can be overriden from the docker.galasa.dev default image
+    # - Image Version: override the galasa default version for running different level components
   simbank:
     replicas: 1
 
@@ -94,3 +104,4 @@ spec:
     prometheusStorage: "200m"
     metricsReplicas: 1
     metricsStorage: "200m"
+

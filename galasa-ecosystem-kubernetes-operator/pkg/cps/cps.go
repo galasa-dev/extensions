@@ -105,7 +105,7 @@ func generateStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet
 					Containers: []corev1.Container{
 						{
 							Name:            "etcd",
-							Image:           "quay.io/coreos/etcd:v3.4.3",
+							Image:           cr.Spec.Propertystore.PropertyStoreImageName + ":" + cr.Spec.Propertystore.PropertyStoreImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
 								{

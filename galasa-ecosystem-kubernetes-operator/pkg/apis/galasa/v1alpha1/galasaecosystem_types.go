@@ -13,7 +13,6 @@ type GalasaEcosystemSpec struct {
 	// The valid options are "Always", "Never" or "IfNotPresent"
 	// +kubebuilder:default="IfNotPresent"
 	ImagePullPolicy  string               `json:"imagePullPolicy,omitempty"`
-	DockerRegistry   string               `json:"dockerRegistry"`
 	MavenRepository  string               `json:"mavenRepository"`
 	ExternalHostname string               `json:"externalhostname"`
 	IngressClass     string               `json:"ingressClass,omitempty"`
@@ -30,43 +29,69 @@ type GalasaEcosystemSpec struct {
 type Monitoring struct {
 	// +kubebuilder:default=1
 	MetricsReplicas *int32 `json:"metricsReplicas,omitempty"`
+	// +kubebuilder:default="docker.galasa.dev/galasa-boot-embedded-amd64"
+	MetricsImageName    string `json:"metricsImageName,omitempty"`
+	MetricsImageVersion string `json:"metricsImageVersion,omitempty"`
+
 	// +kubebuilder:default=1
 	PrometheusReplicas *int32 `json:"prometheusReplicas,omitempty"`
-	// +kubebuilder:default=1
-	GrafanaReplicas *int32 `json:"grafanaReplicas,omitempty"`
+	// +kubebuilder:default="prom/prometheus"
+	PrometheusImageName string `json:"prometheusImageName,omitempty"`
+	// +kubebuilder:default="v2.10.0"
+	PrometheusImageVersion string `json:"prometheusImageVersion,omitempty"`
 	// +kubebuilder:default="200Mi"
 	PrometheusStorage string `json:"prometheusStorage"`
+
+	// +kubebuilder:default=1
+	GrafanaReplicas *int32 `json:"grafanaReplicas,omitempty"`
+	// +kubebuilder:default="grafana/grafana"
+	GrafanaImageName string `json:"grafanaImageName,omitempty"`
+	// +kubebuilder:default="latest"
+	GrafanaImageVersion string `json:"grafanaImageVersion,omitempty"`
 	// +kubebuilder:default="200Mi"
-	GrafanaStorage string            `json:"grafanaStorage"`
-	NodeSelector   map[string]string `json:"nodeSelector,omitempty"`
+	GrafanaStorage string `json:"grafanaStorage"`
+
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type Simbank struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	Replicas     *int32            `json:"replicas,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	// +kubebuilder:default="docker.galasa.dev/galasa-boot-embedded-amd64"
+	SimbankImageName    string            `json:"simbankImageName,omitempty"`
+	SimbankImageVersion string            `json:"simbankImageVersion,omitempty"`
+	NodeSelector        map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type EngineController struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	Replicas     *int32            `json:"replicas,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	// +kubebuilder:default="docker.galasa.dev/galasa-boot-embedded-amd64"
+	ControllerImageName    string            `json:"controllerImageName,omitempty"`
+	ControllerImageVersion string            `json:"controllerImageVersion,omitempty"`
+	NodeSelector           map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ResourceMonitor struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	Replicas     *int32            `json:"replicas,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	// +kubebuilder:default="docker.galasa.dev/galasa-boot-embedded-amd64"
+	ResourceMonitorImageName    string            `json:"resourceMonitorImageName,omitempty"`
+	ResourceMonitorImageVersion string            `json:"resourceMonitorImageVersion,omitempty"`
+	NodeSelector                map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ApiServer struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	Replicas     *int32            `json:"replicas,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	// +kubebuilder:default="docker.galasa.dev/galasa-boot-embedded-amd64"
+	ApiServerImageName    string            `json:"apiServerImageName,omitempty"`
+	ApiServerImageVersion string            `json:"apiServerImageVersion,omitempty"`
+	NodeSelector          map[string]string `json:"nodeSelector,omitempty"`
 	// +kubebuilder:default="200Mi"
 	Storage string `json:"storage"`
 }
@@ -75,8 +100,12 @@ type ApiServer struct {
 type RasSpec struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	Replicas     *int32            `json:"replicas,omitempty"`
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	Replicas *int32 `json:"replicas,omitempty"`
+	// +kubebuilder:default="couchdb"
+	RasImageName string `json:"rasImageName,omitempty"`
+	// +kubebuilder:default="2.3.1"
+	RasImageVersion string            `json:"rasImageImageVersion,omitempty"`
+	NodeSelector    map[string]string `json:"nodeSelector,omitempty"`
 	// +kubebuilder:default="1Gi"
 	Storage string `json:"storage"`
 }
@@ -85,9 +114,13 @@ type RasSpec struct {
 type PropertyStoreCluster struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:default=1
-	PropertyClusterSize int32             `json:"clusterSize,omitempty"`
-	InitProps           map[string]string `json:"InitProps,omitempty"`
-	NodeSelector        map[string]string `json:"nodeSelector,omitempty"`
+	PropertyClusterSize int32 `json:"clusterSize,omitempty"`
+	// +kubebuilder:default="quay.io/coreos/etcd"
+	PropertyStoreImageName string `json:"propertyStoreImageName,omitempty"`
+	// +kubebuilder:default="v3.4.3"
+	PropertyStoreImageVersion string            `json:"propertyStoreImageVersion,omitempty"`
+	InitProps                 map[string]string `json:"InitProps,omitempty"`
+	NodeSelector              map[string]string `json:"nodeSelector,omitempty"`
 	// +kubebuilder:default="1Gi"
 	Storage string `json:"storage"`
 }

@@ -100,7 +100,7 @@ func generateStatefulSet(cr *galasav1alpha1.GalasaEcosystem) *appsv1.StatefulSet
 					Containers: []corev1.Container{
 						{
 							Name:            "couchdb",
-							Image:           "couchdb:2.3.1",
+							Image:           cr.Spec.RasSpec.RasImageName + ":" + cr.Spec.RasSpec.RasImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
 								{
