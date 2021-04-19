@@ -24,6 +24,10 @@ type GalasaEcosystemSpec struct {
 	EngineResmon     ResourceMonitor      `json:"engineResmon"`
 	Simbank          Simbank              `json:"simbank"`
 	Monitoring       Monitoring           `json:"monitoring"`
+	// +kubebuilder:default="busybox"
+	BusyBoxImageName string `json:"busyboxImageName,omitempty"`
+	// +kubebuilder:default="latest"
+	BusyBoxImageVersion string `json:"busyboxImageVersion,omitempty"`
 }
 
 type Monitoring struct {

@@ -1151,7 +1151,7 @@ func generateGrafanaDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 					InitContainers: []corev1.Container{
 						{
 							Name:            "init-chown-data",
-							Image:           "busybox:latest",
+							Image:           cr.Spec.BusyBoxImageName + ":" + cr.Spec.BusyBoxImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Command: []string{
 								"chown",
@@ -1170,7 +1170,7 @@ func generateGrafanaDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 					Containers: []corev1.Container{
 						{
 							Name:            "grafana",
-							Image:           "grafana/grafana",
+							Image:           cr.Spec.Monitoring.GrafanaImageName + ":" + cr.Spec.Monitoring.GrafanaImageVersion,
 							ImagePullPolicy: corev1.PullPolicy(cr.Spec.ImagePullPolicy),
 							Ports: []corev1.ContainerPort{
 								{
