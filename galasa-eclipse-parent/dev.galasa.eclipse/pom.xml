@@ -18,7 +18,7 @@
 	<description>The core Galasa Eclipse plugin</description>
 	
 	<properties>
-	   <force.version.qualifier.change>100</force.version.qualifier.change>
+	   <force.version.qualifier.change>101</force.version.qualifier.change>
 	</properties>
 
 	<dependencies>
