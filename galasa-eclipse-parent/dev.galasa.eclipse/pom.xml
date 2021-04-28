@@ -11,14 +11,15 @@
 
 	<artifactId>dev.galasa.eclipse</artifactId>
 	<version>0.15.0-SNAPSHOT</version>
-	<!-- If updating version,  update in MANIFEST.MF, also dev.galasa.eclipse.feature/pom.xml and feature.xml -->
+	<!-- If updating version, update in MANIFEST.MF, also dev.galasa.eclipse.feature/pom.xml 
+		and feature.xml -->
 	<packaging>eclipse-plugin</packaging>
 
 	<name>Galasa Eclipse Core Plugin</name>
 	<description>The core Galasa Eclipse plugin</description>
-	
+
 	<properties>
-	   <force.version.qualifier.change>100</force.version.qualifier.change>
+		<force.version.qualifier.change>101</force.version.qualifier.change>
 	</properties>
 
 	<dependencies>
@@ -39,6 +40,12 @@
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.2</version> <!-- Forced for Eclipse -->
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
