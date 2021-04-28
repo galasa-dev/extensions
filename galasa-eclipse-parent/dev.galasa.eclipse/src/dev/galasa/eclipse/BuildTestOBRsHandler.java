@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse;
 
@@ -46,7 +46,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.m2e.core.MavenPlugin;
 import org.eclipse.m2e.core.project.IMavenProjectFacade;
-import org.eclipse.pde.core.project.IBundleProjectDescription;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
@@ -405,7 +404,6 @@ public class BuildTestOBRsHandler extends AbstractHandler {
     private static boolean isMavenBundle(IProject workspaceProject) {
         try {
             return (workspaceProject.hasNature(MAVEN_NATURE)
-                    && workspaceProject.hasNature(IBundleProjectDescription.PLUGIN_NATURE)
                     && workspaceProject.hasNature(JavaCore.NATURE_ID));
         } catch (CoreException e) {
             writeError("Unable to confirm project natures", e);
