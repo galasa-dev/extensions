@@ -344,5 +344,20 @@ version(s), and exceptions or additional permissions here}.&quot;
          download-size="0"
          install-size="0"
          version="0.15.0.qualifier"/>
+   <plugin
+         id="org.apache.commons.logging"
+         download-size="0"
+         install-size="0"
+         version="1.2"/>
+   <plugin
+         id="org.apache.commons.lang3"
+         download-size="0"
+         install-size="0"
+         version="3.1"/>
+    <plugin
+         id="log4j"
+         download-size="0"
+         install-size="0"
+         version="1.2.17"/>
 
 </feature>
