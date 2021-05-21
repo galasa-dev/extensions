@@ -445,7 +445,12 @@ public class Launcher extends JavaLaunchDelegate {
         		
         		for (File file : fullBuildDir.append("libs").toFile().listFiles()) {
         			if (file.getName().endsWith(".jar")) {
-    		    		return extractManifestFromJar(new FileInputStream(file));
+        				consoleDefault.append("Looking for bundle in: " + file.getName() + "\n");
+        				Manifest manifest = extractManifestFromJar(new FileInputStream(file));
+                        if (manifest.getMainAttributes().getValue("Bundle-SymbolicName") != null) {
+                                consoleDefault.append("Found: " + manifest.getMainAttributes().getValue("Bundle-SymbolicName") + "\n");
+                                return manifest;
+                        }
     		    	}
         		}
         	}
