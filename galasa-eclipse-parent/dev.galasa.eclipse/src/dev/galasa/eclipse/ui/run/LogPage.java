@@ -1,9 +1,13 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse.ui.run;
+
+import org.eclipse.jface.text.IFindReplaceTarget;
+
+import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -13,6 +17,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.texteditor.FindReplaceAction;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
+import org.eclipse.ui.IWorkbenchCommandConstants;
+import org.eclipse.ui.actions.ActionFactory;
 
 import dev.galasa.framework.spi.IRunResult;
 
@@ -75,5 +83,30 @@ public class LogPage extends FormPage {
         // *** Now running on the UI thread
         logComposite.setLog(log);
     }
+    
+    public void activateActions() { 
+
+        ResourceBundle x = ResourceBundle.getBundle("org.eclipse.ui.texteditor.ConstructedEditorMessages");
+        FindReplaceAction fAction = new FindReplaceAction(x, "Editor.FindReplace.", this); //$NON-NLS-1$
+        fAction.setHelpContextId(IAbstractTextEditorHelpContextIds.FIND_ACTION);
+        fAction.setActionDefinitionId(IWorkbenchCommandConstants.EDIT_FIND_AND_REPLACE);
+        runeditor.getEditorSite().getActionBars().setGlobalActionHandler(ActionFactory.FIND.getId(), fAction);
+        fAction.setEnabled(true);
+    }
+
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T getAdapter(Class<T> adapter) {
+        
+        if (IFindReplaceTarget.class.equals(adapter)) {
+            if (logComposite != null && logComposite.getTextViewer() != null) {
+                return (T) logComposite.getTextViewer().getFindReplaceTarget();
+            }
+        }
+
+        return super.getAdapter(adapter);
+    }
+
 
 }
