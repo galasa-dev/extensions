@@ -60,6 +60,8 @@ public class LogPage extends FormPage {
 
         toolkit.adapt(logComposite);
 
+        activateActions();
+
         new FetchLogJob(this, this.runResult).schedule();
 
         return;
