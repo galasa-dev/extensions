@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse.ui.run;
 
@@ -57,6 +57,10 @@ public class LogComposite extends Composite {
 
     public void setLog(String log) {
         this.doc.set(log);
+    }
+    
+    public TextViewer getTextViewer() {
+        return textViewer;
     }
 
 }

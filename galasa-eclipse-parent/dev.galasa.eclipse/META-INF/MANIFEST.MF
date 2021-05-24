@@ -38,7 +38,8 @@ Import-Package: javax.servlet,
  org.eclipse.m2e.core.project,
  org.eclipse.m2e.core.repository,
  org.eclipse.m2e.core.ui.internal,
- org.eclipse.ui.console
+ org.eclipse.ui.console,
+ org.eclipse.ui.texteditor
 Bundle-Activator: dev.galasa.eclipse.Activator
 Bundle-ActivationPolicy: lazy
 Eclipse-BundleShape: dir

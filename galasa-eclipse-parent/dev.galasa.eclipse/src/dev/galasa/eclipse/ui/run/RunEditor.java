@@ -1,10 +1,11 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019.
+ * (c) Copyright IBM Corp. 2019,2021.
  */
 package dev.galasa.eclipse.ui.run;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -93,5 +94,22 @@ public class RunEditor extends SharedHeaderFormEditor {
     public boolean isDisposed() {
         return disposed;
     }
+    
+    @Override
+    public <T> T getAdapter(Class<T> adapter) {
+        
+        T superAdapter = super.getAdapter(adapter);
+        if (superAdapter != null) {
+            return superAdapter;
+        }
+        
+        Object selectedPage = getSelectedPage();
+        if (selectedPage instanceof IAdaptable) {
+            return ((IAdaptable)selectedPage).getAdapter(adapter);
+        }
+
+        return null;
+    }
+
 
 }
