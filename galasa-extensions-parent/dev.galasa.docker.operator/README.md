@@ -53,13 +53,15 @@ Also, as the Docker Operator is being distributed from 0.10.0-SNAPSHOT, an unrel
 ```
 hostname: {hostname}
 galasaRegistry: docker.galasa.dev
-version: 0.9.0
+version: 0.14.0
 engineController:
-  controllerVersion: 0.10.0-SNAPSHOT
-  engineVersion: 0.9.0
+  controllerVersion: 0.14.0
+  engineVersion: 0.14.0
 ```
 
 Change the {hostname} to be your hostname.  Note the 2 spaces on the last 2 lines,  they are important in YAML.
+
+Please also check the version numbers. 0.14.0 was the official release at the time of updating these docs.
 
 To deploy the Galasa ecosystem, issue the following Docker command:-
 
