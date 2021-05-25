@@ -27,6 +27,7 @@ pipeline {
                    deleteDir()
            }
         }
+        }
 
         stage('prep-npm') {
             environment {
