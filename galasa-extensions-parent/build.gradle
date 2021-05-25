@@ -1,5 +1,5 @@
 plugins {
-    id 'dev.galasa.githash' version '0.1.0-SNAPSHOT' apply false
+    id 'dev.galasa.githash' version '0.15.0' apply false
 }
 
 subprojects {
