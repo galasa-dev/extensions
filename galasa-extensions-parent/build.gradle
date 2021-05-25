@@ -28,17 +28,21 @@ subprojects {
     sourceCompatibility = galasaSourceCompatibility
     targetCompatibility = galasaTargetCompatibility
 
-    ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-
     def mavenrepo = System.getenv('MAVEN_REPO') ?: "https://nexus.galasa.dev/repository/maven-development"
 
-    tasks.withType(Sign) {
-        onlyIf { isReleaseVersion }
-    }
-    
     tasks.withType(PublishToMavenRepository) {
         onlyIf { jar.didWork }
     }
+    
+    signing {
+        sign publishing.publications
+    }
+
+    tasks.withType(Sign) {
+        onlyIf { isRelease.toBoolean() }
+    }
+
+    
 
     java {
         withJavadocJar()
@@ -135,11 +139,6 @@ subprojects {
                 url = mavenrepo
             }
         }
-    }
-
-    signing {
-        useGpgCmd() 
-        sign publishing.publications.maven 
     }
 
     dependencies {
