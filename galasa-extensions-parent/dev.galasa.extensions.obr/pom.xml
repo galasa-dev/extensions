@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>dev.galasa.extensions.obr</artifactId>
-	<version>0.15.0</version>
+	<version>0.16.0</version>
 	<!-- If updating version,  update in dev.galasa.uber.obr -->
 	<packaging>galasa-obr</packaging>
 
