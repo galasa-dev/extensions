@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         maven {
-            url = System.getenv('MAVEN_REPO') ?: "https://nexus.galasa.dev/repository/maven-development"
+            url = "$sourceMaven"
         }
         gradlePluginPortal()
     }
@@ -11,7 +11,6 @@ rootProject.name = "galasa-extensions-parent"
 
 include 'dev.galasa.cps.etcd'
 include 'dev.galasa.ras.couchdb'
-// include 'dev.galasa.extensions.obr' // Commented out until 'dev.galasa.obr' plugin is confirmed as working
 include 'dev.galasa.jenkins'
 include 'dev.galasa.docker.operator'
 
