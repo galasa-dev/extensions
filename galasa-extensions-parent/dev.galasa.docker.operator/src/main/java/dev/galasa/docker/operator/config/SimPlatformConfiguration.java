@@ -8,6 +8,7 @@ package dev.galasa.docker.operator.config;
 public class SimPlatformConfiguration {
 
     private String image;
+    private String version;
     private int    telnetPort;
     private int    webservicePort;
     private int    databasePort;
@@ -42,6 +43,14 @@ public class SimPlatformConfiguration {
 
     public void setImage(String image) {
         this.image = image;
+    }
+    
+    public String getVersion() {
+        return version;
+    }
+    
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public int getTelnetPort() {

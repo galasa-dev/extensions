@@ -273,7 +273,12 @@ public class SimPlatform extends AbstractContainerResource {
     private String getTargetImageName() {
         EcosystemConfiguration ecoConfig = getEcosystem().getConfiguration();
         SimPlatformConfiguration simplatformConfig = ecoConfig.getSimplatform();
-        return ecoConfig.getGalasaRegistry() + "/" + simplatformConfig.getImage() + ":" + ecoConfig.getVersion();
+        String version = simplatformConfig.getVersion();
+        if (version == null || version.isEmpty()) {
+            version = ecoConfig.getVersion();
+        }
+        
+        return ecoConfig.getGalasaRegistry() + "/" + simplatformConfig.getImage() + ":" + version;
     }
 
 
