@@ -1,5 +1,7 @@
 description = 'Galasa Docker Operator'
 
+version "0.16.0"
+
 configurations {
     embedImplementation
     embedImplementation.transitive = true
@@ -13,7 +15,11 @@ jar {
             configurations.embedImplementation.collect { it.isDirectory() ? it : zipTree(it) }
         }
     }
-
+    manifest {
+        attributes(
+          'Main-Class': 'dev.galasa.docker.operator.DockerOperator'
+        )
+    }
 }
 
 dependencies {
