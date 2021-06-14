@@ -15,6 +15,7 @@ jar {
             configurations.embedImplementation.collect { it.isDirectory() ? it : zipTree(it) }
         }
     }
+    exclude('META-INF/*.DSA','META-INF/*.SF')
     manifest {
         attributes(
           'Main-Class': 'dev.galasa.docker.operator.DockerOperator'
