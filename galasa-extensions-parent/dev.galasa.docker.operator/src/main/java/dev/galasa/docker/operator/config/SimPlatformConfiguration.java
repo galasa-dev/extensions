@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2020.
+ * (c) Copyright IBM Corp. 2020-2021.
  */
 package dev.galasa.docker.operator.config;
 
@@ -15,7 +15,7 @@ public class SimPlatformConfiguration {
     
     public void normalise() {
         if (this.image == null || this.image.isEmpty()) {
-            this.image = "galasa-boot-embedded-amd64";
+            this.image = "galasa-simplatform-amd64";
         }
         
         if (this.telnetPort <= 0) {

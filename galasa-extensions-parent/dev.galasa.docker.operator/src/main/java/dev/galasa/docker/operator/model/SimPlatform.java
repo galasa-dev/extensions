@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2020.
+ * (c) Copyright IBM Corp. 2020-2021.
  */
 package dev.galasa.docker.operator.model;
 
@@ -24,7 +24,6 @@ import com.github.dockerjava.api.model.Ports.Binding;
 
 import dev.galasa.docker.operator.DockerOperatorException;
 import dev.galasa.docker.operator.config.EcosystemConfiguration;
-import dev.galasa.docker.operator.config.MetricsConfiguration;
 import dev.galasa.docker.operator.config.SimPlatformConfiguration;
 
 public class SimPlatform extends AbstractContainerResource {
@@ -273,8 +272,8 @@ public class SimPlatform extends AbstractContainerResource {
 
     private String getTargetImageName() {
         EcosystemConfiguration ecoConfig = getEcosystem().getConfiguration();
-        MetricsConfiguration metricsConfig = ecoConfig.getMetrics();
-        return ecoConfig.getGalasaRegistry() + "/" + metricsConfig.getImage() + ":" + ecoConfig.getVersion();
+        SimPlatformConfiguration simplatformConfig = ecoConfig.getSimplatform();
+        return ecoConfig.getGalasaRegistry() + "/" + simplatformConfig.getImage() + ":" + ecoConfig.getVersion();
     }
 
 
