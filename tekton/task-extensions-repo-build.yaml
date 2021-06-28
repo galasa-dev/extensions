@@ -36,7 +36,7 @@ spec:
     default: "false"
   steps:
   - name: get-commit
-    workingDir: /workspace/git-framework
+    workingDir: /workspace/git-extensions
     image: $(params.dockerRepo)/galasa/galasa-build
     script: |
       #!/bin/sh
