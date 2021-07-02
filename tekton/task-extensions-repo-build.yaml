@@ -1,0 +1,86 @@
+#
+# Licensed Materials - Property of IBM
+# 
+# (c) Copyright IBM Corp. 2021.
+#
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: extensions-repo-build
+  namespace: galasa-tekton
+spec:
+  resources:
+    inputs:
+      - name: git-extensions
+        type: git
+  params:
+  - name: distBranch
+    type: string
+  - name: mavenCentralRepo
+    type: string
+    default: https://nexus.cics-ts.hur.hdclab.intranet.ibm.com/repository/proxy/
+  - name: frameworkSourceRepo
+    type: string
+    default: https://repo.maven.apache.org/maven2/
+  - name: dockerRepo
+    type: string
+    default: nexus.cics-ts.hur.hdclab.intranet.ibm.com:8080
+  - name: noPush
+    type: string
+    default: ""
+  - name: jacocoEnabled
+    type: string
+    default: "false"
+  - name: isRelease
+    type: string
+    default: "false"
+  steps:
+  - name: get-commit
+    workingDir: /workspace/git-extensions
+    image: $(params.dockerRepo)/galasa/galasa-build
+    script: |
+      #!/bin/sh
+      set +e
+      COMMIT="$(git log --format="%H" -n 1)"
+      echo $COMMIT > /workspace/git-extensions/docker/extensions.githash
+      echo commit is $COMMIT
+  - name: gradle-build
+    workingDir: /workspace/git-extensions/galasa-extensions-parent
+    image: $(params.dockerRepo)/galasa/galasa-build
+    command:
+    - gradle
+    - --no-daemon
+    - --console 
+    - plain
+    - -PsourceMaven=$(params.frameworkSourceRepo)
+    - -PcentralMaven=$(params.mavenCentralRepo)
+    - -PtargetMaven=/workspace/git-extensions/docker/repo
+    - -PjacocoEnabled=$(params.jacocoEnabled)
+    - -PisRelease=$(params.isRelease)
+    - publish
+    volumeMounts:
+    - name: gpgkey
+      mountPath: /opt/gradle/gradle-6.8.2/galasa.gpg
+      subPath: galasa.gpg
+    - name: gpggradle
+      mountPath: /opt/gradle/gradle-6.8.2/gradle.properties
+      subPath: gradle.properties
+  - name: docker-build
+    workingDir: /workspace/git-extensions/docker
+    image: $(params.dockerRepo)/library/kaniko-executor:latest
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    command:
+    - /kaniko/executor
+    - --dockerfile=./Dockerfile
+    - --context=/workspace/git-extensions/docker
+    - --destination=$(params.dockerRepo)/galasadev/galasa-maven-extensions:$(params.distBranch)
+    - $(params.noPush)
+    - --oci-layout-path=/workspace/git-extensions/docker/image-digest
+    - --skip-tls-verify
+    - --skip-tls-verify-pull
+    - --single-snapshot
+    - --verbosity=info
+    - --build-arg=dockerRepository=$(params.dockerRepo)
+    - --build-arg=branch=$(params.distBranch)
