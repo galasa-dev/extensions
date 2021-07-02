@@ -1,6 +1,8 @@
 package apiserver
 
 import (
+	"time"
+
 	galasav1alpha1 "github.com/galasa-dev/extensions/galasa-ecosystem-kubernetes-operator/pkg/apis/galasa/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -20,17 +22,11 @@ type APIServer struct {
 	Ingress         *v1beta1.Ingress
 }
 
-func New(cr *galasav1alpha1.GalasaEcosystem, cps *corev1.Service) *APIServer {
-	ports := cps.Spec.Ports
-	var nodePort int32
-	for _, p := range ports {
-		nodePort = p.NodePort
-	}
-	cpsURI := cr.Spec.ExternalHostname + ":" + String(nodePort)
+func New(cr *galasav1alpha1.GalasaEcosystem) *APIServer {
 	return &APIServer{
 		InternalService: generateInternalService(cr),
 		ExposedService:  generateExposedService(cr),
-		BootstrapConf:   generateBootstrapConfigMap(cr, cpsURI),
+		BootstrapConf:   generateBootstrapConfigMap(cr),
 		TestCatalog:     generateTestCatalogConfigMap(cr),
 		PersistentVol:   generatePersistentVolumeClaim(cr),
 		Deployment:      generateDeployment(cr),
@@ -95,7 +91,8 @@ func generateDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deployment {
 				ObjectMeta: metav1.ObjectMeta{
 					Name: cr.Name + "-apiserver",
 					Labels: map[string]string{
-						"app": cr.Name + "-apiserver",
+						"app":    cr.Name + "-apiserver",
+						"galasa": "running-framework",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -240,7 +237,11 @@ func generatePersistentVolumeClaim(cr *galasav1alpha1.GalasaEcosystem) *corev1.P
 	}
 }
 
-func generateBootstrapConfigMap(cr *galasav1alpha1.GalasaEcosystem, cpsURI string) *corev1.ConfigMap {
+func generateBootstrapConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap {
+
+	for cr.Status.CPSURL == "" {
+		time.Sleep(3000)
+	}
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -248,7 +249,7 @@ func generateBootstrapConfigMap(cr *galasav1alpha1.GalasaEcosystem, cpsURI strin
 			Namespace: cr.Namespace,
 		},
 		Data: map[string]string{
-			"bootstrap.properties": `framework.config.store=etcd:` + cpsURI + `
+			"bootstrap.properties": `framework.config.store=etcd:` + cr.Status.CPSURL + `
 framework.extra.bundles=dev.galasa.cps.etcd,dev.galasa.ras.couchdb
 			`,
 		},

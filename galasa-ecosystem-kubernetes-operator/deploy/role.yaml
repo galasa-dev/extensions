@@ -12,7 +12,6 @@ rules:
   - services
   - services/finalizers
   - endpoints
-  - persistentvolumeclaims
   - events
   - configmaps
   - secrets
@@ -23,6 +22,15 @@ rules:
   - list
   - patch
   - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - get
+  - list
   - watch
 - apiGroups:
   - "networking.k8s.io"

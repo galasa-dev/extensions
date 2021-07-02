@@ -134,17 +134,21 @@ type GalasaEcosystemStatus struct {
 	CPSReadyReplicas              int32  `json:"CPSReadyReplicas"`
 	APIReadyReplicas              int32  `json:"APIReadyReplicas"`
 	RASReadyReplicas              int32  `json:"RASReadyReplicas"`
+	CPSURL                        string `json:"CPSURL"`
+	TestCatalogURL                string `json:"TestCatalogURL"`
 	BootstrapURL                  string `json:"BootstrapURL"`
 	GrafanaURL                    string `json:"GrafanaURL"`
 	EngineControllerReadyReplicas int32  `json:"EngineControllerReadyReplicas"`
 	ResmonReadyReplicas           int32  `json:"ResmonReadyReplicas"`
 	MonitoringReadyReplicas       int32  `json:"MonitoringReadyReplicas"`
 	EcosystemReady                bool   `json:"EcosystemReady"`
+	EcosystemRestarting           bool   `json:"EcosystemRestarting"`
 }
 
 // kubebuilder:object:root=true
 // kubebuilder:subresource:status
 // +kubebuilder:printcolumn:JSONPath=".status.EcosystemReady",name=READY,type=boolean
+// +kubebuilder:printcolumn:JSONPath=".status.EcosystemRestarting",name=RESTARTING,type=boolean
 // +kubebuilder:printcolumn:JSONPath=".status.BootstrapURL",name=BOOTSTRAPURL,type=string
 // +kubebuilder:printcolumn:JSONPath=".status.GrafanaURL",name=GRAFANAURL,type=string
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

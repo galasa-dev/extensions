@@ -102,7 +102,8 @@ func generateResmonDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deploy
 				ObjectMeta: metav1.ObjectMeta{
 					Name: cr.Name + "-resource-monitor",
 					Labels: map[string]string{
-						"app": cr.Name + "-resource-monitor",
+						"app":    cr.Name + "-resource-monitor",
+						"galasa": "running-framework",
 					},
 				},
 				Spec: corev1.PodSpec{

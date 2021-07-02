@@ -52,7 +52,7 @@ func TestControllerServiceForm(t *testing.T) {
 }
 
 func TestControllerConfigMapForm(t *testing.T) {
-	confMap := generateControllerConfigMap(instance, apiService)
+	confMap := generateControllerConfigMap(instance, "test-api-service")
 	if confMap.Data["bootstrap"] != "http://test-api-service:8080/bootstrap" {
 		t.Error("Config map, malformed API service endpoint:" + confMap.Data["bootstrap"])
 	}
@@ -92,7 +92,7 @@ func TestControllerDeploymentForm(t *testing.T) {
 }
 
 func TestNewController(t *testing.T) {
-	controller := NewController(instance, apiService)
+	controller := NewController(instance, "test-api-service")
 	if controller.ConfigMap == nil {
 		t.Error("Config Map not created")
 	}

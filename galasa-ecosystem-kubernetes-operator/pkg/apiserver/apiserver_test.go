@@ -36,7 +36,7 @@ var cpsService = &corev1.Service{
 }
 
 func TestNewGrafana(t *testing.T) {
-	api := New(instance, cpsService)
+	api := New(instance)
 	if api.ExposedService == nil {
 		t.Error("ExposedService not created")
 	}
@@ -106,7 +106,7 @@ func TestDeploymentForm(t *testing.T) {
 }
 
 func TestBootstrapConfigMapForm(t *testing.T) {
-	apiConf := generateBootstrapConfigMap(instance, "test")
+	apiConf := generateBootstrapConfigMap(instance)
 	if apiConf.Name != "bootstrap-file" {
 		t.Error("Incorrect auto dashboard conf name")
 	}

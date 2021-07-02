@@ -97,7 +97,8 @@ func generateMetricsDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.Deplo
 				ObjectMeta: metav1.ObjectMeta{
 					Name: cr.Name + "-metrics",
 					Labels: map[string]string{
-						"app": cr.Name + "-metrics",
+						"app":    cr.Name + "-metrics",
+						"galasa": "running-framework",
 					},
 				},
 				Spec: corev1.PodSpec{

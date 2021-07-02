@@ -15,6 +15,9 @@ spec:
     - jsonPath: .status.EcosystemReady
       name: READY
       type: boolean
+    - jsonPath: .status.EcosystemRestarting
+      name: RESTARTING
+      type: boolean
     - jsonPath: .status.BootstrapURL
       name: BOOTSTRAPURL
       type: string
@@ -416,7 +419,11 @@ spec:
               CPSReadyReplicas:
                 format: int32
                 type: integer
+              CPSURL:
+                type: string
               EcosystemReady:
+                type: boolean
+              EcosystemRestarting:
                 type: boolean
               EngineControllerReadyReplicas:
                 format: int32
@@ -432,16 +439,21 @@ spec:
               ResmonReadyReplicas:
                 format: int32
                 type: integer
+              TestCatalogURL:
+                type: string
             required:
             - APIReadyReplicas
             - BootstrapURL
             - CPSReadyReplicas
+            - CPSURL
             - EcosystemReady
+            - EcosystemRestarting
             - EngineControllerReadyReplicas
             - GrafanaURL
             - MonitoringReadyReplicas
             - RASReadyReplicas
             - ResmonReadyReplicas
+            - TestCatalogURL
             type: object
         type: object
     served: true

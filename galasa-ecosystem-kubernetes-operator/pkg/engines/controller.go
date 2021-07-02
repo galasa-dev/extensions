@@ -14,18 +14,18 @@ type Controller struct {
 	ConfigMap       *corev1.ConfigMap
 }
 
-func NewController(cr *galasav1alpha1.GalasaEcosystem, apiService *corev1.Service) *Controller {
+func NewController(cr *galasav1alpha1.GalasaEcosystem) *Controller {
 	return &Controller{
 		InternalService: generateControllerInternalService(cr),
 		Deployment:      generateControllerDeployment(cr),
-		ConfigMap:       generateControllerConfigMap(cr, apiService),
+		ConfigMap:       generateControllerConfigMap(cr),
 	}
 }
 
-func generateControllerConfigMap(cr *galasav1alpha1.GalasaEcosystem, apiService *corev1.Service) *corev1.ConfigMap {
+func generateControllerConfigMap(cr *galasav1alpha1.GalasaEcosystem) *corev1.ConfigMap {
 	user := cr.Spec.Config
 	config := map[string]string{
-		"bootstrap":    "http://" + apiService.Name + ":8080/bootstrap",
+		"bootstrap":    cr.Status.BootstrapURL,
 		"max_engines":  "10",
 		"engine_label": "k8s-standard-engine",
 		"engine_image": cr.Spec.EngineController.ControllerImageName + ":" + cr.Spec.GalasaVersion,
@@ -67,7 +67,8 @@ func generateControllerDeployment(cr *galasav1alpha1.GalasaEcosystem) *appsv1.De
 				ObjectMeta: metav1.ObjectMeta{
 					Name: cr.Name + "-engine-controller",
 					Labels: map[string]string{
-						"app": cr.Name + "-engine-controller",
+						"app":    cr.Name + "-engine-controller",
+						"galasa": "running-framework",
 					},
 				},
 				Spec: corev1.PodSpec{
