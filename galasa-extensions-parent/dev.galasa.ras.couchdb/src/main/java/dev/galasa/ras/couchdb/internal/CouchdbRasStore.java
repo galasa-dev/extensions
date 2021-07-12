@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019,2020.
+ * (c) Copyright IBM Corp. 2019-2021.
  */
 package dev.galasa.ras.couchdb.internal;
 
@@ -793,6 +793,15 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
         dirs.add(new CouchdbDirectoryService(this));
         return dirs;
+    }
+
+    @Override
+    public String calculateRasRunId() {
+        
+        if (this.runDocumentId == null) {
+            return null;
+        }
+        return "cdb-" + this.runDocumentId;
     }
 
 }
