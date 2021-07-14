@@ -1,6 +1,7 @@
 plugins {
     id 'maven-publish'
     id 'dev.galasa.obr'         version '0.1.0-SNAPSHOT'
+    id 'galasa.extensions'
 }
 
 description = 'Galasa Framework OBR'

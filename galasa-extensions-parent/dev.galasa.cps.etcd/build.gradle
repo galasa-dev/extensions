@@ -1,11 +1,10 @@
 plugins {
-    id 'biz.aQute.bnd.builder' version '5.3.0'
+    id 'biz.aQute.bnd.builder'
+    id 'galasa.extensions'
 }
 
 description = 'Galasa etcd3 for CPS, DSS and Credentials - Provides the CPS, DSS and Credential stores from a etcd3 server'
 
 dependencies {
-    implementation ('dev.galasa:dev.galasa.framework:0.15.0')
-    implementation ('dev.galasa:dev.galasa:0.15.0')
     implementation ('io.etcd:jetcd-core:0.4.1')
 }
