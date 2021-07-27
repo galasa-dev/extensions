@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2020.
+ * (c) Copyright IBM Corp. 2020-2021.
  */
 package dev.galasa.docker.operator.model;
 
@@ -33,7 +33,6 @@ public class Ecosystem {
         this.resources.add(new Metrics(this));
         this.resources.add(new EngineController(this));
         this.resources.add(new Nexus(this));
-        this.resources.add(new Jenkins(this));
         this.resources.add(new SimPlatform(this));
     }
 

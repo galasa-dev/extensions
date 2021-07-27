@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2020.
+ * (c) Copyright IBM Corp. 2020-2021.
  */
 package dev.galasa.docker.operator.config;
 
@@ -21,7 +21,6 @@ public class EcosystemConfiguration {
     private EngineConfiguration      engineController;
     private SimPlatformConfiguration simplatform;
     private NexusConfiguration       nexus;
-    private JenkinsConfiguration     jenkins;
 
     public String getHostname() {
         return this.hostname;
@@ -87,11 +86,6 @@ public class EcosystemConfiguration {
             this.nexus = new NexusConfiguration();
         }
         this.nexus.normalise();
-        
-        if (this.jenkins == null) {
-            this.jenkins = new JenkinsConfiguration();
-        }
-        this.jenkins.normalise();
     }
 
     public String getGalasaRegistry() {
@@ -164,14 +158,6 @@ public class EcosystemConfiguration {
 
     public void setNexus(NexusConfiguration nexus) {
         this.nexus = nexus;
-    }
-
-    public JenkinsConfiguration getJenkins() {
-        return jenkins;
-    }
-
-    public void setJenkins(JenkinsConfiguration jenkins) {
-        this.jenkins = jenkins;
     }
 
     public void setHostname(String hostname) {
