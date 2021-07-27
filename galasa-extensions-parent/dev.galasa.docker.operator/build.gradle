@@ -40,5 +40,5 @@ dependencies {
             strictly '1.60'
         }
     }
-    embedImplementation ('org.yaml:snakeyaml:1.19')
+    embedImplementation ('org.yaml:snakeyaml:1.29')
 }
