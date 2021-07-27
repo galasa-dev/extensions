@@ -14,6 +14,5 @@ rootProject.name = "galasa-extensions-parent"
 
 include 'dev.galasa.cps.etcd'
 include 'dev.galasa.ras.couchdb'
-//include 'dev.galasa.jenkins'
 include 'dev.galasa.docker.operator'
 
