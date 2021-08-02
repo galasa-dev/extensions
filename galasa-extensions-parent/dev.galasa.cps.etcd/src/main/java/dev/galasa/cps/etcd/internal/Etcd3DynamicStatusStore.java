@@ -1,7 +1,7 @@
 /*
  * Licensed Materials - Property of IBM
  * 
- * (c) Copyright IBM Corp. 2019,2020.
+ * (c) Copyright IBM Corp. 2019-2021.
  */
 package dev.galasa.cps.etcd.internal;
 
@@ -26,6 +26,7 @@ import dev.galasa.framework.spi.DssDeletePrefix;
 import dev.galasa.framework.spi.DssSwap;
 import dev.galasa.framework.spi.DssUpdate;
 import dev.galasa.framework.spi.DynamicStatusStoreException;
+import dev.galasa.framework.spi.DynamicStatusStoreMatchException;
 import dev.galasa.framework.spi.IDssAction;
 import dev.galasa.framework.spi.IDynamicStatusStore;
 import dev.galasa.framework.spi.IDynamicStatusStoreWatcher;
@@ -462,7 +463,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
     }
 
     @Override
-    public void performActions(IDssAction... actions) throws DynamicStatusStoreException {
+    public void performActions(IDssAction... actions) throws DynamicStatusStoreException, DynamicStatusStoreMatchException {
         
         Txn txn = kvClient.txn();
         
@@ -506,7 +507,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
 
         try {
             if (!response.get().isSucceeded()) {
-                throw new DynamicStatusStoreException("DSS transaction failed");
+                throw new DynamicStatusStoreMatchException("DSS transaction failed - matches failed");
             }
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
