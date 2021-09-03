@@ -1,0 +1,21 @@
+#
+# Copyright contributors to the Galasa project 
+#
+apiVersion: galasa.dev/v1alpha
+kind: Release
+metadata:
+  name: galasa-release
+  
+  
+framework:
+  bundles:
+  - artifact: dev.galasa.cps.etcd
+    version: 0.17.0
+    obr: true
+    isolated: true
+    
+  - artifact: dev.galasa.ras.couchdb
+    version: 0.17.0
+    obr: true
+    isolated: true
+    
