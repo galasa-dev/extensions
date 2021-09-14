@@ -12,3 +12,7 @@ task clean {
    }
 }
 
+subprojects {
+    task allDeps(type: DependencyReportTask) {}
+}
+
