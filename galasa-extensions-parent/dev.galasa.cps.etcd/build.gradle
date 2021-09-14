@@ -5,8 +5,8 @@ plugins {
 
 description = 'Galasa etcd3 for CPS, DSS and Credentials - Provides the CPS, DSS and Credential stores from a etcd3 server'
 
-version = '0.17.0'
+version = '0.19.0'
 
 dependencies {
-    implementation ('io.etcd:jetcd-core:0.4.1')
+    implementation ('io.etcd:jetcd-core:0.5.9')
 }
