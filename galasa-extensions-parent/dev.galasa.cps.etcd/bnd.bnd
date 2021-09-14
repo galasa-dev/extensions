@@ -31,6 +31,7 @@ Embed-Dependency: *;scope=compile|runtime
     grpc-protobuf-1.39.0.jar; lib:=true,\
     protobuf-java-3.17.2.jar; lib:=true,\
     guava-30.1.1-jre.jar; lib:=true,\
+    failureaccess-1.0.1.jar; lib:=true,\
     checker-qual-3.8.0.jar; lib:=true,\
     j2objc-annotations-1.3.jar; lib:=true,\
     proto-google-common-protos-2.0.1.jar; lib:=true,\
