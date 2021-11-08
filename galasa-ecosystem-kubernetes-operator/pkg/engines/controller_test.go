@@ -27,6 +27,9 @@ var instance = &galasav1alpha1.GalasaEcosystem{
 		},
 		GalasaVersion: "1.0.0",
 	},
+	Status: galasav1alpha1.GalasaEcosystemStatus{
+		BootstrapURL: "http://test-api-service:8080/bootstrap",
+	},
 }
 
 var apiService = &corev1.Service{
@@ -52,11 +55,11 @@ func TestControllerServiceForm(t *testing.T) {
 }
 
 func TestControllerConfigMapForm(t *testing.T) {
-	confMap := generateControllerConfigMap(instance, "test-api-service")
+	confMap := generateControllerConfigMap(instance)
 	if confMap.Data["bootstrap"] != "http://test-api-service:8080/bootstrap" {
 		t.Error("Config map, malformed API service endpoint:" + confMap.Data["bootstrap"])
 	}
-	if confMap.Data["engine_image"] != "docker.galasa.dev/galasa-boot-embedded-amd64:1.0.0" {
+	if confMap.Data["engine_image"] != instance.Spec.EngineController.ControllerImageName+":"+instance.Spec.GalasaVersion {
 		t.Error("Config map, malformed API service endpoint:" + confMap.Data["bootstrap"])
 	}
 }
@@ -92,7 +95,7 @@ func TestControllerDeploymentForm(t *testing.T) {
 }
 
 func TestNewController(t *testing.T) {
-	controller := NewController(instance, "test-api-service")
+	controller := NewController(instance)
 	if controller.ConfigMap == nil {
 		t.Error("Config Map not created")
 	}
