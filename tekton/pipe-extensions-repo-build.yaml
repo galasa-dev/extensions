@@ -51,7 +51,7 @@ spec:
     - name: distBranch
       value: $(params.distBranch)
     - name: frameworkSourceRepo
-      value: http://cicscit.hursley.ibm.com/galasadev/$(params.distBranch)/maven/framework/
+      value: http://galasadev-cicsk8s.hursley.ibm.com/$(params.distBranch)/maven/framework/
     - name: noPush
       value: $(params.noPush)
     - name: jacocoEnabled
