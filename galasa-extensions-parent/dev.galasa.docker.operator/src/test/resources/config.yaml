@@ -1,6 +1,0 @@
-hostname: 9.211.91.242
-galasaRegistry: docker.galasa.dev
-version: 0.12.0
-engineController:
-  controllerVersion: 0.12.0
-  engineVersion: 0.12.0
