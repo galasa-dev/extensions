@@ -16,7 +16,7 @@ spec:
     type: string
   - name: mavenCentralRepo
     type: string
-    default: https://nexus.cics-ts.hur.hdclab.intranet.ibm.com/repository/proxy/
+    default: https://artifactory-cicsk8s.hursley.ibm.com/artifactory/maven-proxy/
   - name: frameworkSourceRepo
     type: string
     default: https://repo.maven.apache.org/maven2/
@@ -68,7 +68,7 @@ spec:
     image: $(params.dockerRepo)/common/kaniko-project/executor:latest
     env:
     - name: DOCKER_CONFIG
-      value: /tekton/home/.docker
+      value: /tekton/creds/.docker
     command:
     - /kaniko/executor
     - --dockerfile=./Dockerfile
