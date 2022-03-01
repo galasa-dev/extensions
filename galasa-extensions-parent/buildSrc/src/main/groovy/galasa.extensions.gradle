@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    implementation 'dev.galasa:dev.galasa.framework:0.17.0'
-    implementation 'dev.galasa:dev.galasa:0.15.0'
+    implementation 'dev.galasa:dev.galasa.framework:0.21.0'
+    implementation 'dev.galasa:dev.galasa:0.21.0'
 
     implementation 'commons-logging:commons-logging:1.2'
     implementation 'org.osgi:org.osgi.core:6.0.0'
