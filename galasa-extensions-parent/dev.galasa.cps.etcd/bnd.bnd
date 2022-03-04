@@ -41,3 +41,4 @@ Embed-Dependency: *;scope=compile|runtime
     protobuf-java-util-3.17.2.jar; lib:=true,\
     slf4j-api-1.7.32.jar; lib:=true,\
     failsafe-2.4.1.jar; lib:=true
+-fixupmessages "Classes found in the wrong directory"; restrict:=error; is:=warning
