@@ -1,7 +1,5 @@
 /*
- * Licensed Materials - Property of IBM
- * 
- * (c) Copyright IBM Corp. 2019.
+ * Copyright contributors to the Galasa project 
  */
 package dev.galasa.cps.etcd.internal;
 
@@ -42,7 +40,7 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
 
         if (isEtcdUri(cps)) {
             try {
-                URI uri = new URI(cps.toString().replace("etcd:", ""));
+                URI uri = new URI(cps.toString().substring(5));
                 frameworkInitialisation.registerConfigurationPropertyStore(new Etcd3ConfigurationPropertyStore(uri));
             } catch (URISyntaxException e) {
                 throw new ConfigurationPropertyStoreException("Could not create URI", e);

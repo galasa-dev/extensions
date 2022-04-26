@@ -1,7 +1,5 @@
 /*
- * Licensed Materials - Property of IBM
- * 
- * (c) Copyright IBM Corp. 2019.
+ * Copyright contributors to the Galasa project 
  */
 package dev.galasa.cps.etcd.internal;
 
@@ -42,7 +40,7 @@ public class Etcd3DynamicStatusStoreRegistration implements IDynamicStatusStoreR
 
         if (isEtcdUri(dss)) {
             try {
-                URI uri = new URI(dss.toString().replace("etcd:", ""));
+                URI uri = new URI(dss.toString().substring(5));
                 frameworkInitialisation.registerDynamicStatusStore(new Etcd3DynamicStatusStore(uri));
             } catch (URISyntaxException e) {
                 throw new DynamicStatusStoreException("Could not create URI", e);
