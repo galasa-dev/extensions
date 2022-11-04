@@ -70,6 +70,13 @@ function usage {
 Options are:
 -c | --clean : Do a clean build. One of the --clean or --delta flags are mandatory.
 -d | --delta : Do a delta build. One of the --clean or --delta flags are mandatory.
+
+Environment variables used:
+DEBUG - Optional. Valid values "1" (on) or "0" (off). Defaults to "0" (off).
+SOURCE_MAVEN - Optional. Where maven/gradle can look for pre-built development levels of things.
+    Defaults to https://galasadev-cicsk8s.hursley.ibm.com/main/maven/obr/
+LOGS_DIR - Optional. Where logs are placed. Defaults to creating a temporary directory.
+
 EOF
 }
 
@@ -157,21 +164,22 @@ info "Log will be placed at ${log_file}"
 if [[ "${build_type}" == "clean" ]]; then
     goals="clean build publishToMavenLocal"
 else
-    goals="clean build publishToMavenLocal"
+    goals="build publishToMavenLocal"
 fi
 
 cat << EOF 
 Using command:
 
-gradle --no-daemon \
+gradle \
 ${CONSOLE_FLAG} \
 -Dorg.gradle.java.home=${JAVA_HOME} \
 -PsourceMaven=${SOURCE_MAVEN} ${OPTIONAL_DEBUG_FLAG} \
 ${goals} \
 2>&1 > ${log_file}
+
 EOF
 
-gradle --no-daemon \
+gradle \
 ${CONSOLE_FLAG} \
 -Dorg.gradle.java.home=${JAVA_HOME} \
 -PsourceMaven=${SOURCE_MAVEN} ${OPTIONAL_DEBUG_FLAG} \
