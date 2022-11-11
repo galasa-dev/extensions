@@ -162,10 +162,17 @@ log_file=${LOGS_DIR}/${project}.txt
 info "Log will be placed at ${log_file}"
 
 if [[ "${build_type}" == "clean" ]]; then
-    goals="clean build publishToMavenLocal"
+    goals="clean build check publishToMavenLocal --no-build-cache "
 else
-    goals="build publishToMavenLocal"
+    goals="build check publishToMavenLocal"
 fi
+
+h2 "Removing .m2 artifacts"
+rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
+rm -fr ~/.m2/repository/dev/galasa/dev.galasa.raw.couchdb
+success "OK"
+
+h2 "Building with gradle"
 
 cat << EOF 
 Using command:
