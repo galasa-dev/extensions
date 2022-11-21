@@ -12,28 +12,28 @@ public class CouchdbRasException extends ResultArchiveStoreException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * @see java.lang.Exception#Exception()
+     * {@inheritDoc}
      */
     public CouchdbRasException() {
         super();
     }
 
     /**
-     * @see java.lang.Exception#Exception(String)
+     * {@inheritDoc}
      */
     public CouchdbRasException(String message) {
         super(message);
     }
 
     /**
-     * @see java.lang.Exception#Exception(Throwable)
+     * {@inheritDoc}
      */
     public CouchdbRasException(Throwable cause) {
         super(cause);
     }
 
     /**
-     * @see java.lang.Exception#Exception(String, Throwable)
+     * {@inheritDoc}
      */
     public CouchdbRasException(String message, Throwable cause) {
         super(message, cause);

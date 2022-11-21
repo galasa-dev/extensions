@@ -36,9 +36,7 @@ import io.etcd.jetcd.kv.GetResponse;
  * This class implements the credential store in a etcd store. Usernames,
  * Passwords and tokens can be retrieved from etc using the correct key format:
  * 
- * "secure.credentials.<SomeCredentialId>.username"
- * 
- * @author James Davies
+ * "secure.credentials.{SomeCredentialId};.username"
  */
 public class Etcd3CredentialsStore implements ICredentialsStore {
     private final Client        client;
@@ -48,8 +46,9 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
     /**
      * This constructor instantiates the Key value client that can retrieve values
      * from the etcd store.
-     * 
+     * @param framework - The framework used by this credential store.
      * @param etcd - URI location of ETCD store.
+     * @throws CredentialsException
      */
     public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
         try {

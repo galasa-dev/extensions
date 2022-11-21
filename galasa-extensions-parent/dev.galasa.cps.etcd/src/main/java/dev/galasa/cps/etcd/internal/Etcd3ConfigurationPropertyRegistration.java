@@ -30,7 +30,7 @@ public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPro
      * The URI is collected from the Intialisation. If the URI is a etcd scheme then
      * it registers it as a etcd.
      * 
-     * @param frameworkIntialisation - gives the registrtion access to the correct
+     * @param frameworkInitialisation - gives the registrtion access to the correct
      *                               URI for the cps
      */
     @Override
