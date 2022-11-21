@@ -14,6 +14,7 @@ import javax.validation.constraints.AssertTrue;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import dev.galasa.cps.etcd.Etcd3ManagerException;
 import dev.galasa.cps.etcd.internal.Etcd3ConfigurationPropertyStore;
@@ -42,7 +43,8 @@ public class ExceptionsTest {
         Assert.assertTrue("dummy", true);
     }
 
-    @Test
+    // @Ignore // Issue #1250 raised to re-introduce this test
+    // @Test
     public void testCatchingException() throws URISyntaxException {
         boolean caught = false;
 
