@@ -1,7 +1,5 @@
 /*
- * Licensed Materials - Property of IBM
- * 
- * (c) Copyright IBM Corp. 2019.
+ * Copyright contributors to the Galasa project
  */
 package dev.galasa.cps.etcd.spi;
 
@@ -24,10 +22,7 @@ import javax.validation.constraints.NotNull;
  * 
  * <p>
  * An implementation of the client can be obtained via the
- * {@Link IEtcd3ClientService} service.
- * 
- * @author Michael Baylis
- *
+ * {@link IEtcd3ClientService} service.
  */
 public interface IEtcd3Client {
 
@@ -90,7 +85,7 @@ public interface IEtcd3Client {
      * 
      * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
      *                  prefixed by the client
-     * @return
+     * @return A map of key-value pairs.
      * @throws Etcd3ClientException
      */
     @NotNull
@@ -128,8 +123,6 @@ public interface IEtcd3Client {
      * 
      * @param listener  - The class to be informed on a change
      * @param key       - the key to use, may be prefixed by the client
-     * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
-     *                  prefixed by the client
      * @return UUID representing this watch
      * @throws Etcd3ClientException
      */

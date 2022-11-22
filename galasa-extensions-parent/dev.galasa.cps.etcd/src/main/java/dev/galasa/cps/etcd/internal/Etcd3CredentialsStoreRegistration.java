@@ -30,7 +30,7 @@ public class Etcd3CredentialsStoreRegistration implements ICredentialsStoreRegis
      * The URI is collected from the Intialisation. If the URI is a etcd scheme then
      * it registers it as a etcd.
      * 
-     * @param frameworkIntialisation - gives the registrtion access to the correct
+     * @param frameworkInitialisation - gives the registration access to the correct
      *                               URI for the credentials store
      */
     @Override

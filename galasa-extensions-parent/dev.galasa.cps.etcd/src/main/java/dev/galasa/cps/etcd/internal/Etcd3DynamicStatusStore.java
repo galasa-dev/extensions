@@ -1,7 +1,5 @@
 /*
- * Licensed Materials - Property of IBM
- * 
- * (c) Copyright IBM Corp. 2019-2021.
+ * Copyright contributors to the Galasa project
  */
 package dev.galasa.cps.etcd.internal;
 
@@ -227,10 +225,10 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
     }
 
     /**
-     * A simple get method that retireves on value from one key
+     * A simple get method that retrieves on value from one key
      * 
-     * @param key
-     * @return String - the value of the key and null if not exsisting.
+     * @param key The key we wish to query
+     * @return The value of the key and null if not existing.
      * @throws DynamicStatusStoreException
      */
     @Override
@@ -253,11 +251,11 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
 
     /**
      * A get of all keys and value that start with a specified prefix. They are
-     * returned in a Map<String,String>
+     * returned in a map of key-value pairs
      * 
      * @param keyPrefix - the prefix for any key(s)
-     * @return Map<String, String>
-     * @throws DysnamicStatusStoreException
+     * @return A map of name-value pairs 
+     * @throws DynamicStatusStoreException
      */
     @Override
     public @NotNull Map<String, String> getPrefix(@NotNull String keyPrefix) throws DynamicStatusStoreException {
