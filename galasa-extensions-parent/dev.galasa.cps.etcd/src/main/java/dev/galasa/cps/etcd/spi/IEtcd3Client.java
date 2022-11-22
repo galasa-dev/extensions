@@ -85,7 +85,7 @@ public interface IEtcd3Client {
      * 
      * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
      *                  prefixed by the client
-     * @return A map of key, value pairs.
+     * @return A map of key-value pairs.
      * @throws Etcd3ClientException
      */
     @NotNull
