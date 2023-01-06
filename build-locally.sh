@@ -74,7 +74,7 @@ Options are:
 Environment variables used:
 DEBUG - Optional. Valid values "1" (on) or "0" (off). Defaults to "0" (off).
 SOURCE_MAVEN - Optional. Where maven/gradle can look for pre-built development levels of things.
-    Defaults to https://galasadev-cicsk8s.hursley.ibm.com/main/maven/obr/
+    Defaults to https://development.galasa.dev/main/maven-repo/obr/
 LOGS_DIR - Optional. Where logs are placed. Defaults to creating a temporary directory.
 
 EOF
