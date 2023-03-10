@@ -245,6 +245,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private void checkDatabasePresent(int attempts, String dbName) throws CouchdbRasException {
         HttpHead httpHead = new HttpHead(rasUri + "/" + dbName);
+        httpHead.addHeader( "Authorization","Basic YWRtaW46cGFzc3dvcmQ=");
+        httpHead.addHeader("Accept", "application/json");
+        httpHead.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
             StatusLine statusLine = response.getStatusLine();
@@ -265,6 +268,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         logger.info("CouchDB database " + dbName + " is missing,  creating");
 
         HttpPut httpPut = new HttpPut(rasUri + "/" + dbName);
+        httpPut.addHeader( "Authorization","Basic YWRtaW46cGFzc3dvcmQ=");
+        httpPut.addHeader("Accept", "application/json");
+        httpPut.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
@@ -284,7 +290,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
                 throw new CouchdbRasException(
-                        "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
+                        rasUri + "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString()+ httpPut);
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
