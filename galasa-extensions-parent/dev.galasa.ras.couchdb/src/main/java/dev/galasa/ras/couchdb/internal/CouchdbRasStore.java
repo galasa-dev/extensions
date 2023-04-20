@@ -105,7 +105,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.getVersion(), 2, 3, 1);
+            checkVersion(welcome.getVersion(), 3, 3, 1);
             checkDatabasePresent(1,"_users");
             checkDatabasePresent(1,"_replicator");
             checkDatabasePresent(1, "galasa_run");
