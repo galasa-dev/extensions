@@ -98,6 +98,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                     + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
             request.setEntity(new FileEntity(cachePath.toFile()));
             request.addHeader("Accept", "application/json");
+            request.addHeader( "Authorization",CouchdbRequests.authorizationString);
             request.addHeader("Content-Type", remoteContentType.value());
             request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
 

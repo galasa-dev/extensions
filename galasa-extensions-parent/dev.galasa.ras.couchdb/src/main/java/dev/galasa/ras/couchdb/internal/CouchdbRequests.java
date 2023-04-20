@@ -11,7 +11,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPut;
 
 public class CouchdbRequests {
-    static String authorizationString = "Basic UFdySk5RdVVHVExZVE9oUk5GUUNwdnpuelN0TEJFWmY6aHV6a09UT09lQWJRdVJyU2NlbmRZZ3lIcklWd2dRUXE=";
+    static String authorizationString = System.getenv("GALASA_RAS_TOKEN");
 
     public static HttpDelete deleteRequest (String url){
         HttpDelete delete = new HttpDelete(url);
