@@ -93,7 +93,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         // *** Validate the connection to the server and it's version
         this.httpClient = HttpClients.createDefault();
 
-        HttpGet httpGet = new HttpGet(rasUri);
+        HttpGet httpGet = CouchdbRequests.getRequest(rasUri.toString());
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -148,7 +148,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     private void checkIndex(int attempts, String dbName, String field) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_index");
+        HttpGet httpGet = CouchdbRequests.getRequest(rasUri + "/galasa_run/_index");
 
         String idxJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -210,7 +210,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
             HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
 
-            HttpPost httpPost = new HttpPost(rasUri + "/galasa_run/_index");
+            HttpPost httpPost = CouchdbRequests.postRequest(rasUri + "/galasa_run/_index");
             httpPost.setEntity(entity);
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
@@ -244,10 +244,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     private void checkDatabasePresent(int attempts, String dbName) throws CouchdbRasException {
-        HttpHead httpHead = new HttpHead(rasUri + "/" + dbName);
-        httpHead.addHeader( "Authorization","Basic YWRtaW46cGFzc3dvcmQ=");
-        httpHead.addHeader("Accept", "application/json");
-        httpHead.addHeader("Content-Type", "application/json");
+        HttpHead httpHead = CouchdbRequests.headRequest(rasUri + "/" + dbName);       
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
             StatusLine statusLine = response.getStatusLine();
@@ -267,10 +264,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         logger.info("CouchDB database " + dbName + " is missing,  creating");
 
-        HttpPut httpPut = new HttpPut(rasUri + "/" + dbName);
-        httpPut.addHeader( "Authorization","Basic YWRtaW46cGFzc3dvcmQ=");
-        httpPut.addHeader("Accept", "application/json");
-        httpPut.addHeader("Content-Type", "application/json");
+        HttpPut httpPut = CouchdbRequests.putRequest(rasUri + "/" + dbName);
+
 
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
@@ -290,7 +285,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
                 throw new CouchdbRasException(
-                        rasUri + "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString()+ httpPut);
+                        rasUri + "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
@@ -302,7 +297,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     private void checkRunDesignDocument(int attempts) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_design/docs");
+        HttpGet httpGet = CouchdbRequests.getRequest(rasUri + "/galasa_run/_design/docs");
 
         String docJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -387,7 +382,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
             HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
 
-            HttpPut httpPut = new HttpPut(rasUri + "/galasa_run/_design/docs");
+            HttpPut httpPut = CouchdbRequests.putRequest(rasUri + "/galasa_run/_design/docs");
             httpPut.setEntity(entity);
 
             if (rev != null) {
@@ -412,7 +407,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 if (statusCode != HttpStatus.SC_CREATED) {
                     EntityUtils.consumeQuietly(response.getEntity());
                     throw new CouchdbRasException(
-                            "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
+                            "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString()+doc);
                 }
 
                 EntityUtils.consumeQuietly(response.getEntity());
@@ -520,10 +515,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         String jsonArtifacts = gson.toJson(artifacts);
 
-        HttpPost request = new HttpPost(this.rasUri + "/galasa_artifacts");
+        HttpPost request = CouchdbRequests.postRequest(this.rasUri + "/galasa_artifacts");
         request.setEntity(new StringEntity(jsonArtifacts, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -579,10 +572,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         String jsonStructure = gson.toJson(logLines);
 
-        HttpPost request = new HttpPost(this.rasUri + "/galasa_log");
+        HttpPost request = CouchdbRequests.postRequest(this.rasUri + "/galasa_log");
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -633,9 +624,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         HttpEntityEnclosingRequestBase request;
         if (runDocumentId == null) {
-            request = new HttpPost(this.rasUri + "/galasa_run");
+            request = CouchdbRequests.postRequest(this.rasUri + "/galasa_run");
         } else {
-            request = new HttpPut(this.rasUri + "/galasa_run/" + runDocumentId);
+            request = CouchdbRequests.putRequest(this.rasUri + "/galasa_run/" + runDocumentId);
             request.addHeader("If-Match", runDocumentRevision);
         }
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
@@ -678,7 +669,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             throw new CouchdbRasException("Problem encoding artifact path", e);
         }
 
-        HttpGet httpGet = new HttpGet(this.rasUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath);
+        HttpGet httpGet = CouchdbRequests.getRequest(this.rasUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath);
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -702,7 +693,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         StringBuilder sb = new StringBuilder();
 
         for (String logRecordId : ts.getLogRecordIds()) {
-            HttpGet httpGet = new HttpGet(this.rasUri + "/galasa_log/" + logRecordId);
+            HttpGet httpGet = CouchdbRequests.getRequest(this.rasUri + "/galasa_log/" + logRecordId);
             httpGet.addHeader("Accept", "application/json");
 
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
