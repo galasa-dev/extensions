@@ -106,6 +106,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             }
 
             checkVersion(welcome.getVersion(), 2, 3, 1);
+            checkDatabasePresent(1,"_users");
+            checkDatabasePresent(1,"_replicator");
             checkDatabasePresent(1, "galasa_run");
             checkDatabasePresent(1, "galasa_log");
             checkDatabasePresent(1, "galasa_artifacts");
