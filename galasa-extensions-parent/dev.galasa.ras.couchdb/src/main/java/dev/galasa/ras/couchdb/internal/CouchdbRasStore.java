@@ -630,8 +630,6 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             request.addHeader("If-Match", runDocumentRevision);
         }
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -642,7 +640,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                     System.exit(0);
                 }
 
-                throw new CouchdbRasException("Unable to store the test structure - " + statusLine.toString());
+                throw new CouchdbRasException("Unable to store the test structure - " + request.getEntity() + response.getAllHeaders() +response.toString() + statusLine.toString());
             }
 
             HttpEntity entity = response.getEntity();
