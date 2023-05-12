@@ -103,6 +103,13 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
                     attrs);
         } else {
             CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
+
+            for (CouchdbArtifactPath artifactPath : paths) {
+                if (artifactPath.toString().equals(path.toString())) {
+                    cdbPath = artifactPath;
+                }
+            }
+
             Path cachePath = Files.createTempFile("galasa_couchdb", "temp");
             try {
                 couchdbRasStore.retrieveArtifact(cdbPath, cachePath);
