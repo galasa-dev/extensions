@@ -16,7 +16,7 @@ framework:
     codecoverage: true
     
   - artifact: dev.galasa.ras.couchdb
-    version: 0.26.0
+    version: 0.28.0
     obr: true
     isolated: true
     codecoverage: true
