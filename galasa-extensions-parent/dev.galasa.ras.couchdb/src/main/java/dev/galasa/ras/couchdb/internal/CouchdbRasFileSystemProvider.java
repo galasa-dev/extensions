@@ -1,7 +1,5 @@
 /*
- * Licensed Materials - Property of IBM
- * 
- * (c) Copyright IBM Corp. 2019.
+ * Copyright contributors to the Galasa project
  */
 package dev.galasa.ras.couchdb.internal;
 
@@ -103,6 +101,13 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
                     attrs);
         } else {
             CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
+
+            for (CouchdbArtifactPath artifactPath : paths) {
+                if (artifactPath.toString().equals(path.toString())) {
+                    cdbPath = artifactPath;
+                }
+            }
+
             Path cachePath = Files.createTempFile("galasa_couchdb", "temp");
             try {
                 couchdbRasStore.retrieveArtifact(cdbPath, cachePath);
