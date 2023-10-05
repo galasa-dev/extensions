@@ -45,6 +45,7 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
@@ -366,6 +367,9 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                 RasSearchCriteriaResult sResult = (RasSearchCriteriaResult) searchCriteria;
 
                 inArray(and, "result", sResult.getResults());
+            } else if(searchCriteria instanceof RasSearchCriteriaStatus){
+                RasSearchCriteriaStatus sStatus = (RasSearchCriteriaStatus) searchCriteria;
+                inArray(and, "status", sStatus.getStatusesAStrings());
             } else {
                 throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
             }
