@@ -369,7 +369,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                 inArray(and, "result", sResult.getResults());
             } else if(searchCriteria instanceof RasSearchCriteriaStatus){
                 RasSearchCriteriaStatus sStatus = (RasSearchCriteriaStatus) searchCriteria;
-                inArray(and, "status", sStatus.getStatusesAStrings());
+                inArray(and, "status", sStatus.getStatusesAsStrings());
             } else {
                 throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
             }
