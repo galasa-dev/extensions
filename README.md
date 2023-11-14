@@ -1,5 +1,5 @@
 # Galasa Extensions
-This respository contains implementations of extensions that are required by the Galasa infrastructure, including RAS (ResultArchiveStore), etcd and CouchDB databases for storing test information and a Jenkins plugin to support continuous integration testing as part of a DevOps strategy.
+This respository contains implementations of extensions that are required by the Galasa infrastructure, including RAS (ResultArchiveStore), etcd and CouchDB databases for storing test information.
 
 ## Documentation
 
