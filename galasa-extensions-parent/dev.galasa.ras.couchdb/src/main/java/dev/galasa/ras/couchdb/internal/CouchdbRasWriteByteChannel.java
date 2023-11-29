@@ -120,7 +120,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                 this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
                 this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
 
-                logger.info("Jade Carino - In close() method");
+                logger.info("In close() method!");
 
                 logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
                         + this.remoteContentType.value());
