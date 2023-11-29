@@ -45,6 +45,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
@@ -57,8 +58,12 @@ import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
+import dev.galasa.ras.couchdb.internal.properties.CouchdbDocumentType;
+import dev.galasa.ras.couchdb.internal.properties.CouchdbPropertiesSingleton;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
+
+    protected static final String NAMESPACE = "couchdb";
 
     private final Log                          logger             = LogFactory.getLog(getClass());
 
@@ -86,9 +91,17 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private TestStructure                      lastTestStructure;
 
+    private String                             couchDbDocumentType;
+
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
         this.framework = framework;
         this.rasUri = rasUri;
+
+        try {
+            CouchdbPropertiesSingleton.setCps(framework.getConfigurationPropertyService(NAMESPACE));
+        } catch (ConfigurationPropertyStoreException e) {
+            throw new CouchdbRasException("Unable to request framework services", e);
+        }
 
         // *** Validate the connection to the server and it's version
         this.httpClient = HttpClients.createDefault();
@@ -140,7 +153,14 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed - unable to create initial run document", e);
             }
 
-            createArtifactDocument();
+            couchDbDocumentType = CouchdbDocumentType.get();
+
+            if (couchDbDocumentType.equals("shared")) {
+                createArtifactDocument();
+            } else if (couchDbDocumentType.equals("single")) {
+                createSingleArtifactDocuments();
+            }
+
         }
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
@@ -538,6 +558,10 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         } catch (Exception e) {
             throw new CouchdbRasException("Unable to store the artifacts document", e);
         }
+    }
+
+    private void createSingleArtifactDocuments() {
+        logger.info("This method needs to be implemented");
     }
 
     @Override

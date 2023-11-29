@@ -89,9 +89,6 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
      */
     @Override
     public void close() throws IOException {
-
-        logger.info("Jade Carino - closing here");
-        
         cacheByteChannel.close();
 
         synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
@@ -122,6 +119,8 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                 }
                 this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
                 this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
+
+                logger.info("Jade Carino - In close() method");
 
                 logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
                         + this.remoteContentType.value());
