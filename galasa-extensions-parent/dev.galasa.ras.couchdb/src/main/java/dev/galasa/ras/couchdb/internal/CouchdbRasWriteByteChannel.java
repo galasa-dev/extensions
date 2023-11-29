@@ -89,6 +89,9 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
      */
     @Override
     public void close() throws IOException {
+
+        logger.info("Jade Carino - closing here");
+        
         cacheByteChannel.close();
 
         synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
