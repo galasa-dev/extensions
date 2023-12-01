@@ -153,8 +153,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed - unable to create initial run document", e);
             }
 
+            logger.debug("Jade - Getting the CouchDBDocumentType CPS property.");
             couchDbDocumentType = CouchdbDocumentType.get();
-
+            logger.debug("Jade - CouchDBDocumentType CPS property: " + couchDbDocumentType);
             if (couchDbDocumentType.equals("shared")) {
                 createArtifactDocument();
             } else if (couchDbDocumentType.equals("single")) {
@@ -528,6 +529,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     private void createArtifactDocument() throws CouchdbRasException {
+        logger.debug("Jade - Creating shared artifact document");
+
         Artifacts artifacts = new Artifacts();
         artifacts.runId = this.runDocumentId;
         artifacts.runName = this.run.getName();
@@ -561,7 +564,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     private void createSingleArtifactDocuments() {
-        logger.info("This method needs to be implemented");
+        logger.debug("Jade - Creating single artifact documents");
+        logger.debug("This method needs to be implemented");
     }
 
     @Override
