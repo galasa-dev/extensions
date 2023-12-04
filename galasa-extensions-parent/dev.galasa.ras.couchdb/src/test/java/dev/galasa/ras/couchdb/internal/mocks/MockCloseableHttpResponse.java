@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal;
+package dev.galasa.ras.couchdb.internal.mocks;
 
 import java.io.IOException;
 import java.util.Locale;

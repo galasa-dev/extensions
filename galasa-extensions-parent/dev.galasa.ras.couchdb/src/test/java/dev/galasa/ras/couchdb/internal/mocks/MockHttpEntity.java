@@ -3,27 +3,33 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal;
+package dev.galasa.ras.couchdb.internal.mocks;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import java.io.ByteArrayInputStream;
+
 
 
 public class MockHttpEntity implements HttpEntity {
+
+    private MockHttpHeader contentTypeJsonHeader ;
+    private byte[] payloadMessageBytes ;
+
+    public MockHttpEntity(String payloadMessage) {
+
+        contentTypeJsonHeader = new MockHttpHeader("Content-Type","application/json");
+
+        payloadMessageBytes = payloadMessage.getBytes();
+    }
 
     @Override
     public void consumeContent() throws IOException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'consumeContent'");
-    }
-
-    @Override
-    public InputStream getContent() throws IOException, UnsupportedOperationException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContent'");
     }
 
     @Override
@@ -33,14 +39,8 @@ public class MockHttpEntity implements HttpEntity {
     }
 
     @Override
-    public long getContentLength() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getContentLength'");
-    }
-
-    @Override
     public Header getContentType() {
-        throw new UnsupportedOperationException("Unimplemented method 'getContentType'");
+        return this.contentTypeJsonHeader;
     }
 
     @Override
@@ -67,5 +67,14 @@ public class MockHttpEntity implements HttpEntity {
         throw new UnsupportedOperationException("Unimplemented method 'writeTo'");
     }
 
+    @Override
+    public InputStream getContent() throws IOException, UnsupportedOperationException {
+        return new ByteArrayInputStream(this.payloadMessageBytes);
+    }
+
+    @Override
+    public long getContentLength() {
+        return this.payloadMessageBytes.length;
+    }
 }
 

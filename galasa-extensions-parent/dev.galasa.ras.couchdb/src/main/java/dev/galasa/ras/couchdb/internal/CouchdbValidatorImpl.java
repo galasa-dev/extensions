@@ -53,11 +53,11 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             HttpEntity entity = response.getEntity();
             String welcomePayload = EntityUtils.toString(entity);
             Welcome welcome = gson.fromJson(welcomePayload, Welcome.class);
-            if (!"Welcome".equals(welcome.getCouchdb()) || welcome.getVersion() == null) {
+            if (!"Welcome".equals(welcome.couchdb) || welcome.version == null) {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.getVersion(), 2, 3, 1);
+            checkVersion(welcome.version, 2, 3, 1);
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_run");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_log");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts");

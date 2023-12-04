@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal;
+package dev.galasa.ras.couchdb.internal.mocks;
 
 import java.net.URL;
 import java.util.Properties;
