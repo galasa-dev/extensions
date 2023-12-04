@@ -39,7 +39,7 @@ public class CouchdbValidatorImplTest {
 
         StatusLine statusLine = new MockStatusLine();
 
-        MockHttpHeader contentTypeJsonHeader = new MockHttpHeader("Content-Type","application/json",null);
+        MockHttpHeader contentTypeJsonHeader = new MockHttpHeader("Content-Type","application/json");
 
         String welcomeToCouchDBMessage = "{" +
             "\"couchdb\":\"dummy-edition\","+

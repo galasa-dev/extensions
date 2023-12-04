@@ -1,3 +1,8 @@
+/*
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package dev.galasa.ras.couchdb.internal;
 
 import org.apache.http.Header;
@@ -8,12 +13,10 @@ public class MockHttpHeader implements Header {
 
     private String name ;
     private String value ;
-    private HeaderElement[] elements ;
 
-    public MockHttpHeader(String name, String value, HeaderElement[] elements) {
+    public MockHttpHeader(String name, String value) {
         this.name = name ;
         this.value = value;
-        this.elements = elements;
     }
 
     @Override

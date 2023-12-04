@@ -5,16 +5,12 @@
  */
 package dev.galasa.ras.couchdb.internal;
 
-import static org.junit.Assert.assertTrue;
-
-import java.net.URI;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Random;
 
 import javax.validation.constraints.NotNull;
 
-import dev.galasa.Test;
 import dev.galasa.framework.spi.Api;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.DynamicStatusStoreException;
