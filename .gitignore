@@ -8,5 +8,5 @@ galasa-eclipse-parent/target
 dependency-reduced-pom.xml
 .DS_Store
 
-
+.vscode
 bin/
