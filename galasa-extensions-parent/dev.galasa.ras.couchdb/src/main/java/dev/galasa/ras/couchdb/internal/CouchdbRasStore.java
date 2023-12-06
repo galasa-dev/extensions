@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +34,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
+
+import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
+import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
@@ -75,6 +79,14 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private TestStructure                      lastTestStructure;
 
+    private final boolean featureFlagOneArtifactPerDocument ;
+
+    // Configuration property store so we can look up feature flags.
+    private final IConfigurationPropertyStoreService cps;
+
+    // The namespace used to access cps properties that this store is interested in.
+    public static final String CPS_NAMESPACE_COUCHDB = "couchdb";
+
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
         this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() );
     }
@@ -105,7 +117,17 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this);
+
+        try {
+            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
+        } catch (ConfigurationPropertyStoreException ex ) {
+            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
+        }
+
+        // Dig out the value of the feature flag once, and hold it in a cache variable.
+        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT);
     }
+
 
     private void createArtifactDocument() throws CouchdbRasException {
         Artifacts artifacts = new Artifacts();
@@ -404,4 +426,32 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return "cdb-" + this.runDocumentId;
     }
 
+    private boolean isFeatureEnabled(FeatureFlag flag) throws CouchdbRasException {
+        String featurePropertyName = flag.getPropertyName();
+        int firstDotIndex = featurePropertyName.indexOf('.');
+        String prefix = featurePropertyName.substring(0, firstDotIndex);
+        String suffix = featurePropertyName.substring(firstDotIndex+1);
+        String value ;
+        try {
+            value = this.cps.getProperty(prefix, suffix);
+        } catch( ConfigurationPropertyStoreException ex) {
+            throw new CouchdbRasException(
+                MessageFormat.format("Failed to get the value of property {0} from the cps.",featurePropertyName),
+                ex
+            );
+        }
+
+        boolean isFeatureEnabled = Boolean.parseBoolean(value);
+        if (isFeatureEnabled) {
+            logger.trace(MessageFormat.format("Feature flag {0} is enabled", featurePropertyName));
+        } else {
+            logger.trace(MessageFormat.format("Feature flag {0} is disabled", featurePropertyName));
+        }
+        return isFeatureEnabled;
+    }
+
+
+    public boolean isFeatureFlagOneArtifactPerDocumentEnabled() {
+        return this.featureFlagOneArtifactPerDocument;
+    }
 }

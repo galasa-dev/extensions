@@ -22,6 +22,8 @@ public class MockCloseableHttpResponse implements CloseableHttpResponse {
     StatusLine statusLine ;
     HttpEntity entity ;
 
+
+
     @Override
     public HttpEntity getEntity() {
         return this.entity;

@@ -70,6 +70,8 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
         // StandardOpenOption.TRUNCATE_EXISTING need to standardise across the board
         cacheByteChannel = Files.newByteChannel(cachePath, StandardOpenOption.WRITE,
                 StandardOpenOption.TRUNCATE_EXISTING);
+
+
     }
 
     /*
@@ -90,6 +92,9 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
     @Override
     public void close() throws IOException {
         cacheByteChannel.close();
+
+        // Access the feature flag so we can decide what the storage strategy is.
+        boolean isOneArtifactPerDocumentEnabled = this.couchdbRasStore.isFeatureFlagOneArtifactPerDocumentEnabled();
 
         synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
             String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
