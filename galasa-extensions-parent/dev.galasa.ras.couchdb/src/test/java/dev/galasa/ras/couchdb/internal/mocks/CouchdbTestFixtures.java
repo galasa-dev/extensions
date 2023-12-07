@@ -175,11 +175,6 @@ public class CouchdbTestFixtures {
     }
 
 
-    // public static class CreateArtifactDocument extends BaseHttpInteraction {
-    //     // http://my.uri/galasa_artifacts
-    // } 
-
-
     public CouchdbRasStore createCouchdbRasStore(Map<String,String> inputProps) throws Exception {
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         return createCouchdbRasStore(inputProps,interactions, new MockLogFactory());
