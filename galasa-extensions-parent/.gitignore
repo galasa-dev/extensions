@@ -11,7 +11,4 @@ MANIFEST.MF
 default.etcd
 etcd3-manager/hs_err_pid48525.log
 dependency-reduced-pom.xml
-.vscode/
-**/core.*.dmp
-**/javacore*.txt
-**/Snap.*.trc
+

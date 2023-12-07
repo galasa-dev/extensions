@@ -21,7 +21,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -48,6 +47,7 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
+import dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
 import dev.galasa.ras.couchdb.internal.pojos.IdRev;
@@ -58,14 +58,17 @@ import dev.galasa.ras.couchdb.internal.pojos.ViewRow;
 
 public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryService {
 
-    private final Log             logger = LogFactory.getLog(getClass());
+    private final Log             logger ;
+    private final LogFactory      logFactory ;
 
     private static final Charset  UTF8   = Charset.forName("utf-8");
 
     private final CouchdbRasStore store;
 
-    public CouchdbDirectoryService(CouchdbRasStore store) {
+    public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory) {
         this.store = store;
+        this.logFactory = logFactory;
+        this.logger = logFactory.getLog(getClass());
     }
 
     @Override
@@ -81,7 +84,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
-        CouchdbRasFileSystemProvider runProvider = new CouchdbRasFileSystemProvider(fileStore, store);
+        CouchdbRasFileSystemProvider runProvider = new CouchdbRasFileSystemProvider(fileStore, store, logFactory);
         if (ts.getArtifactRecordIds() == null || ts.getArtifactRecordIds().isEmpty()) {
             return runProvider.getRoot();
         }

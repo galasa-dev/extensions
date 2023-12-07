@@ -14,7 +14,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.params.HttpParams;
+import org.apache.http.params.*;
 
 public class MockCloseableHttpResponse implements CloseableHttpResponse {
 
@@ -123,6 +123,7 @@ public class MockCloseableHttpResponse implements CloseableHttpResponse {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public HttpParams getParams() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getParams'");
@@ -177,6 +178,7 @@ public class MockCloseableHttpResponse implements CloseableHttpResponse {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void setParams(HttpParams arg0) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setParams'");

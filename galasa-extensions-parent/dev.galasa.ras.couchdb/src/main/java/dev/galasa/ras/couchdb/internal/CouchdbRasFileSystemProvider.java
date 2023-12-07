@@ -30,6 +30,7 @@ import java.util.Set;
 import dev.galasa.ResultArchiveStoreContentType;
 import dev.galasa.SetContentType;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
+import dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory;
 
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
 
@@ -43,8 +44,11 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
 
     private final CouchdbRasStore                              couchdbRasStore;
 
-    protected CouchdbRasFileSystemProvider(FileStore fileSystemStore, CouchdbRasStore couchdbRasStore) {
+    private final LogFactory logFactory;
+
+    protected CouchdbRasFileSystemProvider(FileStore fileSystemStore, CouchdbRasStore couchdbRasStore, LogFactory logFactory) {
         super(fileSystemStore, null);
+        this.logFactory = logFactory;
         fileSystem = new CouchdbFileSystem(this);
         this.couchdbRasStore = couchdbRasStore;
         paths.add(new CouchdbArtifactPath(fileSystem, "/"));
@@ -100,7 +104,7 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
             passThroughOptions.add(StandardOpenOption.TRUNCATE_EXISTING);
 
             return new CouchdbRasWriteByteChannel(this, this.couchdbRasStore, absolute, contentType, passThroughOptions,
-                    attrs);
+                    attrs, this.logFactory );
         } else {
             CouchdbArtifactPath cdbPath = (CouchdbArtifactPath) path;
 
@@ -135,6 +139,7 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
             throws IOException {
         if (path instanceof CouchdbArtifactPath

@@ -47,6 +47,7 @@ import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import dev.galasa.ras.couchdb.internal.dependencies.api.HttpClientFactory;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpClientFactoryImpl;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
@@ -81,6 +82,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private final boolean featureFlagOneArtifactPerDocument ;
 
+    private dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory; 
+
     // Configuration property store so we can look up feature flags.
     private final IConfigurationPropertyStoreService cps;
 
@@ -88,11 +91,14 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     public static final String CPS_NAMESPACE_COUCHDB = "couchdb";
 
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
-        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() );
+        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl() );
     }
 
-
-    public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator ) throws CouchdbRasException {
+    // Note: We use logFactory here so we can propogate it downwards during unit testing.
+    public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator, 
+        dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory 
+    ) throws CouchdbRasException {
+        this.logFactory = logFactory;
         this.framework = framework;
         this.rasUri = rasUri;
          // *** Validate the connection to the server and it's version
@@ -116,7 +122,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         }
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
-        this.provider = new CouchdbRasFileSystemProvider(fileStore, this);
+        this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
 
         try {
             this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
@@ -413,7 +419,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     @Override
     public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
         ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
-        dirs.add(new CouchdbDirectoryService(this));
+        dirs.add(new CouchdbDirectoryService(this, this.logFactory));
         return dirs;
     }
 
