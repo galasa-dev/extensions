@@ -25,19 +25,16 @@ public class MockHeaderElement implements HeaderElement {
 
     @Override
     public NameValuePair getParameter(int arg0) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getParameter'");
     }
 
     @Override
     public NameValuePair getParameterByName(String arg0) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getParameterByName'");
     }
 
     @Override
     public int getParameterCount() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getParameterCount'");
     }
 

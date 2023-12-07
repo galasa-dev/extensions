@@ -10,5 +10,5 @@ class CouchdbRasWriteByteChannel {
 
 
 CouchdbRasFileSystemProvider -> CouchdbRasWriteByteChannel : "creates"
-CouchdbRasStore
+CouchdbRasStore -> CouchdbRasFileSystemProvider : "creates"
 @enduml

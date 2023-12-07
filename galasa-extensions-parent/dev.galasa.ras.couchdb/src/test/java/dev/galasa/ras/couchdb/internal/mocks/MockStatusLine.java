@@ -16,13 +16,11 @@ public class MockStatusLine implements StatusLine {
 
     @Override
     public ProtocolVersion getProtocolVersion() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getProtocolVersion'");
     }
 
     @Override
     public String getReasonPhrase() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getReasonPhrase'");
     }
 

@@ -28,13 +28,11 @@ public class MockHttpEntity implements HttpEntity {
 
     @Override
     public void consumeContent() throws IOException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'consumeContent'");
     }
 
     @Override
     public Header getContentEncoding() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getContentEncoding'");
     }
 
@@ -45,25 +43,21 @@ public class MockHttpEntity implements HttpEntity {
 
     @Override
     public boolean isChunked() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isChunked'");
     }
 
     @Override
     public boolean isRepeatable() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isRepeatable'");
     }
 
     @Override
     public boolean isStreaming() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isStreaming'");
     }
 
     @Override
     public void writeTo(OutputStream arg0) throws IOException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'writeTo'");
     }
 

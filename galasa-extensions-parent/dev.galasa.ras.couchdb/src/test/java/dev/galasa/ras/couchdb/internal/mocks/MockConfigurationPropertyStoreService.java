@@ -32,44 +32,37 @@ public class MockConfigurationPropertyStoreService implements IConfigurationProp
     @Override
     public @NotNull Map<String, String> getPrefixedProperties(@NotNull String prefix)
             throws ConfigurationPropertyStoreException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getPrefixedProperties'");
     }
 
     @Override
     public void setProperty(@NotNull String name, @NotNull String value)
             throws ConfigurationPropertyStoreException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'setProperty'");
     }
 
     @Override
     public void deleteProperty(@NotNull String name) throws ConfigurationPropertyStoreException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'deleteProperty'");
     }
 
     @Override
     public Map<String, String> getAllProperties() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAllProperties'");
     }
 
     @Override
     public String[] reportPropertyVariants(@NotNull String prefix, @NotNull String suffix, String... infixes) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'reportPropertyVariants'");
     }
 
     @Override
     public String reportPropertyVariantsString(@NotNull String prefix, @NotNull String suffix, String... infixes) {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'reportPropertyVariantsString'");
     }
 
     @Override
     public List<String> getCPSNamespaces() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getCPSNamespaces'");
     }
 

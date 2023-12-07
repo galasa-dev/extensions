@@ -42,20 +42,17 @@ public class MockCloseableHttpClient extends CloseableHttpClient {
     @Override
     @SuppressWarnings("deprecation")
     public HttpParams getParams() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getParams'");
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public ClientConnectionManager getConnectionManager() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getConnectionManager'");
     }
 
     @Override
     public void close() throws IOException {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'close'");
     }
 
