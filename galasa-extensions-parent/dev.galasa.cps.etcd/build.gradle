@@ -25,5 +25,4 @@ dependencies {
        force = true
     }
     implementation ('com.google.guava:failureaccess:1.0.1')
-    implementation ('dev.galasa:dev.galasa.framework: 0.31.0')
 }

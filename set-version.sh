@@ -100,6 +100,7 @@ temp_dir=$BASEDIR/temp/version_bump
 mkdir -p $temp_dir
 
 
+# Couchdb...
 cat $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/couchdb-build.gradle
 cp $temp_dir/couchdb-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle
 
@@ -107,12 +108,13 @@ cat $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle | sed 
 cp $temp_dir/couchdb-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle
 
 
+# etcd ... so far I don't think we need to bump up the version of this.
+# cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/etcd-build.gradle
+# cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
 
-cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/etcd-build.gradle
-cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
+# cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/version = '.*'/version = '$component_version'/1" > $temp_dir/etcd-build.gradle
+# cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
 
-cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/version = '.*'/version = '$component_version'/1" > $temp_dir/etcd-build.gradle
-cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
-
-cat $BASEDIR/release.yaml | sed "s/version:.*/version: $component_version/g" > $temp_dir/release.yaml
+# The framework version is the first one in the file.
+cat $BASEDIR/release.yaml | sed "s/version:.*/version: $component_version/1" > $temp_dir/release.yaml
 cp $temp_dir/release.yaml $BASEDIR/release.yaml 

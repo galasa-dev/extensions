@@ -12,15 +12,18 @@ metadata:
   
 framework:
   bundles:
+
+  - artifact: dev.galasa.ras.couchdb
+    version: 0.31.0
+    obr: true
+    isolated: true
+    codecoverage: true
+
   - artifact: dev.galasa.cps.etcd
     version: 0.31.0
     obr: true
     isolated: true
     codecoverage: true
     
-  - artifact: dev.galasa.ras.couchdb
-    version: 0.31.0
-    obr: true
-    isolated: true
-    codecoverage: true
+
     

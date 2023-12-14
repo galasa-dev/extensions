@@ -5,8 +5,19 @@
  */
 package dev.galasa.ras.couchdb.internal;
 
-import org.junit.Rule;
+import java.util.*;
+import static org.assertj.core.api.Assertions.*;
+
+import org.apache.http.*;
+import org.junit.*;
 import org.junit.rules.TestName;
+
+import com.google.gson.Gson;
+
+import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.ras.couchdb.internal.mocks.*;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
+import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbValidatorImplTest {
     
@@ -14,36 +25,71 @@ public class CouchdbValidatorImplTest {
     public TestName testName = new TestName();
 
 
-    // @Test
-    // public void TestRasStoreCreateBlowsUpIfCouchDBDoesntReturnWelcomeString() throws Exception {
+
+    public static class WelcomeInteractionOK extends BaseHttpInteraction {
+
+        public WelcomeInteractionOK(String rasUriStr, String documentId, String documentRev ) {
+            super(rasUriStr, documentId, documentRev);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
+        }
 
 
-    //     // Given...
-    //     URI rasURI = URI.create("http://my.uri");
+        @Override
+        public void validateRequestContentType(HttpRequest request) {
+            // We don't expect a Content-type header as there is no payload sent to the server
+        }
 
-    //     StatusLine statusLine = new MockStatusLine();
+        @Override
+        public MockCloseableHttpResponse getResponse() {
 
-    //     Welcome welcomeBean = new Welcome();
-    //     welcomeBean.couchdb = "dummy-edition";
-    //     welcomeBean.version = "2.3.1";
+            // We expect a request to the couchdb system.
+            // We will reply with a PutPostResponse
 
-    //     Gson gson = GalasaGsonBuilder.build();
-    //     String welcomeToCouchDBMessage = gson.toJson(welcomeBean);
+            Welcome welcomeBean = new Welcome();
+            welcomeBean.couchdb = "dummy-edition";
+            welcomeBean.version = "2.3.1";
 
-    //     HttpEntity entity = new MockHttpEntity(welcomeToCouchDBMessage);
+            Gson gson = GalasaGsonBuilder.build();
+            String updateMessagePayload = gson.toJson(welcomeBean);
 
-    //     MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-    //     response.setStatusLine(statusLine);
-    //     response.setEntity(entity);
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
 
-    //     MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(response);
+            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
-    //     CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
+            MockStatusLine statusLine = new MockStatusLine();
+            statusLine.setStatusCode(HttpStatus.SC_CREATED);
+            response.setStatusLine(statusLine);
+            response.setEntity(entity);
 
-    //     // When..
-    //     Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( rasURI , mockHttpClient ));
+            return response;
+        }
+    }
 
-    //     // Then..
-    //     assertThat(thrown).isInstanceOf(CouchdbRasException.class);
-    // }
+    @Test
+    public void TestRasStoreCreateBlowsUpIfCouchDBDoesntReturnWelcomeString() throws Exception {
+
+        List <HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+
+        interactions.add( new WelcomeInteractionOK(
+            CouchdbTestFixtures.rasUriStr,
+            CouchdbTestFixtures.documentId1, 
+            CouchdbTestFixtures.documentRev1 
+        ) );
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
+
+        // When..
+        Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient ));
+
+        // Then..
+        assertThat(thrown).isNotNull();
+        assertThat(thrown).as("exception caught is of type "+thrown.getClass().toString()).isInstanceOf(CouchdbRasException.class);
+    }
 }

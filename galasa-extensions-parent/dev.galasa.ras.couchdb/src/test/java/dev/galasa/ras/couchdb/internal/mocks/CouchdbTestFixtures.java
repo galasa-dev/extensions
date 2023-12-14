@@ -36,6 +36,7 @@ import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 public class CouchdbTestFixtures {
 
     public static final String rasUriStr = "http://my.uri";
+    public static final URI rasUri = URI.create(rasUriStr);
 
     public static final String documentId1 = "xyz127";
     public static final String documentRev1 = "123";
@@ -44,6 +45,7 @@ public class CouchdbTestFixtures {
     public static final String ARTIFACT_DOCUMENT_ID_1 = "987-artifact-doc-id-1";
     public static final String ARTIFACT_DOCUMENT_REV_1 = "987-artifact-doc-id-1-v1";
 
+        
     public abstract static class BaseHttpInteraction implements HttpInteraction {
 
         private String rasUriStr ;
@@ -74,10 +76,15 @@ public class CouchdbTestFixtures {
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            assertThat(host.toString()).isEqualTo(rasUriStr);
-            assertThat(request.containsHeader("Content-Type")).isTrue();
+            String hostGot = host.toString();
+            assertThat(hostGot).isEqualTo(rasUriStr);
+
+            validateRequestContentType(request);
+        }
+
+        public void validateRequestContentType(HttpRequest request) {
+            assertThat(request.containsHeader("Content-Type")).as("Missing Content-Type header!").isTrue();
             assertThat(request.getHeaders("Content-Type")[0].getValue()).isEqualTo(getExpectedHttpContentType());
-            
         }
 
     }

@@ -74,6 +74,8 @@ public class MockCloseableHttpClient extends CloseableHttpClient {
         // Validate that the request is as expected.
         this.currentInteraction.validateRequest(target, request);
 
+        System.out.printf("Http request: interaction %s received from the code under test as expected.\n",target.toString());
+
         // Prepare the response to return.
         CloseableHttpResponse response = this.currentInteraction.getResponse();
 
