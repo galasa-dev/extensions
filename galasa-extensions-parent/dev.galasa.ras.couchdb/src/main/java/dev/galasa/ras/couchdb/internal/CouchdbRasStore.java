@@ -13,13 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.logging.Log;
@@ -30,21 +27,16 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 
+import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
+import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
@@ -53,10 +45,12 @@ import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.ras.couchdb.internal.dependencies.api.HttpClientFactory;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpClientFactoryImpl;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
-import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
 
@@ -86,47 +80,31 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private TestStructure                      lastTestStructure;
 
+    private final boolean featureFlagOneArtifactPerDocument ;
+
+    private dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory; 
+
+    // Configuration property store so we can look up feature flags.
+    private final IConfigurationPropertyStoreService cps;
+
+    // The namespace used to access cps properties that this store is interested in.
+    public static final String CPS_NAMESPACE_COUCHDB = "couchdb";
+
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
+        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl() );
+    }
+
+    // Note: We use logFactory here so we can propogate it downwards during unit testing.
+    public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator, 
+        dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory 
+    ) throws CouchdbRasException {
+        this.logFactory = logFactory;
         this.framework = framework;
         this.rasUri = rasUri;
+         // *** Validate the connection to the server and it's version
+        this.httpClient = httpFactory.createClient();
 
-        // *** Validate the connection to the server and it's version
-        this.httpClient = HttpClients.createDefault();
-
-        HttpGet httpGet = new HttpGet(rasUri);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbRasException("Validation failed to CouchDB server - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            Welcome welcome = gson.fromJson(EntityUtils.toString(entity), Welcome.class);
-            if (!"Welcome".equals(welcome.getCouchdb()) || welcome.getVersion() == null) {
-                throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
-            }
-
-            checkVersion(welcome.getVersion(), 2, 3, 1);
-            checkDatabasePresent(1, "galasa_run");
-            checkDatabasePresent(1, "galasa_log");
-            checkDatabasePresent(1, "galasa_artifacts");
-
-            checkRunDesignDocument(1);
-
-            checkIndex(1, "galasa_run", "runName");
-            checkIndex(1, "galasa_run", "requestor");
-            checkIndex(1, "galasa_run", "queued");
-            checkIndex(1, "galasa_run", "testName");
-            checkIndex(1, "galasa_run", "bundle");
-            checkIndex(1, "galasa_run", "result");
-
-            logger.debug("RAS CouchDB at " + this.rasUri.toString() + " validated");
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
-        }
+        validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient);
 
         this.run = this.framework.getTestRun();
 
@@ -144,368 +122,18 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         }
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
-        this.provider = new CouchdbRasFileSystemProvider(fileStore, this);
-    }
-
-    private void checkIndex(int attempts, String dbName, String field) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_index");
-
-        String idxJson = null;
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            StatusLine statusLine = response.getStatusLine();
-            idxJson = EntityUtils.toString(response.getEntity());
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK
-                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException("Validation failed of database indexes - " + statusLine.toString());
-            }
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                idxJson = "{}";
-            }
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
-        }
-
-        JsonObject idx = gson.fromJson(idxJson, JsonObject.class);
-        boolean create = true;
-
-        String idxName = field + "-index";
-
-        JsonArray idxs = idx.getAsJsonArray("indexes");
-        if (idxs != null) {
-            for (int i = 0; i < idxs.size(); i++) {
-                JsonElement elem = idxs.get(i);
-                if (elem.isJsonObject()) {
-                    JsonObject o = (JsonObject) elem;
-
-                    JsonElement name = o.get("name");
-                    if (name != null) {
-                        if (name.isJsonPrimitive() && ((JsonPrimitive) name).isString()) {
-                            if (idxName.equals(name.getAsString())) {
-                                create = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        if (create) {
-            logger.info("Updating the galasa_run index " + idxName);
-
-            JsonObject doc = new JsonObject();
-            doc.addProperty("name", idxName);
-            doc.addProperty("type", "json");
-
-            JsonObject index = new JsonObject();
-            doc.add("index", index);
-            JsonArray fields = new JsonArray();
-            index.add("fields", fields);
-
-            JsonObject field1 = new JsonObject();
-            fields.add(field1);
-            field1.addProperty(field, "asc");
-
-            HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
-
-            HttpPost httpPost = new HttpPost(rasUri + "/galasa_run/_index");
-            httpPost.setEntity(entity);
-
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                StatusLine statusLine = response.getStatusLine();
-                EntityUtils.consumeQuietly(response.getEntity());
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == HttpStatus.SC_CONFLICT) {
-                    // Someone possibly updated
-                    attempts++;
-                    if (attempts > 10) {
-                        throw new CouchdbRasException(
-                                "Update of galasa_run index failed on CouchDB server due to conflicts, attempted 10 times");
-                    }
-                    Thread.sleep(1000 + new Random().nextInt(3000));
-                    checkIndex(attempts, dbName, field);
-                    return;
-                }
-
-                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                    throw new CouchdbRasException(
-                            "Update of galasa_run index failed on CouchDB server - " + statusLine.toString());
-                }
-
-            } catch (CouchdbRasException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new CouchdbRasException("Update of galasa_run index faile", e);
-            }
-        }
-
-    }
-
-    private void checkDatabasePresent(int attempts, String dbName) throws CouchdbRasException {
-        HttpHead httpHead = new HttpHead(rasUri + "/" + dbName);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
-            StatusLine statusLine = response.getStatusLine();
-
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                return;
-            }
-            if (statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException(
-                        "Validation failed of database " + dbName + " - " + statusLine.toString());
-            }
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
-        }
-
-        logger.info("CouchDB database " + dbName + " is missing,  creating");
-
-        HttpPut httpPut = new HttpPut(rasUri + "/" + dbName);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
-            StatusLine statusLine = response.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
-            if (statusCode == HttpStatus.SC_CONFLICT) {
-                // Someone possibly updated
-                attempts++;
-                if (attempts > 10) {
-                    throw new CouchdbRasException(
-                            "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
-                }
-                Thread.sleep(1000 + new Random().nextInt(3000));
-                checkDatabasePresent(attempts, dbName);
-                return;
-            }
-
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                EntityUtils.consumeQuietly(response.getEntity());
-                throw new CouchdbRasException(
-                        "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
-            }
-
-            EntityUtils.consumeQuietly(response.getEntity());
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Create database " + dbName + " failed", e);
-        }
-    }
-
-    private void checkRunDesignDocument(int attempts) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_design/docs");
-
-        String docJson = null;
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            StatusLine statusLine = response.getStatusLine();
-            docJson = EntityUtils.toString(response.getEntity());
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK
-                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException(
-                        "Validation failed of database galasa_run designdocument - " + statusLine.toString());
-            }
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                docJson = "{}";
-            }
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
-        }
-
-        boolean updated = false;
-
-        JsonObject doc = gson.fromJson(docJson, JsonObject.class);
-        doc.remove("_id");
-        String rev = null;
-        if (doc.has("_rev")) {
-            rev = doc.get("_rev").getAsString();
-        }
-
-        JsonObject views = doc.getAsJsonObject("views");
-        if (views == null) {
-            updated = true;
-            views = new JsonObject();
-            doc.add("views", views);
-        }
-
-        JsonObject requestors = views.getAsJsonObject("requestors-view");
-        if (requestors == null) {
-            updated = true;
-            requestors = new JsonObject();
-            views.add("requestors-view", requestors);
-        }
-
-        if (checkView(requestors, "function (doc) { emit(doc.requestor, 1); }", "_count")) {
-            updated = true;
-        }
-        
-        JsonObject result = views.getAsJsonObject("result-view");
-        if (result == null) {
-            updated = true;
-            result = new JsonObject();
-            views.add("result-view", result);
-        }
-
-        if (checkView(result, "function (doc) { emit(doc.result, 1); }", "_count")) {
-            updated = true;
-        }
-
-        JsonObject testnames = views.getAsJsonObject("testnames-view");
-        if (testnames == null) {
-            updated = true;
-            testnames = new JsonObject();
-            views.add("testnames-view", testnames);
-        }
-
-        if (checkView(testnames, "function (doc) { emit(doc.testName, 1); }", "_count")) {
-            updated = true;
-        }
-
-        JsonObject bundleTestnames = views.getAsJsonObject("bundle-testnames-view");
-        if (bundleTestnames == null) {
-            updated = true;
-            bundleTestnames = new JsonObject();
-            views.add("bundle-testnames-view", testnames);
-        }
-
-        if (checkView(bundleTestnames, "function (doc) { emit(doc.bundle + '/' + doc.testName, 1); }", "_count")) {
-            updated = true;
-        }
-
-        if (updated) {
-            logger.info("Updating the galasa_run design document");
-
-            HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
-
-            HttpPut httpPut = new HttpPut(rasUri + "/galasa_run/_design/docs");
-            httpPut.setEntity(entity);
-
-            if (rev != null) {
-                httpPut.addHeader("ETaq", "\"" + rev + "\"");
-            }
-
-            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
-                StatusLine statusLine = response.getStatusLine();
-                int statusCode = statusLine.getStatusCode();
-                if (statusCode == HttpStatus.SC_CONFLICT) {
-                    // Someone possibly updated
-                    attempts++;
-                    if (attempts > 10) {
-                        throw new CouchdbRasException(
-                                "Update of galasa_run design document failed on CouchDB server due to conflicts, attempted 10 times");
-                    }
-                    Thread.sleep(1000 + new Random().nextInt(3000));
-                    checkRunDesignDocument(attempts);
-                    return;
-                }
-                
-                if (statusCode != HttpStatus.SC_CREATED) {
-                    EntityUtils.consumeQuietly(response.getEntity());
-                    throw new CouchdbRasException(
-                            "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
-                }
-
-                EntityUtils.consumeQuietly(response.getEntity());
-            } catch (CouchdbRasException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new CouchdbRasException("Update of galasa_run design document faile", e);
-            }
-        }
-    }
-
-    private boolean checkView(JsonObject view, String targetMap, String targetReduce) {
-
-        boolean updated = false;
-
-        if (checkViewString(view, "map", targetMap)) {
-            updated = true;
-        }
-        if (checkViewString(view, "reduce", targetReduce)) {
-            updated = true;
-        }
-        if (checkViewString(view, "language", "javascript")) {
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    private boolean checkViewString(JsonObject view, String field, String value) {
-
-        JsonElement element = view.get(field);
-        if (element == null) {
-            view.addProperty(field, value);
-            return true;
-        }
-
-        if (!element.isJsonPrimitive() || !((JsonPrimitive) element).isString()) {
-            view.addProperty(field, value);
-            return true;
-        }
-
-        String actualValue = element.getAsString();
-        if (!value.equals(actualValue)) {
-            view.addProperty(field, value);
-            return true;
-        }
-        return false;
-    }
-
-    private void checkVersion(String version, int minVersion, int minRelease, int minModification)
-            throws CouchdbRasException {
-        String minVRM = minVersion + "." + minRelease + "." + minModification;
-
-        Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
-        Matcher m = vrm.matcher(version);
-
-        if (!m.find()) {
-            throw new CouchdbRasException("Invalid CouchDB version " + version);
-        }
-
-        int actualVersion = 0;
-        int actualRelease = 0;
-        int actualModification = 0;
+        this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
 
         try {
-            actualVersion = Integer.parseInt(m.group(1));
-            actualRelease = Integer.parseInt(m.group(2));
-            actualModification = Integer.parseInt(m.group(3));
-        } catch (NumberFormatException e) {
-            throw new CouchdbRasException("Unable to determine CouchDB version " + version, e);
+            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
+        } catch (ConfigurationPropertyStoreException ex ) {
+            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
         }
 
-        if (actualVersion > minVersion) {
-            return;
-        }
-
-        if (actualVersion < minVersion) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        if (actualRelease > minRelease) {
-            return;
-        }
-
-        if (actualRelease < minRelease) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        if (actualModification > minModification) {
-            return;
-        }
-
-        if (actualModification < minModification) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        return;
-
+        // Dig out the value of the feature flag once, and hold it in a cache variable.
+        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT);
     }
+
 
     private void createArtifactDocument() throws CouchdbRasException {
         Artifacts artifacts = new Artifacts();
@@ -791,7 +419,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     @Override
     public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
         ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
-        dirs.add(new CouchdbDirectoryService(this));
+        dirs.add(new CouchdbDirectoryService(this, this.logFactory));
         return dirs;
     }
 
@@ -804,4 +432,32 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return "cdb-" + this.runDocumentId;
     }
 
+    private boolean isFeatureEnabled(FeatureFlag flag) throws CouchdbRasException {
+        String featurePropertyName = flag.getPropertyName();
+        int firstDotIndex = featurePropertyName.indexOf('.');
+        String prefix = featurePropertyName.substring(0, firstDotIndex);
+        String suffix = featurePropertyName.substring(firstDotIndex+1);
+        String value ;
+        try {
+            value = this.cps.getProperty(prefix, suffix);
+        } catch( ConfigurationPropertyStoreException ex) {
+            throw new CouchdbRasException(
+                MessageFormat.format("Failed to get the value of property {0} from the cps.",featurePropertyName),
+                ex
+            );
+        }
+
+        boolean isFeatureEnabled = Boolean.parseBoolean(value);
+        if (isFeatureEnabled) {
+            logger.trace(MessageFormat.format("Feature flag {0} is enabled", featurePropertyName));
+        } else {
+            logger.trace(MessageFormat.format("Feature flag {0} is disabled", featurePropertyName));
+        }
+        return isFeatureEnabled;
+    }
+
+
+    public boolean isFeatureFlagOneArtifactPerDocumentEnabled() {
+        return this.featureFlagOneArtifactPerDocument;
+    }
 }

@@ -8,5 +8,10 @@ galasa-eclipse-parent/target
 dependency-reduced-pom.xml
 .DS_Store
 
-
 bin/
+temp/
+
+.vscode/
+**/core.*.dmp
+**/javacore*.txt
+**/Snap.*.trc

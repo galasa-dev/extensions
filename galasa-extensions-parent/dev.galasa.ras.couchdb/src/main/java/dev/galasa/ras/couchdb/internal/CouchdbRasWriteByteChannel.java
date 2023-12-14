@@ -18,7 +18,6 @@ import java.nio.file.attribute.FileAttribute;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -38,7 +37,7 @@ import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
  */
 public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
-    private final static Log                    logger = LogFactory.getLog(CouchdbRasWriteByteChannel.class);
+    private final Log                           logger;
 
     private static final Charset                UTF8   = Charset.forName("utf-8");
 
@@ -52,7 +51,12 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
     CouchdbRasWriteByteChannel(CouchdbRasFileSystemProvider couchdbRasFileSystemProvider, CouchdbRasStore couchdbRasStore, Path remotePath,
             ResultArchiveStoreContentType remoteContentType, Set<? extends OpenOption> options,
-            FileAttribute<?>[] attrs) throws IOException {
+            FileAttribute<?>[] attrs,
+            dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory
+    ) throws IOException {
+
+        this.logger = logFactory.getLog(CouchdbRasWriteByteChannel.class);
+
         this.couchdbRasStore = couchdbRasStore;
         this.couchdbRasFileSystemProvider = couchdbRasFileSystemProvider;
         this.remotePath = remotePath;
@@ -70,6 +74,8 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
         // StandardOpenOption.TRUNCATE_EXISTING need to standardise across the board
         cacheByteChannel = Files.newByteChannel(cachePath, StandardOpenOption.WRITE,
                 StandardOpenOption.TRUNCATE_EXISTING);
+
+
     }
 
     /*
@@ -90,6 +96,9 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
     @Override
     public void close() throws IOException {
         cacheByteChannel.close();
+
+        // Access the feature flag so we can decide what the storage strategy is.
+        boolean isOneArtifactPerDocumentEnabled = this.couchdbRasStore.isFeatureFlagOneArtifactPerDocumentEnabled();
 
         synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
             String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
@@ -112,16 +121,17 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                     throw new IOException("Unable to store the artifact attachment - " + statusLine.toString());
                 }
                 HttpEntity entity = response.getEntity();
-                PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(EntityUtils.toString(entity),
-                        PutPostResponse.class);
+                String entityStr = EntityUtils.toString(entity);
+                PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(entityStr,PutPostResponse.class);
                 if (putPostResponse.id == null || putPostResponse.rev == null) {
                     throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
                 }
                 this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
                 this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
 
-                logger.info("Stored artifact " + this.remotePath + ", length=" + Files.size(cachePath) + ", contentType="
-                        + this.remoteContentType.value());
+                String remotePathStr = this.remotePath.toString();
+
+                logger.info("Stored artifact " + remotePathStr + " length=" + Files.size(cachePath) + " contentType="+ this.remoteContentType.value());
             } catch (Exception e) {
                 throw new IOException("Unable to store artifact attachment", e);
             } finally {
