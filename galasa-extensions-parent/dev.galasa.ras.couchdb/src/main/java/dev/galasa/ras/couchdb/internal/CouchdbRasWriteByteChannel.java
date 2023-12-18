@@ -27,6 +27,8 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.ResultArchiveStoreContentType;
+import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 /**
@@ -99,41 +101,76 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
         // Access the feature flag so we can decide what the storage strategy is.
         boolean isOneArtifactPerDocumentEnabled = this.couchdbRasStore.isFeatureFlagOneArtifactPerDocumentEnabled();
+        int inlineArtifactMaxSize = this.couchdbRasStore.getInlineArtifactMaxSize();
+        boolean isAttachmentInline = false;
+
+        
+        long attachmentSize = Files.size(cachePath);
+        if (isOneArtifactPerDocumentEnabled) {
+            if(attachmentSize <= inlineArtifactMaxSize) {
+                isAttachmentInline = true;
+            }
+        }
 
         synchronized(this.getClass()) {  // Prevent multiple threads from updating the artifact document at the sametime,  only updated in this class
-            String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
 
-            HttpPut request = new HttpPut(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
-                    + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
-            request.setEntity(new FileEntity(cachePath.toFile()));
-            request.addHeader("Accept", "application/json");
-            request.addHeader("Content-Type", remoteContentType.value());
-            request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
+            try {
 
-            try (CloseableHttpResponse response = this.couchdbRasStore.getHttpClient().execute(request)) {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                    if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
-                        logger.error(
-                                "The run artifact document has been updated by another engine, terminating now to avoid corruption");
-                        System.exit(0);
+                if(isOneArtifactPerDocumentEnabled) {
+                    try {
+                        Artifacts artifacts = new Artifacts();
+                        if (isAttachmentInline) {
+                            // Content of file will be small, so we should be able to read it.
+                            byte[] bytes = Files.readAllBytes(cachePath);
+                            String inlineContent = bytesToHex(bytes);
+                            artifacts.inlineArtifactData = inlineContent;
+                        }
+                        couchdbRasStore.createArtifactDocument(artifacts);
+                    } catch (ResultArchiveStoreException ex) {
+
+                        // The interface can only throw IO exceptions.
+                        throw new IOException("Underlying RAS store cannot create a place to store the artifact.",ex);
                     }
-                    throw new IOException("Unable to store the artifact attachment - " + statusLine.toString());
                 }
-                HttpEntity entity = response.getEntity();
-                String entityStr = EntityUtils.toString(entity);
-                PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(entityStr,PutPostResponse.class);
-                if (putPostResponse.id == null || putPostResponse.rev == null) {
-                    throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
-                }
-                this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
-                this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
 
-                String remotePathStr = this.remotePath.toString();
+                if (!isAttachmentInline) {
 
-                logger.info("Stored artifact " + remotePathStr + " length=" + Files.size(cachePath) + " contentType="+ this.remoteContentType.value());
-            } catch (Exception e) {
-                throw new IOException("Unable to store artifact attachment", e);
+                    String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
+
+                    HttpPut request = new HttpPut(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
+                            + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
+                    request.setEntity(new FileEntity(cachePath.toFile()));
+                    request.addHeader("Accept", "application/json");
+                    request.addHeader("Content-Type", remoteContentType.value());
+                    request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
+
+                    try (CloseableHttpResponse response = this.couchdbRasStore.getHttpClient().execute(request)) {
+                        StatusLine statusLine = response.getStatusLine();
+                        if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
+                            if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
+                                logger.error(
+                                        "The run artifact document has been updated by another engine, terminating now to avoid corruption");
+                                System.exit(0);
+                            }
+                            throw new IOException("Unable to store the artifact attachment - " + statusLine.toString());
+                        }
+                        HttpEntity entity = response.getEntity();
+                        String entityStr = EntityUtils.toString(entity);
+                        PutPostResponse putPostResponse = this.couchdbRasStore.getGson().fromJson(entityStr,PutPostResponse.class);
+                        if (putPostResponse.id == null || putPostResponse.rev == null) {
+                            throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
+                        }
+                        this.couchdbRasStore.updateArtifactDocumentRev(putPostResponse.rev);
+                        this.couchdbRasFileSystemProvider.addPath((CouchdbArtifactPath) remotePath);
+
+                        String remotePathStr = this.remotePath.toString();
+
+                        logger.info("Stored artifact " + remotePathStr + " length=" + Files.size(cachePath) + " contentType="+ this.remoteContentType.value());
+                    } catch (Exception e) {
+                        throw new IOException("Unable to store artifact attachment", e);
+                    } 
+                } 
+                
             } finally {
                 try {
                     Files.delete(cachePath);
@@ -141,6 +178,17 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                 } // *** Hide any delete problems
             }
         }
+    }
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 
     /*

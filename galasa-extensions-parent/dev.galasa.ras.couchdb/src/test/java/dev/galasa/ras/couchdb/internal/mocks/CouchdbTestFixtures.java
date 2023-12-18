@@ -43,8 +43,7 @@ public class CouchdbTestFixtures {
     public static final String runName1 = "L10";
     public static final String ATTACHMENT_CONTENT1 = "Hello World";
     public static final String ARTIFACT_DOCUMENT_ID_1 = "987-artifact-doc-id-1";
-    public static final String ARTIFACT_DOCUMENT_REV_1 = "987-artifact-doc-id-1-v1";
-
+    public static final String ARTIFACT_DOCUMENT_ID_2 = "987-artifact-doc-id-2";
         
     public abstract static class BaseHttpInteraction implements HttpInteraction {
 
@@ -150,6 +149,11 @@ public class CouchdbTestFixtures {
             } catch (IOException ex ) {
                 throw new RuntimeException("Failed to read content from request."+ request.getRequestLine().getUri());
             }
+
+            validateIncomingPayload(content);
+        }
+
+        public void validateIncomingPayload(String content) throws RuntimeException {
             assertThat(content).contains("\"runId\": \""+CouchdbTestFixtures.documentId1);
             assertThat(content).contains("\"runName\": \""+CouchdbTestFixtures.runName1);
         }

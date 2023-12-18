@@ -34,7 +34,7 @@ public class CouchdbRasStoreTest {
     @Test
     public void TestFeatureIsEnabledAndCanFindItIsEnabled() throws Exception {
         // Given...
-        String propertyName = FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName();
+        String propertyName = CpsPropertyDef.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName();
 
         // Fake cps store...
         Map<String,String> props = new HashMap<String,String>();
@@ -52,7 +52,7 @@ public class CouchdbRasStoreTest {
     @Test
     public void TestFeatureIsFalseAndCanFindItIsDisabled() throws Exception {
         // Given...
-        String propertyName = FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName();
+        String propertyName = CpsPropertyDef.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName();
 
         // Fake cps store...
         Map<String,String> props = new HashMap<String,String>();
@@ -92,7 +92,7 @@ public class CouchdbRasStoreTest {
         // See if we can create a store...
         Map<String,String> props = new HashMap<String,String>();
 
-        props.put( FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName() , Boolean.toString(true) );
+        props.put( CpsPropertyDef.ONE_ARTIFACT_PER_DOCUMENT.getPropertyName() , Boolean.toString(true) );
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add( new CreateTestDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, "124") );
@@ -104,5 +104,5 @@ public class CouchdbRasStoreTest {
         fixtures.createCouchdbRasStore(props,interactions, new MockLogFactory());
     }
 
-    
+
 }
