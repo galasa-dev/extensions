@@ -50,20 +50,20 @@ public class CouchdbTestFixtures {
 
         private String rasUriStr ;
         private String documentId;
-        private String documentRev;
+        private String returnedDocumentRev;
 
-        public BaseHttpInteraction(String basicRasUriStr, String documentId, String documentRev ) {
+        public BaseHttpInteraction(String basicRasUriStr, String documentId, String returnedDocumentRev) {
             this.rasUriStr = basicRasUriStr;
             this.documentId = documentId;
-            this.documentRev = documentRev;
+            this.returnedDocumentRev = returnedDocumentRev;
         }
 
         public String getDocumentId() {
             return this.documentId;
         }
 
-        public String getDocumentRev() {
-            return this.documentRev;
+        public String getReturnedDocumentRev() {
+            return this.returnedDocumentRev;
         }
 
         public String getRasUriStr() {
@@ -92,8 +92,8 @@ public class CouchdbTestFixtures {
 
     public static class CreateTestDocInteractionOK extends BaseHttpInteraction {
 
-        public CreateTestDocInteractionOK(String rasUriStr, String documentId, String documentRev ) {
-            super(rasUriStr, documentId, documentRev);
+        public CreateTestDocInteractionOK(String rasUriStr, String documentId, String returnedDocumentRev) {
+            super(rasUriStr, documentId, returnedDocumentRev);
         }
 
         @Override
@@ -110,9 +110,9 @@ public class CouchdbTestFixtures {
             // We will reply with a PutPostResponse
 
             PutPostResponse responseTransportBean = new PutPostResponse();
-            responseTransportBean.id = getDocumentId();
+            responseTransportBean.id = getDocumentId();setAllowComparingPrivateFields(false);
             responseTransportBean.ok = true ;
-            responseTransportBean.rev = getDocumentRev();
+            responseTransportBean.rev = getReturnedDocumentRev();
 
             Gson gson = GalasaGsonBuilder.build();
             String updateMessagePayload = gson.toJson(responseTransportBean);
@@ -132,8 +132,8 @@ public class CouchdbTestFixtures {
 
     public static class CreateArtifactDocInteractionOK extends BaseHttpInteraction {
 
-        public CreateArtifactDocInteractionOK(String rasUriStr, String documentId, String documentRev ) {
-            super(rasUriStr, documentId, documentRev);
+        public CreateArtifactDocInteractionOK(String rasUriStr, String documentId, String returnedDocumentRev) {
+            super(rasUriStr, documentId, returnedDocumentRev);
         }
 
 
@@ -163,7 +163,7 @@ public class CouchdbTestFixtures {
             PutPostResponse responseTransportBean = new PutPostResponse();
             responseTransportBean.id = getDocumentId();
             responseTransportBean.ok = true ;
-            responseTransportBean.rev = getDocumentRev();
+            responseTransportBean.rev = getReturnedDocumentRev();
 
             Gson gson = GalasaGsonBuilder.build();
             String updateMessagePayload = gson.toJson(responseTransportBean);
@@ -184,16 +184,16 @@ public class CouchdbTestFixtures {
 
     public CouchdbRasStore createCouchdbRasStore(Map<String,String> inputProps) throws Exception {
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add( new CreateTestDocInteractionOK(rasUriStr, documentId1, "124") );
+        interactions.add( new CreateArtifactDocInteractionOK(rasUriStr, documentId1, "124") );
+
         return createCouchdbRasStore(inputProps,interactions, new MockLogFactory());
     }
-    
-    public CouchdbRasStore createCouchdbRasStore(Map<String,String> inputProps, List<HttpInteraction> extraInteractions, MockLogFactory logFactory ) throws Exception {
 
+    public CouchdbRasStore createCouchdbRasStore( Map<String,String> inputProps, List<HttpInteraction> allInteractions , MockLogFactory logFactory ) throws Exception {
         if (logFactory == null ) {
             logFactory = new MockLogFactory();
         }
-
-        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         Map<String,String> props = new HashMap<String,String>();
         if (inputProps != null) {
@@ -217,13 +217,7 @@ public class CouchdbTestFixtures {
             } 
         };
 
-        
-
-        interactions.add( new CreateTestDocInteractionOK(rasUriStr, documentId1, documentRev1) );
-        interactions.add( new CreateArtifactDocInteractionOK(rasUriStr, documentId1, documentRev1) );
-        interactions.addAll(extraInteractions);
-
-        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(allInteractions);
 
         MockCouchdbValidator mockValidator = new MockCouchdbValidator();
 

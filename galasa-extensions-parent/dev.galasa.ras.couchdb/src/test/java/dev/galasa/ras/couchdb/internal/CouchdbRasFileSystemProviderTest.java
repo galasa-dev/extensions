@@ -35,6 +35,8 @@ import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
 import dev.galasa.ras.couchdb.internal.mocks.MockStatusLine;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.CreateArtifactDocInteractionOK;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.CreateTestDocInteractionOK;
 
 
 
@@ -47,10 +49,12 @@ public class CouchdbRasFileSystemProviderTest {
     public static class  PutArtifactInteraction extends BaseHttpInteraction {
 
         String testFileNameToCreate;
+        String expectedDocumentRevSentToServer;
 
-        public PutArtifactInteraction(String rasUriStr , String documentId, String documentRev, String testFileNameToCreate) {
-            super(rasUriStr, documentId, documentRev);
+        public PutArtifactInteraction(String rasUriStr , String expectedDocumentIdSentToServer, String expectedDocumentRevSentToServer, String returnedDocumentRev , String testFileNameToCreate) {
+            super(rasUriStr, expectedDocumentIdSentToServer, returnedDocumentRev);
             this.testFileNameToCreate = testFileNameToCreate;
+            this.expectedDocumentRevSentToServer = expectedDocumentRevSentToServer;
         }
 
         @Override
@@ -66,7 +70,7 @@ public class CouchdbRasFileSystemProviderTest {
 
             // Check that the headers have been set up.
             assertThat(request.getHeaders("If-Match")).isNotNull();
-            assertThat(request.getHeaders("If-Match")[0].getValue()).isEqualTo(CouchdbTestFixtures.documentRev1);
+            assertThat(request.getHeaders("If-Match")[0].getValue()).as("Header If-Match contained the wrong revision number.").isEqualTo(this.expectedDocumentRevSentToServer);
 
             assertThat(request.getHeaders("Accept")).isNotNull();
             assertThat(request.getHeaders("Accept")[0].getValue()).isEqualTo("application/json");
@@ -86,9 +90,9 @@ public class CouchdbRasFileSystemProviderTest {
         public MockCloseableHttpResponse getResponse() {
 
             PutPostResponse responseTransportBean = new PutPostResponse();
-            responseTransportBean.id = CouchdbTestFixtures.ARTIFACT_DOCUMENT_ID_1;
+            responseTransportBean.id = getDocumentId();
             responseTransportBean.ok = true ;
-            responseTransportBean.rev = CouchdbTestFixtures.ARTIFACT_DOCUMENT_REV_1;
+            responseTransportBean.rev = getReturnedDocumentRev();
 
             Gson gson = GalasaGsonBuilder.build();
             String updateMessagePayload = gson.toJson(responseTransportBean);
@@ -117,7 +121,11 @@ public class CouchdbRasFileSystemProviderTest {
         // We expect an http interaction shortly, where a PUT is sent to couchdb...
         // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add( new  PutArtifactInteraction( CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, CouchdbTestFixtures.documentRev1, testFileNameToCreate) ) ;
+        // Interactions to get the RAS store created for this run...
+        interactions.add( new CreateTestDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, "124") );
+        interactions.add( new CreateArtifactDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, "124") );
+        // Interactions when you close a file in the file store.
+        interactions.add( new PutArtifactInteraction( CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, "124","125", testFileNameToCreate) ) ;
 
         MockLogFactory mockLogFactory = new MockLogFactory();
         CouchdbRasStore couchdbStore = fixtures.createCouchdbRasStore(null,interactions, mockLogFactory);
@@ -127,6 +135,45 @@ public class CouchdbRasFileSystemProviderTest {
         Path testFilePath = rootDirPath.resolve(testFileNameToCreate);
 
         Files.write(testFilePath, fileContent.getBytes(), StandardOpenOption.CREATE);
+
+        String logContent = mockLogFactory.toString();
+        assertThat(logContent).isNotEmpty();
+    }
+
+    @Test 
+    public void TestTwoFileClosesCausesCouchDBArtifactsToBeSavedInSingleDocument() throws Exception {
+
+        // Given...
+        String fileContent = CouchdbTestFixtures.ATTACHMENT_CONTENT1 ;
+        String testFileNameToCreate = testName.getMethodName()+"1";
+
+        String fileContent2 = CouchdbTestFixtures.ATTACHMENT_CONTENT1 ;
+        String testFileNameToCreate2 = testName.getMethodName()+"2";
+
+        // We expect an http interaction shortly, where a PUT is sent to couchdb...
+        // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved 
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        // Interactions to get the RAS store created for this run...
+        interactions.add( new CreateTestDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1,CouchdbTestFixtures.documentRev1) );
+        interactions.add( new CreateArtifactDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.ARTIFACT_DOCUMENT_ID_1, "124") );
+        // Interactions when you close the first file in the file store.
+        interactions.add( new PutArtifactInteraction( CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.ARTIFACT_DOCUMENT_ID_1, "124", "125", testFileNameToCreate) ) ;
+        // Interactions when you close the second file in the file store.
+        interactions.add( new PutArtifactInteraction( CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.ARTIFACT_DOCUMENT_ID_1, "125", "126" , testFileNameToCreate2) ) ;
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore couchdbStore = fixtures.createCouchdbRasStore(null,interactions, mockLogFactory);
+
+        // When... we write a file to the couchdb filestore...
+        // First file write...
+        Path rootDirPath = couchdbStore.getStoredArtifactsRoot();
+        Path testFilePath = rootDirPath.resolve(testFileNameToCreate);
+        Files.write(testFilePath, fileContent.getBytes(), StandardOpenOption.CREATE);
+
+        //Second file write...
+        Path rootDirPath2 = couchdbStore.getStoredArtifactsRoot();
+        Path testFilePath2 = rootDirPath2.resolve(testFileNameToCreate2);
+        Files.write(testFilePath2, fileContent2.getBytes(), StandardOpenOption.CREATE);
 
         String logContent = mockLogFactory.toString();
         assertThat(logContent).isNotEmpty();

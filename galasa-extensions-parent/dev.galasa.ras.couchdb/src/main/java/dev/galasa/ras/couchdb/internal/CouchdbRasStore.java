@@ -106,6 +106,16 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient);
 
+        // Set the cps up.
+        try {
+            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
+        } catch (ConfigurationPropertyStoreException ex ) {
+            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
+        }
+
+        // Dig out the value of the feature flag once, and hold it in a cache variable.
+        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT);
+
         this.run = this.framework.getTestRun();
 
         // *** If this is a run, ensure we can create the run document
@@ -118,20 +128,13 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed - unable to create initial run document", e);
             }
 
-            createArtifactDocument();
+            if (!this.isFeatureFlagOneArtifactPerDocumentEnabled()){
+                createArtifactDocument();
+            }
         }
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
-
-        try {
-            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
-        } catch (ConfigurationPropertyStoreException ex ) {
-            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
-        }
-
-        // Dig out the value of the feature flag once, and hold it in a cache variable.
-        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT);
     }
 
 
