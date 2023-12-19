@@ -1,6 +1,7 @@
 plugins {
     id 'biz.aQute.bnd.builder'
     id 'galasa.extensions'
+    id 'jacoco'
 }
 
 description = 'Galasa RAS - CouchDB'
@@ -16,4 +17,12 @@ dependencies {
     implementation ('org.apache.httpcomponents:httpcore-osgi:4.4.14')
     implementation ('com.google.code.gson:gson:2.8.9')
     implementation ('dev.galasa:dev.galasa.framework: 0.31.0')
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
 }

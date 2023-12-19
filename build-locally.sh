@@ -20,11 +20,11 @@
 BASEDIR=$(dirname "$0");pushd $BASEDIR 2>&1 >> /dev/null ;BASEDIR=$(pwd);popd 2>&1 >> /dev/null
 # echo "Running from directory ${BASEDIR}"
 export ORIGINAL_DIR=$(pwd)
-# cd "${BASEDIR}"
+cd "${BASEDIR}"
 
 cd "${BASEDIR}/.."
 WORKSPACE_DIR=$(pwd)
-
+cd "${BASEDIR}"
 
 #-----------------------------------------------------------------------------------------                   
 #
@@ -167,9 +167,9 @@ log_file=${LOGS_DIR}/${project}.txt
 info "Log will be placed at ${log_file}"
 
 if [[ "${build_type}" == "clean" ]]; then
-    goals="clean build check publishToMavenLocal --no-build-cache "
+    goals="clean build check jacocoTestReport publishToMavenLocal --no-build-cache "
 else
-    goals="build check publishToMavenLocal"
+    goals="build check jacocoTestReport publishToMavenLocal"
 fi
 
 h2 "Removing .m2 artifacts"
@@ -199,6 +199,20 @@ ${goals} \
 2>&1 > ${log_file}
 
 
+function displayCouchDbCodeCoverage() {
+    h2 "Calculating couchDb code coverage..."
+    percent_code_complete=$(cat ${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/dev.galasa.ras.couchdb.internal/index.html \
+    | sed "s/.*<td>Total<\/td>//1" \
+    | cut -f1 -d'%' \
+    | sed "s/.*>//g")
+    info 
+    info
+    info "Statement code coverage is ${percent_code_complete}%"
+    info
+    info "See html report here: file://${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/index.html"
+}
+
+displayCouchDbCodeCoverage
 
 rc=$? ; if [[ "${rc}" != "0" ]]; then cat ${log_file} ; error "Failed to build ${project}" ; exit 1 ; fi
 success "Project ${project} built - OK - log is at ${log_file}"

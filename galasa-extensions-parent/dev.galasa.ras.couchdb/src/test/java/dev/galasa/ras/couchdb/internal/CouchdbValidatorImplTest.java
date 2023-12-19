@@ -29,7 +29,7 @@ public class CouchdbValidatorImplTest {
     public static class WelcomeInteractionOK extends BaseHttpInteraction {
 
         public WelcomeInteractionOK(String rasUriStr, String documentId, String documentRev ) {
-            super(rasUriStr, documentId, documentRev);
+            super(rasUriStr, documentId, "124");
         }
 
         @Override

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.validation.constraints.NotNull;
+import javax.xml.catalog.CatalogFeatures.Feature;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,7 +55,7 @@ import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
 
-    private final Log                          logger             = LogFactory.getLog(getClass());
+    private final Log                          logger            ;
 
     private final IFramework                   framework;                                         // NOSONAR
     private final URI                          rasUri;
@@ -90,6 +91,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     // The namespace used to access cps properties that this store is interested in.
     public static final String CPS_NAMESPACE_COUCHDB = "couchdb";
 
+    private final int inlineArtifactMaxSize  ;
+
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
         this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl() );
     }
@@ -99,12 +102,24 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory 
     ) throws CouchdbRasException {
         this.logFactory = logFactory;
+        this.logger = logFactory.getLog(getClass());
         this.framework = framework;
         this.rasUri = rasUri;
          // *** Validate the connection to the server and it's version
         this.httpClient = httpFactory.createClient();
 
         validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient);
+
+        // Set the cps up.
+        try {
+            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
+        } catch (ConfigurationPropertyStoreException ex ) {
+            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
+        }
+
+        // Dig out the value of the feature flag once, and hold it in a cache variable.
+        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(CpsPropertyDef.ONE_ARTIFACT_PER_DOCUMENT);
+        this.inlineArtifactMaxSize = CpsPropertyDef.INLINE_ARTIFACT_MAX_SIZE.getCpsIntValue(this.logger, this.cps);
 
         this.run = this.framework.getTestRun();
 
@@ -118,25 +133,24 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                 throw new CouchdbRasException("Validation failed - unable to create initial run document", e);
             }
 
-            createArtifactDocument();
+            if (!this.isFeatureFlagOneArtifactPerDocumentEnabled()){
+                createArtifactDocument();
+            }
         }
 
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
-
-        try {
-            this.cps = this.framework.getConfigurationPropertyService(CPS_NAMESPACE_COUCHDB);
-        } catch (ConfigurationPropertyStoreException ex ) {
-            throw new CouchdbRasException("Unable to connect to a configuration property store.",ex);
-        }
-
-        // Dig out the value of the feature flag once, and hold it in a cache variable.
-        this.featureFlagOneArtifactPerDocument = isFeatureEnabled(FeatureFlag.ONE_ARTIFACT_PER_DOCUMENT);
     }
 
 
-    private void createArtifactDocument() throws CouchdbRasException {
+    // Protected so that we can create artifact documents from elsewhere.
+    protected void createArtifactDocument() throws CouchdbRasException {
         Artifacts artifacts = new Artifacts();
+        createArtifactDocument(artifacts);
+    }
+
+    protected void createArtifactDocument(Artifacts artifacts) throws CouchdbRasException {
+
         artifacts.runId = this.runDocumentId;
         artifacts.runName = this.run.getName();
 
@@ -432,7 +446,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return "cdb-" + this.runDocumentId;
     }
 
-    private boolean isFeatureEnabled(FeatureFlag flag) throws CouchdbRasException {
+    private boolean isFeatureEnabled(CpsPropertyDef flag) throws CouchdbRasException {
         String featurePropertyName = flag.getPropertyName();
         int firstDotIndex = featurePropertyName.indexOf('.');
         String prefix = featurePropertyName.substring(0, firstDotIndex);
@@ -457,7 +471,12 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
 
+
     public boolean isFeatureFlagOneArtifactPerDocumentEnabled() {
         return this.featureFlagOneArtifactPerDocument;
+    }
+
+    public int getInlineArtifactMaxSize() {
+        return this.inlineArtifactMaxSize;
     }
 }
