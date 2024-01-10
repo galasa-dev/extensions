@@ -169,9 +169,13 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
             List<KeyValue> kvs = response.getKvs();
             for(KeyValue kv : kvs) {
                 String key = kv.getKey().toString(UTF_8);
-                key = key.substring(0,key.indexOf("."));
-                if(!results.contains(key)) {
-                    results.add(key);
+                // Ignore any etcd keys which don't have a '.' character.
+                int indexOfFirstDot = key.indexOf(".");
+                if (indexOfFirstDot >= 0) {
+                    String namespace = key.substring(0,indexOfFirstDot);
+                    if(!results.contains(namespace)) {
+                        results.add(namespace);
+                    }
                 }
             }
         } catch (InterruptedException | ExecutionException e) {
