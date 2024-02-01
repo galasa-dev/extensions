@@ -30,8 +30,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import com.google.gson.Gson;
-
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
@@ -39,7 +37,7 @@ import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.dependencies.api.HttpClientFactory;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpClientFactoryImpl;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.LogFactoryImpl;
@@ -57,7 +55,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     private final CloseableHttpClient          httpClient;
     private boolean                            shutdown           = false;
 
-    private final Gson                         gson               = GalasaGsonBuilder.build();
+    private final GalasaGson                         gson               = new GalasaGson();
 
     private final CouchdbRasFileSystemProvider provider;
 

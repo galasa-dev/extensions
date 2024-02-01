@@ -12,9 +12,9 @@ import org.apache.http.*;
 import org.junit.*;
 import org.junit.rules.TestName;
 
-import com.google.gson.Gson;
 
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+
+import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.*;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
@@ -54,7 +54,7 @@ public class CouchdbValidatorImplTest {
             welcomeBean.couchdb = "dummy-edition";
             welcomeBean.version = "2.3.1";
 
-            Gson gson = GalasaGsonBuilder.build();
+            GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(welcomeBean);
 
             HttpEntity entity = new MockHttpEntity(updateMessagePayload); 

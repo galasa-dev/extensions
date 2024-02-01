@@ -23,9 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import com.google.gson.Gson;
-
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.HttpInteraction;
 import dev.galasa.ras.couchdb.internal.mocks.MockCloseableHttpResponse;
@@ -93,7 +91,7 @@ public class CouchdbRasFileSystemProviderTest {
             responseTransportBean.ok = true ;
             responseTransportBean.rev = getReturnedDocumentRev();
 
-            Gson gson = GalasaGsonBuilder.build();
+            GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
             HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
