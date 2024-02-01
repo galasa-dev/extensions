@@ -391,7 +391,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return this.rasUri;
     }
 
-    public Gson getGson() {
+    public GalasaGson getGson() {
         return this.gson;
     }
 
