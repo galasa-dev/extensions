@@ -25,18 +25,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import com.google.gson.Gson;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
     
-    private final Gson                         gson               = GalasaGsonBuilder.build();
+    private final GalasaGson                         gson               = new GalasaGson();
     private final Log                          logger             = LogFactory.getLog(getClass());
 
     public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient ) throws CouchdbRasException {

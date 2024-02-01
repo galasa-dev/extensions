@@ -29,6 +29,7 @@ import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IRun;
+import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
@@ -113,7 +114,7 @@ public class CouchdbTestFixtures {
             responseTransportBean.ok = true ;
             responseTransportBean.rev = getReturnedDocumentRev();
 
-            Gson gson = GalasaGsonBuilder.build();
+            GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
             HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
@@ -169,7 +170,7 @@ public class CouchdbTestFixtures {
             responseTransportBean.ok = true ;
             responseTransportBean.rev = getReturnedDocumentRev();
 
-            Gson gson = GalasaGsonBuilder.build();
+            GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
             HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
