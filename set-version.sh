@@ -100,6 +100,10 @@ temp_dir=$BASEDIR/temp/version_bump
 mkdir -p $temp_dir
 
 
+# Extensions base
+cat $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/galasa.extensions.gradl
+cp $temp_dir/galasa.extensions.gradl $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle
+
 # Couchdb...
 cat $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/couchdb-build.gradle
 cp $temp_dir/couchdb-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle
