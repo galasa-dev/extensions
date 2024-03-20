@@ -25,7 +25,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -35,11 +34,13 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
 import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.dependencies.api.HttpClientFactory;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpClientFactoryImpl;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
@@ -55,7 +56,9 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     private final CloseableHttpClient          httpClient;
     private boolean                            shutdown           = false;
 
-    private final GalasaGson                         gson               = new GalasaGson();
+    private final GalasaGson                   gson               = new GalasaGson();
+
+    private final HttpRequestFactory           requestFactory;
 
     private final CouchdbRasFileSystemProvider provider;
 
@@ -87,6 +90,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         this.logger = logFactory.getLog(getClass());
         this.framework = framework;
         this.rasUri = rasUri;
+        this.requestFactory = new HttpRequestFactory(new SystemEnvironment());
          // *** Validate the connection to the server and it's version
         this.httpClient = httpFactory.createClient();
 
@@ -125,10 +129,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         String jsonArtifacts = gson.toJson(artifacts);
 
-        HttpPost request = new HttpPost(this.rasUri + "/galasa_artifacts");
+        HttpPost request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_artifacts");
         request.setEntity(new StringEntity(jsonArtifacts, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -184,10 +186,8 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         String jsonStructure = gson.toJson(logLines);
 
-        HttpPost request = new HttpPost(this.rasUri + "/galasa_log");
+        HttpPost request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_log");
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -238,14 +238,12 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         HttpEntityEnclosingRequestBase request;
         if (runDocumentId == null) {
-            request = new HttpPost(this.rasUri + "/galasa_run");
+            request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_run");
         } else {
-            request = new HttpPut(this.rasUri + "/galasa_run/" + runDocumentId);
-            request.addHeader("If-Match", runDocumentRevision);
+            request = requestFactory.getHttpPutRequest(this.rasUri + "/galasa_run/" + runDocumentId);
+            request.setHeader("If-Match", runDocumentRevision);
         }
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
-        request.addHeader("Accept", "application/json");
-        request.addHeader("Content-Type", "application/json");
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
@@ -283,7 +281,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             throw new CouchdbRasException("Problem encoding artifact path", e);
         }
 
-        HttpGet httpGet = new HttpGet(this.rasUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath);
+        HttpGet httpGet = requestFactory.getHttpGetRequest(this.rasUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath);
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -307,8 +305,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         StringBuilder sb = new StringBuilder();
 
         for (String logRecordId : ts.getLogRecordIds()) {
-            HttpGet httpGet = new HttpGet(this.rasUri + "/galasa_log/" + logRecordId);
-            httpGet.addHeader("Accept", "application/json");
+            HttpGet httpGet = requestFactory.getHttpGetRequest(this.rasUri + "/galasa_log/" + logRecordId);
 
             try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
                 StatusLine statusLine = response.getStatusLine();

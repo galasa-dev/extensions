@@ -27,7 +27,8 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.ResultArchiveStoreContentType;
-
+import dev.galasa.framework.spi.SystemEnvironment;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 /**
@@ -41,6 +42,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
     private final Path                          cachePath;
     private final SeekableByteChannel           cacheByteChannel;
+    private final HttpRequestFactory           requestFactory;
 
     private final Path                          remotePath;
     private final ResultArchiveStoreContentType remoteContentType;
@@ -58,6 +60,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
         this.couchdbRasStore = couchdbRasStore;
         this.couchdbRasFileSystemProvider = couchdbRasFileSystemProvider;
         this.remotePath = remotePath;
+        this.requestFactory = new HttpRequestFactory(new SystemEnvironment());
 
         if (remoteContentType != null) {
             this.remoteContentType = remoteContentType;
@@ -98,12 +101,11 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
             try {
                 String encodedRemotePath = URLEncoder.encode(this.remotePath.toString(), UTF8.name());
 
-                HttpPut request = new HttpPut(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
+                HttpPut request = requestFactory.getHttpPutRequest(this.couchdbRasStore.getCouchdbUri() + "/galasa_artifacts/"
                         + this.couchdbRasStore.getArtifactDocumentId() + "/" + encodedRemotePath);
                 request.setEntity(new FileEntity(cachePath.toFile()));
-                request.addHeader("Accept", "application/json");
-                request.addHeader("Content-Type", remoteContentType.value());
-                request.addHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
+                request.setHeader("Content-Type", remoteContentType.value());
+                request.setHeader("If-Match", this.couchdbRasStore.getArtifactDocumentRev());
 
                 try (CloseableHttpResponse response = this.couchdbRasStore.getHttpClient().execute(request)) {
                     StatusLine statusLine = response.getStatusLine();
