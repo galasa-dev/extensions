@@ -6,8 +6,11 @@
 package dev.galasa.ras.couchdb.internal;
 
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
+
 import java.net.URI;
 
 public interface CouchdbValidator {
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient ) throws CouchdbRasException ;
+    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory ) throws CouchdbRasException ;
 }

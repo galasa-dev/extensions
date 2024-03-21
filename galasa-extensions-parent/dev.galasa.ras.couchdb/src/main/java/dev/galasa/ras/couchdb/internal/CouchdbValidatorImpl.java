@@ -31,7 +31,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
@@ -40,10 +39,10 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
     
     private final GalasaGson                         gson               = new GalasaGson();
     private final Log                          logger             = LogFactory.getLog(getClass());
-    private final HttpRequestFactory requestFactory = new HttpRequestFactory(new SystemEnvironment());
+    private       HttpRequestFactory requestFactory;
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient ) throws CouchdbRasException {
-       
+    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbRasException {
+       this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -60,7 +59,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.version, 2, 3, 1);
+            checkVersion(welcome.version, 3, 3, 3);
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_run");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_log");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts");

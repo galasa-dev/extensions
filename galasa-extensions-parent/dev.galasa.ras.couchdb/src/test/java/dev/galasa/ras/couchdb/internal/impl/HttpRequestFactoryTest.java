@@ -13,38 +13,10 @@ import org.apache.http.client.methods.HttpPut;
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.*;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
-
-import dev.galasa.framework.spi.Environment;
 import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
+import dev.galasa.ras.couchdb.internal.mocks.MockEnvironment;
 
 public class HttpRequestFactoryTest {
-
-    private class MockEnvironment implements Environment{
-
-        Map<String,String> envProps ;
-
-        public MockEnvironment() {
-        this.envProps = new HashMap<String,String>();
-        }
-
-        public void setenv(String propertyName, String value ) {
-            this.envProps.put(propertyName, value);
-        }
-    
-        @Override
-        public String getenv(String propertyName) {
-            return this.envProps.get(propertyName);
-        }
-
-        @Override
-        public String getProperty(String propertyName) {
-            throw new UnsupportedOperationException("Unimplemented method 'getProperty'");
-        }
-
-    }
 
     @Test
     public void TestGETRequestReturnsRequestWithGETMethod() {
@@ -173,7 +145,7 @@ public class HttpRequestFactoryTest {
     }
 
     @Test
-    public void TestPOSTRequestwithUpdatedHeadersReturnsRequestWithUpdatedHeaders() throws UnsupportedEncodingException {
+    public void TestPOSTRequestwithUpdatedHeadersReturnsRequestWithUpdatedHeaders() {
         //Given ...
         String token = "getwithextraheaders";
         MockEnvironment mockEnv = new MockEnvironment();

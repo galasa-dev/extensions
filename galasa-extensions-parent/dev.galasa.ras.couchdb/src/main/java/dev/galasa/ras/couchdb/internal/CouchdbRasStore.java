@@ -79,22 +79,22 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     private dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory; 
 
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
-        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl() );
+        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl(), new HttpRequestFactory(new SystemEnvironment()));
     }
 
     // Note: We use logFactory here so we can propogate it downwards during unit testing.
     public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator, 
-        dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory 
+        dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory, HttpRequestFactory requestFactory 
     ) throws CouchdbRasException {
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
         this.framework = framework;
         this.rasUri = rasUri;
-        this.requestFactory = new HttpRequestFactory(new SystemEnvironment());
+        this.requestFactory = requestFactory;
          // *** Validate the connection to the server and it's version
         this.httpClient = httpFactory.createClient();
 
-        validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient);
+        validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient, this.requestFactory);
 
         this.run = this.framework.getTestRun();
 
@@ -399,7 +399,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     @Override
     public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
         ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
-        dirs.add(new CouchdbDirectoryService(this, this.logFactory));
+        dirs.add(new CouchdbDirectoryService(this, this.logFactory, this.requestFactory));
         return dirs;
     }
 
@@ -412,5 +412,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
         return "cdb-" + this.runDocumentId;
     }
 
-   
+   public HttpRequestFactory getRequestFactory() {
+     return this.requestFactory;
+   }
 }

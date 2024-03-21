@@ -36,7 +36,6 @@ import org.apache.http.util.EntityUtils;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
-import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
@@ -68,11 +67,11 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
     private final CouchdbRasStore store;
 
-    public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory) {
+    public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory, HttpRequestFactory requestFactory) {
         this.store = store;
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
-        this.requestFactory = new HttpRequestFactory(new SystemEnvironment());
+        this.requestFactory = requestFactory;
     }
 
     @Override
