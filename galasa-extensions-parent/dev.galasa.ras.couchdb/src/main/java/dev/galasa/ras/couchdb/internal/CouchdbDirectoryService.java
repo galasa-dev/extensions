@@ -48,6 +48,7 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
 import dev.galasa.ras.couchdb.internal.pojos.IdRev;
@@ -60,15 +61,17 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
     private final Log             logger ;
     private final LogFactory      logFactory ;
+    private final HttpRequestFactory           requestFactory;
 
     private static final Charset  UTF8   = Charset.forName("utf-8");
 
     private final CouchdbRasStore store;
 
-    public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory) {
+    public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory, HttpRequestFactory requestFactory) {
         this.store = store;
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
+        this.requestFactory = requestFactory;
     }
 
     @Override
@@ -90,8 +93,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         }
 
         for (String artifactRecordId : ts.getArtifactRecordIds()) {
-            HttpGet httpGet = new HttpGet(store.getCouchdbUri() + "/galasa_artifacts/" + artifactRecordId);
-            httpGet.addHeader("Accept", "application/json");
+            HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/galasa_artifacts/" + artifactRecordId);
 
             try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
                 StatusLine statusLine = response.getStatusLine();
@@ -137,8 +139,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         ArrayList<IRunResult> runs = new ArrayList<>();
 
-        HttpGet httpGet = new HttpGet(store.getCouchdbUri() + "/galasa_run/_all_docs");
-        httpGet.addHeader("Accept", "application/json");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/galasa_run/_all_docs");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -175,8 +176,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     private CouchdbRunResult fetchRun(String id) throws ParseException, IOException, CouchdbRasException {
-        HttpGet httpGet = new HttpGet(store.getCouchdbUri() + "/galasa_run/" + id);
-        httpGet.addHeader("Accept", "application/json");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/galasa_run/" + id);
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -200,9 +200,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     public @NotNull List<String> getRequestors() throws ResultArchiveStoreException {
         ArrayList<String> requestors = new ArrayList<>();
 
-        HttpGet httpGet = new HttpGet(
+        HttpGet httpGet = requestFactory.getHttpGetRequest(
                 store.getCouchdbUri() + "/galasa_run/_design/docs/_view/requestors-view?group=true");
-        httpGet.addHeader("Accept", "application/json");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -233,9 +232,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     public @NotNull List<String> getResultNames() throws ResultArchiveStoreException {
         ArrayList<String> results = new ArrayList<>();
 
-        HttpGet httpGet = new HttpGet(
+        HttpGet httpGet = requestFactory.getHttpGetRequest(
                 store.getCouchdbUri() + "/galasa_run/_design/docs/_view/result-view?group=true");
-        httpGet.addHeader("Accept", "application/json");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -271,9 +269,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     public @NotNull List<RasTestClass> getTests() throws ResultArchiveStoreException {
         ArrayList<RasTestClass> tests = new ArrayList<>();
 
-        HttpGet httpGet = new HttpGet(
+        HttpGet httpGet = requestFactory.getHttpGetRequest(
                 store.getCouchdbUri() + "/galasa_run/_design/docs/_view/bundle-testnames-view?group=true");
-        httpGet.addHeader("Accept", "application/json");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -327,7 +324,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         ArrayList<IRunResult> runs = new ArrayList<>();
 
-        HttpPost httpPost = new HttpPost(store.getCouchdbUri() + "/galasa_run/_find");
+        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
 
         JsonObject selector = new JsonObject();
         JsonArray and = new JsonArray();
@@ -381,9 +378,6 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         Find find = new Find();
         find.selector = selector;
         find.execution_stats = true;
-
-        httpPost.addHeader("Accept", "application/json");
-        httpPost.addHeader("Content-Type", "application/json");
 
         while (true) {
             String requestContent = store.getGson().toJson(find);
@@ -465,7 +459,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             builder = new URIBuilder(store.getCouchdbUri() + "/" + databaseName + "/" + id);
             builder.addParameter("rev", getRevision(databaseName, id));
 
-            HttpDelete httpDelete = new HttpDelete(builder.build());
+            HttpDelete httpDelete = requestFactory.getHttpDeleteRequest(builder.build().toString());
 
             try (CloseableHttpResponse response = store.getHttpClient().execute(httpDelete)) {
                 StatusLine statusLine = response.getStatusLine();
@@ -482,7 +476,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     private String getRevision(String databaseName, String id) throws ResultArchiveStoreException {
-        HttpGet httpGet = new HttpGet(store.getCouchdbUri() + "/"+ databaseName+"/"+id);
+        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/"+ databaseName+"/"+id);
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();

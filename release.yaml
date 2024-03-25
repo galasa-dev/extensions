@@ -14,7 +14,7 @@ framework:
   bundles:
 
   - artifact: dev.galasa.ras.couchdb
-    version: 0.32.0
+    version: 0.33.0
     obr: true
     isolated: true
     codecoverage: true

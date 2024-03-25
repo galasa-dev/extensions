@@ -18,6 +18,7 @@ import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.*;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;;
 
 public class CouchdbValidatorImplTest {
     
@@ -52,7 +53,7 @@ public class CouchdbValidatorImplTest {
 
             Welcome welcomeBean = new Welcome();
             welcomeBean.couchdb = "dummy-edition";
-            welcomeBean.version = "2.3.1";
+            welcomeBean.version = "3.3.3";
 
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(welcomeBean);
@@ -84,9 +85,12 @@ public class CouchdbValidatorImplTest {
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
+        MockEnvironment environment = new MockEnvironment();
+        environment.setenv("GALASA_RAS_TOKEN", "checkisvalid");
+        HttpRequestFactory requestFactory = new HttpRequestFactory(environment);
 
         // When..
-        Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient ));
+        Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));
 
         // Then..
         assertThat(thrown).isNotNull();
