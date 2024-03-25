@@ -19,12 +19,14 @@ import dev.galasa.framework.spi.Environment;
 
 public class HttpRequestFactory {
 
+    private final String token = "GALASA_RAS_TOKEN";
+
     private Map<String, String> headers = new HashMap<String,String>();
 
     public HttpRequestFactory(Environment environment) {
         headers.put("Accept", "application/json");
         headers.put("Content-Type", "application/json");
-        headers.put( "Authorization", environment.getenv("GALASA_RAS_TOKEN"));
+        headers.put( "Authorization", environment.getenv(token));
     }
 
     private  HttpRequest addDefaultHeaders(HttpRequest request) {

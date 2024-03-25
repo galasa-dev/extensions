@@ -9,12 +9,12 @@ import dev.galasa.framework.spi.Environment;
 
 import java.util.HashMap;
 import java.util.Map;
-public class MockEnvironment implements Environment{
+public class MockEnvironment implements Environment {
 
-    private Map<String,String> envProps ;
+    private Map<String,String> envProps;
 
     public MockEnvironment() {
-    this.envProps = new HashMap<String,String>();
+        this.envProps = new HashMap<String,String>();
     }
 
     public void setenv(String propertyName, String value ) {
