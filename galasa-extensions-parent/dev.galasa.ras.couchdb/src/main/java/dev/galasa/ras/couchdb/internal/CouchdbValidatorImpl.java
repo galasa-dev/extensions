@@ -105,7 +105,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         logger.info("CouchDB database " + dbName + " is missing,  creating");
 
         HttpPut httpPut = requestFactory.getHttpPutRequest(rasUri + "/" + dbName);
-
+        logger.info("Authorization Header > "+ httpPut.getFirstHeader("Authorization").getValue());
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
             int statusCode = statusLine.getStatusCode();
