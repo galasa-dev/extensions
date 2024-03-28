@@ -26,7 +26,7 @@ public class HttpRequestFactory {
     public HttpRequestFactory(Environment environment) {
         headers.put("Accept", "application/json");
         headers.put("Content-Type", "application/json");
-        headers.put( "Authorization", environment.getenv(token));
+        headers.put( "Authorization", "Basic "+ environment.getenv(token));
     }
 
     private  HttpRequest addDefaultHeaders(HttpRequest request) {
