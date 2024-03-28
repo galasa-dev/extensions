@@ -33,7 +33,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
@@ -53,7 +53,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("HEAD");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
@@ -73,7 +73,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("POST");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
@@ -93,7 +93,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("PUT");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
@@ -113,7 +113,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("DELETE");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
@@ -137,7 +137,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("GET");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Referer").getValue()).isEqualTo(referer);
@@ -163,7 +163,7 @@ public class HttpRequestFactoryTest {
         //Then ...
         assertThat(request.getURI().toString()).isEqualTo(url);
         assertThat(request.getMethod()).isEqualTo("POST");
-        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo(token);
+        assertThat(request.getFirstHeader("Authorization").getValue()).isEqualTo("Basic "+token);
         assertThat(request.getHeaders("Content-Type").length).isEqualTo(1);
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo(contentType);
         assertThat(request.getHeaders("Accept").length).isEqualTo(1);
