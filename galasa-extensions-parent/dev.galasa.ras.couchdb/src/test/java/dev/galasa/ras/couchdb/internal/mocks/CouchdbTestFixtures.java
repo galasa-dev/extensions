@@ -32,6 +32,7 @@ import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbTestFixtures {
@@ -227,9 +228,14 @@ public class CouchdbTestFixtures {
         MockCouchdbValidator mockValidator = new MockCouchdbValidator();
 
         MockHttpClientFactory mockHttpClientFactory = new MockHttpClientFactory(mockHttpClient);
+
+        MockEnvironment mockEnv = new MockEnvironment();
+        mockEnv.setenv("GALASA_RAS_TOKEN", "myrastoken");
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
         
         URI rasURI = URI.create(rasUriStr);
-        CouchdbRasStore couchdbRasStore = new CouchdbRasStore(mockFramework, rasURI, mockHttpClientFactory, mockValidator, logFactory);
+        CouchdbRasStore couchdbRasStore = new CouchdbRasStore(mockFramework, rasURI, mockHttpClientFactory, mockValidator, logFactory, requestFactory);
 
         return couchdbRasStore;
     }

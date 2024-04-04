@@ -11,11 +11,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.ras.couchdb.internal.CouchdbRasException;
 import dev.galasa.ras.couchdb.internal.CouchdbValidator;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient) throws CouchdbRasException {
+    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbRasException {
         // Do nothing.
     }
     
