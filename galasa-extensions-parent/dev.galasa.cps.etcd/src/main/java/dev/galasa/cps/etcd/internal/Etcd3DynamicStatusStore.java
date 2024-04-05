@@ -85,9 +85,9 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
     /**
      * A simple put class that adds a single key value in etcd key value store.
      * 
-     * @param key
-     * @param value
-     * @throws DynamicStatusStoreException
+     * @param key The key to be stored.
+     * @param value The value to be associated with the specified key.
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public void put(@NotNull String key, @NotNull String value) throws DynamicStatusStoreException {
@@ -107,7 +107,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * A map put which allows a map of k-v pairs to the etcd store.
      * 
      * @param keyValues - a map of key value pairs.
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public void put(@NotNull Map<String, String> keyValues) throws DynamicStatusStoreException {
@@ -137,11 +137,11 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * If the oldValue argument is not the current value of the key the newValue is
      * NOT set into the store.
      * 
-     * @param key
+     * @param key The key whose value will be swapped.
      * @param oldValue - the value the key should have for the change to succeeed
      * @param newValue - the new value to set too if the old value was correct
      * @return boolean - if the swap was successful
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue)
@@ -180,13 +180,13 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * NOT set into the store. If the old value was correct then a map of other key
      * value pairs can be then set.
      * 
-     * @param key
+     * @param key The key whose value will be swapped
      * @param oldValue - the value the key should have for the change to succeeed
      * @param newValue - the new value to set too if the old value was correct
      * @param others   - a map of all subsequent values to set if the condition was
      *                 satisfied
      * @return boolean - if the swap was successful
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue,
@@ -231,7 +231,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * 
      * @param key The key we wish to query
      * @return The value of the key and null if not existing.
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public String get(@NotNull String key) throws DynamicStatusStoreException {
@@ -257,7 +257,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * 
      * @param keyPrefix - the prefix for any key(s)
      * @return A map of name-value pairs 
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public @NotNull Map<String, String> getPrefix(@NotNull String keyPrefix) throws DynamicStatusStoreException {
@@ -288,7 +288,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * A Simple delete of a singe Key value pair.
      * 
      * @param key - the key to delete
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public void delete(@NotNull String key) throws DynamicStatusStoreException {
@@ -307,7 +307,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * A delete of a set of provided keys and there corresponding values.
      * 
      * @param keys a set of keys to delete
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      *
      */
     @Override
@@ -335,7 +335,7 @@ public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
      * corresponding values from the store.
      * 
      * @param keyPrefix - a string prefix that all the key(s) have in common
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public void deletePrefix(@NotNull String keyPrefix) throws DynamicStatusStoreException {

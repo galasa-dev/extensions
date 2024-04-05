@@ -48,7 +48,7 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
      * from the etcd store.
      * @param framework - The framework used by this credential store.
      * @param etcd - URI location of ETCD store.
-     * @throws CredentialsException
+     * @throws CredentialsException A failure occurred.
      */
     public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
         try {
@@ -75,7 +75,7 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
      * passed back on its own, or with a passowrd if there is one available.
      * 
      * @param credentialsId a key which contains the credential id.
-     * @throws CredentialsException
+     * @throws CredentialsException A failure occurred.
      */
     public ICredentials getCredentials(String credentialsId) throws CredentialsException {
         String token = get("secure.credentials." + credentialsId + ".token");
