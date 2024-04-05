@@ -34,7 +34,7 @@ public interface IEtcd3ClientService {
      * @param servers a uri of the servers.
      * @param prefix  - The prefix to use if desired, can be null or empty.
      * @return - A client implementation
-     * @throws Etcd3ManagerException
+     * @throws Etcd3ManagerException A failure occurred.
      */
     IEtcd3Client getClient(@NotNull URI servers, String prefix) throws Etcd3ManagerException;
 
@@ -55,7 +55,7 @@ public interface IEtcd3ClientService {
      *                            empty.
      * @param authenticationToken - A token to authenticate with.
      * @return - A client implementation
-     * @throws Etcd3ManagerException
+     * @throws Etcd3ManagerException A failure occurred.
      */
     IEtcd3Client getClient(@NotNull URI servers, String prefix, String authenticationToken)
             throws Etcd3ManagerException;
@@ -77,7 +77,7 @@ public interface IEtcd3ClientService {
      * @param username - A username to authenticate with.
      * @param password - A username to authenticate with.
      * @return - A client implementation
-     * @throws Etcd3ManagerException
+     * @throws Etcd3ManagerException A failure occurred.
      */
     IEtcd3Client getClient(@NotNull URI servers, String prefix, @NotNull String username, @NotNull String password)
             throws Etcd3ManagerException;

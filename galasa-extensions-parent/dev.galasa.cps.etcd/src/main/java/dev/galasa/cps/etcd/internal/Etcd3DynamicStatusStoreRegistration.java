@@ -34,7 +34,7 @@ public class Etcd3DynamicStatusStoreRegistration implements IDynamicStatusStoreR
      * 
      * @param frameworkInitialisation - gives the registration access to the correct
      *                               URI for the dss
-     * @throws DynamicStatusStoreException
+     * @throws DynamicStatusStoreException A failure occurred.
      */
     @Override
     public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
