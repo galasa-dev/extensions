@@ -52,7 +52,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
      * This is the only method for CPS as managers should only need to get
      * properties from the CPS and not set or watch any.
      * 
-     * @param key
+     * @param key The property to get
      */
     @Override
     public @Null String getProperty(@NotNull String key) throws ConfigurationPropertyStoreException {

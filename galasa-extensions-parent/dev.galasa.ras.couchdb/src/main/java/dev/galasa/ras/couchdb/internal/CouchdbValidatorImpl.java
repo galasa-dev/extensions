@@ -32,16 +32,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
     
     private final GalasaGson                         gson               = new GalasaGson();
     private final Log                          logger             = LogFactory.getLog(getClass());
+    private       HttpRequestFactory requestFactory;
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient ) throws CouchdbRasException {
-       
-        HttpGet httpGet = new HttpGet(rasUri);
+    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbRasException {
+       this.requestFactory = httpRequestFactory;
+        HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 
@@ -57,7 +59,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.version, 2, 3, 1);
+            checkVersion(welcome.version, 3, 3, 3);
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_run");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_log");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts");
@@ -82,7 +84,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
 
     private void checkDatabasePresent( CloseableHttpClient httpClient, URI rasUri, int attempts, String dbName) throws CouchdbRasException {
-        HttpHead httpHead = new HttpHead(rasUri + "/" + dbName);
+        HttpHead httpHead = requestFactory.getHttpHeadRequest(rasUri + "/" + dbName);
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
             StatusLine statusLine = response.getStatusLine();
@@ -102,8 +104,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
         logger.info("CouchDB database " + dbName + " is missing,  creating");
 
-        HttpPut httpPut = new HttpPut(rasUri + "/" + dbName);
-
+        HttpPut httpPut = requestFactory.getHttpPutRequest(rasUri + "/" + dbName);
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
             int statusCode = statusLine.getStatusCode();
@@ -134,7 +135,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
     }
 
     private void checkRunDesignDocument( CloseableHttpClient httpClient , URI rasUri , int attempts) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_design/docs");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_design/docs");
 
         String docJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -219,7 +220,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
             HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
 
-            HttpPut httpPut = new HttpPut(rasUri + "/galasa_run/_design/docs");
+            HttpPut httpPut = requestFactory.getHttpPutRequest(rasUri + "/galasa_run/_design/docs");
             httpPut.setEntity(entity);
 
             if (rev != null) {
@@ -348,7 +349,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
 
     private void checkIndex(CloseableHttpClient httpClient, URI rasUri , int attempts, String dbName, String field) throws CouchdbRasException {
-        HttpGet httpGet = new HttpGet(rasUri + "/galasa_run/_index");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_index");
 
         String idxJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -410,7 +411,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
             HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
 
-            HttpPost httpPost = new HttpPost(rasUri + "/galasa_run/_index");
+            HttpPost httpPost = requestFactory.getHttpPostRequest(rasUri + "/galasa_run/_index");
             httpPost.setEntity(entity);
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {

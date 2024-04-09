@@ -33,7 +33,7 @@ public interface IEtcd3Client {
      * 
      * @param key   - the key to use, may be prefixed by the client
      * @param value - the value to use
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     void put(@NotNull String key, @NotNull String value) throws Etcd3ClientException;
 
@@ -42,7 +42,7 @@ public interface IEtcd3Client {
      * client.
      * 
      * @param keyValues - map of key/value pairs
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     void put(@NotNull Map<String, String> keyValues) throws Etcd3ClientException;
 
@@ -54,7 +54,7 @@ public interface IEtcd3Client {
      *                 put is actioned. Null means does not exist
      * @param newValue - The new value to set the key to
      * @return true if the put was actioned, false if not.
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue) throws Etcd3ClientException;
 
@@ -68,7 +68,7 @@ public interface IEtcd3Client {
      * @param newValue - The new value to set the key to
      * @param others   - other key/value pairs to put if the primary key is valid.
      * @return true if the
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     boolean putSwap(@NotNull String key, String oldValue, @NotNull String newValue, @NotNull Map<String, String> others)
             throws Etcd3ClientException;
@@ -78,7 +78,7 @@ public interface IEtcd3Client {
      * 
      * @param key - the key to use, may be prefixed by the client
      * @return the value if present, null if not
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     String get(@NotNull String key) throws Etcd3ClientException;
 
@@ -88,7 +88,7 @@ public interface IEtcd3Client {
      * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
      *                  prefixed by the client
      * @return A map of key-value pairs.
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     @NotNull
     Map<String, String> getPrefix(@NotNull String keyPrefix) throws Etcd3ClientException;
@@ -97,7 +97,7 @@ public interface IEtcd3Client {
      * Delete the key from the server
      * 
      * @param key - the key to use, may be prefixed by the client
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     void delete(@NotNull String key) throws Etcd3ClientException;
 
@@ -106,7 +106,7 @@ public interface IEtcd3Client {
      * 
      * @param keys - all the keys that need to be deleted, may be prefixed by the
      *             client
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     void delete(@NotNull Set<String> keys) throws Etcd3ClientException;
 
@@ -115,7 +115,7 @@ public interface IEtcd3Client {
      * 
      * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
      *                  prefixed by the client
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     void deletePrefix(@NotNull String keyPrefix) throws Etcd3ClientException;
 
@@ -126,7 +126,7 @@ public interface IEtcd3Client {
      * @param listener  - The class to be informed on a change
      * @param key       - the key to use, may be prefixed by the client
      * @return UUID representing this watch
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     UUID registerWatch(@NotNull IEtcd3Listener listener, @NotNull String key) throws Etcd3ClientException;
 
@@ -135,7 +135,7 @@ public interface IEtcd3Client {
      * @param keyPrefix - the prefix of all the keys to use. This prefix may also be
      *                  prefixed by the client
      * @return UUID representing this watch
-     * @throws Etcd3ClientException
+     * @throws Etcd3ClientException A failure occurred.
      */
     UUID registerWatchPrefix(@NotNull IEtcd3Listener listener, @NotNull String keyPrefix) throws Etcd3ClientException;
 
