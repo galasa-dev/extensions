@@ -79,7 +79,7 @@ Options are:
 Environment variables used:
 DEBUG - Optional. Valid values "1" (on) or "0" (off). Defaults to "0" (off).
 SOURCE_MAVEN - Optional. Where maven/gradle can look for pre-built development levels of things.
-    Defaults to https://development.galasa.dev/main/maven-repo/obr/
+    Defaults to https://development.galasa.dev/main/maven-repo/framework/
 LOGS_DIR - Optional. Where logs are placed. Defaults to creating a temporary directory.
 
 EOF
@@ -133,7 +133,7 @@ fi
 
 # Over-rode SOURCE_MAVEN if you want to build from a different maven repo...
 if [[ -z ${SOURCE_MAVEN} ]]; then
-    export SOURCE_MAVEN=https://development.galasa.dev/main/maven-repo/obr/
+    export SOURCE_MAVEN=https://development.galasa.dev/main/maven-repo/framework/
     info "SOURCE_MAVEN repo defaulting to ${SOURCE_MAVEN}."
     info "Set this environment variable if you want to over-ride this value."
 else
@@ -174,7 +174,7 @@ fi
 
 h2 "Removing .m2 artifacts"
 rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
-rm -fr ~/.m2/repository/dev/galasa/dev.galasa.raw.couchdb
+rm -fr ~/.m2/repository/dev/galasa/dev.galasa.ras.couchdb
 success "OK"
 
 h2 "Building with gradle"
