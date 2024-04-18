@@ -1,0 +1,26 @@
+plugins {
+    id 'biz.aQute.bnd.builder'
+    id 'galasa.extensions'
+}
+
+description = 'Galasa CPS access over http - Provides the CPS stores via the public REST interface over http'
+
+version = '0.33.0'
+
+dependencies {
+    
+    // Not required for compile,  but required to force the download of the jars to embed by bnd
+    implementation ('dev.galasa:gson:2.8.5') {
+       force = true
+    }
+    implementation ('dev.galasa:dev.galasa.framework.api.beans:0.33.0')
+    implementation (project(':dev.galasa.extensions.common'))
+    implementation 'commons-io:commons-io:2.9.0'
+    // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation(project(':dev.galasa.extensions.mocks'))
+    testImplementation 'org.assertj:assertj-core:3.16.1'
+    testImplementation('dev.galasa:dev.galasa.framework:0.33.0')
+}

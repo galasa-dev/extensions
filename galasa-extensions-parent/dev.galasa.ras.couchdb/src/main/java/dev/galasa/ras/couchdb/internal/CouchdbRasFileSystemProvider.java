@@ -30,7 +30,7 @@ import java.util.Set;
 import dev.galasa.ResultArchiveStoreContentType;
 import dev.galasa.SetContentType;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
-import dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory;
+import dev.galasa.extensions.common.api.LogFactory;
 
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
 

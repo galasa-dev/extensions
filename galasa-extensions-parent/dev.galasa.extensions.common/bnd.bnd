@@ -1,0 +1,9 @@
+-snapshot ${tstamp}
+Bundle-Name: dev.galasa.extensions.common
+Bundle-Description: Provides access to the CPS via a remote REST endpoint over http. 
+Bundle-License: https://www.eclipse.org/legal/epl-2.0
+Export-Package: !dev.galasa.extensions.api,dev.galasa.extensions.impl
+Import-Package: dev.galasa,dev.galasa.framework.spi,javax.net.ssl,javax.security.cert
+Embed-Transitive: true
+Embed-Dependency: *;scope=compile|runtime
+-fixupmessages "Classes found in the wrong directory"; restrict:=error; is:=warning
