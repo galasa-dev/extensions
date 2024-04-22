@@ -11,6 +11,8 @@ public class JwtProviderSystemProp implements JwtProvider {
             String msg = Errors.ERROR_GALASA_CANT_GET_JWT_TOKEN.getMessage();
             throw new ConfigurationPropertyStoreException(msg);
         }
+        // In case there are quotes around the system property value... get rid of them.
+        jwt = jwt.replaceAll("\"", "");
         return jwt;
     }
 

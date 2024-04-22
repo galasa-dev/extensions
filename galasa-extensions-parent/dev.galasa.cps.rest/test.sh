@@ -127,6 +127,8 @@ function build_galasa_home {
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build galasa home. Return code: ${rc}" ; exit 1 ; fi
 
     galasaConfigStoreRestUrl=$(echo -n "${galasaApiUrl}" | sed "s/https:/galasacps:/g")
+    galasactl auth login 
+    rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to login to the galasa server. Return code: ${rc}" ; exit 1 ; fi
 
     cat << EOF >> $BASEDIR/temp/home/bootstrap.properties
 

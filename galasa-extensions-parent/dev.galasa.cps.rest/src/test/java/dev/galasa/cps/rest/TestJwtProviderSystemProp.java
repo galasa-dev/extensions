@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.*;
 public class TestJwtProviderSystemProp {
     
     @Test
-    public void testCanGetJwtFromEnvironment() throws Exception {
+    public void testCanGetJwtFromSystemPropertyOK() throws Exception {
         String dummyJwt = "A fake jwt";
         System.setProperty("GALASA_JWT", dummyJwt);
         JwtProvider provider = new JwtProviderSystemProp();
@@ -24,7 +24,17 @@ public class TestJwtProviderSystemProp {
     }
 
     @Test
-    public void testMissingJwtFromEnvironmentFails() throws Exception {
+    public void testJwtFromSystemPropertyWithQuotesHasTheQuotesRemoved() throws Exception {
+        String dummyJwt = "A fake jwt";
+        String dummyJwtWithQuotes = "\""+dummyJwt+"\"";
+        System.setProperty("GALASA_JWT", dummyJwtWithQuotes);
+        JwtProvider provider = new JwtProviderSystemProp();
+        String jwtGot = provider.getJwt();
+        assertThat(jwtGot).isEqualTo(dummyJwt);
+    }
+
+    @Test
+    public void testMissingJwtFromSystemPropertyFails() throws Exception {
         // No GALASA_JWT set in the system properties.
         System.clearProperty("GALASA_JWT");
         JwtProvider provider = new JwtProviderSystemProp();

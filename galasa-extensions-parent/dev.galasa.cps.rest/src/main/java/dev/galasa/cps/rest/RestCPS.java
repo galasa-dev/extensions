@@ -125,12 +125,12 @@ public class RestCPS implements IConfigurationPropertyStore {
             throw new ConfigurationPropertyStoreException(msg, ex);
         }
 
-        this.jwt = jwtProvider.getJwt();
-
-        this.apiClient = httpClientFactory.createClient();
-
         this.log = logFactory.getLog(this.getClass());
 
+        this.jwt = jwtProvider.getJwt();
+        this.log.info("Got a jwt OK.");
+
+        this.apiClient = httpClientFactory.createClient();
 
         this.redactedPropertyKeys = createRedactedPropertyKeySet();
         this.redactedNamespacesSet = createRedactedNamespaceSet();

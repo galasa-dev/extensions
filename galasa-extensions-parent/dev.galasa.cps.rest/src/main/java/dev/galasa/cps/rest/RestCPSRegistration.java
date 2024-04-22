@@ -30,7 +30,7 @@ public class RestCPSRegistration implements IConfigurationPropertyStoreRegistrat
     public RestCPSRegistration() {
         this( 
             new HttpClientFactoryImpl() , 
-            new JwtProviderEnvironment(),
+            new JwtProviderSystemProp(),
             new LogFactoryImpl() 
         );
     }
