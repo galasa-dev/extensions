@@ -88,10 +88,8 @@ public class RestCPSRegistration implements IConfigurationPropertyStoreRegistrat
     }
 
     /**
-     * <p>
-     * A simple method thta checks the provided URI to the CPS is a local file or
+     * A simple method that checks the provided URI to the CPS is a local file or
      * not.
-     * </p>
      * 
      * @param uri - URI to the CPS . of the form "rest:http://my.server/api"
      * @return - boolean if File or not.
