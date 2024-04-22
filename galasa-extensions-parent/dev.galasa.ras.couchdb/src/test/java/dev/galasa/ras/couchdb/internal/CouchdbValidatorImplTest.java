@@ -15,10 +15,10 @@ import org.junit.rules.TestName;
 
 
 import dev.galasa.framework.spi.utils.GalasaGson;
-import dev.galasa.ras.couchdb.internal.mocks.*;
-import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
+import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.pojos.Welcome;
-import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
 
 public class CouchdbValidatorImplTest {
     

@@ -23,16 +23,14 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 
-import com.google.gson.Gson;
-
+import dev.galasa.extensions.mocks.*;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.utils.GalasaGson;
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
-import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
+import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbTestFixtures {

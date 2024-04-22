@@ -8,8 +8,11 @@ Import-Package: com.google.gson,\
     dev.galasa.framework.spi.ras,\
     dev.galasa.framework.spi.teststructure,\
     dev.galasa.framework.spi.utils,\
+    dev.galasa.extensions.common.api,\
+    dev.galasa.extensions.common.impl,\
     javax.validation.constraints;resolution:=optional,\
-    org.apache.commons.logging,org.apache.http,\
+    org.apache.commons.logging,\
+    org.apache.http,\
     org.apache.http.client.methods,\
     org.apache.http.client.utils,\
     org.apache.http.entity,\

@@ -25,11 +25,8 @@ import org.junit.rules.TestName;
 
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
-import dev.galasa.ras.couchdb.internal.mocks.HttpInteraction;
-import dev.galasa.ras.couchdb.internal.mocks.MockCloseableHttpResponse;
-import dev.galasa.ras.couchdb.internal.mocks.MockHttpEntity;
 import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
-import dev.galasa.ras.couchdb.internal.mocks.MockStatusLine;
+import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.CreateArtifactDocInteractionOK;

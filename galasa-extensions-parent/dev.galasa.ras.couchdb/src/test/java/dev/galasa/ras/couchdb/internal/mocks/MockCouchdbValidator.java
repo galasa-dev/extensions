@@ -11,7 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.ras.couchdb.internal.CouchdbRasException;
 import dev.galasa.ras.couchdb.internal.CouchdbValidator;
-import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
+import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 

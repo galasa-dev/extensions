@@ -27,7 +27,6 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.ResultArchiveStoreContentType;
-import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 /**
@@ -51,7 +50,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
     CouchdbRasWriteByteChannel(CouchdbRasFileSystemProvider couchdbRasFileSystemProvider, CouchdbRasStore couchdbRasStore, Path remotePath,
             ResultArchiveStoreContentType remoteContentType, Set<? extends OpenOption> options,
             FileAttribute<?>[] attrs,
-            dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory logFactory
+            dev.galasa.extensions.common.api.LogFactory logFactory
     ) throws IOException {
 
         this.logger = logFactory.getLog(CouchdbRasWriteByteChannel.class);

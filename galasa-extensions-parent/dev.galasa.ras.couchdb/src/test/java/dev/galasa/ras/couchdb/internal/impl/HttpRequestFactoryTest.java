@@ -13,8 +13,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.*;
 
-import dev.galasa.ras.couchdb.internal.dependencies.impl.HttpRequestFactory;
-import dev.galasa.ras.couchdb.internal.mocks.MockEnvironment;
+import dev.galasa.extensions.mocks.MockEnvironment;
+import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
 
 public class HttpRequestFactoryTest {
 

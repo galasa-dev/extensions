@@ -45,26 +45,16 @@ blue=$(tput setaf 25)
 # Headers and Logging
 #
 #-----------------------------------------------------------------------------------------                   
-underline() { printf "${underline}${bold}%s${reset}\n" "$@"
-}
-h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@"
-}
-h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@"
-}
-debug() { printf "${white}%s${reset}\n" "$@"
-}
-info() { printf "${white}➜ %s${reset}\n" "$@"
-}
-success() { printf "${green}✔ %s${reset}\n" "$@"
-}
-error() { printf "${red}✖ %s${reset}\n" "$@"
-}
-warn() { printf "${tan}➜ %s${reset}\n" "$@"
-}
-bold() { printf "${bold}%s${reset}\n" "$@"
-}
-note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@"
-}
+underline() { printf "${underline}${bold}%s${reset}\n" "$@" ;}
+h1() { printf "\n${underline}${bold}${blue}%s${reset}\n" "$@" ;}
+h2() { printf "\n${underline}${bold}${white}%s${reset}\n" "$@" ;}
+debug() { printf "${white}%s${reset}\n" "$@" ;}
+info() { printf "${white}➜ %s${reset}\n" "$@" ;}
+success() { printf "${green}✔ %s${reset}\n" "$@" ;}
+error() { printf "${red}✖ %s${reset}\n" "$@" ;}
+warn() { printf "${tan}➜ %s${reset}\n" "$@" ;}
+bold() { printf "${bold}%s${reset}\n" "$@" ;}
+note() { printf "\n${underline}${bold}${blue}Note:${reset} ${blue}%s${reset}\n" "$@" ;}
 
 #-----------------------------------------------------------------------------------------                   
 # Functions
@@ -166,40 +156,34 @@ CONSOLE_FLAG=--console=plain
 log_file=${LOGS_DIR}/${project}.txt
 info "Log will be placed at ${log_file}"
 
-if [[ "${build_type}" == "clean" ]]; then
-    goals="clean build check jacocoTestReport publishToMavenLocal --no-build-cache "
-else
-    goals="build check jacocoTestReport publishToMavenLocal"
-fi
+function clean_maven_repo {
+    h2 "Removing .m2 artifacts"
+    rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
+    rm -fr ~/.m2/repository/dev/galasa/dev.galasa.raw.couchdb
+    rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.rest
+    success "OK"
+}
 
-h2 "Removing .m2 artifacts"
-rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
-rm -fr ~/.m2/repository/dev/galasa/dev.galasa.ras.couchdb
-success "OK"
+function build_with_gradle {
+    h2 "Building with gradle"
 
-h2 "Building with gradle"
+    if [[ "${build_type}" == "clean" ]]; then
+        goals="clean build check jacocoTestReport publishToMavenLocal --no-build-cache "
+    else
+        goals="build check jacocoTestReport publishToMavenLocal"
+    fi
 
-cat << EOF 
-Using command:
+    cmd="gradle \
+    ${CONSOLE_FLAG} \
+    -Dorg.gradle.java.home=${JAVA_HOME} \
+    -PsourceMaven=${SOURCE_MAVEN} ${OPTIONAL_DEBUG_FLAG} \
+    ${goals}"
+    info "Using command: $cmd"
+    $cmd 2>&1 > ${log_file}
+    rc=$? ; if [[ "${rc}" != "0" ]]; then cat ${log_file} ; error "Failed to build ${project} with gradle." ; exit 1 ; fi
+}
 
-gradle \
-${CONSOLE_FLAG} \
--Dorg.gradle.java.home=${JAVA_HOME} \
--PsourceMaven=${SOURCE_MAVEN} ${OPTIONAL_DEBUG_FLAG} \
-${goals} \
-2>&1 > ${log_file}
-
-EOF
-
-gradle \
-${CONSOLE_FLAG} \
--Dorg.gradle.java.home=${JAVA_HOME} \
--PsourceMaven=${SOURCE_MAVEN} ${OPTIONAL_DEBUG_FLAG} \
-${goals} \
-2>&1 > ${log_file}
-
-
-function displayCouchDbCodeCoverage() {
+function displayCouchDbCodeCoverage {
     h2 "Calculating couchDb code coverage..."
     percent_code_complete=$(cat ${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/dev.galasa.ras.couchdb.internal/index.html \
     | sed "s/.*<td>Total<\/td>//1" \
@@ -212,7 +196,8 @@ function displayCouchDbCodeCoverage() {
     info "See html report here: file://${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/index.html"
 }
 
+clean_maven_repo
+build_with_gradle
 displayCouchDbCodeCoverage
 
-rc=$? ; if [[ "${rc}" != "0" ]]; then cat ${log_file} ; error "Failed to build ${project}" ; exit 1 ; fi
 success "Project ${project} built - OK - log is at ${log_file}"

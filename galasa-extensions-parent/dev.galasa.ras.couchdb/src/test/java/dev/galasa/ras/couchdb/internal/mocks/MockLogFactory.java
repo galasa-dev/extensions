@@ -11,7 +11,8 @@ import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 
-import dev.galasa.ras.couchdb.internal.dependencies.api.LogFactory;
+import dev.galasa.extensions.mocks.MockLog;
+import dev.galasa.extensions.common.api.LogFactory;
 
 // Creates Log objects, which can be used to log trace and error output.
 // All the log objects direct their output back to this log factory.
