@@ -25,7 +25,6 @@ import org.junit.rules.TestName;
 
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
-import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;

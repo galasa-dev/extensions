@@ -143,7 +143,7 @@ EOF
 
 function generating_galasa_test_project {
     h2 "Generating galasa test project code..."
-    cd ${BASEDIR}/galasa-extensions-parent/dev.galasa.cps.rest/temp
+    cd ${BASEDIR}/temp
     cmd="galasactl project create --package dev.galasa.cps.rest.test --features http --obr --gradle --force --development "
     info "Command is $cmd"
     $cmd
@@ -154,7 +154,7 @@ function generating_galasa_test_project {
 
 function build_test_project {
     h2 "Building the generated code..."
-    cd ${BASEDIR}/galasa-extensions-parent/dev.galasa.cps.rest/temp/dev.galasa.cps.rest.test
+    cd ${BASEDIR}/temp/dev.galasa.cps.rest.test
     gradle clean build publishToMavenLocal
     rc=$? ; if [[ "${rc}" != "0" ]]; then error "Failed to build the generated test project code. Return code: ${rc}" ; exit 1 ; fi
     success "OK"

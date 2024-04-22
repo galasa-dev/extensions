@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.mocks;
+package dev.galasa.extensions.mocks;
 
 
 import java.io.ByteArrayOutputStream;
@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 
 import org.apache.commons.logging.Log;
 
-import dev.galasa.extensions.mocks.MockLog;
 import dev.galasa.extensions.common.api.LogFactory;
 
 // Creates Log objects, which can be used to log trace and error output.

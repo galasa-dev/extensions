@@ -9,6 +9,9 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import dev.galasa.cps.rest.mocks.MockFrameworkInitialisation;
+import dev.galasa.cps.rest.mocks.MockJwtProvider;
+import dev.galasa.extensions.mocks.MockHttpClientFactory;
+import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.framework.spi.IConfigurationPropertyStore;
 
 import java.net.URI;
@@ -30,7 +33,11 @@ public class TestRestCPSRegistration {
     @Test
     public void TestCanInitialiseARegistrationOK() throws Exception {
         URI uri = new URI("galasacps://my.server/api");
-        RestCPSRegistration registration = new RestCPSRegistration();
+        RestCPSRegistration registration = new RestCPSRegistration(
+            new MockHttpClientFactory(null),
+            new MockJwtProvider("myJWT"),
+            new MockLogFactory()
+        );
 
         MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation(uri);
 

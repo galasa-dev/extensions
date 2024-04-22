@@ -24,22 +24,6 @@ framework:
     obr: true
     isolated: true
     codecoverage: true
+    
 
-  - artifact: dev.galasa.cps.rest
-    version: 0.33.0
-    obr: true
-    isolated: true
-    codecoverage: true
-
-  - artifact: dev.galasa.extensions.common
-    version: 0.33.0
-    obr: true
-    isolated: true
-    codecoverage: true
-
-  - artifact: dev.galasa.extensions.mocks
-    version: 0.33.0
-    obr: false
-    isolated: false
-    codecoverage: false
     

@@ -27,13 +27,13 @@ public class TestRestCPS {
     @Test
     public void testCanCreateARestCPS() throws Exception {
         JwtProvider jwtProvider = new MockJwtProvider(JWT1);
+        MockLogFactory logFactory = new MockLogFactory();
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         URI ecosystemUrl = new URI(RestCPS.URL_SCHEMA_REST+"://my.host/api");
-        new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider);
+        new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider,logFactory);
     }
-
 
     @Test
     public void testCPSInitInvalidCPSUrlNotStartingWithGalasaRestSchemeReturnsError() throws Exception {
@@ -42,8 +42,9 @@ public class TestRestCPS {
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         URI ecosystemUrl = new URI("an:invalid:url/on/purpose.");
+        MockLogFactory logFactory = new MockLogFactory();
         ConfigurationPropertyStoreException ex = catchThrowableOfType( 
-            ()-> new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider),
+            ()-> new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory),
             ConfigurationPropertyStoreException.class
         );
 
@@ -59,72 +60,62 @@ public class TestRestCPS {
 
         JwtProvider jwtProvider = new MockJwtProvider(JWT1);
 
-        class GetNamedCPSPropertyInteraction extends BaseHttpInteraction {
-
-            String propNamespace;
-            String propName;
-            String propValue;
-
-            public GetNamedCPSPropertyInteraction(String expectedUri, String propNamespace, String propName , String propValue) {
-                super(expectedUri,null);
-                this.propName = propName;
-                this.propNamespace = propNamespace;
-                this.propValue = propValue;
-            }
-  
-            @Override
-            public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-                super.validateRequest(host,request);
-                assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
-                Header[] headers = request.getHeaders("Authorization");
-                assertThat(headers).as("There is no bearer token header being passed to the server side.").hasSize(1);
-                assertThat(headers[0].getValue()).as("The bearer token is not being passed correctly to the REST API.").isEqualTo("Bearer "+JWT1);
-            }
-    
-    
-            @Override
-            public void validateRequestContentType(HttpRequest request) {
-                // We don't expect a Content-type header as there is no payload sent to the server
-            }
-    
-            @Override
-            public MockCloseableHttpResponse getResponse() {
-    
-                GalasaPropertyData data = new GalasaPropertyData(propValue);
-                GalasaPropertyMetadata metadata = new GalasaPropertyMetadata(propNamespace,propName);
-                GalasaProperty prop = new GalasaProperty(metadata,data);
-                GalasaProperty[] props = new GalasaProperty[1];
-                props[0]=prop;
-
-                GalasaGson gson = new GalasaGson();
-                String updateMessagePayload = gson.toJson(props);
-    
-                HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
-    
-                MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-    
-                MockStatusLine statusLine = new MockStatusLine();
-                statusLine.setStatusCode(HttpStatus.SC_OK);
-                response.setStatusLine(statusLine);
-                response.setEntity(entity);
-    
-                return response;
-            }
-        }
-
-        GetNamedCPSPropertyInteraction getNamedCPSPropertyInteraction = new GetNamedCPSPropertyInteraction( 
-            "https://my.host/api/cps/myNamespace/properties/myPrefix.myMiddle.mySuffix",
-            "myNamespace", "myPrefix.myMiddle.mySuffix", "abcde");
+        GetNamedCPSPropertiesInteraction getCPSPropertiesInteraction = new GetNamedCPSPropertiesInteraction( 
+            JWT1,"https://my.host/api/cps/myNamespace/properties?prefix=myPrefix.myMiddle.mySuffix", "myNamespace", 
+            "myPrefix.myMiddle.mySuffix", "abcde",
+            "myPrefix.myMiddle.mySuffix.abcd", "dfgdfg"
+            );
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(getNamedCPSPropertyInteraction);
+        interactions.add(getCPSPropertiesInteraction);
 
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         
-        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider);
+        MockLogFactory logFactory = new MockLogFactory();
+        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory);
         String propGotBack = cps.getProperty(fullyQualifiedPropertyName);
         assertThat(propGotBack).isNotBlank();
+    }
+
+    @Test
+    public void testAttemptsToGetFrameworkCredsStorePropertyGetsRedacted() throws Exception {
+        checkRedactedPropertyReturnsNull("framework.credentials.store");
+    }
+
+    @Test
+    public void testAttemptsToGetFrameworkDSSStorePropertyGetsRedacted() throws Exception {
+        checkRedactedPropertyReturnsNull("framework.dynamicstatus.store");
+    }
+
+    @Test
+    public void testAttemptsToGetASecurePropertyGetsRedacted() throws Exception {
+        checkRedactedPropertyReturnsNull("secure.any.key");
+    }
+
+    private void checkRedactedPropertyReturnsNull(String fullyQualifiedPropertyName) throws Exception {
+        // Given...
+
+        // This is a special property we never want the local tests to use.
+
+        URI ecosystemUrl = new URI(RestCPS.URL_SCHEMA_REST+"://my.host/api");
+
+        JwtProvider jwtProvider = new MockJwtProvider(JWT1);
+
+        // No interactions. We don't expect any HTTP traffic for this reserved property name.
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+
+        CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
+        MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
+        
+        MockLogFactory logFactory = new MockLogFactory();
+        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory);
+
+        // When...
+        String value = cps.getProperty(fullyQualifiedPropertyName);
+
+        // Then...
+        assertThat(value).as("Expected value to be null, as the property being got is reserved.").isNull();
     }
 
     // A leading test which tests that the CPS can reach the actual server implementation.
@@ -241,7 +232,8 @@ public class TestRestCPS {
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         
-        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider);
+        MockLogFactory logFactory = new MockLogFactory();
+        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory);
         Map<String,String> properties = cps.getPrefixedProperties("myNamespace.myPrefix");
         assertThat(properties).isNotNull().hasSize(2);
         assertThat(properties).containsKeys(fullyQualifiedPropertyName1);
@@ -296,7 +288,8 @@ public class TestRestCPS {
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         
-        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider);
+        MockLogFactory logFactory = new MockLogFactory();
+        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory);
         Map<String,String> properties = cps.getPropertiesFromNamespace("myNamespace");
         assertThat(properties).isNotNull().hasSize(2);
         assertThat(properties).containsKeys(fullyQualifiedPropertyName1);
@@ -386,7 +379,8 @@ public class TestRestCPS {
         CloseableHttpClient mockCloseableHttpClient = new MockCloseableHttpClient(interactions);
         MockHttpClientFactory mockClientFactory = new MockHttpClientFactory(mockCloseableHttpClient);
         
-        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider);
+        MockLogFactory logFactory = new MockLogFactory();
+        RestCPS cps = new RestCPS( ecosystemUrl , mockClientFactory, jwtProvider, logFactory);
         List<String> namespacesGotBack = cps.getNamespaces();
         assertThat(namespacesGotBack).isNotNull().contains(myNamespace);
     }

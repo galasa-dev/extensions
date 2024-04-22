@@ -12,12 +12,38 @@ import javax.validation.constraints.NotNull;
 
 import org.osgi.service.component.annotations.Component;
 
+import dev.galasa.extensions.common.api.HttpClientFactory;
+import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
+import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreRegistration;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 
 @Component(service = { IConfigurationPropertyStoreRegistration.class })
 public class RestCPSRegistration implements IConfigurationPropertyStoreRegistration {
+
+    private HttpClientFactory httpClientFacotory; 
+    private JwtProvider jwtProvider;
+    private LogFactory logFactory;
+
+    public RestCPSRegistration() {
+        this( 
+            new HttpClientFactoryImpl() , 
+            new JwtProviderEnvironment(),
+            new LogFactoryImpl() 
+        );
+    }
+
+    public RestCPSRegistration( 
+        HttpClientFactory httpClientFacotory,
+        JwtProvider jwtProvider,
+        LogFactory logFactory
+    ) {
+        this.httpClientFacotory = httpClientFacotory;
+        this.jwtProvider = jwtProvider;
+        this.logFactory = logFactory ;
+    }
 
     /**
      * <p>
@@ -49,7 +75,15 @@ public class RestCPSRegistration implements IConfigurationPropertyStoreRegistrat
                 String msg = MessageFormat.format("Failed to parse the CPS rest URL '{0}'. It should be of the form '{1}://my.server/api' or similar.",ecosystemRestApiStr,RestCPS.URL_SCHEMA_REST);
                 throw new ConfigurationPropertyStoreException(msg,ex);
             }
-            frameworkInitialisation.registerConfigurationPropertyStore(new RestCPS(ecosystemRestApi));
+
+            frameworkInitialisation.registerConfigurationPropertyStore(
+                new RestCPS(
+                    ecosystemRestApi, 
+                    httpClientFacotory,
+                    jwtProvider,
+                    logFactory
+                )
+            );
         }
     }
 
