@@ -14,7 +14,8 @@ The galasactl tool can be configured to communicate with that CPS (see the lates
 To do this, assuming `https://myhost/api/bootstrap` can be used to 
 communicate with the remote server, add the following to your `bootstrap.properties` file, 
 ```
-// https://myhost/api is the location of the Galasa REST API endpoints.
+# Tell the galasactl tool that local tests should use the REST API to get shared configuration properties from a remote server.
+# https://myhost/api is the location of the Galasa REST API endpoints.
 framework.config.store=galasacps://myhost/api
-// Tells the framework to load this extension, so it can register to react when the `galasacps` URL scheme is used.
+# Tells the framework to load this extension, so it can register to react when the `galasacps` URL scheme is used.
 framework.extra.bundles=dev.galasa.cps.rest
