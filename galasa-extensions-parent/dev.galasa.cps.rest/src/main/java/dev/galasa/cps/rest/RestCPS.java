@@ -71,7 +71,7 @@ public class RestCPS implements IConfigurationPropertyStore {
     public static final String NULL_INFIX = null ;
     public static final String NULL_SUFFIX = null ;
 
-    // Galasa json adds some serialisation of dates to avoid security vulnerabilities.
+    /** Galasa json adds some serialisation of dates to avoid security vulnerabilities. */
     public Gson gson = new GalasaGsonBuilder(PRETTY_PRINTING_ENABLED).getGson();
 
     private class PropertyName {
@@ -79,28 +79,33 @@ public class RestCPS implements IConfigurationPropertyStore {
         String simpleName;
     }
 
-    // What is the URI to the rest api endpoint ?
-    // This will be of the form https://myhost/api
+    /** What is the URI to the rest api endpoint ? This will be of the form https://myhost/api */
     private URI ecosystemRestApiUri;
 
-    // We create an HTTP client on initialisation of the instance of this CPS implementation, 
-    // and use that one until the Gaalsa framework shuts us down.
+    /** 
+     * We create an HTTP client on initialisation of the instance of this CPS implementation,
+     * and use that one until the Gaalsa framework shuts us down.
+     */
     private CloseableHttpClient apiClient;
 
-    // The jwt we will use to contact the remote Galasa system.
+    /** The jwt we will use to contact the remote Galasa system. */
     private String jwt; 
 
     private Log log ;
 
-    // A set of property keys which the local test runs should not be reading or using.
-    // For these properties, the value of null is returned, implying the value isn't set in the CPS,
-    // so the value gets defaulted.
-    // The key to the set is the fully-qualified property name (including the namespace)
+    /** 
+     * A set of property keys which the local test runs should not be reading or using.
+     * For these properties, the value of null is returned, implying the value isn't set in the CPS,
+     * so the value gets defaulted.
+     * The key to the set is the fully-qualified property name (including the namespace)
+     */
     private Set<String> redactedPropertyKeys ;
 
-    // A set of namespaces which cannot be read by a local run.
-    // For any queries of these properties, a null is returned, causing defaulted behaviour.
-    // The key to the set is the namespace name.
+    /**
+     * A set of namespaces which cannot be read by a local run.
+     * For any queries of these properties, a null is returned, causing defaulted behaviour.
+     * The key to the set is the namespace name.
+     */
     private Set<String> redactedNamespacesSet;
 
     public RestCPS(
@@ -181,11 +186,9 @@ public class RestCPS implements IConfigurationPropertyStore {
     }
 
     /**
-     * <p>
      * This method implements the getProperty method from the framework property
      * file class, returning a string value from a key inside the property file, or
      * null if empty.
-     * </p>
      * 
      * @param fullyQualifiedPropertyName The key of the property to get.
      * @throws ConfigurationPropertyStoreException - Something went wrong.
@@ -373,10 +376,8 @@ public class RestCPS implements IConfigurationPropertyStore {
     }
 
     /**
-     * <p>
      * This method implements the setProperty method from the framework property
      * file class.
-     * </p>
      * 
      * @param key The key of the property to be set
      * @param value The value we set the property to
@@ -395,10 +396,8 @@ public class RestCPS implements IConfigurationPropertyStore {
     }
 
     /**
-     * <p>
      * This method returns all properties for a given namespace from the framework property
      * file class.
-     * </p>
      * 
      * @param namespace The namespace we want to get the property from.
      * @return The properties returned.
@@ -455,9 +454,7 @@ public class RestCPS implements IConfigurationPropertyStore {
     }
 
     /**
-     * <p>
      * Return all Namespaces for the framework property file
-     * </p>
      * 
      * @return - List of namespaces
      */

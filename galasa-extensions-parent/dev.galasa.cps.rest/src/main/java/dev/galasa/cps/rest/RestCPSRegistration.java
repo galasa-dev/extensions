@@ -46,10 +46,8 @@ public class RestCPSRegistration implements IConfigurationPropertyStoreRegistrat
     }
 
     /**
-     * <p>
      * This method checks that the CPS is a remote URL reference, and if true registers this
      * file as the ONLY CPS.
-     * </p>
      * 
      * @param frameworkInitialisation Parameters this extension can use to to initialise itself.
      * @throws ConfigurationPropertyStoreException Something went wrong.
