@@ -130,7 +130,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     }
 
     @Override
-    public Map<String, String> getPropertiesFromNamespace(String namespace) {
+    public Map<String, String> getPropertiesFromNamespace(String namespace) throws ConfigurationPropertyStoreException {
         ByteSequence bsNamespace = ByteSequence.from(namespace + ".", UTF_8);
         GetOption option = GetOption.newBuilder()
                 .withSortField(GetOption.SortTarget.KEY)
@@ -154,7 +154,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     }
 
     @Override
-    public List<String> getNamespaces() {
+    public List<String> getNamespaces() throws ConfigurationPropertyStoreException {
         ByteSequence empty = ByteSequence.from("\0", UTF_8);
         GetOption option = GetOption.newBuilder()
                 .withSortField(GetOption.SortTarget.KEY)

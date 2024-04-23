@@ -401,33 +401,28 @@ public class RestCPS implements IConfigurationPropertyStore {
      * 
      * @param namespace The namespace we want to get the property from.
      * @return The properties returned.
+     * @throws ConfigurationPropertyStoreException 
      */
     @Override
-    public Map<String,String> getPropertiesFromNamespace(String namespace) {
+    public Map<String,String> getPropertiesFromNamespace(String namespace) throws ConfigurationPropertyStoreException {
 
         Map<String,String> results = new HashMap<String,String>();
 
-        // TODO: The interface is wrong. It should allow throwing of an exception.
-        try {
-            URI targetUri = calculateQueryPropertyUri(namespace, NULL_PREFIX, NULL_SUFFIX, NULL_INFIX);
-            HttpGet req = constructGetRequest(targetUri, this.jwt);
+        URI targetUri = calculateQueryPropertyUri(namespace, NULL_PREFIX, NULL_SUFFIX, NULL_INFIX);
+        HttpGet req = constructGetRequest(targetUri, this.jwt);
 
-            // Note: The response is always closed properly.
-            try ( CloseableHttpResponse response = (CloseableHttpResponse) this.apiClient.execute(req) ) {
+        // Note: The response is always closed properly.
+        try ( CloseableHttpResponse response = (CloseableHttpResponse) this.apiClient.execute(req) ) {
 
-                checkResponseHttpCode(response, ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_PROPERTIES_NON_OK_STATUS, targetUri);
-                GalasaProperty[] properties = extractPropertiesFromPayload(response, targetUri);
-                results = propertiesToMap(properties);
+            checkResponseHttpCode(response, ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_PROPERTIES_NON_OK_STATUS, targetUri);
+            GalasaProperty[] properties = extractPropertiesFromPayload(response, targetUri);
+            results = propertiesToMap(properties);
 
-            } catch(IOException ioEx) {
-                String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTIES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
-                throw new ConfigurationPropertyStoreException(msg,ioEx);
-            }
-
-        } catch ( ConfigurationPropertyStoreException ex) {
-            // TODO: Temporarily turn the exception into a runtime exception... as that can be used and still maintain the interface.
-            throw new RuntimeException(ex);
+        } catch(IOException ioEx) {
+            String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTIES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
+            throw new ConfigurationPropertyStoreException(msg,ioEx);
         }
+
         return results;
     }
 
@@ -457,30 +452,26 @@ public class RestCPS implements IConfigurationPropertyStore {
      * Return all Namespaces for the framework property file
      * 
      * @return - List of namespaces
+     * @throws ConfigurationPropertyStoreException 
      */
     @Override
-    public List<String> getNamespaces() {
+    public List<String> getNamespaces() throws ConfigurationPropertyStoreException {
         List<String> results = new ArrayList<String>();
 
-        // TODO: The interface is wrong. It should allow throwing of an exception.
-        try {
-            URI targetUri = calculateQueryNamespaceUri();
-            HttpGet req = constructGetRequest(targetUri, this.jwt);
+        URI targetUri = calculateQueryNamespaceUri();
+        HttpGet req = constructGetRequest(targetUri, this.jwt);
 
-            // Note: The response is always closed properly.
-            try ( CloseableHttpResponse response = (CloseableHttpResponse) this.apiClient.execute(req) ) {
+        // Note: The response is always closed properly.
+        try ( CloseableHttpResponse response = (CloseableHttpResponse) this.apiClient.execute(req) ) {
 
-                checkResponseHttpCode(response, ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_NAMESPACES_NON_OK_STATUS, targetUri);
-                results = extractNamespacesFromPayload(response, targetUri);
+            checkResponseHttpCode(response, ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_NAMESPACES_NON_OK_STATUS, targetUri);
+            results = extractNamespacesFromPayload(response, targetUri);
 
-            } catch(IOException ioEx) {
-                String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
-                throw new ConfigurationPropertyStoreException(msg,ioEx);
-            } 
-        } catch ( ConfigurationPropertyStoreException ex) {
-            // TODO: Temporarily turn the exception into a runtime exception... as that can be used and still maintain the interface.
-            throw new RuntimeException(ex);
-        }
+        } catch(IOException ioEx) {
+            String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
+            throw new ConfigurationPropertyStoreException(msg,ioEx);
+        } 
+
         return results;
     }
 
