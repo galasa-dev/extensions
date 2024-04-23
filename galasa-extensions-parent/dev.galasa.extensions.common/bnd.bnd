@@ -4,12 +4,10 @@ Bundle-Description: Provides access to the CPS via a remote REST endpoint over h
 Bundle-License: https://www.eclipse.org/legal/epl-2.0
 Export-Package: dev.galasa.extensions.common.*
 Import-Package: \
-dev.galasa,\
-dev.galasa.framework.spi,\
-javax.net.ssl,\
-javax.security.cert,\
-org.apache.commons.logging,\
-org.apache.http.impl.client
-Embed-Transitive: true
-Embed-Dependency: *;scope=compile|runtime
--fixupmessages "Classes found in the wrong directory"; restrict:=error; is:=warning
+    dev.galasa,\
+    dev.galasa.framework.spi,\
+    javax.net.ssl,\
+    javax.security.cert,\
+    org.apache.commons.logging,\
+    org.apache.http.impl.client
+    
