@@ -18,6 +18,8 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.auth.IUserStore;
+import dev.galasa.framework.spi.auth.UserStoreException;
 import dev.galasa.framework.spi.creds.CredentialsException;
 import dev.galasa.framework.spi.creds.ICredentialsStore;
 
@@ -97,5 +99,8 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
         throw new UnsupportedOperationException("Unimplemented method 'getFramework'");
     }
 
-    
+    @Override
+    public void registerUserStore(@NotNull IUserStore userStore) throws UserStoreException {
+        throw new UnsupportedOperationException("Unimplemented method 'registerUserStore'");
+    }
 }

@@ -38,27 +38,27 @@ import dev.galasa.extensions.common.api.*;
  * store for the Configuration property store. This class registers the
  * Configuration property store as the only CPS.
  *
- * This implementation of the CPS interface gets all it's data from a remote 
+ * This implementation of the CPS interface gets all it's data from a remote
  * Galasa ecosystem using HTTPS REST calls.
- * 
+ *
  * It is used by local test runs who want to run in a hybrid environment such that
  * the CPS properties are shared in a remote ecosystem.
- * 
+ *
  * This CPS store is read-only. Write and Delete operations are not supported.
  */
 public class RestCPS implements IConfigurationPropertyStore {
 
-    private static final String REST_API_VERSION_CODED_AGAINST = "0.33.0" ; 
+    private static final String REST_API_VERSION_CODED_AGAINST = "0.33.0" ;
 
     // The prefix to URLs which guide the galasa framework into passing the request to this
-    // CPS implementation. 
+    // CPS implementation.
     //
     // We register this implementation as being associated with this URL schema type.
     // So when the framework sees that the framework.config.store is set to galasacps://myhost/api
     // it knows to instantiate this CPS implementation and direct calls to it.
     //
     // For example: galasacps://myHost/api
-    // Such URLs would get turned into https://myhost/api eventually before they are used to 
+    // Such URLs would get turned into https://myhost/api eventually before they are used to
     // talk to the API endpoint.
     public static final String URL_SCHEMA_REST = "galasacps";
 
@@ -82,18 +82,18 @@ public class RestCPS implements IConfigurationPropertyStore {
     /** What is the URI to the rest api endpoint ? This will be of the form https://myhost/api */
     private URI ecosystemRestApiUri;
 
-    /** 
+    /**
      * We create an HTTP client on initialisation of the instance of this CPS implementation,
      * and use that one until the Gaalsa framework shuts us down.
      */
     private CloseableHttpClient apiClient;
 
     /** The jwt we will use to contact the remote Galasa system. */
-    private String jwt; 
+    private String jwt;
 
     private Log log ;
 
-    /** 
+    /**
      * A set of property keys which the local test runs should not be reading or using.
      * For these properties, the value of null is returned, implying the value isn't set in the CPS,
      * so the value gets defaulted.
@@ -109,9 +109,9 @@ public class RestCPS implements IConfigurationPropertyStore {
     private Set<String> redactedNamespacesSet;
 
     public RestCPS(
-        URI                 ecosystemRestApiUri, 
-        HttpClientFactory   httpClientFactory, 
-        JwtProvider         jwtProvider, 
+        URI                 ecosystemRestApiUri,
+        HttpClientFactory   httpClientFactory,
+        JwtProvider         jwtProvider,
         LogFactory          logFactory
     ) throws ConfigurationPropertyStoreException {
 
@@ -142,7 +142,7 @@ public class RestCPS implements IConfigurationPropertyStore {
     }
 
     /**
-     * Some property namespaces and specific keys have no part to play in a local test run, so the 
+     * Some property namespaces and specific keys have no part to play in a local test run, so the
      * values are redacted.
      */
     private Set<String> createRedactedNamespaceSet() {
@@ -166,7 +166,7 @@ public class RestCPS implements IConfigurationPropertyStore {
         keys.add("framework.dynamicstatus.store");
 
         // Local test runs should not be using the remote creds store.
-        keys.add("framework.credentials.store"); 
+        keys.add("framework.credentials.store");
 
         return keys;
     }
@@ -189,7 +189,7 @@ public class RestCPS implements IConfigurationPropertyStore {
      * This method implements the getProperty method from the framework property
      * file class, returning a string value from a key inside the property file, or
      * null if empty.
-     * 
+     *
      * @param fullyQualifiedPropertyName The key of the property to get.
      * @throws ConfigurationPropertyStoreException - Something went wrong.
      */
@@ -204,7 +204,7 @@ public class RestCPS implements IConfigurationPropertyStore {
             // We could have used the /cps/{namespace}/property/{propertyName} endpoint, BUT
             // if the property isn't there, we get a 404 NOT FOUND error, and we can't tell the difference between
             // the endpoint being unavailable/wrong URL, and the property not being set.
-            // So we use the /cps/{namespace}/properties?prefix=xxxx so that if the endpoint isn't available, we get 404, 
+            // So we use the /cps/{namespace}/properties?prefix=xxxx so that if the endpoint isn't available, we get 404,
             // and if the property doesn't exist, then we get null in the map.
             // Although it's not as efficient on the server-side, performance isn't everything in this case, as local runs
             // can be slower/less performant than the ecosyste runs.
@@ -247,11 +247,11 @@ public class RestCPS implements IConfigurationPropertyStore {
         } catch(IOException ioEx) {
             String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
             throw new ConfigurationPropertyStoreException(msg,ioEx);
-        } 
+        }
 
         checkPropertiesAreWellFormed(properties);
 
-        return properties; 
+        return properties;
     }
 
     /**
@@ -316,7 +316,7 @@ public class RestCPS implements IConfigurationPropertyStore {
 
         return propName;
     }
-    
+
     @Override
     public @NotNull Map<String, String> getPrefixedProperties(@NotNull String prefixWithNamespace)
             throws ConfigurationPropertyStoreException {
@@ -329,7 +329,7 @@ public class RestCPS implements IConfigurationPropertyStore {
         // Some namespaces are not available to local test runs.
         if (!isNamespaceRedacted(namespace)) {
             String prefix = propName.simpleName;
-            
+
             URI targetUri = calculateQueryPropertyUri(namespace, prefix, NULL_SUFFIX, NULL_INFIX);
             HttpGet req = constructGetRequest(targetUri, this.jwt);
 
@@ -345,9 +345,9 @@ public class RestCPS implements IConfigurationPropertyStore {
             } catch(IOException ioEx) {
                 String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTIES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
                 throw new ConfigurationPropertyStoreException(msg,ioEx);
-            } 
+            }
         }
-        
+
         return results;
     }
 
@@ -367,7 +367,7 @@ public class RestCPS implements IConfigurationPropertyStore {
                 uriBuilder = uriBuilder.addParameter("infix", infix);
             }
             targetUri = uriBuilder.build();
-            
+
         } catch(URISyntaxException ex ) {
             String msg = ERROR_GALASA_CONSTRUCTED_URL_TO_REMOTE_CPS_INVALID_SYNTAX.getMessage(this.ecosystemRestApiUri.toString(),ex.getMessage());
             throw new ConfigurationPropertyStoreException(msg,ex);
@@ -378,7 +378,7 @@ public class RestCPS implements IConfigurationPropertyStore {
     /**
      * This method implements the setProperty method from the framework property
      * file class.
-     * 
+     *
      * @param key The key of the property to be set
      * @param value The value we set the property to
      * @throws ConfigurationPropertyStoreException  - Something went wrong.
@@ -388,7 +388,7 @@ public class RestCPS implements IConfigurationPropertyStore {
         String msg = ERROR_GALASA_CPS_SET_OPERATIONS_NOT_PERMITTED.getMessage();
         throw new ConfigurationPropertyStoreException(msg);
     }
-    
+
     @Override
     public void deleteProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
         String msg = ERROR_GALASA_CPS_DELETE_OPERATIONS_NOT_PERMITTED.getMessage();
@@ -398,10 +398,10 @@ public class RestCPS implements IConfigurationPropertyStore {
     /**
      * This method returns all properties for a given namespace from the framework property
      * file class.
-     * 
+     *
      * @param namespace The namespace we want to get the property from.
      * @return The properties returned.
-     * @throws ConfigurationPropertyStoreException 
+     * @throws ConfigurationPropertyStoreException if there was a problem accessing the CPS
      */
     @Override
     public Map<String,String> getPropertiesFromNamespace(String namespace) throws ConfigurationPropertyStoreException {
@@ -450,9 +450,9 @@ public class RestCPS implements IConfigurationPropertyStore {
 
     /**
      * Return all Namespaces for the framework property file
-     * 
+     *
      * @return - List of namespaces
-     * @throws ConfigurationPropertyStoreException 
+     * @throws ConfigurationPropertyStoreException if there was a problem accessing the CPS
      */
     @Override
     public List<String> getNamespaces() throws ConfigurationPropertyStoreException {
@@ -470,7 +470,7 @@ public class RestCPS implements IConfigurationPropertyStore {
         } catch(IOException ioEx) {
             String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
             throw new ConfigurationPropertyStoreException(msg,ioEx);
-        } 
+        }
 
         return results;
     }
@@ -501,16 +501,16 @@ public class RestCPS implements IConfigurationPropertyStore {
         } catch(IOException ioEx) {
             String msg = ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED.getMessage(targetUri.toString(),ioEx.getMessage());
             throw new ConfigurationPropertyStoreException(msg,ioEx);
-        } 
+        }
 
-        return namespaces; 
+        return namespaces;
     }
 
     private URI calculateQueryNamespaceUri() throws ConfigurationPropertyStoreException {
         URI targetUri ;
         try {
             String baseUri = this.ecosystemRestApiUri +"/cps/namespace/";
-            targetUri = new URI(baseUri);            
+            targetUri = new URI(baseUri);
         } catch(URISyntaxException ex ) {
             String msg = ERROR_GALASA_CONSTRUCTED_URL_TO_REMOTE_CPS_INVALID_SYNTAX.getMessage(this.ecosystemRestApiUri.toString(),ex.getMessage());
             throw new ConfigurationPropertyStoreException(msg,ex);

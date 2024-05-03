@@ -1,16 +1,30 @@
 plugins {
     id 'biz.aQute.bnd.builder'
     id 'galasa.extensions'
+    id 'jacoco'
 }
 
-description = 'Galasa CPS access over http - Provides the CPS stores via the public REST interface over http'
+description = 'Galasa Authentication - CouchDB'
 
 version = '0.34.0'
+
+configurations {
+    implementation.transitive = false
+}
 
 dependencies {
     implementation ('org.apache.httpcomponents:httpclient-osgi:4.5.13')
     implementation ('org.apache.httpcomponents:httpcore-osgi:4.4.14')
     implementation ('com.google.code.gson:gson:2.10.1')
+    implementation (project(':dev.galasa.extensions.common'))
 
     testImplementation(project(':dev.galasa.extensions.mocks'))
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
 }
