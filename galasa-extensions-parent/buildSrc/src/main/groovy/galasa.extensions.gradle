@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation 'dev.galasa:dev.galasa.framework:0.33.0'
+    implementation 'dev.galasa:dev.galasa.framework:0.34.0'
     implementation 'dev.galasa:dev.galasa:0.34.0'
 
     implementation 'commons-logging:commons-logging:1.2'
@@ -16,5 +16,5 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:3.1.0'
     testImplementation 'org.awaitility:awaitility:3.0.0'
     testImplementation 'org.assertj:assertj-core:3.16.1'
-    testImplementation 'dev.galasa:dev.galasa.framework:0.33.0'
+    testImplementation 'dev.galasa:dev.galasa.framework:0.34.0'
 }
