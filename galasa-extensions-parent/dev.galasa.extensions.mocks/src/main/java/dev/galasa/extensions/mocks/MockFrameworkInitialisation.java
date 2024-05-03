@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.cps.rest.mocks;
+package dev.galasa.extensions.mocks;
 
 import javax.validation.constraints.NotNull;
 
@@ -28,16 +28,47 @@ import java.util.*;
 
 public class MockFrameworkInitialisation implements IFrameworkInitialisation {
 
-    private URI cpsBootstrapUri ;
+    protected URI userStoreUri;
+    protected URI cpsBootstrapUri;
+
+    private List<IUserStore> registeredUserStores = new ArrayList<IUserStore>();
     private List<IConfigurationPropertyStore> registeredConfigPropertyStores = new ArrayList<IConfigurationPropertyStore>();
 
     public MockFrameworkInitialisation(URI cpsBootstrapUri) {
         this.cpsBootstrapUri = cpsBootstrapUri;
     }
 
+    public MockFrameworkInitialisation(URI cpsBootstrapUri, URI userStoreUri) {
+        this.cpsBootstrapUri = cpsBootstrapUri;
+        this.userStoreUri = userStoreUri;
+    }
+
+    @Override
+    public @NotNull URI getUserStoreUri() {
+        return userStoreUri;
+    }
+
     @Override
     public @NotNull URI getBootstrapConfigurationPropertyStore() {
         return cpsBootstrapUri;
+    }
+
+    @Override
+    public void registerConfigurationPropertyStore(@NotNull IConfigurationPropertyStore configurationPropertyStore) {
+        registeredConfigPropertyStores.add(configurationPropertyStore);
+    }
+
+    public List<IConfigurationPropertyStore> getRegisteredConfigurationPropertyStores() {
+        return registeredConfigPropertyStores;
+    }
+
+    @Override
+    public void registerUserStore(@NotNull IUserStore userStore) throws UserStoreException {
+        registeredUserStores.add(userStore);
+    }
+
+    public List<IUserStore> getRegisteredUserStores() {
+        return registeredUserStores;
     }
 
     @Override
@@ -53,16 +84,6 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     @Override
     public @NotNull List<URI> getResultArchiveStoreUris() {
         throw new UnsupportedOperationException("Unimplemented method 'getResultArchiveStoreUris'");
-    }
-
-
-    @Override
-    public void registerConfigurationPropertyStore(@NotNull IConfigurationPropertyStore configurationPropertyStore) {
-        registeredConfigPropertyStores.add(configurationPropertyStore);
-    }
-
-    public List<IConfigurationPropertyStore> getRegisteredConfigurationPropertyStores() {
-        return registeredConfigPropertyStores;
     }
 
     @Override
@@ -97,10 +118,5 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     @Override
     public @NotNull IFramework getFramework() {
         throw new UnsupportedOperationException("Unimplemented method 'getFramework'");
-    }
-
-    @Override
-    public void registerUserStore(@NotNull IUserStore userStore) throws UserStoreException {
-        throw new UnsupportedOperationException("Unimplemented method 'registerUserStore'");
     }
 }
