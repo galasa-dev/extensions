@@ -1,0 +1,12 @@
+plugins {
+    id 'biz.aQute.bnd.builder'
+    id 'galasa.extensions'
+}
+
+description = 'Galasa Events Plug-In - Kafka'
+
+version = '0.34.0'
+
+dependencies {
+    implementation 'dev.galasa:kafka.clients:3.7.0'
+}

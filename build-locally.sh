@@ -161,6 +161,7 @@ function clean_maven_repo {
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.raw.couchdb
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.rest
+    rm -fr ~/.m2/repository/dev/galasa/dev.galasa.events.kafka
     success "OK"
 }
 
