@@ -39,13 +39,18 @@ import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.api.HttpClientFactory;
+import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
+
+    private static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
+    private static final String COUCHDB_AUTH_TYPE    = "Basic";
 
     private final Log                          logger            ;
 
@@ -75,15 +80,22 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private TestStructure                      lastTestStructure;
 
-    private dev.galasa.extensions.common.api.LogFactory logFactory; 
+    private LogFactory logFactory;
 
     public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
-        this(framework, rasUri, new HttpClientFactoryImpl() , new CouchdbValidatorImpl() , new LogFactoryImpl(), new HttpRequestFactory(new SystemEnvironment()));
+        this(
+            framework,
+            rasUri,
+            new HttpClientFactoryImpl(),
+            new CouchdbValidatorImpl(),
+            new LogFactoryImpl(),
+            new HttpRequestFactory(COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(COUCHDB_AUTH_ENV_VAR))
+        );
     }
 
     // Note: We use logFactory here so we can propogate it downwards during unit testing.
-    public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator, 
-        dev.galasa.extensions.common.api.LogFactory logFactory, HttpRequestFactory requestFactory 
+    public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator,
+        LogFactory logFactory, HttpRequestFactory requestFactory
     ) throws CouchdbRasException {
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
@@ -404,7 +416,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     @Override
     public String calculateRasRunId() {
-        
+
         if (this.runDocumentId == null) {
             return null;
         }

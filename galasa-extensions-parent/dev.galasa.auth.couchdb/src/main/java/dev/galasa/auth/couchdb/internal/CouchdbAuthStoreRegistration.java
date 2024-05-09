@@ -11,6 +11,7 @@ import org.osgi.service.component.annotations.Component;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
@@ -22,14 +23,16 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
     private HttpClientFactory httpClientFactory;
     private LogFactory logFactory;
+    private CouchdbValidator couchdbValidator;
 
     public CouchdbAuthStoreRegistration() {
-        this(new HttpClientFactoryImpl(), new LogFactoryImpl());
+        this(new HttpClientFactoryImpl(), new LogFactoryImpl(), new CouchdbAuthStoreValidator());
     }
 
-    public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, LogFactory logFactory) {
+    public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, LogFactory logFactory, CouchdbValidator couchdbValidator) {
         this.httpClientFactory = httpClientFactory;
         this.logFactory = logFactory;
+        this.couchdbValidator = couchdbValidator;
     }
 
     /**
@@ -47,7 +50,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
         if (isUriRefferringToThisExtension(authStoreUri)) {
             frameworkInitialisation
-                    .registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, logFactory));
+                    .registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, logFactory, couchdbValidator));
         }
     }
 

@@ -31,16 +31,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import dev.galasa.extensions.common.couchdb.pojos.Welcome;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
-import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
-    
-    private final GalasaGson                         gson               = new GalasaGson();
-    private final Log                          logger             = LogFactory.getLog(getClass());
-    private       HttpRequestFactory requestFactory;
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbRasException {
+    private final GalasaGson gson   = new GalasaGson();
+    private final Log        logger = LogFactory.getLog(getClass());
+
+    private HttpRequestFactory requestFactory;
+
+    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbRasException {
        this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 
@@ -180,7 +182,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         if (checkView(requestors, "function (doc) { emit(doc.requestor, 1); }", "_count")) {
             updated = true;
         }
-        
+
         JsonObject result = views.getAsJsonObject("result-view");
         if (result == null) {
             updated = true;
@@ -240,7 +242,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                     checkRunDesignDocument(httpClient, rasUri, attempts);
                     return;
                 }
-                
+
                 if (statusCode != HttpStatus.SC_CREATED) {
                     EntityUtils.consumeQuietly(response.getEntity());
                     throw new CouchdbRasException(

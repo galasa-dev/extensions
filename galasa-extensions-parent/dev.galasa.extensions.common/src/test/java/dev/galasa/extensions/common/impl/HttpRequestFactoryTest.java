@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.impl;
+package dev.galasa.extensions.common.impl;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -11,10 +11,8 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.junit.Test;
-import static org.assertj.core.api.Assertions.*;
 
-import dev.galasa.extensions.mocks.MockEnvironment;
-import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
+import static org.assertj.core.api.Assertions.*;
 
 public class HttpRequestFactoryTest {
 
@@ -22,9 +20,9 @@ public class HttpRequestFactoryTest {
     public void TestGETRequestReturnsRequestWithGETMethod() {
         //Given ...
         String token = "myvalue";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/get";
 
         //When ...
@@ -42,9 +40,9 @@ public class HttpRequestFactoryTest {
     public void TestHEADRequestReturnsRequestWithHEADMethod() {
         //Given ...
         String token = "iamnottryingtogetahead";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/head";
 
         //When ...
@@ -62,9 +60,9 @@ public class HttpRequestFactoryTest {
     public void TestPOSTRequestReturnsRequestWithPOSTMethod() {
         //Given ...
         String token = "mysecretPOSTtoken";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/post";
 
         //When ...
@@ -82,9 +80,9 @@ public class HttpRequestFactoryTest {
     public void TestPUTRequestReturnsRequestWithPUTMethod() {
         //Given ...
         String token = "iPut";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/put";
 
         //When ...
@@ -97,14 +95,14 @@ public class HttpRequestFactoryTest {
         assertThat(request.getFirstHeader("Content-Type").getValue()).isEqualTo("application/json");
         assertThat(request.getFirstHeader("Accept").getValue()).isEqualTo("application/json");
     }
-    
+
     @Test
     public void TestDELETERequestReturnsRequestWithDELETEMethod() {
         //Given ...
         String token = "idontneedthisanymore";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/delete";
 
         //When ...
@@ -122,9 +120,9 @@ public class HttpRequestFactoryTest {
     public void TestGETRequestwithExtraHeadersReturnsRequestWithExtraHeaders() {
         //Given ...
         String token = "getwithextraheaders";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/get";
         String referer = "Galasa";
         String encoding = "gzip, deflate, br";
@@ -148,9 +146,9 @@ public class HttpRequestFactoryTest {
     public void TestPOSTRequestwithUpdatedHeadersReturnsRequestWithUpdatedHeaders() {
         //Given ...
         String token = "getwithextraheaders";
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", token);
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
+        String authType = "Basic";
+
+        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
         String url = "http://example.com/post";
         String accept = "application/xml";
         String contentType = "text/html";

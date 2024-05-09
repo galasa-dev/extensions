@@ -22,6 +22,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import dev.galasa.extensions.common.api.HttpClientFactory;
+import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.framework.api.beans.GalasaProperty;
 import dev.galasa.framework.api.beans.GalasaPropertyData;
 import dev.galasa.framework.api.beans.GalasaPropertyMetadata;
@@ -31,7 +33,6 @@ import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 
 import static dev.galasa.cps.rest.Errors.*;
 import org.apache.commons.logging.Log;
-import dev.galasa.extensions.common.api.*;
 
 /**
  * This class is used when the RestCPS class is being operated as the Key-Value

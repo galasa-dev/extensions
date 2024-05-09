@@ -23,6 +23,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
@@ -30,7 +31,6 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
-import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbTestFixtures {
@@ -44,7 +44,7 @@ public class CouchdbTestFixtures {
     public static final String ATTACHMENT_CONTENT1 = "Hello World";
     public static final String ARTIFACT_DOCUMENT_ID_1 = "987-artifact-doc-id-1";
     public static final String ARTIFACT_DOCUMENT_ID_2 = "987-artifact-doc-id-2";
-        
+
     public abstract static class BaseHttpInteraction implements HttpInteraction {
 
         private String rasUriStr ;
@@ -116,7 +116,7 @@ public class CouchdbTestFixtures {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -172,7 +172,7 @@ public class CouchdbTestFixtures {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -212,13 +212,13 @@ public class CouchdbTestFixtures {
             @Override
             public IRun getTestRun() {
                 return mockIRun;
-            }     
+            }
             @Override
             public @NotNull IConfigurationPropertyStoreService getConfigurationPropertyService(
                     @NotNull String namespace) throws ConfigurationPropertyStoreException {
                 assertThat(namespace).isEqualTo("couchdb");
                 return mockCps;
-            } 
+            }
         };
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(allInteractions);
@@ -227,11 +227,8 @@ public class CouchdbTestFixtures {
 
         MockHttpClientFactory mockHttpClientFactory = new MockHttpClientFactory(mockHttpClient);
 
-        MockEnvironment mockEnv = new MockEnvironment();
-        mockEnv.setenv("GALASA_RAS_TOKEN", "myrastoken");
+        HttpRequestFactory requestFactory = new HttpRequestFactory("Basic", "myrastoken");
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(mockEnv);
-        
         URI rasURI = URI.create(rasUriStr);
         CouchdbRasStore couchdbRasStore = new CouchdbRasStore(mockFramework, rasURI, mockHttpClientFactory, mockValidator, logFactory, requestFactory);
 

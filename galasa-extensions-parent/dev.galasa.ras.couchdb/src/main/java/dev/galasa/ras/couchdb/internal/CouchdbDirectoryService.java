@@ -48,9 +48,10 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.pojos.IdRev;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
-import dev.galasa.ras.couchdb.internal.pojos.IdRev;
 import dev.galasa.ras.couchdb.internal.pojos.Row;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
 import dev.galasa.ras.couchdb.internal.pojos.ViewResponse;
@@ -58,11 +59,11 @@ import dev.galasa.ras.couchdb.internal.pojos.ViewRow;
 
 public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryService {
 
-    private final Log             logger ;
-    private final LogFactory      logFactory ;
-    private final HttpRequestFactory           requestFactory;
+    private final Log logger;
+    private final LogFactory logFactory;
+    private final HttpRequestFactory requestFactory;
 
-    private static final Charset  UTF8   = Charset.forName("utf-8");
+    private static final Charset UTF8 = Charset.forName("utf-8");
 
     private final CouchdbRasStore store;
 
@@ -310,7 +311,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             throw new ResultArchiveStoreException("Unable to find tests", e);
         }
 
-        return tests;    
+        return tests;
     }
 
     @Override

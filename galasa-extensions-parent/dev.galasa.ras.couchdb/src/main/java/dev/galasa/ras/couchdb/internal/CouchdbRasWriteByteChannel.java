@@ -27,6 +27,7 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.ResultArchiveStoreContentType;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 /**
@@ -40,7 +41,7 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
 
     private final Path                          cachePath;
     private final SeekableByteChannel           cacheByteChannel;
-    private final HttpRequestFactory           requestFactory;
+    private final HttpRequestFactory            requestFactory;
 
     private final Path                          remotePath;
     private final ResultArchiveStoreContentType remoteContentType;
@@ -129,8 +130,8 @@ public class CouchdbRasWriteByteChannel implements SeekableByteChannel {
                     logger.info("Stored artifact " + remotePathStr + " length=" + Files.size(cachePath) + " contentType="+ this.remoteContentType.value());
                 } catch (Exception e) {
                     throw new IOException("Unable to store artifact attachment", e);
-                } 
-                
+                }
+
             } finally {
                 try {
                     Files.delete(cachePath);

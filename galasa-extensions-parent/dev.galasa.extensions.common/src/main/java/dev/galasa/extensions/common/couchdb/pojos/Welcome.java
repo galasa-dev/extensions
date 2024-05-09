@@ -3,10 +3,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.pojos;
+package dev.galasa.extensions.common.couchdb.pojos;
 
 public class Welcome {
-    
+
     public String couchdb;
     public String version;
 

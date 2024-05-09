@@ -14,6 +14,7 @@ import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreRegistration;
 import dev.galasa.extensions.mocks.MockFrameworkInitialisation;
 import dev.galasa.extensions.mocks.MockHttpClientFactory;
 import dev.galasa.extensions.mocks.MockLogFactory;
+import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.IAuthStore;
 
 import java.net.URI;
@@ -37,7 +38,8 @@ public class TestCouchdbAuthStoreRegistration {
         URI uri = new URI("couchdb:https://my.server:5984");
         CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration(
                 new MockHttpClientFactory(null),
-                new MockLogFactory());
+                new MockLogFactory(),
+                new MockCouchdbValidator());
 
         MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation(null, uri);
 

@@ -15,6 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthToken;
 import dev.galasa.framework.spi.auth.IAuthStore;
 import dev.galasa.framework.spi.auth.AuthStoreException;
@@ -36,8 +37,7 @@ public class CouchdbAuthStore implements IAuthStore {
     private CloseableHttpClient httpClient;
     private Log logger;
 
-    public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, LogFactory logFactory)
-            throws AuthStoreException {
+    public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, LogFactory logFactory, CouchdbValidator validator) throws AuthStoreException {
 
         // Strip off the 'couchdb:' prefix from the auth store URI
         // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
@@ -51,7 +51,7 @@ public class CouchdbAuthStore implements IAuthStore {
         this.logger = logFactory.getLog(getClass());
         this.httpClient = httpClientFactory.createClient();
 
-        // TODO-EM: Check that the couchdb database is valid
+        validator.checkCouchdbDatabaseIsValid(this.authStoreUri, this.httpClient, null);
     }
 
     @Override

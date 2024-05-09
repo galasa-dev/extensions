@@ -3,20 +3,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.mocks;
+package dev.galasa.extensions.mocks.couchdb;
 
 import java.net.URI;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import dev.galasa.extensions.common.couchdb.CouchdbAuthStoreException;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
-import dev.galasa.ras.couchdb.internal.CouchdbRasException;
-import dev.galasa.ras.couchdb.internal.CouchdbValidator;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbRasException {
+    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbAuthStoreException {
         // Do nothing.
     }
 
