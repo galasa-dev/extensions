@@ -18,8 +18,8 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
-import dev.galasa.framework.spi.auth.IUserStore;
-import dev.galasa.framework.spi.auth.UserStoreException;
+import dev.galasa.framework.spi.auth.IAuthStore;
+import dev.galasa.framework.spi.auth.AuthStoreException;
 import dev.galasa.framework.spi.creds.CredentialsException;
 import dev.galasa.framework.spi.creds.ICredentialsStore;
 
@@ -28,24 +28,24 @@ import java.util.*;
 
 public class MockFrameworkInitialisation implements IFrameworkInitialisation {
 
-    protected URI userStoreUri;
+    protected URI authStoreUri;
     protected URI cpsBootstrapUri;
 
-    private List<IUserStore> registeredUserStores = new ArrayList<IUserStore>();
+    private List<IAuthStore> registeredAuthStores = new ArrayList<IAuthStore>();
     private List<IConfigurationPropertyStore> registeredConfigPropertyStores = new ArrayList<IConfigurationPropertyStore>();
 
     public MockFrameworkInitialisation(URI cpsBootstrapUri) {
         this.cpsBootstrapUri = cpsBootstrapUri;
     }
 
-    public MockFrameworkInitialisation(URI cpsBootstrapUri, URI userStoreUri) {
+    public MockFrameworkInitialisation(URI cpsBootstrapUri, URI authStoreUri) {
         this.cpsBootstrapUri = cpsBootstrapUri;
-        this.userStoreUri = userStoreUri;
+        this.authStoreUri = authStoreUri;
     }
 
     @Override
-    public @NotNull URI getUserStoreUri() {
-        return userStoreUri;
+    public @NotNull URI getAuthStoreUri() {
+        return authStoreUri;
     }
 
     @Override
@@ -63,12 +63,12 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     }
 
     @Override
-    public void registerUserStore(@NotNull IUserStore userStore) throws UserStoreException {
-        registeredUserStores.add(userStore);
+    public void registerAuthStore(@NotNull IAuthStore authStore) throws AuthStoreException {
+        registeredAuthStores.add(authStore);
     }
 
-    public List<IUserStore> getRegisteredUserStores() {
-        return registeredUserStores;
+    public List<IAuthStore> getRegisteredAuthStores() {
+        return registeredAuthStores;
     }
 
     @Override
