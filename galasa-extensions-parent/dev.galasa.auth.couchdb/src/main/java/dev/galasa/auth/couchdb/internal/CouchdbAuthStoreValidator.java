@@ -22,10 +22,11 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
     @Override
     public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbAuthStoreException {
+        // Perform the base CouchDB checks
         super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory);
 
         try {
-            checkDatabasePresent(httpClient, couchdbUri, 1, "galasa_tokens");
+            checkDatabasePresent(httpClient, couchdbUri, 1, CouchdbAuthStore.TOKENS_DATABASE_NAME);
 
             logger.debug("Auth Store CouchDB at " + couchdbUri.toString() + " validated");
         } catch (Exception e) {

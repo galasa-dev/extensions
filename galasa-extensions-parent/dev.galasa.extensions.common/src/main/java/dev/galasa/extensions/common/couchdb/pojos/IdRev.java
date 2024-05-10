@@ -5,9 +5,21 @@
  */
 package dev.galasa.extensions.common.couchdb.pojos;
 
+import com.google.gson.annotations.SerializedName;
+
 public class IdRev {
 
-    public String _id;
-    public String _rev;
+    @SerializedName("_id")
+    public String id;
 
+    @SerializedName("_rev")
+    public String rev;
+
+    public String getId() {
+        return id;
+    }
+
+    public String getRev() {
+        return rev;
+    }
 }

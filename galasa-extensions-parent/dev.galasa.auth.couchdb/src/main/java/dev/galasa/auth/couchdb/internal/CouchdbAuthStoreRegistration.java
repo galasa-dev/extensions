@@ -13,6 +13,7 @@ import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.auth.IAuthStoreRegistration;
@@ -22,15 +23,17 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
 public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
     private HttpClientFactory httpClientFactory;
+    private HttpRequestFactory httpRequestFactory;
     private LogFactory logFactory;
     private CouchdbValidator couchdbValidator;
 
     public CouchdbAuthStoreRegistration() {
-        this(new HttpClientFactoryImpl(), new LogFactoryImpl(), new CouchdbAuthStoreValidator());
+        this(new HttpClientFactoryImpl(), new HttpRequestFactory(), new LogFactoryImpl(), new CouchdbAuthStoreValidator());
     }
 
-    public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, LogFactory logFactory, CouchdbValidator couchdbValidator) {
+    public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, HttpRequestFactory httpRequestFactory, LogFactory logFactory, CouchdbValidator couchdbValidator) {
         this.httpClientFactory = httpClientFactory;
+        this.httpRequestFactory = httpRequestFactory;
         this.logFactory = logFactory;
         this.couchdbValidator = couchdbValidator;
     }
@@ -50,7 +53,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
         if (isUriRefferringToThisExtension(authStoreUri)) {
             frameworkInitialisation
-                    .registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, logFactory, couchdbValidator));
+                    .registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, httpRequestFactory, logFactory, couchdbValidator));
         }
     }
 

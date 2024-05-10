@@ -40,12 +40,12 @@ import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
-import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbRasStore implements IResultArchiveStoreService {
 

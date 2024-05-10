@@ -49,13 +49,13 @@ import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.pojos.IdRev;
+import dev.galasa.extensions.common.couchdb.pojos.Row;
+import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
+import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
-import dev.galasa.ras.couchdb.internal.pojos.Row;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
-import dev.galasa.ras.couchdb.internal.pojos.ViewResponse;
-import dev.galasa.ras.couchdb.internal.pojos.ViewRow;
 
 public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryService {
 
@@ -488,13 +488,13 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             }
 
             IdRev found = store.getGson().fromJson(responseEntity, IdRev.class);
-            if (found._id == null) {
+            if (found.id == null) {
                 throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
             }
-            if (found._rev == null) {
+            if (found.rev == null) {
                 throw new CouchdbRasException("Unable to find rev - Invalid JSON response");
             }
-            return found._rev;
+            return found.rev;
         } catch (Exception e) {
             throw new ResultArchiveStoreException(e);
         }

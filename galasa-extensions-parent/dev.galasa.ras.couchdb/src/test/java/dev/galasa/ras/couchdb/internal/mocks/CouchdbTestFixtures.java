@@ -23,6 +23,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 
+import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
@@ -31,7 +32,6 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
-import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 
 public class CouchdbTestFixtures {
 

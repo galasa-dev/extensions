@@ -26,8 +26,8 @@ import org.junit.rules.TestName;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
+import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.mocks.*;
-import dev.galasa.ras.couchdb.internal.pojos.PutPostResponse;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.CreateArtifactDocInteractionOK;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.CreateTestDocInteractionOK;
@@ -91,7 +91,7 @@ public class CouchdbRasFileSystemProviderTest {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -106,7 +106,7 @@ public class CouchdbRasFileSystemProviderTest {
 
 
 
-    @Test 
+    @Test
     public void TestFileCloseCausesCouchDBArtifactToBeSaved() throws Exception {
 
         // Given...
@@ -115,7 +115,7 @@ public class CouchdbRasFileSystemProviderTest {
         String testFileNameToCreate = testName.getMethodName();
 
         // We expect an http interaction shortly, where a PUT is sent to couchdb...
-        // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved 
+        // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         // Interactions to get the RAS store created for this run...
         interactions.add( new CreateTestDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1, "124") );
@@ -136,7 +136,7 @@ public class CouchdbRasFileSystemProviderTest {
         assertThat(logContent).isNotEmpty();
     }
 
-    @Test 
+    @Test
     public void TestTwoFileClosesCausesCouchDBArtifactsToBeSavedInSingleDocument() throws Exception {
 
         // Given...
@@ -147,7 +147,7 @@ public class CouchdbRasFileSystemProviderTest {
         String testFileNameToCreate2 = testName.getMethodName()+"2";
 
         // We expect an http interaction shortly, where a PUT is sent to couchdb...
-        // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved 
+        // http://my.uri/galasa_artifacts/xyz127/%2FTestFileCloseCausesCouchDBArtifactToBeSaved
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         // Interactions to get the RAS store created for this run...
         interactions.add( new CreateTestDocInteractionOK(CouchdbTestFixtures.rasUriStr , CouchdbTestFixtures.documentId1,CouchdbTestFixtures.documentRev1) );
@@ -170,7 +170,7 @@ public class CouchdbRasFileSystemProviderTest {
         String logContent = mockLogFactory.toString();
         assertThat(logContent).isNotEmpty();
     }
-    
+
 
     private void createFile( CouchdbRasStore couchdbStore, String testFileNameToCreate, String fileContent) throws IOException {
         Path rootDirPath = couchdbStore.getStoredArtifactsRoot();

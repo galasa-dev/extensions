@@ -5,12 +5,11 @@
  */
 package dev.galasa.auth.couchdb;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestName;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreRegistration;
+import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.mocks.MockFrameworkInitialisation;
 import dev.galasa.extensions.mocks.MockHttpClientFactory;
 import dev.galasa.extensions.mocks.MockLogFactory;
@@ -24,9 +23,6 @@ import static org.assertj.core.api.Assertions.*;
 
 public class TestCouchdbAuthStoreRegistration {
 
-    @Rule
-    public TestName testName = new TestName();
-
     @Test
     public void TestCanCreateARegistrationOK() {
         new CouchdbAuthStoreRegistration();
@@ -38,6 +34,7 @@ public class TestCouchdbAuthStoreRegistration {
         URI uri = new URI("couchdb:https://my.server:5984");
         CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration(
                 new MockHttpClientFactory(null),
+                new HttpRequestFactory(),
                 new MockLogFactory(),
                 new MockCouchdbValidator());
 
