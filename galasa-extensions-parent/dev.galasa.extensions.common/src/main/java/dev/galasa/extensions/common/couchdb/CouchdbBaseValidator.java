@@ -36,7 +36,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
 
     @Override
     public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient,
-            HttpRequestFactory httpRequestFactory) throws CouchdbAuthStoreException {
+            HttpRequestFactory httpRequestFactory) throws CouchdbException {
         this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri.toString());
 
@@ -44,48 +44,45 @@ public class CouchdbBaseValidator implements CouchdbValidator {
 
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbAuthStoreException("Validation failed to CouchDB server - " + statusLine.toString());
+                throw new CouchdbException("Validation failed to CouchDB server - " + statusLine.toString());
             }
 
             HttpEntity entity = response.getEntity();
             String welcomePayload = EntityUtils.toString(entity);
             Welcome welcome = gson.fromJson(welcomePayload, Welcome.class);
             if (!"Welcome".equals(welcome.couchdb) || welcome.version == null) {
-                throw new CouchdbAuthStoreException("Validation failed to CouchDB server - invalid json response");
+                throw new CouchdbException("Validation failed to CouchDB server - invalid json response");
             }
 
             checkVersion(welcome.version, 3, 3, 3);
             logger.debug("CouchDB is at the correct version");
 
         } catch (Exception e) {
-            throw new CouchdbAuthStoreException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
     }
 
-    protected void checkDatabasePresent(CloseableHttpClient httpClient, URI couchdbUri, int attempts, String dbName) throws CouchdbAuthStoreException {
+    protected void checkDatabasePresent(CloseableHttpClient httpClient, URI couchdbUri, int attempts, String dbName) throws CouchdbException {
         HttpHead httpHead = requestFactory.getHttpHeadRequest(couchdbUri + "/" + dbName);
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
             StatusLine statusLine = response.getStatusLine();
 
-            if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-                return;
-            }
-            if (statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbAuthStoreException(
+            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                logger.info("CouchDB database '" + dbName + "' is missing, creating");
+                createDatabase(httpClient, couchdbUri, dbName, attempts);
+            } else if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                throw new CouchdbException(
                         "Validation failed of database " + dbName + " - " + statusLine.toString());
             }
-        } catch (CouchdbAuthStoreException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbAuthStoreException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
-
-        logger.info("CouchDB database " + dbName + " is missing,  creating");
-        createDatabase(httpClient, couchdbUri, dbName, attempts);
     }
 
-    private void createDatabase(CloseableHttpClient httpClient, URI couchdbUri, String dbName, int attempts) throws CouchdbAuthStoreException {
+    private void createDatabase(CloseableHttpClient httpClient, URI couchdbUri, String dbName, int attempts) throws CouchdbException {
         HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/" + dbName);
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
@@ -94,7 +91,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
                 // Someone possibly updated
                 attempts++;
                 if (attempts > 10) {
-                    throw new CouchdbAuthStoreException(
+                    throw new CouchdbException(
                             "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
                 }
                 Thread.sleep(1000 + new Random().nextInt(3000));
@@ -104,27 +101,27 @@ public class CouchdbBaseValidator implements CouchdbValidator {
 
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
-                throw new CouchdbAuthStoreException(
+                throw new CouchdbException(
                         "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
-        } catch (CouchdbAuthStoreException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbAuthStoreException("Create database " + dbName + " failed", e);
+            throw new CouchdbException("Create database " + dbName + " failed", e);
         }
     }
 
     private void checkVersion(String version, int minVersion, int minRelease, int minModification)
-            throws CouchdbAuthStoreException {
+            throws CouchdbException {
         String minVRM = minVersion + "." + minRelease + "." + minModification;
 
         Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
         Matcher m = vrm.matcher(version);
 
         if (!m.find()) {
-            throw new CouchdbAuthStoreException("Invalid CouchDB version " + version);
+            throw new CouchdbException("Invalid CouchDB version " + version);
         }
 
         int actualVersion = 0;
@@ -136,7 +133,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
             actualRelease = Integer.parseInt(m.group(2));
             actualModification = Integer.parseInt(m.group(3));
         } catch (NumberFormatException e) {
-            throw new CouchdbAuthStoreException("Unable to determine CouchDB version " + version, e);
+            throw new CouchdbException("Unable to determine CouchDB version " + version, e);
         }
 
         if (actualVersion > minVersion) {
@@ -144,7 +141,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
         }
 
         if (actualVersion < minVersion) {
-            throw new CouchdbAuthStoreException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
         if (actualRelease > minRelease) {
@@ -152,7 +149,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
         }
 
         if (actualRelease < minRelease) {
-            throw new CouchdbAuthStoreException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
         if (actualModification > minModification) {
@@ -160,7 +157,7 @@ public class CouchdbBaseValidator implements CouchdbValidator {
         }
 
         if (actualModification < minModification) {
-            throw new CouchdbAuthStoreException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
     }
 }

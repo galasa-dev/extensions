@@ -23,7 +23,7 @@ import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
-import dev.galasa.extensions.common.couchdb.CouchdbAuthStoreException;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
@@ -46,6 +46,8 @@ public class CouchdbAuthStore implements IAuthStore {
 
     public static final String URL_SCHEME = "couchdb";
     public static final String TOKENS_DATABASE_NAME = "galasa_tokens";
+    public static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
+    public static final String COUCHDB_AUTH_TYPE    = "Basic";
 
     private final GalasaGson gson = new GalasaGson();
 
@@ -56,20 +58,23 @@ public class CouchdbAuthStore implements IAuthStore {
 
     public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, HttpRequestFactory requestFactory, LogFactory logFactory, CouchdbValidator validator) throws AuthStoreException {
 
-        // Strip off the 'couchdb:' prefix from the auth store URI
-        // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
-        try {
-            this.authStoreUri = new URI(authStoreUri.toString().replace(URL_SCHEME + ":", ""));
-        } catch (URISyntaxException e) {
-            // TODO-EM: Add a custom error message to this exception
-            throw new AuthStoreException();
-        }
-
         this.httpRequestFactory = requestFactory;
         this.logger = logFactory.getLog(getClass());
         this.httpClient = httpClientFactory.createClient();
 
-        validator.checkCouchdbDatabaseIsValid(this.authStoreUri, this.httpClient, this.httpRequestFactory);
+        // Strip off the 'couchdb:' prefix from the auth store URI
+        // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
+        try {
+            this.authStoreUri = new URI(authStoreUri.toString().replace(URL_SCHEME + ":", ""));
+            validator.checkCouchdbDatabaseIsValid(this.authStoreUri, this.httpClient, this.httpRequestFactory);
+        } catch (URISyntaxException e) {
+            // TODO-EM: Add a custom error message to this exception
+            throw new CouchdbAuthStoreException(e);
+        } catch (CouchdbException e) {
+            // TODO-EM: Add a custom error message to this exception
+            throw new CouchdbAuthStoreException(e);
+        }
+
     }
 
     @Override

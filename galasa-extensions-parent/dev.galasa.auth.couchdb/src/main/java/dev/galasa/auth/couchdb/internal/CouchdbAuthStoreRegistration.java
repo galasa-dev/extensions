@@ -16,6 +16,7 @@ import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
+import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.auth.IAuthStoreRegistration;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
@@ -28,7 +29,12 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
     private CouchdbValidator couchdbValidator;
 
     public CouchdbAuthStoreRegistration() {
-        this(new HttpClientFactoryImpl(), new HttpRequestFactory(), new LogFactoryImpl(), new CouchdbAuthStoreValidator());
+        this(
+            new HttpClientFactoryImpl(),
+            new HttpRequestFactory(CouchdbAuthStore.COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(CouchdbAuthStore.COUCHDB_AUTH_ENV_VAR)),
+            new LogFactoryImpl(),
+            new CouchdbAuthStoreValidator()
+        );
     }
 
     public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, HttpRequestFactory httpRequestFactory, LogFactory logFactory, CouchdbValidator couchdbValidator) {

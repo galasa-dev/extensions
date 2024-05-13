@@ -12,5 +12,5 @@ import dev.galasa.extensions.common.impl.HttpRequestFactory;
 import java.net.URI;
 
 public interface CouchdbValidator {
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbAuthStoreException;
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException;
 }

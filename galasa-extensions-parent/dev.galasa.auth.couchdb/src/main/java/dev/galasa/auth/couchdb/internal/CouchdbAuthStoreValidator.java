@@ -12,8 +12,8 @@ import java.net.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import dev.galasa.extensions.common.couchdb.CouchdbAuthStoreException;
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 
 public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
@@ -21,7 +21,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
     private final Log logger = LogFactory.getLog(getClass());
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbAuthStoreException {
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbException {
         // Perform the base CouchDB checks
         super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory);
 
@@ -30,7 +30,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
             logger.debug("Auth Store CouchDB at " + couchdbUri.toString() + " validated");
         } catch (Exception e) {
-            throw new CouchdbAuthStoreException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
     }
 }

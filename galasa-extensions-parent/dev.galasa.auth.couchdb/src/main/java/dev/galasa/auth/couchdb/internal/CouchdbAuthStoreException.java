@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.extensions.common.couchdb;
+package dev.galasa.auth.couchdb.internal;
 
 import dev.galasa.framework.spi.auth.AuthStoreException;
 

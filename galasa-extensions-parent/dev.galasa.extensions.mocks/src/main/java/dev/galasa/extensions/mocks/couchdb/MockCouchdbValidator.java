@@ -9,14 +9,14 @@ import java.net.URI;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import dev.galasa.extensions.common.couchdb.CouchdbAuthStoreException;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbAuthStoreException {
+    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException {
         // Do nothing.
     }
 
