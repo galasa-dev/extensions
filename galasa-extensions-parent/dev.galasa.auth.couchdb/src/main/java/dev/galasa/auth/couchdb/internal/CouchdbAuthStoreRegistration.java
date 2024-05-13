@@ -65,6 +65,6 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
      * @return true if the URI is a couchdb URI, false otherwise.
      */
     public boolean isUriRefferringToThisExtension(URI uri) {
-        return CouchdbAuthStore.URL_SCHEMA.equals(uri.getScheme());
+        return CouchdbAuthStore.URL_SCHEME.equals(uri.getScheme());
     }
 }

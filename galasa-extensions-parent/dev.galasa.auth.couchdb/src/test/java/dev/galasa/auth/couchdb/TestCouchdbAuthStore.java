@@ -19,6 +19,7 @@ import org.apache.http.HttpStatus;
 import org.junit.Test;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
+import dev.galasa.auth.couchdb.internal.CouchdbAuthToken;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.impl.HttpRequestFactory;
@@ -73,9 +74,9 @@ public class TestCouchdbAuthStore {
 
     class GetTokenDocumentInteraction extends BaseHttpInteraction {
 
-        private AuthToken tokenToReturn;
+        private CouchdbAuthToken tokenToReturn;
 
-        public GetTokenDocumentInteraction(String expectedUri, AuthToken tokenToReturn) {
+        public GetTokenDocumentInteraction(String expectedUri, CouchdbAuthToken tokenToReturn) {
             super(expectedUri, null);
             this.tokenToReturn = tokenToReturn;
         }
@@ -118,7 +119,7 @@ public class TestCouchdbAuthStore {
         ViewResponse mockAllDocsResponse = new ViewResponse();
         mockAllDocsResponse.rows = mockDocs;
 
-        AuthToken mockToken = new AuthToken("token1", "my test token", Instant.now(), new User("johndoe"));
+        CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new User("johndoe"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", mockAllDocsResponse));
         interactions.add(new GetTokenDocumentInteraction("https://my-auth-store/galasa_tokens/token1", mockToken));
@@ -132,7 +133,8 @@ public class TestCouchdbAuthStore {
         List<AuthToken> tokens = authStore.getTokens();
 
         // Then...
+        AuthToken expectedToken = new AuthToken(mockToken.getDocumentId(), mockToken.getDescription(), mockToken.getCreationTime(), mockToken.getOwner());
         assertThat(tokens).hasSize(1);
-        assertThat(tokens.get(0)).usingRecursiveComparison().isEqualTo(mockToken);
+        assertThat(tokens.get(0)).usingRecursiveComparison().isEqualTo(expectedToken);
     }
 }

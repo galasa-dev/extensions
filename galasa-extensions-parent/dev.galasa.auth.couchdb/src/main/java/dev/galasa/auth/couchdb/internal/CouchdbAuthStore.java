@@ -44,7 +44,7 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
  */
 public class CouchdbAuthStore implements IAuthStore {
 
-    public static final String URL_SCHEMA = "couchdb";
+    public static final String URL_SCHEME = "couchdb";
     public static final String TOKENS_DATABASE_NAME = "galasa_tokens";
 
     private final GalasaGson gson = new GalasaGson();
@@ -59,7 +59,7 @@ public class CouchdbAuthStore implements IAuthStore {
         // Strip off the 'couchdb:' prefix from the auth store URI
         // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
         try {
-            this.authStoreUri = new URI(authStoreUri.toString().replace(URL_SCHEMA + ":", ""));
+            this.authStoreUri = new URI(authStoreUri.toString().replace(URL_SCHEME + ":", ""));
         } catch (URISyntaxException e) {
             // TODO-EM: Add a custom error message to this exception
             throw new AuthStoreException();
@@ -138,7 +138,12 @@ public class CouchdbAuthStore implements IAuthStore {
 
             HttpEntity entity = response.getEntity();
             String responseEntity = EntityUtils.toString(entity);
-            token = gson.fromJson(responseEntity, AuthToken.class);
+
+            // Convert the token stored in CouchDB into a token usable by the framework by
+            // removing the client ID and setting the document ID as the token ID
+            CouchdbAuthToken couchdbToken = gson.fromJson(responseEntity, CouchdbAuthToken.class);
+            token = new AuthToken(couchdbToken.getDocumentId(), couchdbToken.getDescription(),
+                    couchdbToken.getCreationTime(), couchdbToken.getOwner());
 
         } catch (ParseException | IOException e) {
             throw new AuthStoreException("Unable to retrieve token", e);
