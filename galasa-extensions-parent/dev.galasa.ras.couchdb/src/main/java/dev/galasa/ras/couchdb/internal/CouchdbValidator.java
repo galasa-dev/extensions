@@ -7,7 +7,7 @@ package dev.galasa.ras.couchdb.internal;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 import java.net.URI;
 

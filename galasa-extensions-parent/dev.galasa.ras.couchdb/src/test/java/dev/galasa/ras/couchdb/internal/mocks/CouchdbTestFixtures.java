@@ -24,7 +24,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
@@ -227,7 +228,7 @@ public class CouchdbTestFixtures {
 
         MockHttpClientFactory mockHttpClientFactory = new MockHttpClientFactory(mockHttpClient);
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory("Basic", "myrastoken");
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "myrastoken");
 
         URI rasURI = URI.create(rasUriStr);
         CouchdbRasStore couchdbRasStore = new CouchdbRasStore(mockFramework, rasURI, mockHttpClientFactory, mockValidator, logFactory, requestFactory);

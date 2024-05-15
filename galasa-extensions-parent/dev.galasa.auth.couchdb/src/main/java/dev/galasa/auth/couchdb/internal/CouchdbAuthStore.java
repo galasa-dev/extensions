@@ -7,7 +7,7 @@ package dev.galasa.auth.couchdb.internal;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,19 +18,18 @@ import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
-import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
-import dev.galasa.framework.spi.auth.AuthToken;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
+import dev.galasa.framework.spi.auth.IAuthToken;
 import dev.galasa.framework.spi.auth.IAuthStore;
-import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
 /**
@@ -42,86 +41,47 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
  * This implementation of the auth store interface gets all of its data from a CouchDB
  * server.
  */
-public class CouchdbAuthStore implements IAuthStore {
+public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
-    public static final String URL_SCHEME = "couchdb";
     public static final String TOKENS_DATABASE_NAME = "galasa_tokens";
     public static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
     public static final String COUCHDB_AUTH_TYPE    = "Basic";
 
-    private final GalasaGson gson = new GalasaGson();
-
-    private URI authStoreUri;
-    private CloseableHttpClient httpClient;
     private Log logger;
-    private HttpRequestFactory httpRequestFactory;
 
-    public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, HttpRequestFactory requestFactory, LogFactory logFactory, CouchdbValidator validator) throws AuthStoreException {
-
-        this.httpRequestFactory = requestFactory;
+    public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, HttpRequestFactory requestFactory,
+            LogFactory logFactory, CouchdbValidator validator) throws CouchdbException {
+        super(authStoreUri, requestFactory, httpClientFactory);
         this.logger = logFactory.getLog(getClass());
-        this.httpClient = httpClientFactory.createClient();
 
-        // Strip off the 'couchdb:' prefix from the auth store URI
-        // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
         try {
-            this.authStoreUri = new URI(authStoreUri.toString().replace(URL_SCHEME + ":", ""));
-            validator.checkCouchdbDatabaseIsValid(this.authStoreUri, this.httpClient, this.httpRequestFactory);
-        } catch (URISyntaxException e) {
-            // TODO-EM: Add a custom error message to this exception
-            throw new CouchdbAuthStoreException(e);
+            validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory);
         } catch (CouchdbException e) {
             // TODO-EM: Add a custom error message to this exception
-            throw new CouchdbAuthStoreException(e);
+            throw new CouchdbException(e);
         }
 
     }
 
     @Override
-    public List<AuthToken> getTokens() throws AuthStoreException {
+    public List<IAuthToken> getTokens() throws AuthStoreException {
         logger.info("Retrieving tokens from CouchDB");
         // Get all of the documents in the tokens database
-        List<ViewRow> tokenDocuments = getAllDocsViewRows(TOKENS_DATABASE_NAME);
+        List<ViewRow> tokenDocuments = new ArrayList<>();
+        List<IAuthToken> tokens = new ArrayList<>();
+        try {
+            tokenDocuments = getAllDocsFromDatabase(TOKENS_DATABASE_NAME);
 
-        // Build up a list of all the tokens using the document IDs
-        List<AuthToken> tokens = new ArrayList<>();
-        for (ViewRow row : tokenDocuments) {
-            tokens.add(getAuthTokenFromDocument(row.key));
+            // Build up a list of all the tokens using the document IDs
+            for (ViewRow row : tokenDocuments) {
+                tokens.add(getAuthTokenFromDocument(row.key));
+            }
+
+            logger.info("Tokens retrieved from CouchDB OK");
+        } catch (CouchdbException e) {
+            throw new CouchdbAuthStoreException(e);
         }
-
-        logger.info("Tokens retrieved from CouchDB OK");
         return tokens;
-    }
-
-    /**
-     * Sends a GET request to CouchDB's /{db}/_all_docs endpoint and returns the "rows" list in the response,
-     * which corresponds to the list of documents within the given database.
-     *
-     * @param dbName the name of the database to retrieve the documents of
-     * @return a list of rows corresponding to documents within the database
-     * @throws AuthStoreException if there was a problem accessing the auth store or its response
-     */
-    private List<ViewRow> getAllDocsViewRows(String dbName) throws AuthStoreException {
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(authStoreUri + "/" + dbName + "/_all_docs");
-        List<ViewRow> viewRows = new ArrayList<>();
-        try (CloseableHttpResponse response = httpClient.execute(getTokensDocs)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbAuthStoreException("Unable to find view - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            String responseEntity = EntityUtils.toString(entity);
-            ViewResponse tokenDocs = gson.fromJson(responseEntity, ViewResponse.class);
-            viewRows = tokenDocs.rows;
-
-            if (viewRows == null) {
-                throw new CouchdbAuthStoreException("Unable to find rows - Invalid JSON response");
-            }
-        } catch (ParseException | IOException e) {
-            throw new AuthStoreException("Unable to retrieve view ", e);
-        }
-        return viewRows;
     }
 
     /**
@@ -132,9 +92,10 @@ public class CouchdbAuthStore implements IAuthStore {
      * @return the auth token stored within the given document
      * @throws AuthStoreException if there was a problem accessing the auth store or its response
      */
-    private AuthToken getAuthTokenFromDocument(String documentId) throws AuthStoreException {
-        HttpGet getTokenDoc = httpRequestFactory.getHttpGetRequest(authStoreUri + "/" + TOKENS_DATABASE_NAME + "/" + documentId);
-        AuthToken token = null;
+    private IAuthToken getAuthTokenFromDocument(String documentId) throws AuthStoreException {
+        HttpGet getTokenDoc = httpRequestFactory
+                .getHttpGetRequest(storeUri + "/" + TOKENS_DATABASE_NAME + "/" + documentId);
+        IAuthToken token = null;
         try (CloseableHttpResponse response = httpClient.execute(getTokenDoc)) {
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
@@ -146,9 +107,7 @@ public class CouchdbAuthStore implements IAuthStore {
 
             // Convert the token stored in CouchDB into a token usable by the framework by
             // removing the client ID and setting the document ID as the token ID
-            CouchdbAuthToken couchdbToken = gson.fromJson(responseEntity, CouchdbAuthToken.class);
-            token = new AuthToken(couchdbToken.getDocumentId(), couchdbToken.getDescription(),
-                    couchdbToken.getCreationTime(), couchdbToken.getOwner());
+            token = gson.fromJson(responseEntity, CouchdbAuthToken.class);
 
         } catch (ParseException | IOException e) {
             throw new AuthStoreException("Unable to retrieve token", e);
@@ -162,7 +121,21 @@ public class CouchdbAuthStore implements IAuthStore {
             httpClient.close();
         } catch (IOException e) {
             // TODO-EM: Add a custom error message to this exception
-            throw new AuthStoreException();
+            throw new AuthStoreException(e);
+        }
+    }
+
+    @Override
+    public void storeToken(String clientId, String description, User owner) throws AuthStoreException {
+        // Create the JSON payload representing the token to store
+        // TODO-EM: Add a TimeService to the constructor so that we can mock out the
+        // Instant.now() call
+        String tokenJson = gson.toJson(new CouchdbAuthToken(clientId, description, Instant.now(), owner));
+
+        try {
+            createDocument(TOKENS_DATABASE_NAME, tokenJson);
+        } catch (CouchdbException e) {
+            throw new CouchdbAuthStoreException(e);
         }
     }
 }

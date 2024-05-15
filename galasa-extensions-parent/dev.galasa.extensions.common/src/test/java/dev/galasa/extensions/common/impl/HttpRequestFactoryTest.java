@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
+import dev.galasa.extensions.common.api.HttpRequestFactory;
+
 public class HttpRequestFactoryTest {
 
     @Test
@@ -22,7 +24,7 @@ public class HttpRequestFactoryTest {
         String token = "myvalue";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/get";
 
         //When ...
@@ -42,7 +44,7 @@ public class HttpRequestFactoryTest {
         String token = "iamnottryingtogetahead";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/head";
 
         //When ...
@@ -62,7 +64,7 @@ public class HttpRequestFactoryTest {
         String token = "mysecretPOSTtoken";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/post";
 
         //When ...
@@ -82,7 +84,7 @@ public class HttpRequestFactoryTest {
         String token = "iPut";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/put";
 
         //When ...
@@ -102,7 +104,7 @@ public class HttpRequestFactoryTest {
         String token = "idontneedthisanymore";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/delete";
 
         //When ...
@@ -122,7 +124,7 @@ public class HttpRequestFactoryTest {
         String token = "getwithextraheaders";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/get";
         String referer = "Galasa";
         String encoding = "gzip, deflate, br";
@@ -148,7 +150,7 @@ public class HttpRequestFactoryTest {
         String token = "getwithextraheaders";
         String authType = "Basic";
 
-        HttpRequestFactory requestFactory = new HttpRequestFactory(authType, token);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl(authType, token);
         String url = "http://example.com/post";
         String accept = "application/xml";
         String contentType = "text/html";

@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 

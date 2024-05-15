@@ -28,7 +28,7 @@ import org.apache.http.util.EntityUtils;
 
 import dev.galasa.ResultArchiveStoreContentType;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 /**
  * CouchDBRAS Byte Channel

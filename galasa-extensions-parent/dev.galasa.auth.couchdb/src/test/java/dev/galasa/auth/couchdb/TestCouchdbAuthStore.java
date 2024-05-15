@@ -20,9 +20,10 @@ import org.junit.Test;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthToken;
+import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
 import dev.galasa.extensions.mocks.MockCloseableHttpClient;
@@ -33,6 +34,7 @@ import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.MockStatusLine;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthToken;
+import dev.galasa.framework.spi.auth.IAuthToken;
 import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
@@ -106,6 +108,41 @@ public class TestCouchdbAuthStore {
         }
     }
 
+    class CreateTokenDocInteractionOK extends BaseHttpInteraction {
+
+        public CreateTokenDocInteractionOK(String expectedUri, String documentId) {
+            super(expectedUri, documentId);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("POST");
+        }
+
+        @Override
+        public MockCloseableHttpResponse getResponse() {
+            PutPostResponse responseTransportBean = new PutPostResponse();
+            responseTransportBean.id = getReturnedDocument();
+            responseTransportBean.ok = true;
+            responseTransportBean.rev = getReturnedDocument();
+
+            GalasaGson gson = new GalasaGson();
+            String updateMessagePayload = gson.toJson(responseTransportBean);
+
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
+
+            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
+
+            MockStatusLine statusLine = new MockStatusLine();
+            statusLine.setStatusCode(HttpStatus.SC_CREATED);
+            response.setStatusLine(statusLine);
+            response.setEntity(entity);
+
+            return response;
+        }
+    }
+
     @Test
     public void testGetTokensReturnsTokensFromCouchdbOK() throws Exception {
         // Given...
@@ -127,14 +164,39 @@ public class TestCouchdbAuthStore {
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
-        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactory(), logFactory, new MockCouchdbValidator());
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator());
 
         // When...
-        List<AuthToken> tokens = authStore.getTokens();
+        List<IAuthToken> tokens = authStore.getTokens();
 
         // Then...
-        AuthToken expectedToken = new AuthToken(mockToken.getDocumentId(), mockToken.getDescription(), mockToken.getCreationTime(), mockToken.getOwner());
+        AuthToken expectedToken = new AuthToken(mockToken.getTokenId(), mockToken.getDescription(), mockToken.getCreationTime(), mockToken.getOwner());
         assertThat(tokens).hasSize(1);
-        assertThat(tokens.get(0)).usingRecursiveComparison().isEqualTo(expectedToken);
+
+        IAuthToken actualToken = tokens.get(0);
+        assertThat(actualToken.getTokenId()).isEqualTo(expectedToken.getTokenId());
+        assertThat(actualToken.getDescription()).isEqualTo(expectedToken.getDescription());
+        assertThat(actualToken.getCreationTime()).isEqualTo(expectedToken.getCreationTime());
+        assertThat(actualToken.getOwner()).usingRecursiveComparison().isEqualTo(expectedToken.getOwner());
+    }
+
+    @Test
+    public void testStoreTokenAddsTokenToAuthStoreOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new CreateTokenDocInteractionOK("https://my-auth-store/galasa_tokens", "token-document-1"));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator());
+
+        // When...
+        authStore.storeToken("this-is-a-dex-id", "my token", new User("user1"));
+
+        // Then the assertions made in the create token document interaction shouldn't have failed.
     }
 }

@@ -52,7 +52,7 @@ import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.couchdb.pojos.Row;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.pojos.Find;
 import dev.galasa.ras.couchdb.internal.pojos.FoundRuns;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;

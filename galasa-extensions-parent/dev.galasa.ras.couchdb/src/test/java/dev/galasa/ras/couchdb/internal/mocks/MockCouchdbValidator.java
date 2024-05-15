@@ -9,7 +9,7 @@ import java.net.URI;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.CouchdbRasException;
 import dev.galasa.ras.couchdb.internal.CouchdbValidator;
 

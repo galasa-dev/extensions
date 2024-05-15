@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreRegistration;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.MockFrameworkInitialisation;
 import dev.galasa.extensions.mocks.MockHttpClientFactory;
 import dev.galasa.extensions.mocks.MockLogFactory;
@@ -34,7 +34,7 @@ public class TestCouchdbAuthStoreRegistration {
         URI uri = new URI("couchdb:https://my.server:5984");
         CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration(
                 new MockHttpClientFactory(null),
-                new HttpRequestFactory(),
+                new HttpRequestFactoryImpl(),
                 new MockLogFactory(),
                 new MockCouchdbValidator());
 

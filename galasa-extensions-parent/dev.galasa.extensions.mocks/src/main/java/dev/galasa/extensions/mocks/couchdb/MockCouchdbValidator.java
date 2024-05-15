@@ -11,7 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 

@@ -11,9 +11,11 @@ import org.osgi.service.component.annotations.Component;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.SystemEnvironment;
@@ -31,7 +33,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
     public CouchdbAuthStoreRegistration() {
         this(
             new HttpClientFactoryImpl(),
-            new HttpRequestFactory(CouchdbAuthStore.COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(CouchdbAuthStore.COUCHDB_AUTH_ENV_VAR)),
+            new HttpRequestFactoryImpl(CouchdbAuthStore.COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(CouchdbAuthStore.COUCHDB_AUTH_ENV_VAR)),
             new LogFactoryImpl(),
             new CouchdbAuthStoreValidator()
         );
@@ -58,8 +60,11 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
         URI authStoreUri = frameworkInitialisation.getAuthStoreUri();
 
         if (isUriRefferringToThisExtension(authStoreUri)) {
-            frameworkInitialisation
-                    .registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, httpRequestFactory, logFactory, couchdbValidator));
+            try {
+                frameworkInitialisation.registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, httpRequestFactory, logFactory, couchdbValidator));
+            } catch (CouchdbException e) {
+                throw new AuthStoreException(e);
+            }
         }
     }
 

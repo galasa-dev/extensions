@@ -8,10 +8,10 @@ package dev.galasa.auth.couchdb.internal;
 import java.time.Instant;
 
 import com.google.gson.annotations.SerializedName;
-
+import dev.galasa.framework.spi.auth.IAuthToken;
 import dev.galasa.framework.spi.auth.User;
 
-public class CouchdbAuthToken {
+public class CouchdbAuthToken implements IAuthToken {
 
     @SerializedName("_id")
     private String documentId;
@@ -28,15 +28,19 @@ public class CouchdbAuthToken {
     @SerializedName("owner")
     private User owner;
 
-    public CouchdbAuthToken(String documentId, String clientId, String description, Instant creationTime, User owner) {
-        this.documentId = documentId;
+    public CouchdbAuthToken(String clientId, String description, Instant creationTime, User owner) {
         this.clientId = clientId;
         this.description = description;
         this.creationTime = creationTime;
         this.owner = owner;
     }
 
-    public String getDocumentId() {
+    public CouchdbAuthToken(String documentId, String clientId, String description, Instant creationTime, User owner) {
+        this(clientId, description, creationTime, owner);
+        this.documentId = documentId;
+    }
+
+    public String getTokenId() {
         return documentId;
     }
 

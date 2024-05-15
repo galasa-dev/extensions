@@ -42,7 +42,8 @@ import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
-import dev.galasa.extensions.common.impl.HttpRequestFactory;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
@@ -89,7 +90,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             new HttpClientFactoryImpl(),
             new CouchdbValidatorImpl(),
             new LogFactoryImpl(),
-            new HttpRequestFactory(COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(COUCHDB_AUTH_ENV_VAR))
+            new HttpRequestFactoryImpl(COUCHDB_AUTH_TYPE, new SystemEnvironment().getenv(COUCHDB_AUTH_ENV_VAR))
         );
     }
 

@@ -16,16 +16,18 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 
-public class HttpRequestFactory {
+import dev.galasa.extensions.common.api.HttpRequestFactory;
+
+public class HttpRequestFactoryImpl implements HttpRequestFactory {
 
     private Map<String, String> headers = new HashMap<String,String>();
 
-    public HttpRequestFactory() {
+    public HttpRequestFactoryImpl() {
         headers.put(HttpHeaders.ACCEPT, "application/json");
         headers.put(HttpHeaders.CONTENT_TYPE, "application/json");
     }
 
-    public HttpRequestFactory(String authType, String authToken) {
+    public HttpRequestFactoryImpl(String authType, String authToken) {
         this();
         headers.put(HttpHeaders.AUTHORIZATION, authType + " " + authToken);
     }
