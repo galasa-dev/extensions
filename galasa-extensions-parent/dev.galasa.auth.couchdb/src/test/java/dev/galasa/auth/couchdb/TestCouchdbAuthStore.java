@@ -188,7 +188,7 @@ public class TestCouchdbAuthStore {
         interactions.add(new CreateTokenDocInteractionOK("https://my-auth-store/galasa_tokens", "token-document-1"));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
-        
+
         MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
         MockTimeService mockTimeService = new MockTimeService(Instant.now());
 

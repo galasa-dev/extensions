@@ -105,16 +105,17 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
                 }
                 Thread.sleep(1000 + new Random().nextInt(3000));
                 checkDatabasePresent(httpClient, couchdbUri, attempts, dbName);
-                return;
-            }
 
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
+            } else if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
+
                 String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
                 throw new CouchdbException(errorMessage);
-            }
 
-            EntityUtils.consumeQuietly(response.getEntity());
+            } else {
+                // The database was successfully created
+                EntityUtils.consumeQuietly(response.getEntity());
+            }
         } catch (InterruptedException | IOException e) {
             String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, e.getMessage());
             throw new CouchdbException(errorMessage, e);
@@ -124,7 +125,7 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
     /**
      * Determines whether or not the given CouchDB version meets the minimum required CouchDB version
      * for Galasa.
-     * 
+     *
      * @param actualVersion the version that the CouchDB server is running at
      * @throws CouchdbException if the version of CouchDB is older than the minimum required version
      */
