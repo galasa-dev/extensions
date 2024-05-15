@@ -5,6 +5,8 @@
  */
 package dev.galasa.extensions.common.couchdb;
 
+import static dev.galasa.extensions.common.Errors.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -47,11 +49,12 @@ public abstract class CouchdbStore {
     public CouchdbStore(URI storeUri, HttpRequestFactory httpRequestFactory, HttpClientFactory httpClientFactory) throws CouchdbException {
         // Strip off the 'couchdb:' prefix from the auth store URI
         // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
+        String storeUriStr = storeUri.toString();
         try {
-            this.storeUri = new URI(storeUri.toString().replace(URL_SCHEME + ":", ""));
+            this.storeUri = new URI(storeUriStr.replace(URL_SCHEME + ":", ""));
         } catch (URISyntaxException e) {
-            // TODO-EM: Add a custom error message to this exception
-            throw new CouchdbException(e);
+            String errorMessage = ERROR_URI_IS_INVALID.getMessage(storeUriStr, e.getMessage());
+            throw new CouchdbException(errorMessage, e);
         }
 
         this.httpRequestFactory = httpRequestFactory;
@@ -74,7 +77,8 @@ public abstract class CouchdbStore {
         // Check that the document was successfully created
         PutPostResponse putPostResponse = gson.fromJson(responseEntity, PutPostResponse.class);
         if (!putPostResponse.ok) {
-            throw new CouchdbException("Unable to create the token document - Invalid JSON response");
+            String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT.getMessage(dbName);
+            throw new CouchdbException(errorMessage);
         }
     }
 
@@ -94,7 +98,8 @@ public abstract class CouchdbStore {
         List<ViewRow> viewRows = allDocs.rows;
 
         if (viewRows == null) {
-            throw new CouchdbException("Unable to find rows - Invalid JSON response");
+            String errorMessage = ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE.getMessage(dbName);
+            throw new CouchdbException(errorMessage);
         }
 
         return viewRows;
@@ -104,7 +109,7 @@ public abstract class CouchdbStore {
      * Gets an object from a given database's document using its document ID by sending a
      * GET /{db}/{docid} request to the CouchDB server.
      *
-     * @param <T>
+     * @param <T> The object type to be returned
      * @param dbName the name of the database to retrieve the document from
      * @param documentId the couchDB ID for the document to retrieve
      * @param classOfObject the class of the JSON object to retrieve from the CouchDB Document
@@ -129,17 +134,18 @@ public abstract class CouchdbStore {
         String responseEntity = "";
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != expectedHttpStatusCode) {
-                //TODO Use a custom exception message
-                throw new CouchdbException("Unable to find token - " + statusLine.toString());
+            int actualStatusCode = statusLine.getStatusCode();
+            if (actualStatusCode != expectedHttpStatusCode) {
+                String errorMessage = ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE.getMessage(httpRequest.getURI().toString(), actualStatusCode, expectedHttpStatusCode);
+                throw new CouchdbException(errorMessage);
             }
 
             HttpEntity entity = response.getEntity();
             responseEntity = EntityUtils.toString(entity);
 
         } catch (ParseException | IOException e) {
-            //TODO Use a custom exception message
-            throw new CouchdbException("Unable to retrieve token", e);
+            String errorMessage = ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB.getMessage(httpRequest.getURI().toString(), e.getMessage());
+            throw new CouchdbException(errorMessage, e);
         }
         return responseEntity;
     }

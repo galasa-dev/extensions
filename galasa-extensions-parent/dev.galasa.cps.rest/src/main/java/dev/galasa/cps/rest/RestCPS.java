@@ -5,6 +5,8 @@
  */
 package dev.galasa.cps.rest;
 
+import static dev.galasa.extensions.common.Errors.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
@@ -22,6 +24,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import dev.galasa.extensions.common.Errors;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.framework.api.beans.GalasaProperty;
@@ -31,7 +34,6 @@ import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStore;
 import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
 
-import static dev.galasa.cps.rest.Errors.*;
 import org.apache.commons.logging.Log;
 
 /**
@@ -118,7 +120,7 @@ public class RestCPS implements IConfigurationPropertyStore {
 
         // Check that the URL passed starts with "galasacps"
         if (!ecosystemRestApiUri.toString().startsWith(URL_SCHEMA_REST+"://")) {
-            String msg = ERROR_GALASA_API_SERVER_URI_DOESNT_START_WITH_REST_SCHEME.getMessage(ecosystemRestApiUri.toString(),URL_SCHEMA_REST+"://");
+            String msg = ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME.getMessage(ecosystemRestApiUri.toString(),URL_SCHEMA_REST+"://");
             throw new ConfigurationPropertyStoreException(msg);
         }
 
@@ -127,7 +129,7 @@ public class RestCPS implements IConfigurationPropertyStore {
         try {
             this.ecosystemRestApiUri = new URI(ecosystemRestApiUri.toString().replaceAll(URL_SCHEMA_REST,"https"));
         } catch(URISyntaxException ex) {
-            String msg = ERROR_GALASA_API_SERVER_URI_IS_INVALID.getMessage(ecosystemRestApiUri.toString(),ex.toString());
+            String msg = ERROR_URI_IS_INVALID.getMessage(ecosystemRestApiUri.toString(),ex.toString());
             throw new ConfigurationPropertyStoreException(msg, ex);
         }
 

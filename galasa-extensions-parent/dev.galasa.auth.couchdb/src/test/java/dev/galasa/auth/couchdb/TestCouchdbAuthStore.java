@@ -32,8 +32,8 @@ import dev.galasa.extensions.mocks.MockHttpClientFactory;
 import dev.galasa.extensions.mocks.MockHttpEntity;
 import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.MockStatusLine;
+import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
-import dev.galasa.framework.spi.auth.AuthToken;
 import dev.galasa.framework.spi.auth.IAuthToken;
 import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.utils.GalasaGson;
@@ -164,24 +164,22 @@ public class TestCouchdbAuthStore {
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
-        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator());
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
         List<IAuthToken> tokens = authStore.getTokens();
 
         // Then...
-        AuthToken expectedToken = new AuthToken(mockToken.getTokenId(), mockToken.getDescription(), mockToken.getCreationTime(), mockToken.getOwner());
         assertThat(tokens).hasSize(1);
 
         IAuthToken actualToken = tokens.get(0);
-        assertThat(actualToken.getTokenId()).isEqualTo(expectedToken.getTokenId());
-        assertThat(actualToken.getDescription()).isEqualTo(expectedToken.getDescription());
-        assertThat(actualToken.getCreationTime()).isEqualTo(expectedToken.getCreationTime());
-        assertThat(actualToken.getOwner()).usingRecursiveComparison().isEqualTo(expectedToken.getOwner());
+        assertThat(actualToken).usingRecursiveComparison().isEqualTo(mockToken);
     }
 
     @Test
-    public void testStoreTokenAddsTokenToAuthStoreOK() throws Exception {
+    public void testStoreTokenSendsRequestToCreateTokenDocumentOK() throws Exception {
         // Given...
         URI authStoreUri = URI.create("couchdb:https://my-auth-store");
         MockLogFactory logFactory = new MockLogFactory();
@@ -190,9 +188,11 @@ public class TestCouchdbAuthStore {
         interactions.add(new CreateTokenDocInteractionOK("https://my-auth-store/galasa_tokens", "token-document-1"));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
-
+        
         MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
-        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator());
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
         authStore.storeToken("this-is-a-dex-id", "my token", new User("user1"));

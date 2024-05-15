@@ -3,21 +3,41 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.cps.rest;
+package dev.galasa.extensions.common;
 
 import java.text.MessageFormat;
 
 public enum Errors {
 
+    // Common errors
+    ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME                      (7000,"GAL7000E: URL of ''{0}'' is invalid. It does not start with ''{1}''"),
+    ERROR_URI_IS_INVALID                                             (7001,"GAL7001E: URL of ''{0}'' is invalid. {1}"),
+
+    // Generic CouchDB errors
+    ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER                            (6000,"GAL6000E: Failed to access CouchDB server. Cause: {1}"),
+    ERROR_INVALID_COUCHDB_WELCOME_RESPONSE                           (6001,"GAL6001E: Invalid CouchDB Welcome message returned from the CouchDB server."),
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Failed to validate CouchDB server configuration. Cause: {1}"),
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE                        (6003,"GAL6003E: Failed to determine whether the ''{0}'' database exists or not. Cause: {1}"),
+    ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Failed to create CouchDB database ''{0}''. Cause: {1}"),
+    ERROR_INVALID_COUCHDB_VERSION                                    (6005,"GAL6005E: Invalid CouchDB server version ''{0}''. Expected version ''{1}'' or above."),
+    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Failed to create new document in the CouchDB server's ''{0}'' database. POST response 'ok' was false."),
+    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}"),
+    ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: {1}"),
+    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009, "GAL6009E: Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB."),
+
+    // CouchDB Auth Store errors
+    ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED                          (6100,"GAL6100E: Failed to shut down Galasa CouchDB auth store. Cause: {0}"),
+    ERROR_FAILED_TO_RETRIEVE_TOKENS                                  (6101,"GAL6101E: Failed to get auth tokens from the CouchDB auth store. Cause: {0}"),
+    ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT                            (6102,"GAL6102E: Failed to store auth token in the CouchDB server's tokens database. Cause: {0}"),
+
+    // REST CPS errors
     ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE                 (6999,"GAL6999E: Failed to render message template. Not the expected number of parameters. Got ''{0}''. Expected ''{1}''"),
-    ERROR_GALASA_API_SERVER_URI_DOESNT_START_WITH_REST_SCHEME          (7000,"GAL7000E: URL of ''{0}'' is invalid. It does not start with ''{1}''"),
-    ERROR_GALASA_API_SERVER_URI_IS_INVALID                             (7001,"GAL7001E: URL of ''{0}'' is invalid. {1}"),
     ERROR_GALASA_CONSTRUCTED_URL_TO_REMOTE_CPS_INVALID_SYNTAX          (7002,"GAL7002E: URL ''{0}'' is of an invalid syntax. {1}"),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_FAILED_NON_OK_STATUS    (7003,"GAL7003E: Could not get the CPS property value from URL ''{0}''. Status code ''{1}'' is not 200."),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_FAILED                  (7004,"GAL7004E: Could not get the CPS property value from URL ''{0}''. Cause: {1}"),
     ERROR_GALASA_CANT_GET_JWT_TOKEN                                    (7005,"GAL7005E: Could not find the GALASA_JWT in the available configuration."),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_BAD_JSON_RETURNED       (7006,"GAL7006E: Could not get the CPS property value from URL ''{0}''. Cause: Bad json returned from the server. {1}"),
-    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_TOO_FEW_OR_MANY_RETURNED(7007,"GAL7007E: Could not get the SPC property valie from URL ''${0}''. Unexpected number of results. Expected {1} got {2}"),
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_TOO_FEW_OR_MANY_RETURNED(7007,"GAL7007E: Could not get the CPS property value from URL ''{0}''. Unexpected number of results. Expected {1} got {2}"),
     ERROR_GALASA_CPS_SET_OPERATIONS_NOT_PERMITTED                      (7008,"GAL7008E: Local test runs are not permitted to set CPS properties on the remote Galasa server."),
     ERROR_GALASA_CPS_DELETE_OPERATIONS_NOT_PERMITTED                   (7009,"GAL7009E: Local test runs are not permitted to delete CPS properties on the remote Galasa server."),
     ERROR_GALASA_CPS_SHUTDOWN_FAILED                                   (7010,"GAL7010E: Galasa internal error. Rest-based CPS store failed to shut down. Cause: {0}"),

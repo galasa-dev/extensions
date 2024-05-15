@@ -5,9 +5,10 @@
  */
 package dev.galasa.auth.couchdb.internal;
 
+import static dev.galasa.extensions.common.Errors.*;
+
 import java.io.IOException;
 import java.net.URI;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +24,7 @@ import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.auth.IAuthToken;
 import dev.galasa.framework.spi.auth.IAuthStore;
 import dev.galasa.framework.spi.auth.User;
+import dev.galasa.framework.spi.utils.ITimeService;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
 /**
@@ -41,19 +43,21 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     public static final String COUCHDB_AUTH_TYPE    = "Basic";
 
     private Log logger;
+    private ITimeService timeService;
 
-    public CouchdbAuthStore(URI authStoreUri, HttpClientFactory httpClientFactory, HttpRequestFactory requestFactory,
-            LogFactory logFactory, CouchdbValidator validator) throws CouchdbException {
+    public CouchdbAuthStore(
+        URI authStoreUri,
+        HttpClientFactory httpClientFactory,
+        HttpRequestFactory requestFactory,
+        LogFactory logFactory,
+        CouchdbValidator validator,
+        ITimeService timeService
+    ) throws CouchdbException {
         super(authStoreUri, requestFactory, httpClientFactory);
         this.logger = logFactory.getLog(getClass());
+        this.timeService = timeService;
 
-        try {
-            validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory);
-        } catch (CouchdbException e) {
-            // TODO-EM: Add a custom error message to this exception
-            throw new CouchdbException(e);
-        }
-
+        validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory);
     }
 
     @Override
@@ -72,7 +76,8 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
             logger.info("Tokens retrieved from CouchDB OK");
         } catch (CouchdbException e) {
-            throw new CouchdbAuthStoreException(e);
+            String errorMessage = ERROR_FAILED_TO_RETRIEVE_TOKENS.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
         }
         return tokens;
     }
@@ -94,22 +99,21 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         try {
             httpClient.close();
         } catch (IOException e) {
-            // TODO-EM: Add a custom error message to this exception
-            throw new AuthStoreException(e);
+            String errorMessage = ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
         }
     }
 
     @Override
     public void storeToken(String clientId, String description, User owner) throws AuthStoreException {
         // Create the JSON payload representing the token to store
-        // TODO-EM: Add a TimeService to the constructor so that we can mock out the
-        // Instant.now() call
-        String tokenJson = gson.toJson(new CouchdbAuthToken(clientId, description, Instant.now(), owner));
+        String tokenJson = gson.toJson(new CouchdbAuthToken(clientId, description, timeService.now(), owner));
 
         try {
             createDocument(TOKENS_DATABASE_NAME, tokenJson);
         } catch (CouchdbException e) {
-            throw new CouchdbAuthStoreException(e);
+            String errorMessage = ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
         }
     }
 }

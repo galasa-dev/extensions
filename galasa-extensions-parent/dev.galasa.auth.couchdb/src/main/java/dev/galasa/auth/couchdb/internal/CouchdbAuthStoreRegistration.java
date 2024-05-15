@@ -5,6 +5,8 @@
  */
 package dev.galasa.auth.couchdb.internal;
 
+import static dev.galasa.extensions.common.Errors.ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME;
+
 import java.net.*;
 
 import org.osgi.service.component.annotations.Component;
@@ -12,6 +14,7 @@ import org.osgi.service.component.annotations.Component;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -20,6 +23,7 @@ import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.auth.IAuthStoreRegistration;
+import dev.galasa.framework.spi.utils.SystemTimeService;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
 @Component(service = { IAuthStoreRegistration.class })
@@ -61,9 +65,19 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
         if (isUriRefferringToThisExtension(authStoreUri)) {
             try {
-                frameworkInitialisation.registerAuthStore(new CouchdbAuthStore(authStoreUri, httpClientFactory, httpRequestFactory, logFactory, couchdbValidator));
+                frameworkInitialisation.registerAuthStore(
+                    new CouchdbAuthStore(
+                        authStoreUri,
+                        httpClientFactory,
+                        httpRequestFactory,
+                        logFactory,
+                        couchdbValidator,
+                        new SystemTimeService()
+                    )
+                );
             } catch (CouchdbException e) {
-                throw new AuthStoreException(e);
+                String errorMessage = ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME.getMessage(authStoreUri.toString(), CouchdbStore.URL_SCHEME + ":");
+                throw new AuthStoreException(errorMessage, e);
             }
         }
     }

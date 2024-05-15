@@ -5,8 +5,11 @@
  */
 package dev.galasa.extensions.common.couchdb;
 
+import static dev.galasa.extensions.common.Errors.*;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -15,7 +18,9 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +32,9 @@ import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
-public class CouchdbBaseValidator implements CouchdbValidator {
+public abstract class CouchdbBaseValidator implements CouchdbValidator {
+
+    public static final String COUCHDB_MIN_VERSION = "3.3.3";
 
     private final GalasaGson gson = new GalasaGson();
     private final Log logger = LogFactory.getLog(getClass());
@@ -44,21 +51,23 @@ public class CouchdbBaseValidator implements CouchdbValidator {
 
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbException("Validation failed to CouchDB server - " + statusLine.toString());
+                String errorMessage = ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER.getMessage(statusLine.toString());
+                throw new CouchdbException(errorMessage);
             }
 
             HttpEntity entity = response.getEntity();
             String welcomePayload = EntityUtils.toString(entity);
             Welcome welcome = gson.fromJson(welcomePayload, Welcome.class);
             if (!"Welcome".equals(welcome.couchdb) || welcome.version == null) {
-                throw new CouchdbException("Validation failed to CouchDB server - invalid json response");
+                throw new CouchdbException(ERROR_INVALID_COUCHDB_WELCOME_RESPONSE.getMessage());
             }
 
-            checkVersion(welcome.version, 3, 3, 3);
+            checkVersion(welcome.version);
             logger.debug("CouchDB is at the correct version");
 
-        } catch (Exception e) {
-            throw new CouchdbException("Validation failed", e);
+        } catch (ParseException | IOException e) {
+            String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER.getMessage(e.getMessage());
+            throw new CouchdbException(errorMessage, e);
         }
     }
 
@@ -71,14 +80,14 @@ public class CouchdbBaseValidator implements CouchdbValidator {
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 logger.info("CouchDB database '" + dbName + "' is missing, creating");
                 createDatabase(httpClient, couchdbUri, dbName, attempts);
+
             } else if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbException(
-                        "Validation failed of database " + dbName + " - " + statusLine.toString());
+                String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
+                throw new CouchdbException(errorMessage);
             }
-        } catch (CouchdbException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbException("Validation failed", e);
+        } catch (IOException e) {
+            String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER.getMessage(e.getMessage());
+            throw new CouchdbException(errorMessage, e);
         }
     }
 
@@ -91,8 +100,8 @@ public class CouchdbBaseValidator implements CouchdbValidator {
                 // Someone possibly updated
                 attempts++;
                 if (attempts > 10) {
-                    throw new CouchdbException(
-                            "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
+                    String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
+                    throw new CouchdbException(errorMessage);
                 }
                 Thread.sleep(1000 + new Random().nextInt(3000));
                 checkDatabasePresent(httpClient, couchdbUri, attempts, dbName);
@@ -101,63 +110,55 @@ public class CouchdbBaseValidator implements CouchdbValidator {
 
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
-                throw new CouchdbException(
-                        "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
+                String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
+                throw new CouchdbException(errorMessage);
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
-        } catch (CouchdbException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbException("Create database " + dbName + " failed", e);
+        } catch (InterruptedException | IOException e) {
+            String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, e.getMessage());
+            throw new CouchdbException(errorMessage, e);
         }
     }
 
-    private void checkVersion(String version, int minVersion, int minRelease, int minModification)
-            throws CouchdbException {
-        String minVRM = minVersion + "." + minRelease + "." + minModification;
+    /**
+     * Determines whether or not the given CouchDB version meets the minimum required CouchDB version
+     * for Galasa.
+     * 
+     * @param actualVersion the version that the CouchDB server is running at
+     * @throws CouchdbException if the version of CouchDB is older than the minimum required version
+     */
+    private void checkVersion(String actualVersion) throws CouchdbException {
+        Pattern versionPattern = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
+        Matcher versionMatcher = versionPattern.matcher(actualVersion);
 
-        Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
-        Matcher m = vrm.matcher(version);
-
-        if (!m.find()) {
-            throw new CouchdbException("Invalid CouchDB version " + version);
+        // Make sure the given version follows semantic versioning rules (i.e. major.minor.patch)
+        if (!versionMatcher.find()) {
+            String errorMessage = ERROR_INVALID_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
+            throw new CouchdbException(errorMessage);
         }
 
-        int actualVersion = 0;
-        int actualRelease = 0;
-        int actualModification = 0;
+        int[] actualVersionParts = getVersionStringAsArray(actualVersion);
+        int[] minVersionParts = getVersionStringAsArray(COUCHDB_MIN_VERSION);
 
-        try {
-            actualVersion = Integer.parseInt(m.group(1));
-            actualRelease = Integer.parseInt(m.group(2));
-            actualModification = Integer.parseInt(m.group(3));
-        } catch (NumberFormatException e) {
-            throw new CouchdbException("Unable to determine CouchDB version " + version, e);
-        }
+        // Check if the actual version is older than the minimum version
+        // If the actual version matches the minimum version, then this loop will continue until
+        // all parts of the versions have been compared
+        for (int i = 0; i < minVersionParts.length; i++) {
+            if (actualVersionParts[i] < minVersionParts[i]) {
 
-        if (actualVersion > minVersion) {
-            return;
-        }
+                // The minimum CouchDB version is later than the actual version, so throw an error
+                String errorMessage = ERROR_INVALID_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
+                throw new CouchdbException(errorMessage);
 
-        if (actualVersion < minVersion) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
+            } else if (actualVersionParts[i] > minVersionParts[i]) {
+                // The minimum CouchDB version is older than the actual version, this is fine
+                break;
+            }
         }
+    }
 
-        if (actualRelease > minRelease) {
-            return;
-        }
-
-        if (actualRelease < minRelease) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        if (actualModification > minModification) {
-            return;
-        }
-
-        if (actualModification < minModification) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
+    private int[] getVersionStringAsArray(String versionStr) {
+        return Arrays.stream(versionStr.split("\\.")).mapToInt(Integer::parseInt).toArray();
     }
 }
