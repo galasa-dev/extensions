@@ -12,13 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.ParseException;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
@@ -92,27 +85,8 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
      * @return the auth token stored within the given document
      * @throws AuthStoreException if there was a problem accessing the auth store or its response
      */
-    private IAuthToken getAuthTokenFromDocument(String documentId) throws AuthStoreException {
-        HttpGet getTokenDoc = httpRequestFactory
-                .getHttpGetRequest(storeUri + "/" + TOKENS_DATABASE_NAME + "/" + documentId);
-        IAuthToken token = null;
-        try (CloseableHttpResponse response = httpClient.execute(getTokenDoc)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbAuthStoreException("Unable to find token - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            String responseEntity = EntityUtils.toString(entity);
-
-            // Convert the token stored in CouchDB into a token usable by the framework by
-            // removing the client ID and setting the document ID as the token ID
-            token = gson.fromJson(responseEntity, CouchdbAuthToken.class);
-
-        } catch (ParseException | IOException e) {
-            throw new AuthStoreException("Unable to retrieve token", e);
-        }
-        return token;
+    private IAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
+        return getDocumentFromDatabase(TOKENS_DATABASE_NAME, documentId, CouchdbAuthToken.class);
     }
 
     @Override

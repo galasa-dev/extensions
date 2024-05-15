@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -19,6 +18,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
@@ -67,24 +67,14 @@ public abstract class CouchdbStore {
      */
     protected void createDocument(String dbName, String jsonContent) throws CouchdbException {
         // Create a new document in the tokens database with the new token to store
-        HttpPost postTokenDoc = httpRequestFactory.getHttpPostRequest(storeUri + "/" + dbName);
-        postTokenDoc.setEntity(new StringEntity(jsonContent, StandardCharsets.UTF_8));
+        HttpPost postDocument = httpRequestFactory.getHttpPostRequest(storeUri + "/" + dbName);
+        postDocument.setEntity(new StringEntity(jsonContent, StandardCharsets.UTF_8));
+        String responseEntity = actionHttpRequest(postDocument, HttpStatus.SC_CREATED);
 
-        try (CloseableHttpResponse response = httpClient.execute(postTokenDoc)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                throw new CouchdbException("Unable to find token - " + statusLine.toString());
-            }
-
-            // Check that the document was successfully created
-            HttpEntity entity = response.getEntity();
-            PutPostResponse putPostResponse = gson.fromJson(EntityUtils.toString(entity), PutPostResponse.class);
-            if (!putPostResponse.ok) {
-                throw new CouchdbException("Unable to create the token document - Invalid JSON response");
-            }
-
-        } catch (ParseException | IOException e) {
-            throw new CouchdbException("Unable to retrieve token", e);
+        // Check that the document was successfully created
+        PutPostResponse putPostResponse = gson.fromJson(responseEntity, PutPostResponse.class);
+        if (!putPostResponse.ok) {
+            throw new CouchdbException("Unable to create the token document - Invalid JSON response");
         }
     }
 
@@ -98,24 +88,59 @@ public abstract class CouchdbStore {
      */
     protected List<ViewRow> getAllDocsFromDatabase(String dbName) throws CouchdbException {
         HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
-        List<ViewRow> viewRows = new ArrayList<>();
-        try (CloseableHttpResponse response = httpClient.execute(getTokensDocs)) {
+        String responseEntity = actionHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+
+        ViewResponse allDocs = gson.fromJson(responseEntity, ViewResponse.class);
+        List<ViewRow> viewRows = allDocs.rows;
+
+        if (viewRows == null) {
+            throw new CouchdbException("Unable to find rows - Invalid JSON response");
+        }
+
+        return viewRows;
+    }
+
+    /**
+     * Gets an object from a given database's document using its document ID by sending a
+     * GET /{db}/{docid} request to the CouchDB server.
+     *
+     * @param <T>
+     * @param dbName the name of the database to retrieve the document from
+     * @param documentId the couchDB ID for the document to retrieve
+     * @param classOfObject the class of the JSON object to retrieve from the CouchDB Document
+     * @return an object of the class provided in classOfObject
+     * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
+     */
+    protected <T> T getDocumentFromDatabase(String dbName, String documentId, Class<T> classOfObject) throws CouchdbException {
+        HttpGet getTokenDoc = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
+        return gson.fromJson(actionHttpRequest(getTokenDoc, HttpStatus.SC_OK), classOfObject);
+    }
+
+
+    /**
+     * Sends a given HTTP request to the CouchDB server and returns the response body as a string.
+     *
+     * @param httpRequest the HTTP request to send to the CouchDB server
+     * @param expectedHttpStatusCode the expected Status code to get from the CouchDb server upon the request being actioned
+     * @return a string representation of the response.
+     * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
+     */
+    private String actionHttpRequest(HttpUriRequest httpRequest, int expectedHttpStatusCode) throws CouchdbException {
+        String responseEntity = "";
+        try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbException("Unable to find view - " + statusLine.toString());
+            if (statusLine.getStatusCode() != expectedHttpStatusCode) {
+                //TODO Use a custom exception message
+                throw new CouchdbException("Unable to find token - " + statusLine.toString());
             }
 
             HttpEntity entity = response.getEntity();
-            String responseEntity = EntityUtils.toString(entity);
-            ViewResponse tokenDocs = gson.fromJson(responseEntity, ViewResponse.class);
-            viewRows = tokenDocs.rows;
+            responseEntity = EntityUtils.toString(entity);
 
-            if (viewRows == null) {
-                throw new CouchdbException("Unable to find rows - Invalid JSON response");
-            }
         } catch (ParseException | IOException e) {
-            throw new CouchdbException("Unable to retrieve view ", e);
+            //TODO Use a custom exception message
+            throw new CouchdbException("Unable to retrieve token", e);
         }
-        return viewRows;
+        return responseEntity;
     }
 }
