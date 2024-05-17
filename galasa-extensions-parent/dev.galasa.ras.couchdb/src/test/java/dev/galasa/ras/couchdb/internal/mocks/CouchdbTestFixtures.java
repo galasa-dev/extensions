@@ -45,7 +45,7 @@ public class CouchdbTestFixtures {
     public static final String ATTACHMENT_CONTENT1 = "Hello World";
     public static final String ARTIFACT_DOCUMENT_ID_1 = "987-artifact-doc-id-1";
     public static final String ARTIFACT_DOCUMENT_ID_2 = "987-artifact-doc-id-2";
-
+        
     public abstract static class BaseHttpInteraction implements HttpInteraction {
 
         private String rasUriStr ;
@@ -117,7 +117,7 @@ public class CouchdbTestFixtures {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -173,7 +173,7 @@ public class CouchdbTestFixtures {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(responseTransportBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -213,13 +213,13 @@ public class CouchdbTestFixtures {
             @Override
             public IRun getTestRun() {
                 return mockIRun;
-            }
+            }     
             @Override
             public @NotNull IConfigurationPropertyStoreService getConfigurationPropertyService(
                     @NotNull String namespace) throws ConfigurationPropertyStoreException {
                 assertThat(namespace).isEqualTo("couchdb");
                 return mockCps;
-            }
+            } 
         };
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(allInteractions);

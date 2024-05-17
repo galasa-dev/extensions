@@ -33,7 +33,7 @@ import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
 /**
- * This is a base class for CouchDB-implementations of Galasa stores that defines functions for common interactions
+ * This is a base class for CouchDB implementations of Galasa stores that defines functions for common interactions
  * with CouchDB, including creating documents in a database and getting all documents that are stored in a database.
  */
 public abstract class CouchdbStore {

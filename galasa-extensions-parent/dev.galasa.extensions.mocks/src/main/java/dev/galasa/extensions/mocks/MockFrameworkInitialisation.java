@@ -34,12 +34,13 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     private List<IAuthStore> registeredAuthStores = new ArrayList<IAuthStore>();
     private List<IConfigurationPropertyStore> registeredConfigPropertyStores = new ArrayList<IConfigurationPropertyStore>();
 
+    public MockFrameworkInitialisation() {}
+
     public MockFrameworkInitialisation(URI cpsBootstrapUri) {
         this.cpsBootstrapUri = cpsBootstrapUri;
     }
 
-    public MockFrameworkInitialisation(URI cpsBootstrapUri, URI authStoreUri) {
-        this.cpsBootstrapUri = cpsBootstrapUri;
+    public void setAuthStoreUri(URI authStoreUri) {
         this.authStoreUri = authStoreUri;
     }
 

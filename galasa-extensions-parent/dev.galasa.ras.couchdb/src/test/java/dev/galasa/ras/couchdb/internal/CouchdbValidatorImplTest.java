@@ -21,7 +21,7 @@ import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
 
 public class CouchdbValidatorImplTest {
-
+    
     @Rule
     public TestName testName = new TestName();
 
@@ -58,7 +58,7 @@ public class CouchdbValidatorImplTest {
             GalasaGson gson = new GalasaGson();
             String updateMessagePayload = gson.toJson(welcomeBean);
 
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
 
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
 
@@ -78,8 +78,8 @@ public class CouchdbValidatorImplTest {
 
         interactions.add( new WelcomeInteractionOK(
             CouchdbTestFixtures.rasUriStr,
-            CouchdbTestFixtures.documentId1,
-            CouchdbTestFixtures.documentRev1
+            CouchdbTestFixtures.documentId1, 
+            CouchdbTestFixtures.documentRev1 
         ) );
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);

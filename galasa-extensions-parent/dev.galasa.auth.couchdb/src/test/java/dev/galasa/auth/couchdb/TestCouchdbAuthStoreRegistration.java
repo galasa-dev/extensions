@@ -38,7 +38,8 @@ public class TestCouchdbAuthStoreRegistration {
                 new MockLogFactory(),
                 new MockCouchdbValidator());
 
-        MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation(null, uri);
+        MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation();
+        mockFrameworkInit.setAuthStoreUri(uri);
 
         // When...
         registration.initialise(mockFrameworkInit);
@@ -56,7 +57,8 @@ public class TestCouchdbAuthStoreRegistration {
         URI uri = new URI("notcouchdb:http://my.server/blah");
         CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration();
 
-        MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation(null, uri);
+        MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation();
+        mockFrameworkInit.setAuthStoreUri(uri);
 
         // When...
         registration.initialise(mockFrameworkInit);

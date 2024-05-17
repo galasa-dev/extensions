@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 
 
 public class TestRestCPSRegistration {
-
+    
     @Rule
     public TestName testName = new TestName();
 

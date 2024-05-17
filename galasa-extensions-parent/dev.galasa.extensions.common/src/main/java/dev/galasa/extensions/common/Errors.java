@@ -68,7 +68,7 @@ public enum Errors {
 
         if (actualParameterCount!= this.expectedParameterCount) {
             msg = ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE.getMessage(
-                actualParameterCount,
+                actualParameterCount, 
                 this.expectedParameterCount);
         } else {
             msg = this.template;
@@ -83,9 +83,9 @@ public enum Errors {
         int actualParameterCount = 1;
 
         if (actualParameterCount!= this.expectedParameterCount) {
-
+            
             msg = ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE.getMessage(
-                actualParameterCount,
+                actualParameterCount, 
                 this.expectedParameterCount);
         } else {
             msg = MessageFormat.format(this.template,o1);
