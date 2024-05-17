@@ -63,7 +63,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
 
         URI authStoreUri = frameworkInitialisation.getAuthStoreUri();
 
-        if (isUriRefferringToThisExtension(authStoreUri)) {
+        if (isUriReferringToThisExtension(authStoreUri)) {
             try {
                 frameworkInitialisation.registerAuthStore(
                     new CouchdbAuthStore(
@@ -89,7 +89,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
      *            "couchdb:http://my.couchdb.server:5984"
      * @return true if the URI is a couchdb URI, false otherwise.
      */
-    public boolean isUriRefferringToThisExtension(URI uri) {
+    public boolean isUriReferringToThisExtension(URI uri) {
         return CouchdbAuthStore.URL_SCHEME.equals(uri.getScheme());
     }
 }
