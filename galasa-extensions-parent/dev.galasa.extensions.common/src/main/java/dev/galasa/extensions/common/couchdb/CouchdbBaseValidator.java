@@ -21,7 +21,6 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,19 +38,22 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
     private final GalasaGson gson = new GalasaGson();
     private final Log logger = LogFactory.getLog(getClass());
 
-    protected HttpRequestFactory requestFactory;
+    private HttpRequestFactory requestFactory;
+    private CloseableHttpClient httpClient;
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient,
-            HttpRequestFactory httpRequestFactory) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbException {
         this.requestFactory = httpRequestFactory;
-        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri.toString());
+        this.httpClient = httpClient;
+
+        HttpGet httpGet = this.requestFactory.getHttpGetRequest(couchdbUri.toString());
 
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                String errorMessage = ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER.getMessage(statusLine.toString());
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode != HttpStatus.SC_OK) {
+                String errorMessage = ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER.getMessage(statusCode);
                 throw new CouchdbException(errorMessage);
             }
 
@@ -71,52 +73,72 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
         }
     }
 
-    protected void checkDatabasePresent(CloseableHttpClient httpClient, URI couchdbUri, int attempts, String dbName) throws CouchdbException {
+    /**
+     * Checks if a database with the given name exists in the CouchDB server. If not, the database is created.
+     *
+     * @param couchdbUri the URI of the CouchDB server
+     * @param dbName the name of the database that should exist
+     * @throws CouchdbException if there was an issue checking the existence of the database or creating it
+     */
+    protected void validateDatabasePresent(URI couchdbUri, String dbName) throws CouchdbException {
+        if (!isDatabasePresent(couchdbUri, dbName)) {
+            createDatabase(couchdbUri, dbName);
+        }
+    }
+
+    /**
+     * Checks if a database with the given name exists, returning true if so and false otherwise.
+     *
+     * @param couchdbUri the URI of the CouchDB server
+     * @param dbName the name of the database to check for
+     * @return true if the database with the given name exists, false otherwise
+     * @throws CouchdbException if there was an issue checking for the database
+     */
+    private boolean isDatabasePresent(URI couchdbUri, String dbName) throws CouchdbException {
         HttpHead httpHead = requestFactory.getHttpHeadRequest(couchdbUri + "/" + dbName);
 
+        boolean databaseExists = false;
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
             StatusLine statusLine = response.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
 
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                logger.info("CouchDB database '" + dbName + "' is missing, creating");
-                createDatabase(httpClient, couchdbUri, dbName, attempts);
-
-            } else if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
+            if (statusCode == HttpStatus.SC_OK) {
+                databaseExists = true;
+            } else if (statusCode != HttpStatus.SC_NOT_FOUND) {
+                String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE.getMessage(dbName, statusCode);
                 throw new CouchdbException(errorMessage);
             }
         } catch (IOException e) {
             String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER.getMessage(e.getMessage());
             throw new CouchdbException(errorMessage, e);
         }
+        return databaseExists;
     }
 
-    private void createDatabase(CloseableHttpClient httpClient, URI couchdbUri, String dbName, int attempts) throws CouchdbException {
+    /**
+     * Creates a new database with the given name, throwing a CouchdbException if
+     * the database could not be created.
+     *
+     * @param dbName the name of the database to be created
+     * @throws CouchdbException if there was a problem accessing the CouchDB server
+     *                          or creating the database
+     */
+    private synchronized void createDatabase(URI couchdbUri, String dbName) throws CouchdbException {
         HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/" + dbName);
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
             int statusCode = statusLine.getStatusCode();
-            if (statusCode == HttpStatus.SC_CONFLICT) {
-                // Someone possibly updated
-                attempts++;
-                if (attempts > 10) {
-                    String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
-                    throw new CouchdbException(errorMessage);
-                }
-                Thread.sleep(1000 + new Random().nextInt(3000));
-                checkDatabasePresent(httpClient, couchdbUri, attempts, dbName);
-
-            } else if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
+            if (statusCode != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
 
-                String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusLine.toString());
+                String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, statusCode);
                 throw new CouchdbException(errorMessage);
 
             } else {
                 // The database was successfully created
                 EntityUtils.consumeQuietly(response.getEntity());
             }
-        } catch (InterruptedException | IOException e) {
+        } catch (IOException e) {
             String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE.getMessage(dbName, e.getMessage());
             throw new CouchdbException(errorMessage, e);
         }

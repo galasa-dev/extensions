@@ -22,6 +22,7 @@ import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
@@ -33,6 +34,45 @@ import dev.galasa.extensions.mocks.MockStatusLine;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
 public class TestCouchdbAuthStoreValidator {
+
+    class CreateDatabaseInteraction extends BaseHttpInteraction {
+
+        private int responseStatusCode;
+
+        public CreateDatabaseInteraction(String expectedUri, int responseStatusCode) {
+            super(expectedUri, null);
+            this.responseStatusCode = responseStatusCode;
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("PUT");
+        }
+
+        @Override
+        public MockCloseableHttpResponse getResponse() {
+
+            PutPostResponse responseTransportBean = new PutPostResponse();
+            responseTransportBean.id = "id";
+            responseTransportBean.ok = String.valueOf(responseStatusCode).startsWith("2");
+            responseTransportBean.rev = "rev";
+
+            GalasaGson gson = new GalasaGson();
+            String updateMessagePayload = gson.toJson(responseTransportBean);
+
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
+
+            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
+
+            MockStatusLine statusLine = new MockStatusLine();
+            statusLine.setStatusCode(responseStatusCode);
+            response.setStatusLine(statusLine);
+            response.setEntity(entity);
+
+            return response;
+        }
+    }
 
     class GetCouchdbWelcomeInteraction extends BaseHttpInteraction {
 
@@ -126,6 +166,97 @@ public class TestCouchdbAuthStoreValidator {
     }
 
     @Test
+    public void testCheckCouchdbDatabaseIsValidWithFailingDatabaseCreationReturnsError() throws Exception {
+        // Given...
+        String couchdbUriStr = "https://my-couchdb-server";
+        URI couchdbUri = URI.create(couchdbUriStr);
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        Welcome welcomeMessage = new Welcome();
+        welcomeMessage.couchdb = "Welcome";
+        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+
+        String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
+        List<HttpInteraction> interactions = new ArrayList<>();
+        interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_NOT_FOUND));
+        interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_INTERNAL_SERVER_ERROR));
+        CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        // When...
+        CouchdbException thrown = catchThrowableOfType(
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            CouchdbException.class
+        );
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6004E", "Failed to create CouchDB database '" + tokensDatabaseName + "'", "Status code 500 from CouchDB server is not 201");
+    }
+
+    @Test
+    public void testCheckCouchdbDatabaseIsValidWithSuccessfulDatabaseCreationIsOK() throws Exception {
+        // Given...
+        String couchdbUriStr = "https://my-couchdb-server";
+        URI couchdbUri = URI.create(couchdbUriStr);
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        Welcome welcomeMessage = new Welcome();
+        welcomeMessage.couchdb = "Welcome";
+        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+
+        String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
+        List<HttpInteraction> interactions = new ArrayList<>();
+        interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_NOT_FOUND));
+        interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_CREATED));
+        CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        // When...
+        CouchdbException thrown = catchThrowableOfType(
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            CouchdbException.class
+        );
+
+        // Then...
+        // The validation should have passed, so no errors should have been thrown
+        assertThat(thrown).isNull();
+    }
+
+    @Test
+    public void testCheckCouchdbDatabaseIsValidWithNewerCouchdbVersionIsOK() throws Exception {
+        // Given...
+        String couchdbUriStr = "https://my-couchdb-server";
+        URI couchdbUri = URI.create(couchdbUriStr);
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        String[] versionParts = CouchdbBaseValidator.COUCHDB_MIN_VERSION.split("\\.");
+        int majorVersion = Integer.parseInt(versionParts[0]);
+        int minorVersion = Integer.parseInt(versionParts[1]);
+        int patchVersion = Integer.parseInt(versionParts[2]);
+
+        Welcome welcomeMessage = new Welcome();
+        welcomeMessage.couchdb = "Welcome";
+        welcomeMessage.version = (majorVersion + 10) + "." + minorVersion + "." + patchVersion;
+
+        String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
+        List<HttpInteraction> interactions = new ArrayList<>();
+        interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_INTERNAL_SERVER_ERROR));
+        CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        // When...
+        CouchdbException thrown = catchThrowableOfType(
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            CouchdbException.class
+        );
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6003E", "Failed to determine whether the '" + tokensDatabaseName + "' database exists");
+    }
+
+    @Test
     public void testCheckCouchdbDatabaseIsValidWithInvalidWelcomeMessageThrowsError() throws Exception {
         // Given...
         String couchdbUriStr = "https://my-couchdb-server";
@@ -192,7 +323,6 @@ public class TestCouchdbAuthStoreValidator {
         welcomeMessage.couchdb = "Welcome";
         welcomeMessage.version = majorVersion + ".0.0";
 
-
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
@@ -221,7 +351,6 @@ public class TestCouchdbAuthStoreValidator {
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
         welcomeMessage.version = String.format("%s.%s.%s", minVersionParts[0], minVersionParts[1], 0);
-
 
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));

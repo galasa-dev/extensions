@@ -5,12 +5,11 @@
  */
 package dev.galasa.auth.couchdb.internal;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
@@ -25,12 +24,8 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         // Perform the base CouchDB checks
         super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory);
 
-        try {
-            checkDatabasePresent(httpClient, couchdbUri, 1, CouchdbAuthStore.TOKENS_DATABASE_NAME);
+        validateDatabasePresent(couchdbUri, CouchdbAuthStore.TOKENS_DATABASE_NAME);
 
-            logger.debug("Auth Store CouchDB at " + couchdbUri.toString() + " validated");
-        } catch (Exception e) {
-            throw new CouchdbException("Validation failed", e);
-        }
+        logger.debug("Auth Store CouchDB at " + couchdbUri.toString() + " validated");
     }
 }
