@@ -15,9 +15,16 @@ import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 
-    @Override
-    public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException {
-        // Do nothing.
+    private boolean throwException = false;
+
+    public void setThrowException(boolean throwException) {
+        this.throwException = throwException;
     }
 
+    @Override
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException {
+        if (throwException) {
+            throw new CouchdbException("simulating a validation failure!");
+        }
+    }
 }

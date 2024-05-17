@@ -23,12 +23,13 @@ public enum Errors {
     ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Failed to create new document in the CouchDB server's ''{0}'' database. POST response 'ok' was false."),
     ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}"),
     ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: {1}"),
-    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009, "GAL6009E: Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB."),
+    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB."),
 
     // CouchDB Auth Store errors
     ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED                          (6100,"GAL6100E: Failed to shut down Galasa CouchDB auth store. Cause: {0}"),
     ERROR_FAILED_TO_RETRIEVE_TOKENS                                  (6101,"GAL6101E: Failed to get auth tokens from the CouchDB auth store. Cause: {0}"),
-    ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT                            (6102,"GAL6102E: Failed to store auth token in the CouchDB server's tokens database. Cause: {0}"),
+    ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT                            (6102,"GAL6102E: Failed to store auth token in the CouchDB tokens database. Cause: {0}"),
+    ERROR_FAILED_TO_INITIALISE_AUTH_STORE                            (6103,"GAL6103E: Failed to initialise the Galasa CouchDB auth store. Cause: {0}"),
 
     // REST CPS errors
     ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE                 (6999,"GAL6999E: Failed to render message template. Not the expected number of parameters. Got ''{0}''. Expected ''{1}''"),

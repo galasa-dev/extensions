@@ -5,9 +5,7 @@
  */
 package dev.galasa.extensions.common.couchdb;
 
-import dev.galasa.framework.spi.FrameworkException;
-
-public class CouchdbException extends FrameworkException {
+public class CouchdbException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

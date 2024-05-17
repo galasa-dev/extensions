@@ -11,7 +11,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
@@ -28,20 +27,19 @@ import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
 import dev.galasa.extensions.mocks.MockCloseableHttpClient;
-import dev.galasa.extensions.mocks.MockCloseableHttpResponse;
-import dev.galasa.extensions.mocks.MockHttpEntity;
-import dev.galasa.extensions.mocks.MockStatusLine;
-import dev.galasa.framework.spi.utils.GalasaGson;
 
 public class TestCouchdbAuthStoreValidator {
 
     class CreateDatabaseInteraction extends BaseHttpInteraction {
 
-        private int responseStatusCode;
-
         public CreateDatabaseInteraction(String expectedUri, int responseStatusCode) {
-            super(expectedUri, null);
-            this.responseStatusCode = responseStatusCode;
+            super(expectedUri, responseStatusCode);
+            
+            PutPostResponse responseTransportBean = new PutPostResponse();
+            responseTransportBean.id = "id";
+            responseTransportBean.ok = String.valueOf(responseStatusCode).startsWith("2");
+            responseTransportBean.rev = "rev";
+            setResponsePayload(responseTransportBean);
         }
 
         @Override
@@ -49,38 +47,13 @@ public class TestCouchdbAuthStoreValidator {
             super.validateRequest(host,request);
             assertThat(request.getRequestLine().getMethod()).isEqualTo("PUT");
         }
-
-        @Override
-        public MockCloseableHttpResponse getResponse() {
-
-            PutPostResponse responseTransportBean = new PutPostResponse();
-            responseTransportBean.id = "id";
-            responseTransportBean.ok = String.valueOf(responseStatusCode).startsWith("2");
-            responseTransportBean.rev = "rev";
-
-            GalasaGson gson = new GalasaGson();
-            String updateMessagePayload = gson.toJson(responseTransportBean);
-
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload);
-
-            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
-            MockStatusLine statusLine = new MockStatusLine();
-            statusLine.setStatusCode(responseStatusCode);
-            response.setStatusLine(statusLine);
-            response.setEntity(entity);
-
-            return response;
-        }
     }
 
     class GetCouchdbWelcomeInteraction extends BaseHttpInteraction {
 
-        private Welcome welcomeMessage;
-
         public GetCouchdbWelcomeInteraction(String expectedUri, Welcome welcomeMessage) {
-            super(expectedUri, null);
-            this.welcomeMessage = welcomeMessage;
+            super(expectedUri, HttpStatus.SC_OK);
+            setResponsePayload(welcomeMessage);
         }
 
         @Override
@@ -88,54 +61,18 @@ public class TestCouchdbAuthStoreValidator {
             super.validateRequest(host,request);
             assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
         }
-
-        @Override
-        public MockCloseableHttpResponse getResponse() {
-
-            GalasaGson gson = new GalasaGson();
-            String msgPayload = gson.toJson(this.welcomeMessage);
-
-            HttpEntity entity = new MockHttpEntity(msgPayload);
-
-            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
-            MockStatusLine statusLine = new MockStatusLine();
-            statusLine.setStatusCode(HttpStatus.SC_OK);
-            response.setStatusLine(statusLine);
-            response.setEntity(entity);
-
-            return response;
-        }
     }
 
     class GetTokensDatabaseInteraction extends BaseHttpInteraction {
 
-        private int responseStatusCode;
-
         public GetTokensDatabaseInteraction(String expectedUri, int responseStatusCode) {
-            super(expectedUri, null);
-            this.responseStatusCode = responseStatusCode;
+            super(expectedUri, responseStatusCode);
         }
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
             super.validateRequest(host,request);
             assertThat(request.getRequestLine().getMethod()).isEqualTo("HEAD");
-        }
-
-        @Override
-        public MockCloseableHttpResponse getResponse() {
-
-            HttpEntity entity = new MockHttpEntity("");
-
-            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
-            MockStatusLine statusLine = new MockStatusLine();
-            statusLine.setStatusCode(responseStatusCode);
-            response.setStatusLine(statusLine);
-            response.setEntity(entity);
-
-            return response;
         }
     }
 

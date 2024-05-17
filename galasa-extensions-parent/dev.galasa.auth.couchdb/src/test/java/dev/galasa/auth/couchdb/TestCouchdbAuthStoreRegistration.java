@@ -14,6 +14,7 @@ import dev.galasa.extensions.mocks.MockFrameworkInitialisation;
 import dev.galasa.extensions.mocks.MockHttpClientFactory;
 import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
+import dev.galasa.framework.spi.auth.AuthStoreException;
 import dev.galasa.framework.spi.auth.IAuthStore;
 
 import java.net.URI;
@@ -55,7 +56,11 @@ public class TestCouchdbAuthStoreRegistration {
         // Given...
         // Wrong schema in this URL.
         URI uri = new URI("notcouchdb:http://my.server/blah");
-        CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration();
+        CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration(
+                new MockHttpClientFactory(null),
+                new HttpRequestFactoryImpl(),
+                new MockLogFactory(),
+                new MockCouchdbValidator());
 
         MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation();
         mockFrameworkInit.setAuthStoreUri(uri);
@@ -64,9 +69,32 @@ public class TestCouchdbAuthStoreRegistration {
         registration.initialise(mockFrameworkInit);
 
         // Then...
-        // The auth store shouldn't have been added to the list of registered user
-        // stores
+        // The auth store shouldn't have been added to the list of registered user stores
         List<IAuthStore> stores = mockFrameworkInit.getRegisteredAuthStores();
         assertThat(stores).isNotNull().hasSize(0);
+    }
+
+    @Test
+    public void TestInitialiseRegistrationWithFailingValidationReturnsError() throws Exception {
+        // Given...
+        URI uri = new URI("couchdb:http://my.server:1234");
+        MockCouchdbValidator mockCouchdbValidator = new MockCouchdbValidator();
+        mockCouchdbValidator.setThrowException(true);
+
+        CouchdbAuthStoreRegistration registration = new CouchdbAuthStoreRegistration(
+                new MockHttpClientFactory(null),
+                new HttpRequestFactoryImpl(),
+                new MockLogFactory(),
+                mockCouchdbValidator);
+
+        MockFrameworkInitialisation mockFrameworkInit = new MockFrameworkInitialisation();
+        mockFrameworkInit.setAuthStoreUri(uri);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> registration.initialise(mockFrameworkInit), AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6103E", "Failed to initialise the Galasa CouchDB auth store");
     }
 }

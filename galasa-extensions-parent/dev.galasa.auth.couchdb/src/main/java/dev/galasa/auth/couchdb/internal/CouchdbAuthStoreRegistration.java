@@ -5,7 +5,7 @@
  */
 package dev.galasa.auth.couchdb.internal;
 
-import static dev.galasa.extensions.common.Errors.ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME;
+import static dev.galasa.extensions.common.Errors.*;
 
 import java.net.*;
 
@@ -14,7 +14,6 @@ import org.osgi.service.component.annotations.Component;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
-import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -76,7 +75,7 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
                     )
                 );
             } catch (CouchdbException e) {
-                String errorMessage = ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME.getMessage(authStoreUri.toString(), CouchdbStore.URL_SCHEME + ":");
+                String errorMessage = ERROR_FAILED_TO_INITIALISE_AUTH_STORE.getMessage(e.getMessage());
                 throw new AuthStoreException(errorMessage, e);
             }
         }

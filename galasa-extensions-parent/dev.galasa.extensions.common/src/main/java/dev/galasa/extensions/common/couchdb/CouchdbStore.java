@@ -72,7 +72,7 @@ public abstract class CouchdbStore {
         // Create a new document in the tokens database with the new token to store
         HttpPost postDocument = httpRequestFactory.getHttpPostRequest(storeUri + "/" + dbName);
         postDocument.setEntity(new StringEntity(jsonContent, StandardCharsets.UTF_8));
-        String responseEntity = actionHttpRequest(postDocument, HttpStatus.SC_CREATED);
+        String responseEntity = sendHttpRequest(postDocument, HttpStatus.SC_CREATED);
 
         // Check that the document was successfully created
         PutPostResponse putPostResponse = gson.fromJson(responseEntity, PutPostResponse.class);
@@ -92,7 +92,7 @@ public abstract class CouchdbStore {
      */
     protected List<ViewRow> getAllDocsFromDatabase(String dbName) throws CouchdbException {
         HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
-        String responseEntity = actionHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
 
         ViewResponse allDocs = gson.fromJson(responseEntity, ViewResponse.class);
         List<ViewRow> viewRows = allDocs.rows;
@@ -118,7 +118,7 @@ public abstract class CouchdbStore {
      */
     protected <T> T getDocumentFromDatabase(String dbName, String documentId, Class<T> classOfObject) throws CouchdbException {
         HttpGet getTokenDoc = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
-        return gson.fromJson(actionHttpRequest(getTokenDoc, HttpStatus.SC_OK), classOfObject);
+        return gson.fromJson(sendHttpRequest(getTokenDoc, HttpStatus.SC_OK), classOfObject);
     }
 
 
@@ -130,13 +130,13 @@ public abstract class CouchdbStore {
      * @return a string representation of the response.
      * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
      */
-    private String actionHttpRequest(HttpUriRequest httpRequest, int expectedHttpStatusCode) throws CouchdbException {
+    private String sendHttpRequest(HttpUriRequest httpRequest, int expectedHttpStatusCode) throws CouchdbException {
         String responseEntity = "";
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             StatusLine statusLine = response.getStatusLine();
             int actualStatusCode = statusLine.getStatusCode();
             if (actualStatusCode != expectedHttpStatusCode) {
-                String errorMessage = ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE.getMessage(httpRequest.getURI().toString(), actualStatusCode, expectedHttpStatusCode);
+                String errorMessage = ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE.getMessage(httpRequest.getURI().toString(), expectedHttpStatusCode, actualStatusCode);
                 throw new CouchdbException(errorMessage);
             }
 
