@@ -39,7 +39,7 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
 public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
     public static final String TOKENS_DATABASE_NAME = "galasa_tokens";
-    public static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
+    public static final String COUCHDB_AUTH_ENV_VAR = "GALASA_AUTHSTORE_TOKEN";
     public static final String COUCHDB_AUTH_TYPE    = "Basic";
 
     private Log logger;
@@ -63,10 +63,11 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     @Override
     public List<IAuthToken> getTokens() throws AuthStoreException {
         logger.info("Retrieving tokens from CouchDB");
-        // Get all of the documents in the tokens database
         List<ViewRow> tokenDocuments = new ArrayList<>();
         List<IAuthToken> tokens = new ArrayList<>();
+
         try {
+            // Get all of the documents in the tokens database
             tokenDocuments = getAllDocsFromDatabase(TOKENS_DATABASE_NAME);
 
             // Build up a list of all the tokens using the document IDs
@@ -80,18 +81,6 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
             throw new AuthStoreException(errorMessage, e);
         }
         return tokens;
-    }
-
-    /**
-     * Gets an auth token from a CouchDB document with the given document ID.
-     * The document is assumed to be within the tokens database in the CouchDB server.
-     *
-     * @param documentId the ID of the document containing the details of an auth token
-     * @return the auth token stored within the given document
-     * @throws AuthStoreException if there was a problem accessing the auth store or its response
-     */
-    private IAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
-        return getDocumentFromDatabase(TOKENS_DATABASE_NAME, documentId, CouchdbAuthToken.class);
     }
 
     @Override
@@ -115,5 +104,17 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
             String errorMessage = ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT.getMessage(e.getMessage());
             throw new AuthStoreException(errorMessage, e);
         }
+    }
+
+    /**
+     * Gets an auth token from a CouchDB document with the given document ID.
+     * The document is assumed to be within the tokens database in the CouchDB server.
+     *
+     * @param documentId the ID of the document containing the details of an auth token
+     * @return the auth token stored within the given document
+     * @throws AuthStoreException if there was a problem accessing the auth store or its response
+     */
+    private IAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
+        return getDocumentFromDatabase(TOKENS_DATABASE_NAME, documentId, CouchdbAuthToken.class);
     }
 }
