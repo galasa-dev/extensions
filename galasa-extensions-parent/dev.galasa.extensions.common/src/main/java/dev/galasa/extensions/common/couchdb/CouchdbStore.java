@@ -111,7 +111,7 @@ public abstract class CouchdbStore {
      *
      * @param <T> The object type to be returned
      * @param dbName the name of the database to retrieve the document from
-     * @param documentId the couchDB ID for the document to retrieve
+     * @param documentId the CouchDB ID for the document to retrieve
      * @param classOfObject the class of the JSON object to retrieve from the CouchDB Document
      * @return an object of the class provided in classOfObject
      * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
