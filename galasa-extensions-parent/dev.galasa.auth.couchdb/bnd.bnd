@@ -8,6 +8,7 @@ Import-Package: com.google.gson,\
     dev.galasa.framework.spi.auth,\
     dev.galasa.framework.spi.utils,\
     dev.galasa.extensions.common.couchdb.*,\
+    dev.galasa.extensions.common,\
     dev.galasa.extensions.common.api,\
     dev.galasa.extensions.common.impl,\
     javax.validation.constraints;resolution:=optional,\

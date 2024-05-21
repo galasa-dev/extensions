@@ -6,6 +6,7 @@ Export-Package: !dev.galasa.cps.rest.internal,dev.galasa.cps.rest*
 Import-Package: \
     com.google.gson,\
     dev.galasa,\
+    dev.galasa.extensions.common,\
     dev.galasa.extensions.common.api,\
     dev.galasa.extensions.common.impl,\
     dev.galasa.framework.spi,\
