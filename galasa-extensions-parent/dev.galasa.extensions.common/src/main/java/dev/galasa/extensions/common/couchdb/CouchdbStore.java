@@ -51,7 +51,7 @@ public abstract class CouchdbStore {
         // e.g. couchdb:https://myhost:5984 becomes https://myhost:5984
         String storeUriStr = storeUri.toString();
         try {
-            this.storeUri = new URI(storeUriStr.replace(URL_SCHEME + ":", ""));
+            this.storeUri = new URI(storeUriStr.substring((URL_SCHEME + ":").length()));
         } catch (URISyntaxException e) {
             String errorMessage = ERROR_URI_IS_INVALID.getMessage(storeUriStr, e.getMessage());
             throw new CouchdbException(errorMessage, e);

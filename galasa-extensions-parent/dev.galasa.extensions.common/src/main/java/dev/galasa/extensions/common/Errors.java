@@ -16,11 +16,11 @@ public enum Errors {
     // Generic CouchDB errors
     ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER                            (6000,"GAL6000E: Failed to access CouchDB server. Status code {1} from CouchDB server is not 200."),
     ERROR_INVALID_COUCHDB_WELCOME_RESPONSE                           (6001,"GAL6001E: Invalid CouchDB Welcome message returned from the CouchDB server."),
-    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Failed to validate CouchDB server configuration. Cause: {1}"),
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Failed to validate CouchDB server configuration. Cause: {0}"),
     ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE                        (6003,"GAL6003E: Failed to determine whether the ''{0}'' database exists. Status code {1} from CouchDB server is not 200."),
     ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Failed to create CouchDB database ''{0}''. Status code {1} from CouchDB server is not 201."),
     ERROR_INVALID_COUCHDB_VERSION                                    (6005,"GAL6005E: Invalid CouchDB server version ''{0}''. Expected version ''{1}'' or above."),
-    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Failed to create new document in the CouchDB server's ''{0}'' database. POST response 'ok' was false."),
+    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Failed to create new document in the CouchDB database ''{0}''. POST response 'ok' was false."),
     ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}"),
     ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: {1}"),
     ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB."),
