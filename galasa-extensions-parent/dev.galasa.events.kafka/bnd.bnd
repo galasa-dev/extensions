@@ -1,0 +1,7 @@
+-snapshot ${tstamp}
+Bundle-Name: dev.galasa.events.kafka
+Bundle-Description: Provides an events service from a Kafka cluster
+Bundle-License: https://www.eclipse.org/legal/epl-2.0
+Export-Package: dev.galasa.events.kafka*
+Import-Package: \
+    dev.galasa.framework.spi,

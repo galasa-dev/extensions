@@ -1,5 +1,7 @@
-package dev.galasa.events.kafka.internal;
+// package dev.galasa.events.kafka.internal;
 
-public class KafkaEventsService implements IEventService {
+// import dev.galasa.framework.spi.IEventsService;
+
+// public class KafkaEventsService implements IEventsService {
     
-}
+// }
