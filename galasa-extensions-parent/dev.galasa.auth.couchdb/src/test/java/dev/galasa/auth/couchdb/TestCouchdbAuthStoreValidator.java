@@ -248,6 +248,33 @@ public class TestCouchdbAuthStoreValidator {
     }
 
     @Test
+    public void testCheckCouchdbDatabaseIsValidWithInvalidVersionThrowsError() throws Exception {
+        // Given...
+        String couchdbUriStr = "https://my-couchdb-server";
+        URI couchdbUri = URI.create(couchdbUriStr);
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        Welcome welcomeMessage = new Welcome();
+        welcomeMessage.couchdb = "Welcome";
+        welcomeMessage.version = "notaversion";
+
+        List<HttpInteraction> interactions = new ArrayList<>();
+        interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
+        CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        // When...
+        CouchdbException thrown = catchThrowableOfType(
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            CouchdbException.class
+        );
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6010E", "Invalid CouchDB server version format detected");
+    }
+
+    @Test
     public void testCheckCouchdbDatabaseIsValidWithMinorVersionMismatchThrowsError() throws Exception {
         // Given...
         String couchdbUriStr = "https://my-couchdb-server";

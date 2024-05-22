@@ -157,7 +157,7 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
 
         // Make sure the given version follows semantic versioning rules (i.e. major.minor.patch)
         if (!versionMatcher.find()) {
-            String errorMessage = ERROR_INVALID_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
+            String errorMessage = ERROR_INVALID_COUCHDB_VERSION_FORMAT.getMessage(actualVersion, COUCHDB_MIN_VERSION);
             throw new CouchdbException(errorMessage);
         }
 
@@ -171,7 +171,7 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
             if (actualVersionParts[i] < minVersionParts[i]) {
 
                 // The minimum CouchDB version is later than the actual version, so throw an error
-                String errorMessage = ERROR_INVALID_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
+                String errorMessage = ERROR_OUTDATED_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
                 throw new CouchdbException(errorMessage);
 
             } else if (actualVersionParts[i] > minVersionParts[i]) {

@@ -14,16 +14,17 @@ public enum Errors {
     ERROR_URI_IS_INVALID                                             (7001,"GAL7001E: URL of ''{0}'' is invalid. {1}"),
 
     // Generic CouchDB errors
-    ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER                            (6000,"GAL6000E: Failed to access CouchDB server. Status code {1} from CouchDB server is not 200."),
-    ERROR_INVALID_COUCHDB_WELCOME_RESPONSE                           (6001,"GAL6001E: Invalid CouchDB Welcome message returned from the CouchDB server."),
-    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Failed to validate CouchDB server configuration. Cause: {0}"),
-    ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE                        (6003,"GAL6003E: Failed to determine whether the ''{0}'' database exists. Status code {1} from CouchDB server is not 200."),
-    ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Failed to create CouchDB database ''{0}''. Status code {1} from CouchDB server is not 201."),
-    ERROR_INVALID_COUCHDB_VERSION                                    (6005,"GAL6005E: Invalid CouchDB server version ''{0}''. Expected version ''{1}'' or above."),
-    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Failed to create new document in the CouchDB database ''{0}''. POST response 'ok' was false."),
-    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}"),
-    ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: {1}"),
-    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB."),
+    ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER                            (6000,"GAL6000E: Internal server error. Failed to access CouchDB server. Status code {1} from CouchDB server is not 200. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_INVALID_COUCHDB_WELCOME_RESPONSE                           (6001,"GAL6001E: Internal server error. Invalid CouchDB Welcome message returned from the CouchDB server. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Internal server error. Failed to validate CouchDB server configuration. Cause: {0}"),
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE                        (6003,"GAL6003E: Internal server error. Failed to determine whether the ''{0}'' database exists. Status code {1} from CouchDB server is not 200. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Internal server error. Failed to create CouchDB database ''{0}''. Status code {1} from CouchDB server is not 201. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_OUTDATED_COUCHDB_VERSION                                   (6005,"GAL6005E: Outdated CouchDB server version ''{0}'' detected. Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Internal server error. Failed to create new document in the CouchDB database ''{0}''. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Internal server error. Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: ''{1}''"),
+    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Internal server error. Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_INVALID_COUCHDB_VERSION_FORMAT                             (6010,"GAL6010E: Invalid CouchDB server version format detected. The CouchDB version ''{0}'' must be in the semantic versioning format (e.g. major.minor.patch). Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
 
     // CouchDB Auth Store errors
     ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED                          (6100,"GAL6100E: Failed to shut down Galasa CouchDB auth store. Cause: {0}"),
