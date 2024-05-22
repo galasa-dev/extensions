@@ -8,6 +8,7 @@ package dev.galasa.ras.couchdb.internal;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +64,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     private final LogFactory logFactory;
     private final HttpRequestFactory requestFactory;
 
-    private static final Charset UTF8 = Charset.forName("utf-8");
+    private static final Charset UTF8 = StandardCharsets.UTF_8;
 
     private final CouchdbRasStore store;
 
