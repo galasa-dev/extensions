@@ -13,13 +13,13 @@ import dev.galasa.framework.spi.auth.User;
 public class CouchdbAuthToken implements IAuthToken {
 
     private String _id;
-    private String clientId;
+    private String dexClientId;
     private String description;
     private Instant creationTime;
     private User owner;
 
     public CouchdbAuthToken(String clientId, String description, Instant creationTime, User owner) {
-        this.clientId = clientId;
+        this.dexClientId = clientId;
         this.description = description;
         this.creationTime = creationTime;
         this.owner = owner;
@@ -46,7 +46,7 @@ public class CouchdbAuthToken implements IAuthToken {
         return owner;
     }
 
-    public String getClientId() {
-        return clientId;
+    public String getDexClientId() {
+        return dexClientId;
     }
 }
