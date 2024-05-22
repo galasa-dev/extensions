@@ -28,13 +28,13 @@ import dev.galasa.framework.spi.utils.ITimeService;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
 /**
- * When CouchDB is being used to store user-related information, including authentication
- * tokens, this class is called upon to implement the auth store. This class registers the
- * auth store as the only auth store in the framework, and is only used when Galasa is
- * running in an ecosystem.
- *
- * This implementation of the auth store interface gets all of its data from a CouchDB
- * server.
+ * When CouchDB is being used to store user-related information, including information
+ * about authentication tokens (but not the tokens themselves), this class is called
+ * upon to implement the auth store.
+ * 
+ * This class registers the auth store as the only auth store in the framework, and is
+ * only used when Galasa is running in an ecosystem. It gets all of its data from a
+ * CouchDB server.
  */
 public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
