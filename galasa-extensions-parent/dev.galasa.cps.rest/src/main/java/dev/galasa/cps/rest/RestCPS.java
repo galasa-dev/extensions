@@ -21,7 +21,6 @@ import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import dev.galasa.extensions.common.Errors;
@@ -32,7 +31,7 @@ import dev.galasa.framework.api.beans.GalasaPropertyData;
 import dev.galasa.framework.api.beans.GalasaPropertyMetadata;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStore;
-import dev.galasa.framework.spi.utils.GalasaGsonBuilder;
+import dev.galasa.framework.spi.utils.GalasaGson;
 
 import org.apache.commons.logging.Log;
 
@@ -75,7 +74,7 @@ public class RestCPS implements IConfigurationPropertyStore {
     public static final String NULL_SUFFIX = null ;
 
     /** Galasa json adds some serialisation of dates to avoid security vulnerabilities. */
-    public Gson gson = new GalasaGsonBuilder(PRETTY_PRINTING_ENABLED).getGson();
+    public GalasaGson gson = new GalasaGson();
 
     private class PropertyName {
         String namespace;
