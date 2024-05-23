@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.cps.rest.mocks;
+package dev.galasa.extensions.mocks;
 
 import javax.validation.constraints.NotNull;
 
@@ -18,6 +18,8 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.auth.IAuthStore;
+import dev.galasa.framework.spi.auth.AuthStoreException;
 import dev.galasa.framework.spi.creds.CredentialsException;
 import dev.galasa.framework.spi.creds.ICredentialsStore;
 
@@ -26,16 +28,48 @@ import java.util.*;
 
 public class MockFrameworkInitialisation implements IFrameworkInitialisation {
 
-    private URI cpsBootstrapUri ;
+    protected URI authStoreUri;
+    protected URI cpsBootstrapUri;
+
+    private List<IAuthStore> registeredAuthStores = new ArrayList<IAuthStore>();
     private List<IConfigurationPropertyStore> registeredConfigPropertyStores = new ArrayList<IConfigurationPropertyStore>();
+
+    public MockFrameworkInitialisation() {}
 
     public MockFrameworkInitialisation(URI cpsBootstrapUri) {
         this.cpsBootstrapUri = cpsBootstrapUri;
     }
 
+    public void setAuthStoreUri(URI authStoreUri) {
+        this.authStoreUri = authStoreUri;
+    }
+
+    @Override
+    public @NotNull URI getAuthStoreUri() {
+        return authStoreUri;
+    }
+
     @Override
     public @NotNull URI getBootstrapConfigurationPropertyStore() {
         return cpsBootstrapUri;
+    }
+
+    @Override
+    public void registerConfigurationPropertyStore(@NotNull IConfigurationPropertyStore configurationPropertyStore) {
+        registeredConfigPropertyStores.add(configurationPropertyStore);
+    }
+
+    public List<IConfigurationPropertyStore> getRegisteredConfigurationPropertyStores() {
+        return registeredConfigPropertyStores;
+    }
+
+    @Override
+    public void registerAuthStore(@NotNull IAuthStore authStore) throws AuthStoreException {
+        registeredAuthStores.add(authStore);
+    }
+
+    public List<IAuthStore> getRegisteredAuthStores() {
+        return registeredAuthStores;
     }
 
     @Override
@@ -51,16 +85,6 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     @Override
     public @NotNull List<URI> getResultArchiveStoreUris() {
         throw new UnsupportedOperationException("Unimplemented method 'getResultArchiveStoreUris'");
-    }
-
-
-    @Override
-    public void registerConfigurationPropertyStore(@NotNull IConfigurationPropertyStore configurationPropertyStore) {
-        registeredConfigPropertyStores.add(configurationPropertyStore);
-    }
-
-    public List<IConfigurationPropertyStore> getRegisteredConfigurationPropertyStores() {
-        return registeredConfigPropertyStores;
     }
 
     @Override
@@ -96,6 +120,4 @@ public class MockFrameworkInitialisation implements IFrameworkInitialisation {
     public @NotNull IFramework getFramework() {
         throw new UnsupportedOperationException("Unimplemented method 'getFramework'");
     }
-
-    
 }

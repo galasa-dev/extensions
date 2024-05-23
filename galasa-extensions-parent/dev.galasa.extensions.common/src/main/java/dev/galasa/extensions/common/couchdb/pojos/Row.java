@@ -3,11 +3,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.pojos;
+package dev.galasa.extensions.common.couchdb.pojos;
 
 public class Row {
 
-    public String id;  // NOSONAR
-    public String key; // NOSONAR
-
+    public String id;
+    public String key;
 }
