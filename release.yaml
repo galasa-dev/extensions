@@ -42,9 +42,3 @@ framework:
     obr: true
     isolated: true
     codecoverage: true
-
-  - artifact: dev.galasa.events.kafka
-    version: 0.34.0
-    obr: true
-    isolated: true
-    codecoverage: true
