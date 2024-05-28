@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.pojos;
+package dev.galasa.extensions.common.couchdb.pojos;
 
 public class ViewRow {
 
-    public String key;   // NOSONAR
-    public Object value; // NOSONAR
+    public String key;
+    public Object value;
 
 }

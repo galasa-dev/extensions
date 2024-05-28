@@ -1,5 +1,6 @@
 package dev.galasa.cps.rest;
 
+import dev.galasa.extensions.common.Errors;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 
 public class JwtProviderSystemProp implements JwtProvider {

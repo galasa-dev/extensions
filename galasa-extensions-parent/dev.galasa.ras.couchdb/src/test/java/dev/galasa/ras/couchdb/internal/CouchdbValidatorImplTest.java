@@ -12,11 +12,11 @@ import org.apache.http.*;
 import org.junit.*;
 import org.junit.rules.TestName;
 
-
-
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.extensions.common.couchdb.pojos.Welcome;
+import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
-import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
 
@@ -85,9 +85,7 @@ public class CouchdbValidatorImplTest {
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
-        MockEnvironment environment = new MockEnvironment();
-        environment.setenv("GALASA_RAS_TOKEN", "checkisvalid");
-        HttpRequestFactory requestFactory = new HttpRequestFactory(environment);
+        HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "checkisvalid");
 
         // When..
         Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));

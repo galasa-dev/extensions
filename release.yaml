@@ -8,13 +8,19 @@ apiVersion: galasa.dev/v1alpha
 kind: Release
 metadata:
   name: galasa-release
-  
-  
+
+
 framework:
   bundles:
 
+  - artifact: dev.galasa.auth.couchdb
+    version: 0.34.0
+    obr: true
+    isolated: true
+    codecoverage: true
+
   - artifact: dev.galasa.ras.couchdb
-    version: 0.33.0
+    version: 0.34.0
     obr: true
     isolated: true
     codecoverage: true
@@ -32,10 +38,10 @@ framework:
     codecoverage: true
 
   - artifact: dev.galasa.extensions.common
-    version: 0.33.0
+    version: 0.34.0
     obr: true
     isolated: true
-    codecoverage: true 
+    codecoverage: true
 
   - artifact: dev.galasa.events.kafka
     version: 0.34.0
