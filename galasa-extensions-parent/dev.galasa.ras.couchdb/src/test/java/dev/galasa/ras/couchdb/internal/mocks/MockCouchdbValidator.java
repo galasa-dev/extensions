@@ -9,9 +9,9 @@ import java.net.URI;
 
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.ras.couchdb.internal.CouchdbRasException;
 import dev.galasa.ras.couchdb.internal.CouchdbValidator;
-import dev.galasa.ras.couchdb.internal.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
 
@@ -19,5 +19,5 @@ public class MockCouchdbValidator implements CouchdbValidator {
     public void checkCouchdbDatabaseIsValid(URI rasUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbRasException {
         // Do nothing.
     }
-    
+
 }

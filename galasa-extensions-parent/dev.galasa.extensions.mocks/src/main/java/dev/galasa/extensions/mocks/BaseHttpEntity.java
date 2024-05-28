@@ -16,6 +16,11 @@ import org.apache.http.HttpEntity;
 public class BaseHttpEntity implements HttpEntity {
 
     @Override
+    public boolean isStreaming() {
+        return false;
+    }
+
+    @Override
     public void consumeContent() throws IOException {
         throw new UnsupportedOperationException("Unimplemented method 'consumeContent'");
     }
@@ -51,13 +56,8 @@ public class BaseHttpEntity implements HttpEntity {
     }
 
     @Override
-    public boolean isStreaming() {
-        throw new UnsupportedOperationException("Unimplemented method 'isStreaming'");
-    }
-
-    @Override
     public void writeTo(OutputStream arg0) throws IOException {
         throw new UnsupportedOperationException("Unimplemented method 'writeTo'");
     }
-    
+
 }

@@ -7,6 +7,8 @@ package dev.galasa.ras.couchdb.internal.pojos;
 
 import java.util.List;
 
+import dev.galasa.extensions.common.couchdb.pojos.Row;
+
 public class FoundRuns {
 
     public List<TestStructureCouchdb> docs;    // NOSONAR

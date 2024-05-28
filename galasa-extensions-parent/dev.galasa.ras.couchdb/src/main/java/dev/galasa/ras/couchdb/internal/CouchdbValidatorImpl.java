@@ -31,8 +31,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import dev.galasa.extensions.common.couchdb.pojos.Welcome;
+import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
-import dev.galasa.ras.couchdb.internal.pojos.Welcome;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
     
