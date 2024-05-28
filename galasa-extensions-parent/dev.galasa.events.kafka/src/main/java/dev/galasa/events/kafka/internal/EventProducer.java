@@ -11,6 +11,9 @@ import java.util.Properties;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+
+import dev.galasa.framework.spi.Environment;
+
 import org.apache.kafka.common.security.plain.PlainLoginModule;
 
 public class EventProducer {
@@ -18,7 +21,9 @@ public class EventProducer {
     private final KafkaProducer<String, String> producer;
     private final String topic;
 
-    public EventProducer(String topic) {
+    private final String token = "GALASA_EVENT_STREAMS_TOKEN";
+
+    public EventProducer(String topic, Environment environment) {
 
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
@@ -27,7 +32,7 @@ public class EventProducer {
         properties.put("topic", topic);
         properties.put("key.serializer", StringSerializer.class.getName());
         properties.put("value.serializer", StringSerializer.class.getName());
-        properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"TOKEN\";");
+        properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + environment.getenv(token) + "\";");
         properties.put("security.protocol", "SASL_SSL");
         properties.put("sasl.mechanism", "PLAIN");
         properties.put("ssl.protocol", "TLSv1.2");

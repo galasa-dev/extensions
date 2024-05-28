@@ -4,7 +4,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        EventProducer eventProducer = new EventProducer("Tests.StatusChangedEvent");
+        EventProducer eventProducer = new EventProducer("Tests.StatusChangedEvent", new SystemEnvironment());
 
         IEvent event = new TestRunLifecycleStatusChangeEvent(Instant.now().toString(), "testing!!!");
 

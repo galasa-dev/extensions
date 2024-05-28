@@ -9,4 +9,5 @@ version = '0.34.0'
 
 dependencies {
     implementation 'dev.galasa:kafka.clients:3.7.0'
+    implementation 'dev.galasa:dev.galasa.framework:0.34.0'
 }
