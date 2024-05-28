@@ -19,6 +19,7 @@ import dev.galasa.framework.spi.ICertificateStoreService;
 import dev.galasa.framework.spi.IConfidentialTextService;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IDynamicStatusStoreService;
+import dev.galasa.framework.spi.IEventsService;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IFrameworkRuns;
 import dev.galasa.framework.spi.IResourcePoolingService;
@@ -122,6 +123,11 @@ public class MockFramework implements IFramework {
     @Override
     public @NotNull IAuthStore getAuthStore() {
         throw new UnsupportedOperationException("Unimplemented method 'getAuthStore'");
+    }
+
+    @Override
+    public @NotNull IEventsService getEventsService() {
+        throw new UnsupportedOperationException("Unimplemented method 'getEventsService'");
     }
 
 }
