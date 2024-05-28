@@ -42,5 +42,3 @@ framework:
     obr: true
     isolated: true
     codecoverage: true
-
-
