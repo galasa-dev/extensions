@@ -19,7 +19,7 @@ import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
-import dev.galasa.framework.spi.IFrameworkInitialisation;
+import dev.galasa.framework.spi.IApiServerInitialisation;
 import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.auth.IAuthStoreRegistration;
 import dev.galasa.framework.spi.utils.SystemTimeService;
@@ -53,18 +53,18 @@ public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
      * This method checks that the auth store is a remote URL reference, and if true
      * registers a new couchdb auth store as the only auth store.
      *
-     * @param frameworkInitialisation Parameters this extension can use to to
+     * @param apiServerInitialisation Parameters this extension can use to to
      *                                initialise itself.
      * @throws AuthStoreException if there was a problem accessing the auth store.
      */
     @Override
-    public void initialise(IFrameworkInitialisation frameworkInitialisation) throws AuthStoreException {
+    public void initialise(IApiServerInitialisation apiServerInitialisation) throws AuthStoreException {
 
-        URI authStoreUri = frameworkInitialisation.getAuthStoreUri();
+        URI authStoreUri = apiServerInitialisation.getAuthStoreUri();
 
         if (isUriReferringToThisExtension(authStoreUri)) {
             try {
-                frameworkInitialisation.registerAuthStore(
+                apiServerInitialisation.registerAuthStore(
                     new CouchdbAuthStore(
                         authStoreUri,
                         httpClientFactory,
