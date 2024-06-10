@@ -5,13 +5,13 @@ plugins {
 
 description = 'Galasa etcd3 for CPS, DSS and Credentials - Provides the CPS, DSS and Credential stores from a etcd3 server'
 
-version = '0.33.0'
+version = '0.34.0'
 
 dependencies {
     implementation ('io.etcd:jetcd-core:0.5.9')
     
     // Not required for compile,  but required to force the download of the jars to embed by bnd
-    implementation ('com.google.code.gson:gson:2.9.0') {
+    implementation ('com.google.code.gson:gson:2.10.1') {
        force = true
     }
     implementation ('org.codehaus.mojo:animal-sniffer-annotations:1.19')
