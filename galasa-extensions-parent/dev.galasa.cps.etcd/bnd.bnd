@@ -12,7 +12,7 @@ Import-Package: \
     javax.security.cert
 Embed-Transitive: true
 Embed-Dependency: *;scope=compile|runtime
--includeresource: gson-2.9.0.jar; lib:=true,\
+-includeresource: gson-2.10.1.jar; lib:=true,\
     jetcd-core-0.5.9.jar; lib:=true,\
     jetcd-common-0.5.9.jar; lib:=true,\
     grpc-core-1.39.0.jar; lib:=true,\
