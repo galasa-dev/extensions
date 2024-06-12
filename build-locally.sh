@@ -75,6 +75,16 @@ LOGS_DIR - Optional. Where logs are placed. Defaults to creating a temporary dir
 EOF
 }
 
+function check_exit_code () {
+    # This function takes 3 parameters in the form:
+    # $1 an integer value of the expected exit code
+    # $2 an error message to display if $1 is not equal to 0
+    if [[ "$1" != "0" ]]; then 
+        error "$2" 
+        exit 1  
+    fi
+}
+
 #-----------------------------------------------------------------------------------------                   
 # Process parameters
 #-----------------------------------------------------------------------------------------                   
@@ -181,7 +191,8 @@ function build_with_gradle {
     ${goals}"
     info "Using command: $cmd"
     $cmd 2>&1 > ${log_file}
-    rc=$? ; if [[ "${rc}" != "0" ]]; then cat ${log_file} ; error "Failed to build ${project} with gradle." ; exit 1 ; fi
+    rc=$? 
+    check_exit_code $rc "Failed to build ${project} with gradle."
 }
 
 function displayCouchDbCodeCoverage {
@@ -197,8 +208,33 @@ function displayCouchDbCodeCoverage {
     info "See html report here: file://${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/index.html"
 }
 
+function check_secrets {
+    h2 "updating secrets baseline"
+    cd ${BASEDIR}
+    detect-secrets scan --update .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to run detect-secrets. Please check it is installed properly" 
+    success "updated secrets file"
+
+    h2 "running audit for secrets"
+    detect-secrets audit .secrets.baseline
+    rc=$? 
+    check_exit_code $rc "Failed to audit detect-secrets."
+    
+    #Check all secrets have been audited
+    secrets=$(grep -c hashed_secret .secrets.baseline)
+    audits=$(grep -c is_secret .secrets.baseline)
+    if [[ "$secrets" != "$audits" ]]; then 
+        error "Not all secrets found have been audited"
+        exit 1  
+    fi
+    sed -i '' '/[ ]*"generated_at": ".*",/d' .secrets.baseline
+    success "secrets audit complete"
+}
+
 clean_maven_repo
 build_with_gradle
 displayCouchDbCodeCoverage
+check_secrets
 
 success "Project ${project} built - OK - log is at ${log_file}"
