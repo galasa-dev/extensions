@@ -7,10 +7,12 @@ package dev.galasa.events.kafka.internal;
 
 import dev.galasa.framework.spi.EventsException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
+import dev.galasa.framework.spi.IEventProducer;
 import dev.galasa.framework.spi.IEventsService;
 import dev.galasa.framework.spi.events.IEvent;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 
 public class KafkaEventsService implements IEventsService {
@@ -21,8 +23,8 @@ public class KafkaEventsService implements IEventsService {
 
     // The EventProducers are cached so they can be reused for performance
     // Keyed on the name of the topic as one EventProducer is made for each topic
-    // Note: Protected so unit tests can access this directly.
-    protected Map<String, KafkaEventProducer> producers;
+    // Note: Private but getter method is so unit tests can access this.
+    private Map<String, IEventProducer> producers = new HashMap<String, IEventProducer>();
 
     public KafkaEventsService(IConfigurationPropertyStoreService cps, IEventProducerFactory producerFactory) {
         this.cps = cps;
@@ -36,9 +38,7 @@ public class KafkaEventsService implements IEventsService {
             throw new KafkaException("Topic is empty");
         }
 
-        KafkaEventProducer producer;
-
-        producer = producers.get(topic);
+        IEventProducer producer = producers.get(topic);
     
         if (producer == null) {
 
@@ -63,9 +63,14 @@ public class KafkaEventsService implements IEventsService {
     @Override
     public void shutdown() {
         // Shut down all cached EventProducers
-        for (Map.Entry<String, KafkaEventProducer> entry : producers.entrySet()) {
+        for (Map.Entry<String, IEventProducer> entry : producers.entrySet()) {
             entry.getValue().close();
         }
+        producers.clear();
+    }
+
+    public Map<String, IEventProducer> getProducers() {
+        return producers;
     }
     
 }

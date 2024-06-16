@@ -123,7 +123,7 @@ public class MockFrameworkInitialisation implements IApiServerInitialisation {
 
     @Override
     public @NotNull IFramework getFramework() {
-        return this.framework;
+        return new MockFramework();
     }
 
     @Override

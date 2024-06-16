@@ -8,7 +8,6 @@ package dev.galasa.events.kafka.mocks;
 import java.util.Properties;
 
 import dev.galasa.events.kafka.internal.IEventProducerFactory;
-import dev.galasa.events.kafka.internal.KafkaEventProducer;
 import dev.galasa.events.kafka.internal.KafkaException;
 import dev.galasa.extensions.mocks.MockEnvironment;
 import dev.galasa.framework.spi.EventsException;
@@ -23,15 +22,17 @@ public class MockEventProducerFactory implements IEventProducerFactory {
     }
 
     @Override
-    public KafkaEventProducer createProducer(Properties properties, String topic) throws EventsException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createProducer'");
+    public MockEventProducer createProducer(Properties properties, String topic) throws EventsException {
+        MockEventProducer producer = new MockEventProducer(properties, topic);
+        return producer;
     }
 
     @Override
     public Properties createProducerConfig(IConfigurationPropertyStoreService cps, String topic) throws KafkaException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createProducerConfig'");
+        Properties properties = new Properties();
+        properties.put("topic", topic);
+        return properties;
+
     }
     
 }

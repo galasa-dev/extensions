@@ -9,10 +9,11 @@ import java.util.Properties;
 
 import dev.galasa.framework.spi.EventsException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
+import dev.galasa.framework.spi.IEventProducer;
 
 public interface IEventProducerFactory {
 
-    KafkaEventProducer createProducer(Properties properties, String topic) throws EventsException;
+    IEventProducer createProducer(Properties properties, String topic) throws EventsException;
 
     Properties createProducerConfig(IConfigurationPropertyStoreService cps, String topic) throws KafkaException;
     
