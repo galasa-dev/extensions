@@ -1,6 +1,7 @@
 plugins {
     id 'biz.aQute.bnd.builder'
     id 'galasa.extensions'
+    id 'jacoco'
 }
 
 description = 'Galasa Events Plug-In - Kafka'
@@ -12,4 +13,12 @@ dependencies {
     implementation 'dev.galasa:dev.galasa.framework:0.35.0'
 
     testImplementation(project(':dev.galasa.extensions.mocks'))
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        csv.required = true
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
 }
