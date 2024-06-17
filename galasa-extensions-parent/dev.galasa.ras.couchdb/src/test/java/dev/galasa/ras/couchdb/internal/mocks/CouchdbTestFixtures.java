@@ -27,6 +27,7 @@ import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
+import dev.galasa.extensions.mocks.cps.MockConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.IFramework;
