@@ -171,6 +171,7 @@ function clean_maven_repo {
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.etcd
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.raw.couchdb
     rm -fr ~/.m2/repository/dev/galasa/dev.galasa.cps.rest
+    rm -fr ~/.m2/repository/dev/galasa/dev.galasa.events.kafka
     success "OK"
 }
 
@@ -207,6 +208,19 @@ function displayCouchDbCodeCoverage {
     info "See html report here: file://${BASEDIR}/galasa-extensions-parent/dev.galasa.ras.couchdb/build/jacocoHtml/index.html"
 }
 
+function displayKafkaCodeCoverage {
+    h2 "Calculating Kafka code coverage..."
+    percent_code_complete=$(cat ${BASEDIR}/galasa-extensions-parent/dev.galasa.events.kafka/build/jacocoHtml/dev.galasa.events.kafka.internal/index.html \
+    | sed "s/.*<td>Total<\/td>//1" \
+    | cut -f1 -d'%' \
+    | sed "s/.*>//g")
+    info 
+    info
+    info "Statement code coverage is ${percent_code_complete}%"
+    info
+    info "See html report here: file://${BASEDIR}/galasa-extensions-parent/dev.galasa.events.kafka/build/jacocoHtml/index.html"
+}
+
 function check_secrets {
     h2 "updating secrets baseline"
     cd ${BASEDIR}
@@ -234,6 +248,7 @@ function check_secrets {
 clean_maven_repo
 build_with_gradle
 displayCouchDbCodeCoverage
+displayKafkaCodeCoverage
 check_secrets
 
 success "Project ${project} built - OK - log is at ${log_file}"

@@ -30,11 +30,14 @@ import java.util.*;
 
 public class MockFrameworkInitialisation implements IApiServerInitialisation {
 
+    private MockFramework framework;
+    
     protected URI authStoreUri;
     protected URI cpsBootstrapUri;
 
     private List<IAuthStore> registeredAuthStores = new ArrayList<IAuthStore>();
     private List<IConfigurationPropertyStore> registeredConfigPropertyStores = new ArrayList<IConfigurationPropertyStore>();
+    private List<IEventsService> registeredEventsServices = new ArrayList<IEventsService>();
 
     public MockFrameworkInitialisation() {}
 
@@ -120,11 +123,15 @@ public class MockFrameworkInitialisation implements IApiServerInitialisation {
 
     @Override
     public @NotNull IFramework getFramework() {
-        throw new UnsupportedOperationException("Unimplemented method 'getFramework'");
+        return new MockFramework();
     }
 
     @Override
     public void registerEventsService(@NotNull IEventsService eventsService) throws EventsException {
-        throw new UnsupportedOperationException("Unimplemented method 'registerEventsService'");
+        registeredEventsServices.add(eventsService);
+    }
+
+    public List<IEventsService> getRegisteredEventsServices() {
+        return registeredEventsServices;
     }
 }

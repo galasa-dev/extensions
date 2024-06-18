@@ -8,9 +8,12 @@ package dev.galasa.extensions.mocks;
 import java.net.URL;
 import java.util.Properties;
 import java.util.Random;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.validation.constraints.NotNull;
 
+import dev.galasa.extensions.mocks.cps.MockConfigurationPropertyStoreService;
 import dev.galasa.framework.spi.Api;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.DynamicStatusStoreException;
@@ -46,7 +49,8 @@ public class MockFramework implements IFramework {
     @Override
     public @NotNull IConfigurationPropertyStoreService getConfigurationPropertyService(@NotNull String namespace)
             throws ConfigurationPropertyStoreException {
-        throw new UnsupportedOperationException("Unimplemented method 'getConfigurationPropertyService'");
+        Map<String,String> props = new HashMap<String,String>();
+        return new MockConfigurationPropertyStoreService(props);
     }
 
     @Override

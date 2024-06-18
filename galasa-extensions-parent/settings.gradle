@@ -18,4 +18,5 @@ include 'dev.galasa.extensions.common'
 include 'dev.galasa.cps.etcd'
 include 'dev.galasa.cps.rest'
 include 'dev.galasa.ras.couchdb'
+include 'dev.galasa.events.kafka'
 
