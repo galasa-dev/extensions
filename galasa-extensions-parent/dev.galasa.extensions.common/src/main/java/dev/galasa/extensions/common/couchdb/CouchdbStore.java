@@ -12,12 +12,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -27,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
+import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
@@ -117,26 +121,51 @@ public abstract class CouchdbStore {
      * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
      */
     protected <T> T getDocumentFromDatabase(String dbName, String documentId, Class<T> classOfObject) throws CouchdbException {
-        HttpGet getTokenDoc = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
-        return gson.fromJson(sendHttpRequest(getTokenDoc, HttpStatus.SC_OK), classOfObject);
+        HttpGet getDocumentRequest = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
+        return gson.fromJson(sendHttpRequest(getDocumentRequest, HttpStatus.SC_OK), classOfObject);
     }
 
+    /**
+     * Deletes a document from a given database using its document ID by sending a
+     * DELETE /{db}/{docid} request to the CouchDB server.
+     *
+     * @param dbName the name of the database to delete the document from
+     * @param documentId the CouchDB ID for the document to delete
+     * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
+     */
+    protected void deleteDocumentFromDatabase(String dbName, String documentId) throws CouchdbException {
+        IdRev documentIdRev = getDocumentFromDatabase(dbName, documentId, IdRev.class);
+
+        if (documentIdRev != null && documentIdRev._rev != null) {
+            String deleteRequestUrl = storeUri + "/" + dbName + "/" + documentId + "?" + documentIdRev._rev;
+            HttpDelete deleteDocumentRequest = httpRequestFactory.getHttpDeleteRequest(deleteRequestUrl);
+            sendHttpRequest(deleteDocumentRequest, HttpStatus.SC_OK, HttpStatus.SC_ACCEPTED);
+        } else {
+            String errorMessage = ERROR_FAILED_TO_GET_DOCUMENT_FROM_DATABASE.getMessage(documentId, dbName);
+            throw new CouchdbException(errorMessage);
+        }
+    }
 
     /**
      * Sends a given HTTP request to the CouchDB server and returns the response body as a string.
      *
      * @param httpRequest the HTTP request to send to the CouchDB server
-     * @param expectedHttpStatusCode the expected Status code to get from the CouchDb server upon the request being actioned
+     * @param expectedHttpStatusCodes the expected Status code to get from the CouchDb server upon the request being actioned
      * @return a string representation of the response.
      * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
      */
-    private String sendHttpRequest(HttpUriRequest httpRequest, int expectedHttpStatusCode) throws CouchdbException {
+    private String sendHttpRequest(HttpUriRequest httpRequest, int... expectedHttpStatusCodes) throws CouchdbException {
         String responseEntity = "";
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             StatusLine statusLine = response.getStatusLine();
             int actualStatusCode = statusLine.getStatusCode();
-            if (actualStatusCode != expectedHttpStatusCode) {
-                String errorMessage = ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE.getMessage(httpRequest.getURI().toString(), expectedHttpStatusCode, actualStatusCode);
+
+            if (!isStatusCodeExpected(actualStatusCode, expectedHttpStatusCodes)) {
+                String expectedStatusCodesStr = IntStream.of(expectedHttpStatusCodes)
+                    .mapToObj(Integer::toString)
+                    .collect(Collectors.joining(", "));
+
+                String errorMessage = ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE.getMessage(httpRequest.getURI().toString(), expectedStatusCodesStr, actualStatusCode);
                 throw new CouchdbException(errorMessage);
             }
 
@@ -148,5 +177,23 @@ public abstract class CouchdbStore {
             throw new CouchdbException(errorMessage, e);
         }
         return responseEntity;
+    }
+
+    /**
+     * Checks if a given status code is an expected status code using a given array of expected status codes.
+     * 
+     * @param actualStatusCode the status code to check
+     * @param expectedStatusCodes an array of expected status codes returned from CouchDB
+     * @return true if the actual status code is an expected status code, false otherwise
+     */
+    private boolean isStatusCodeExpected(int actualStatusCode, int... expectedStatusCodes) {
+        boolean isExpectedStatusCode = false;
+        for (int statusCode : expectedStatusCodes) {
+            if (actualStatusCode == statusCode) {
+                isExpectedStatusCode = true;
+                break;
+            }
+        }
+        return isExpectedStatusCode;
     }
 }

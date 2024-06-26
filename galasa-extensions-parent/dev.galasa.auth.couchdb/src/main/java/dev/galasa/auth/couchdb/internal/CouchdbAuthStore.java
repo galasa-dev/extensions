@@ -31,7 +31,7 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
  * When CouchDB is being used to store user-related information, including information
  * about authentication tokens (but not the tokens themselves), this class is called
  * upon to implement the auth store.
- * 
+ *
  * This class registers the auth store as the only auth store in the framework, and is
  * only used when Galasa is running in an ecosystem. It gets all of its data from a
  * CouchDB server.
@@ -102,6 +102,16 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
             createDocument(TOKENS_DATABASE_NAME, tokenJson);
         } catch (CouchdbException e) {
             String errorMessage = ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
+        }
+    }
+
+    @Override
+    public void deleteToken(String tokenId) throws AuthStoreException {
+        try {
+            deleteDocumentFromDatabase(TOKENS_DATABASE_NAME, tokenId);
+        } catch (CouchdbException e) {
+            String errorMessage = ERROR_FAILED_TO_DELETE_TOKEN_DOCUMENT.getMessage(e.getMessage());
             throw new AuthStoreException(errorMessage, e);
         }
     }
