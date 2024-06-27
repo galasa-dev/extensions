@@ -99,26 +99,42 @@ fi
 temp_dir=$BASEDIR/temp/version_bump
 mkdir -p $temp_dir
 
+function bump_version {
+    source_file=$1
+    temp_file=$2
+
+    cat $source_file | sed "s/dev.galasa.framework:.*'/dev.galasa.framework:$component_version'/1" > $temp_file
+    cp $temp_file $source_file
+
+    cat $source_file | sed "s/version = '.*'/version = '$component_version'/1" > $temp_file
+    cp $temp_file $source_file
+}
+
 
 # Extensions base
-cat $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/galasa.extensions.gradl
-cp $temp_dir/galasa.extensions.gradl $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle
+bump_version $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle $temp_dir/galasa.extensions.gradle
 
 # Couchdb...
-cat $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/couchdb-build.gradle
-cp $temp_dir/couchdb-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle $temp_dir/couchdb-build.gradle
 
-cat $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle | sed "s/version = '.*'/version = '$component_version'/1" > $temp_dir/couchdb-build.gradle
-cp $temp_dir/couchdb-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle
+# etcd...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle $temp_dir/etcd-build.gradle
 
+# REST CPS...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.cps.rest/build.gradle $temp_dir/restcps-build.gradle
 
-# etcd ... so far I don't think we need to bump up the version of this.
-# cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/dev.galasa.framework:.*'/dev.galasa.framework: $component_version'/1" > $temp_dir/etcd-build.gradle
-# cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
+# CouchDB Auth Store...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.auth.couchdb/build.gradle $temp_dir/couchdbauth-build.gradle
 
-# cat $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle | sed "s/version = '.*'/version = '$component_version'/1" > $temp_dir/etcd-build.gradle
-# cp $temp_dir/etcd-build.gradle $BASEDIR/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle 
+# Kafka...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.events.kafka/build.gradle $temp_dir/kafka-build.gradle
+
+# Common...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.extensions.common/build.gradle $temp_dir/common-build.gradle
+
+# Mocks...
+bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.extensions.mocks/build.gradle $temp_dir/mocks-build.gradle
 
 # The framework version is the first one in the file.
 cat $BASEDIR/release.yaml | sed "s/version:.*/version: $component_version/1" > $temp_dir/release.yaml
-cp $temp_dir/release.yaml $BASEDIR/release.yaml 
+cp $temp_dir/release.yaml $BASEDIR/release.yaml
