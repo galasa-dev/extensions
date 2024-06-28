@@ -21,8 +21,6 @@ public class KafkaEventProducer implements IEventProducer {
 
     public KafkaEventProducer(Properties properties, String topic) {
 
-        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
         this.producer = producer;
 
