@@ -36,6 +36,9 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
         try {
             String bootstrapServers = cps.getProperty("bootstrap", "servers");
 
+            // Needed to get the Kafka classes at runtime
+            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+
             properties.put("bootstrap.servers", bootstrapServers);
             properties.put("topic", topic);
             properties.put("key.serializer", StringSerializer.class.getName());
