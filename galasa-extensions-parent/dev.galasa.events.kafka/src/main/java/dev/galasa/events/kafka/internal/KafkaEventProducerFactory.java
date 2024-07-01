@@ -13,16 +13,13 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.EventsException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
-import dev.galasa.framework.spi.SystemEnvironment;
 
 public class KafkaEventProducerFactory implements IEventProducerFactory {
 
-    private final String TOKEN = "GALASA_EVENT_STREAMS_TOKEN";
+    private final String AUTH_TOKEN;
 
-    private SystemEnvironment env;
-
-    public KafkaEventProducerFactory(SystemEnvironment env) {
-        this.env = env;
+    public KafkaEventProducerFactory(String authToken) {
+        this.AUTH_TOKEN = authToken;
     }
 
     public KafkaEventProducer createProducer(Properties properties, String topic) throws EventsException {
@@ -43,7 +40,7 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
             properties.put("topic", topic);
             properties.put("key.serializer", StringSerializer.class.getName());
             properties.put("value.serializer", StringSerializer.class.getName());
-            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.env.getenv(TOKEN) + "\";");
+            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.AUTH_TOKEN + "\";");
             properties.put("security.protocol", "SASL_SSL");
             properties.put("sasl.mechanism", "PLAIN");
             properties.put("ssl.protocol", "TLSv1.2");
