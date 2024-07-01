@@ -22,13 +22,13 @@ public class KafkaEventProducer implements IEventProducer {
     public KafkaEventProducer(Properties properties, String topic) {
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
+        producer.initTransactions();
         this.producer = producer;
 
         this.topic = topic;
     }
 
     public void sendEvent(IEvent event){
-        producer.initTransactions();
         producer.beginTransaction();
         producer.send(new ProducerRecord<>(topic, event.toString()));
         producer.commitTransaction();

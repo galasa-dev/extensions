@@ -17,8 +17,9 @@ import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 public class KafkaEventProducerFactory implements IEventProducerFactory {
 
     private final String AUTH_TOKEN;
+    private String runName;
 
-    public KafkaEventProducerFactory(String authToken) {
+    public KafkaEventProducerFactory(String authToken, String runName) {
         this.AUTH_TOKEN = authToken;
     }
 
@@ -32,6 +33,8 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
 
         try {
             String bootstrapServers = cps.getProperty("bootstrap", "servers");
+            // Transactional IDs need to be unique for each producer
+            String transactionalId = runName + "-" + topic;
 
             // Needed to get the Kafka classes at runtime
             Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
@@ -46,7 +49,7 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
             properties.put("ssl.protocol", "TLSv1.2");
             properties.put("ssl.enabled.protocols", "TLSv1.2");
             properties.put("ssl.endpoint.identification.algorithm", "HTTPS");
-            properties.put("transactional.id", "transactional-id");
+            properties.put("transactional.id", transactionalId);
 
         } catch (ConfigurationPropertyStoreException e) {
             throw new KafkaException("Unable to retrieve Kafka properties from the CPS", e);
