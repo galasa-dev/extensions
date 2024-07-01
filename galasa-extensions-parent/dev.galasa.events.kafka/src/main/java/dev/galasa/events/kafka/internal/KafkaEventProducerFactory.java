@@ -16,10 +16,10 @@ import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
 
 public class KafkaEventProducerFactory implements IEventProducerFactory {
 
-    private String authToken;
+    private final String AUTH_TOKEN;
 
     public KafkaEventProducerFactory(String authToken) {
-        this.authToken = authToken;
+        this.AUTH_TOKEN = authToken;
     }
 
     public KafkaEventProducer createProducer(Properties properties, String topic) throws EventsException {
@@ -40,7 +40,7 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
             properties.put("topic", topic);
             properties.put("key.serializer", StringSerializer.class.getName());
             properties.put("value.serializer", StringSerializer.class.getName());
-            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.authToken + "\";");
+            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.AUTH_TOKEN + "\";");
             properties.put("security.protocol", "SASL_SSL");
             properties.put("sasl.mechanism", "PLAIN");
             properties.put("ssl.protocol", "TLSv1.2");

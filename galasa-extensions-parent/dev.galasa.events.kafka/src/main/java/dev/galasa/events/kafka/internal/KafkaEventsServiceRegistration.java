@@ -23,7 +23,7 @@ public class KafkaEventsServiceRegistration implements IEventsServiceRegistratio
 
     private final String NAMESPACE = "kafka";
 
-    private final String TOKEN = "GALASA_EVENT_STREAMS_TOKEN";
+    private final String TOKEN_NAME = "GALASA_EVENT_STREAMS_TOKEN";
     
     @Override
     public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
@@ -38,7 +38,7 @@ public class KafkaEventsServiceRegistration implements IEventsServiceRegistratio
                 IFramework framework = frameworkInitialisation.getFramework();
 
                 SystemEnvironment env = new SystemEnvironment();
-                String authToken = env.getenv(TOKEN);
+                String authToken = env.getenv(TOKEN_NAME);
                 KafkaEventProducerFactory producerFactory = new KafkaEventProducerFactory(authToken);
                 IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService(NAMESPACE);
 
