@@ -136,14 +136,14 @@ public abstract class CouchdbStore {
     protected void deleteDocumentFromDatabase(String dbName, String documentId) throws CouchdbException {
         IdRev documentIdRev = getDocumentFromDatabase(dbName, documentId, IdRev.class);
 
-        if (documentIdRev != null && documentIdRev._rev != null) {
-            String deleteRequestUrl = storeUri + "/" + dbName + "/" + documentId + "?" + documentIdRev._rev;
-            HttpDelete deleteDocumentRequest = httpRequestFactory.getHttpDeleteRequest(deleteRequestUrl);
-            sendHttpRequest(deleteDocumentRequest, HttpStatus.SC_OK, HttpStatus.SC_ACCEPTED);
-        } else {
+        if (documentIdRev == null || documentIdRev._rev == null) {
             String errorMessage = ERROR_FAILED_TO_GET_DOCUMENT_FROM_DATABASE.getMessage(documentId, dbName);
             throw new CouchdbException(errorMessage);
         }
+
+        String deleteRequestUrl = storeUri + "/" + dbName + "/" + documentId + "?rev=" + documentIdRev._rev;
+        HttpDelete deleteDocumentRequest = httpRequestFactory.getHttpDeleteRequest(deleteRequestUrl);
+        sendHttpRequest(deleteDocumentRequest, HttpStatus.SC_OK, HttpStatus.SC_ACCEPTED);
     }
 
     /**
@@ -181,7 +181,7 @@ public abstract class CouchdbStore {
 
     /**
      * Checks if a given status code is an expected status code using a given array of expected status codes.
-     * 
+     *
      * @param actualStatusCode the status code to check
      * @param expectedStatusCodes an array of expected status codes returned from CouchDB
      * @return true if the actual status code is an expected status code, false otherwise

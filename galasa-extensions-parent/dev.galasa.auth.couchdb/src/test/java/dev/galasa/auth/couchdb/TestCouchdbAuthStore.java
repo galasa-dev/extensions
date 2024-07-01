@@ -215,7 +215,7 @@ public class TestCouchdbAuthStore {
         mockIdRev._rev = "this-is-a-revision";
         
         String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
-        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?" + mockIdRev._rev;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
@@ -246,7 +246,7 @@ public class TestCouchdbAuthStore {
         mockIdRev._rev = "this-is-a-revision";
         
         String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
-        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?" + mockIdRev._rev;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
@@ -279,7 +279,7 @@ public class TestCouchdbAuthStore {
         mockIdRev._rev = "this-is-a-revision";
         
         String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
-        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?" + mockIdRev._rev;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
