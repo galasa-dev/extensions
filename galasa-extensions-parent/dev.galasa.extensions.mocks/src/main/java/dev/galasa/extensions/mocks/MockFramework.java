@@ -86,7 +86,9 @@ public class MockFramework implements IFramework {
 
     @Override
     public String getTestRunName() {
-        throw new UnsupportedOperationException("Unimplemented method 'getTestRunName'");
+        Random random = new Random();
+        int randomNumber = 100 + random.nextInt(900);
+        return "C" + randomNumber;
     }
 
     @Override
