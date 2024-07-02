@@ -32,7 +32,7 @@ import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthStoreException;
-import dev.galasa.framework.spi.auth.IAuthToken;
+import dev.galasa.framework.spi.auth.IInternalAuthToken;
 import dev.galasa.framework.spi.auth.User;
 
 public class TestCouchdbAuthStore {
@@ -148,12 +148,12 @@ public class TestCouchdbAuthStore {
         CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
-        List<IAuthToken> tokens = authStore.getTokens();
+        List<IInternalAuthToken> tokens = authStore.getTokens();
 
         // Then...
         assertThat(tokens).hasSize(1);
 
-        IAuthToken actualToken = tokens.get(0);
+        IInternalAuthToken actualToken = tokens.get(0);
         assertThat(actualToken).usingRecursiveComparison().isEqualTo(mockToken);
     }
 

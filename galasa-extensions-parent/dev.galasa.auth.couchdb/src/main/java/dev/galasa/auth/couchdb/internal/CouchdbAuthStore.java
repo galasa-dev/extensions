@@ -21,7 +21,7 @@ import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
-import dev.galasa.framework.spi.auth.IAuthToken;
+import dev.galasa.framework.spi.auth.IInternalAuthToken;
 import dev.galasa.framework.spi.auth.IAuthStore;
 import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.utils.ITimeService;
@@ -61,10 +61,10 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     }
 
     @Override
-    public List<IAuthToken> getTokens() throws AuthStoreException {
+    public List<IInternalAuthToken> getTokens() throws AuthStoreException {
         logger.info("Retrieving tokens from CouchDB");
         List<ViewRow> tokenDocuments = new ArrayList<>();
-        List<IAuthToken> tokens = new ArrayList<>();
+        List<IInternalAuthToken> tokens = new ArrayList<>();
 
         try {
             // Get all of the documents in the tokens database
@@ -124,7 +124,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
      * @return the auth token stored within the given document
      * @throws AuthStoreException if there was a problem accessing the auth store or its response
      */
-    private IAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
+    private IInternalAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
         return getDocumentFromDatabase(TOKENS_DATABASE_NAME, documentId, CouchdbAuthToken.class);
     }
 }
