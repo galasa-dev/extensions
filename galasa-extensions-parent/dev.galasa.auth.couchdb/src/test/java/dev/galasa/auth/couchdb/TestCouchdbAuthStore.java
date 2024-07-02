@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthToken;
+import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
@@ -31,7 +32,7 @@ import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthStoreException;
-import dev.galasa.framework.spi.auth.IAuthToken;
+import dev.galasa.framework.spi.auth.IInternalAuthToken;
 import dev.galasa.framework.spi.auth.User;
 
 public class TestCouchdbAuthStore {
@@ -50,17 +51,31 @@ public class TestCouchdbAuthStore {
         }
     }
 
-    class GetTokenDocumentInteraction extends BaseHttpInteraction {
+    class GetTokenDocumentInteraction<T> extends BaseHttpInteraction {
 
-        public GetTokenDocumentInteraction(String expectedUri, int responseStatusCode, CouchdbAuthToken tokenToReturn) {
+        public GetTokenDocumentInteraction(String expectedUri, int responseStatusCode, T responseObjToReturn) {
             super(expectedUri, responseStatusCode);
-            setResponsePayload(tokenToReturn);
+            setResponsePayload(responseObjToReturn);
         }
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
             super.validateRequest(host,request);
             assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
+        }
+    }
+
+    class DeleteTokenDocumentInteraction extends BaseHttpInteraction {
+
+        public DeleteTokenDocumentInteraction(String expectedUri, int responseStatusCode) {
+            super(expectedUri, responseStatusCode);
+            setResponsePayload("");
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("DELETE");
         }
     }
 
@@ -123,7 +138,7 @@ public class TestCouchdbAuthStore {
         CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new User("johndoe"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
-        interactions.add(new GetTokenDocumentInteraction("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
+        interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -133,12 +148,12 @@ public class TestCouchdbAuthStore {
         CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
-        List<IAuthToken> tokens = authStore.getTokens();
+        List<IInternalAuthToken> tokens = authStore.getTokens();
 
         // Then...
         assertThat(tokens).hasSize(1);
 
-        IAuthToken actualToken = tokens.get(0);
+        IInternalAuthToken actualToken = tokens.get(0);
         assertThat(actualToken).usingRecursiveComparison().isEqualTo(mockToken);
     }
 
@@ -186,5 +201,175 @@ public class TestCouchdbAuthStore {
         // Then...
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("GAL6102E", "Failed to store auth token in the CouchDB tokens database");
+    }
+
+    @Test
+    public void testDeleteTokenSendsRequestToDeleteTokenDocumentOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        String tokenIdToDelete = "my-old-token";
+
+        IdRev mockIdRev = new IdRev();
+        mockIdRev._rev = "this-is-a-revision";
+        
+        String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+        interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_OK));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        authStore.deleteToken(tokenIdToDelete);
+
+        // Then the assertions made in the document interactions shouldn't have failed.
+    }
+
+    @Test
+    public void testDeleteTokenWithAcceptedRequestToDeleteTokenDocumentDoesNotError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        String tokenIdToDelete = "my-old-token";
+
+        IdRev mockIdRev = new IdRev();
+        mockIdRev._rev = "this-is-a-revision";
+        
+        String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+
+        // The DELETE request may return a 202 Accepted, which shouldn't be a problem for us
+        interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_ACCEPTED));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        authStore.deleteToken(tokenIdToDelete);
+
+        // Then the assertions made in the document interactions shouldn't have failed.
+    }
+
+    @Test
+    public void testDeleteTokenWithFailingRequestToDeleteTokenDocumentThrowsError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        String tokenIdToDelete = "my-old-token";
+
+        IdRev mockIdRev = new IdRev();
+        mockIdRev._rev = "this-is-a-revision";
+        
+        String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
+        String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+
+        // Simulate an internal server error
+        interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_INTERNAL_SERVER_ERROR));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> {
+            authStore.deleteToken(tokenIdToDelete);
+        }, AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6104E", "Failed to delete auth token from the CouchDB tokens database");
+        assertThat(thrown.getMessage()).contains("GAL6007E", "Expected status code(s) [200, 202] but received 500");
+    }
+
+    @Test
+    public void testDeleteTokenWithFailingRequestToGetTokenDocumentThrowsError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        String tokenIdToDelete = "my-old-token";
+
+        IdRev mockIdRev = new IdRev();
+        mockIdRev._rev = "this-is-a-revision";
+        
+        String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+
+        // Simulate an internal server error
+        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_INTERNAL_SERVER_ERROR, mockIdRev));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> {
+            authStore.deleteToken(tokenIdToDelete);
+        }, AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6104E", "Failed to delete auth token from the CouchDB tokens database");
+    }
+
+    @Test
+    public void testDeleteTokenWithBadGetTokenDocumentResponseBodyThrowsError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        String tokenIdToDelete = "my-old-token";
+        
+        String expectedGetRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete;
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+
+        // Simulate an internal server error
+        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, null));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> {
+            authStore.deleteToken(tokenIdToDelete);
+        }, AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6104E", "Failed to delete auth token from the CouchDB tokens database");
+        assertThat(thrown.getMessage()).contains("GAL6011E", "Failed to get document with ID 'my-old-token' from the 'galasa_tokens' database");
     }
 }

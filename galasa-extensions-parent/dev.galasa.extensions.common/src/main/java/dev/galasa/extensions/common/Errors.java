@@ -21,16 +21,18 @@ public enum Errors {
     ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Internal server error. Failed to create CouchDB database ''{0}''. Status code {1} from CouchDB server is not 201. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
     ERROR_OUTDATED_COUCHDB_VERSION                                   (6005,"GAL6005E: Outdated CouchDB server version ''{0}'' detected. Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
     ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Internal server error. Failed to create new document in the CouchDB database ''{0}''. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
-    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code {1} but received {2}. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code(s) [{1}] but received {2}. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner."),
     ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Internal server error. Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: ''{1}''"),
     ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Internal server error. Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
     ERROR_INVALID_COUCHDB_VERSION_FORMAT                             (6010,"GAL6010E: Invalid CouchDB server version format detected. The CouchDB version ''{0}'' must be in the semantic versioning format (e.g. major.minor.patch). Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
+    ERROR_FAILED_TO_GET_DOCUMENT_FROM_DATABASE                       (6011,"GAL6011E: Internal server error. Failed to get document with ID ''{0}'' from the ''{1}'' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
 
     // CouchDB Auth Store errors
     ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED                          (6100,"GAL6100E: Failed to shut down Galasa CouchDB auth store. Cause: {0}"),
     ERROR_FAILED_TO_RETRIEVE_TOKENS                                  (6101,"GAL6101E: Failed to get auth tokens from the CouchDB auth store. Cause: {0}"),
     ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT                            (6102,"GAL6102E: Failed to store auth token in the CouchDB tokens database. Cause: {0}"),
     ERROR_FAILED_TO_INITIALISE_AUTH_STORE                            (6103,"GAL6103E: Failed to initialise the Galasa CouchDB auth store. Cause: {0}"),
+    ERROR_FAILED_TO_DELETE_TOKEN_DOCUMENT                            (6104,"GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: {0}"),
 
     // REST CPS errors
     ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE                 (6999,"GAL6999E: Failed to render message template. Not the expected number of parameters. Got ''{0}''. Expected ''{1}''"),

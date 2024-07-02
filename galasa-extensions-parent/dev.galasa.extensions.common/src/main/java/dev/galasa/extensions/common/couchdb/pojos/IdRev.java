@@ -3,11 +3,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal.pojos;
+package dev.galasa.extensions.common.couchdb.pojos;
 
 public class IdRev  {
 
-    public String _id;  // NOSONAR
-    public String _rev; // NOSONAR
+    public String _id;
+    public String _rev;
 
 }
