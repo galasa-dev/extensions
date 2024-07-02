@@ -36,10 +36,11 @@ public class KafkaEventsServiceRegistration implements IEventsServiceRegistratio
             // If the CPS is ETCD, then register this version of the EventsService
             if (cps.getScheme().equals("etcd")) {
                 IFramework framework = frameworkInitialisation.getFramework();
+                String runName = framework.getTestRunName();
 
                 SystemEnvironment env = new SystemEnvironment();
                 String authToken = env.getenv(TOKEN_NAME);
-                KafkaEventProducerFactory producerFactory = new KafkaEventProducerFactory(authToken);
+                KafkaEventProducerFactory producerFactory = new KafkaEventProducerFactory(authToken, runName);
                 IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService(NAMESPACE);
 
                 frameworkInitialisation.registerEventsService(new KafkaEventsService(cpsService, producerFactory));
