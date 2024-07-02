@@ -13,16 +13,14 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.EventsException;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreService;
-import dev.galasa.framework.spi.SystemEnvironment;
 
 public class KafkaEventProducerFactory implements IEventProducerFactory {
 
-    private final String TOKEN = "GALASA_EVENT_STREAMS_TOKEN";
+    private final String AUTH_TOKEN;
+    private String runName;
 
-    private SystemEnvironment env;
-
-    public KafkaEventProducerFactory(SystemEnvironment env) {
-        this.env = env;
+    public KafkaEventProducerFactory(String authToken, String runName) {
+        this.AUTH_TOKEN = authToken;
     }
 
     public KafkaEventProducer createProducer(Properties properties, String topic) throws EventsException {
@@ -35,18 +33,23 @@ public class KafkaEventProducerFactory implements IEventProducerFactory {
 
         try {
             String bootstrapServers = cps.getProperty("bootstrap", "servers");
+            // Transactional IDs need to be unique for each producer
+            String transactionalId = runName + "-" + topic;
+
+            // Needed to get the Kafka classes at runtime
+            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
             properties.put("bootstrap.servers", bootstrapServers);
             properties.put("topic", topic);
             properties.put("key.serializer", StringSerializer.class.getName());
             properties.put("value.serializer", StringSerializer.class.getName());
-            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.env.getenv(TOKEN) + "\";");
+            properties.put("sasl.jaas.config", PlainLoginModule.class.getName() + " required username=\"token\" password=\"" + this.AUTH_TOKEN + "\";");
             properties.put("security.protocol", "SASL_SSL");
             properties.put("sasl.mechanism", "PLAIN");
             properties.put("ssl.protocol", "TLSv1.2");
             properties.put("ssl.enabled.protocols", "TLSv1.2");
             properties.put("ssl.endpoint.identification.algorithm", "HTTPS");
-            properties.put("transactional.id", "transactional-id");
+            properties.put("transactional.id", transactionalId);
 
         } catch (ConfigurationPropertyStoreException e) {
             throw new KafkaException("Unable to retrieve Kafka properties from the CPS", e);

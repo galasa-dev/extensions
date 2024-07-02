@@ -5,6 +5,8 @@
  */
 package dev.galasa.events.kafka.internal;
 
+import java.net.URI;
+
 import javax.validation.constraints.NotNull;
 
 import org.osgi.service.component.annotations.Component;
@@ -20,6 +22,8 @@ import dev.galasa.framework.spi.SystemEnvironment;
 public class KafkaEventsServiceRegistration implements IEventsServiceRegistration {
 
     private final String NAMESPACE = "kafka";
+
+    private final String TOKEN_NAME = "GALASA_EVENT_STREAMS_TOKEN";
     
     @Override
     public void initialise(@NotNull IFrameworkInitialisation frameworkInitialisation)
@@ -27,13 +31,20 @@ public class KafkaEventsServiceRegistration implements IEventsServiceRegistratio
 
         try {
 
-            IFramework framework = frameworkInitialisation.getFramework();
+            URI cps = frameworkInitialisation.getBootstrapConfigurationPropertyStore();
 
-            SystemEnvironment env = new SystemEnvironment();
-            KafkaEventProducerFactory producerFactory = new KafkaEventProducerFactory(env);
-            IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService(NAMESPACE);
+            // If the CPS is ETCD, then register this version of the EventsService
+            if (cps.getScheme().equals("etcd")) {
+                IFramework framework = frameworkInitialisation.getFramework();
+                String runName = framework.getTestRunName();
 
-            frameworkInitialisation.registerEventsService(new KafkaEventsService(cpsService, producerFactory));
+                SystemEnvironment env = new SystemEnvironment();
+                String authToken = env.getenv(TOKEN_NAME);
+                KafkaEventProducerFactory producerFactory = new KafkaEventProducerFactory(authToken, runName);
+                IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService(NAMESPACE);
+
+                frameworkInitialisation.registerEventsService(new KafkaEventsService(cpsService, producerFactory));
+            }
 
         } catch (Exception e) {
             throw new KafkaException("Unable to register the Kafka Events Service", e);
