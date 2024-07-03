@@ -7,10 +7,10 @@ package dev.galasa.auth.couchdb.internal;
 
 import java.time.Instant;
 
-import dev.galasa.framework.spi.auth.IAuthToken;
+import dev.galasa.framework.spi.auth.IInternalAuthToken;
 import dev.galasa.framework.spi.auth.User;
 
-public class CouchdbAuthToken implements IAuthToken {
+public class CouchdbAuthToken implements IInternalAuthToken {
 
     private String _id;
     private String dexClientId;

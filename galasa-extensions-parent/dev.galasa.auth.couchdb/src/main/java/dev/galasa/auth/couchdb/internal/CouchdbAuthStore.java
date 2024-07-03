@@ -21,7 +21,7 @@ import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
-import dev.galasa.framework.spi.auth.IAuthToken;
+import dev.galasa.framework.spi.auth.IInternalAuthToken;
 import dev.galasa.framework.spi.auth.IAuthStore;
 import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.utils.ITimeService;
@@ -31,7 +31,7 @@ import dev.galasa.framework.spi.auth.AuthStoreException;
  * When CouchDB is being used to store user-related information, including information
  * about authentication tokens (but not the tokens themselves), this class is called
  * upon to implement the auth store.
- * 
+ *
  * This class registers the auth store as the only auth store in the framework, and is
  * only used when Galasa is running in an ecosystem. It gets all of its data from a
  * CouchDB server.
@@ -61,10 +61,10 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     }
 
     @Override
-    public List<IAuthToken> getTokens() throws AuthStoreException {
+    public List<IInternalAuthToken> getTokens() throws AuthStoreException {
         logger.info("Retrieving tokens from CouchDB");
         List<ViewRow> tokenDocuments = new ArrayList<>();
-        List<IAuthToken> tokens = new ArrayList<>();
+        List<IInternalAuthToken> tokens = new ArrayList<>();
 
         try {
             // Get all of the documents in the tokens database
@@ -106,6 +106,16 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         }
     }
 
+    @Override
+    public void deleteToken(String tokenId) throws AuthStoreException {
+        try {
+            deleteDocumentFromDatabase(TOKENS_DATABASE_NAME, tokenId);
+        } catch (CouchdbException e) {
+            String errorMessage = ERROR_FAILED_TO_DELETE_TOKEN_DOCUMENT.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
+        }
+    }
+
     /**
      * Gets an auth token from a CouchDB document with the given document ID.
      * The document is assumed to be within the tokens database in the CouchDB server.
@@ -114,7 +124,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
      * @return the auth token stored within the given document
      * @throws AuthStoreException if there was a problem accessing the auth store or its response
      */
-    private IAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
+    private IInternalAuthToken getAuthTokenFromDocument(String documentId) throws CouchdbException {
         return getDocumentFromDatabase(TOKENS_DATABASE_NAME, documentId, CouchdbAuthToken.class);
     }
 }
