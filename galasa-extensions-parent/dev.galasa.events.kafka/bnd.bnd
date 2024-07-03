@@ -5,6 +5,7 @@ Bundle-License: https://www.eclipse.org/legal/epl-2.0
 Export-Package: dev.galasa.events.kafka*
 Import-Package: \
     dev.galasa.framework.spi,\
+    org.apache.commons.logging,\
     org.apache.kafka.clients,\
     org.apache.kafka.clients.admin,\
     org.apache.kafka.clients.consumer,\
