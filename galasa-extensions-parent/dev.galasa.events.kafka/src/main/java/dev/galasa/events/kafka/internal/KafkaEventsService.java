@@ -15,7 +15,12 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class KafkaEventsService implements IEventsService {
+
+    private final Log logger = LogFactory.getLog(getClass());
 
     private IConfigurationPropertyStoreService cps;
 
@@ -47,11 +52,14 @@ public class KafkaEventsService implements IEventsService {
                 producer = producers.get(topic);
         
                 if (producer == null) {
+                    logger.info("Creating a new producer as one does not exist for the topic " + topic);
      
                     Properties properties = this.producerFactory.createProducerConfig(cps, topic);
                     
                     producer = this.producerFactory.createProducer(properties, topic);
                     producers.put(topic, producer);
+                } else {
+                    logger.info("Using the cached producer for the topic " + topic);
                 }
             }
 
@@ -62,7 +70,7 @@ public class KafkaEventsService implements IEventsService {
 
     @Override
     public void shutdown() {
-        // Shut down all cached EventProducers
+        logger.info("Shutting down all cached producers");
         for (Map.Entry<String, IEventProducer> entry : producers.entrySet()) {
             entry.getValue().close();
         }
