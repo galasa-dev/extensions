@@ -19,6 +19,7 @@ import org.junit.Test;
 
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthToken;
+import dev.galasa.auth.couchdb.internal.CouchdbUser;
 import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
@@ -33,7 +34,6 @@ import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 import dev.galasa.framework.spi.auth.IInternalAuthToken;
-import dev.galasa.framework.spi.auth.User;
 
 public class TestCouchdbAuthStore {
 
@@ -135,7 +135,7 @@ public class TestCouchdbAuthStore {
         ViewResponse mockAllDocsResponse = new ViewResponse();
         mockAllDocsResponse.rows = mockDocs;
 
-        CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new User("johndoe"));
+        CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new CouchdbUser("johndoe", "dex-user-id"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
         interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
         interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
@@ -174,7 +174,7 @@ public class TestCouchdbAuthStore {
         CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
-        authStore.storeToken("this-is-a-dex-id", "my token", new User("user1"));
+        authStore.storeToken("this-is-a-dex-id", "my token", new CouchdbUser("user1", "user1-id"));
 
         // Then the assertions made in the create token document interaction shouldn't have failed.
     }
@@ -196,7 +196,7 @@ public class TestCouchdbAuthStore {
         CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
 
         // When...
-        AuthStoreException thrown = catchThrowableOfType(() -> authStore.storeToken("this-is-a-dex-id", "my token", new User("user1")), AuthStoreException.class);
+        AuthStoreException thrown = catchThrowableOfType(() -> authStore.storeToken("this-is-a-dex-id", "my token", new CouchdbUser("user1", "user1-id")), AuthStoreException.class);
 
         // Then...
         assertThat(thrown).isNotNull();
