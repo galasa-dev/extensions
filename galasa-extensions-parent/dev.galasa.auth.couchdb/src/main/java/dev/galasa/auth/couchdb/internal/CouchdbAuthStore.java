@@ -22,8 +22,8 @@ import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.auth.IInternalAuthToken;
+import dev.galasa.framework.spi.auth.IInternalUser;
 import dev.galasa.framework.spi.auth.IAuthStore;
-import dev.galasa.framework.spi.auth.User;
 import dev.galasa.framework.spi.utils.ITimeService;
 import dev.galasa.framework.spi.auth.AuthStoreException;
 
@@ -94,9 +94,10 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     }
 
     @Override
-    public void storeToken(String clientId, String description, User owner) throws AuthStoreException {
+    public void storeToken(String clientId, String description, IInternalUser owner) throws AuthStoreException {
         // Create the JSON payload representing the token to store
-        String tokenJson = gson.toJson(new CouchdbAuthToken(clientId, description, timeService.now(), owner));
+        CouchdbUser couchdbUser = new CouchdbUser(owner);
+        String tokenJson = gson.toJson(new CouchdbAuthToken(clientId, description, timeService.now(), couchdbUser));
 
         try {
             createDocument(TOKENS_DATABASE_NAME, tokenJson);
