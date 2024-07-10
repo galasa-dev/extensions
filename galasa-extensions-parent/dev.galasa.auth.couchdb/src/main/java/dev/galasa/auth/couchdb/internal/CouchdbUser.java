@@ -5,10 +5,13 @@
  */
 package dev.galasa.auth.couchdb.internal;
 
+import com.google.gson.annotations.SerializedName;
+
 import dev.galasa.framework.spi.auth.IInternalUser;
 
 public class CouchdbUser implements IInternalUser {
     
+    @SerializedName(value = "loginId", alternate = { "login_id" })
     private String loginId;
     private String dexUserId;
 
