@@ -30,7 +30,8 @@ jobs:
   
             - name: Test and Build Extensions using gradle
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_ACTOR: ${{github.actor}}
+                GITHUB_TOKEN: ${{ github.token }}
               run: |
                 gradle -x sign -b galasa-extensions-parent/build.gradle check publish --scan \
                 -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework  \
