@@ -31,14 +31,9 @@ jobs:
             - name: Test and Build Extensions using gradle
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                ORG_GRADLE_PROJECT_signingKeyId:  ${{ secrets.GPG_KEY }}
-                ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_SECRET }}
-                ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
               run: |
-                gradle -b galasa-extensions-parent/build.gradle check publish --scan \
+                gradle -X sign -b galasa-extensions-parent/build.gradle check publish --scan \
                 -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework  \
                 -PcentralMaven=https://repo.maven.apache.org/maven2/ \
-                -PtargetMaven=https://maven.pkg.github.com/${{env.NAMESPACE}}/extensions/  \
-                -PjacocoEnabled=true \
-                -PisMainOrRelease=true
+                -PtargetMaven=https://maven.pkg.github.com/${{env.NAMESPACE}}/extensions/  -PjacocoEnabled=true -PisMainOrRelease=true
               
