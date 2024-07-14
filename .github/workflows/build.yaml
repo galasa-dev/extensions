@@ -33,7 +33,7 @@ jobs:
                 GITHUB_ACTOR: ${{github.actor}}
                 GITHUB_TOKEN: ${{ github.token }}
               run: |
-                gradle -x sign -b galasa-extensions-parent/build.gradle check publish --scan \
+                gradle -x sign -b galasa-extensions-parent/build.gradle check publish --info \
                 -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework  \
                 -PcentralMaven=https://repo.maven.apache.org/maven2/ \
                 -PtargetMaven=https://maven.pkg.github.com/${{env.NAMESPACE}}/extensions/  -PjacocoEnabled=true -PisMainOrRelease=true
