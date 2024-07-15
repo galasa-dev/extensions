@@ -2,7 +2,7 @@ plugins {
     id 'biz.aQute.bnd.builder' version '5.3.0' apply false
     id 'dev.galasa.githash' version '0.15.0' apply false
     id 'maven-publish'
-    id 'signing'
+    // id 'signing'
 }
 
 version = '0.15.0'
@@ -14,13 +14,13 @@ version = '0.15.0'
 //    }
 // }
 
-signing {
-    def signingKeyId = findProperty("signingKeyId")
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
-    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-    sign publishing.publications
-}
+// signing {
+//     def signingKeyId = findProperty("signingKeyId")
+//     def signingKey = findProperty("signingKey")
+//     def signingPassword = findProperty("signingPassword")
+//     useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+//     sign publishing.publications
+// }
 
 //---------------------------------------------------------------
 // We need to gather the release and packaging metadata from each
