@@ -7,12 +7,12 @@ plugins {
 
 version = '0.15.0'
 
-task clean {
-   // make sure the build directory is gone 
-   doFirst {
-      delete "${buildDir}"
-   }
-}
+// task clean {
+//    // make sure the build directory is gone 
+//    doFirst {
+//       delete "${buildDir}"
+//    }
+// }
 
 signing {
     def signingKeyId = findProperty("signingKeyId")
