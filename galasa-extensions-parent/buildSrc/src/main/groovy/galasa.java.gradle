@@ -59,6 +59,10 @@ repositories {
 }
 
 signing {
+    // def signingKeyId = findProperty("signingKeyId")
+    // def signingKey = findProperty("signingKey")
+    // def signingPassword = findProperty("signingPassword")
+    // useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     sign publishing.publications
 }
 
@@ -109,6 +113,8 @@ publishing {
                 credentials {
                     username System.getenv('MAVENUSERNAME')
                     password System.getenv('MAVENPASSWORD')
+                    // username System.getenv('GITHUB_ACTOR')
+                    // password System.getenv('GITHUB_TOKEN')
                 }
             }
         }
