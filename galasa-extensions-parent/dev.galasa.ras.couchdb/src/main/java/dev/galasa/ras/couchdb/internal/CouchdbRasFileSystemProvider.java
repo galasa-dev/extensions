@@ -31,6 +31,7 @@ import dev.galasa.ResultArchiveStoreContentType;
 import dev.galasa.SetContentType;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileSystemProvider;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 
 public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemProvider {
 
@@ -117,7 +118,7 @@ public class CouchdbRasFileSystemProvider extends ResultArchiveStoreFileSystemPr
             Path cachePath = Files.createTempFile("galasa_couchdb", "temp");
             try {
                 couchdbRasStore.retrieveArtifact(cdbPath, cachePath);
-            } catch (CouchdbRasException e) {
+            } catch (CouchdbException e) {
                 throw new IOException("Unable to retrieve artifact", e);
             }
             return new CouchdbRasReadByteChannel(cachePath);
