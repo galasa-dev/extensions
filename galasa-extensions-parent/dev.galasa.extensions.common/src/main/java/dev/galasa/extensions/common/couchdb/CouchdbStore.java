@@ -73,6 +73,7 @@ public abstract class CouchdbStore {
      *
      * @param dbName the database to create the new document within
      * @param jsonContent the JSON content to send to CouchDB in order to populate the new document
+     * @return PutPostResponse the response from the CouchDB service
      * @throws CouchdbException if there is a problem accessing the CouchDB server or creating the document
      */
     protected PutPostResponse createDocument(String dbName, String jsonContent) throws CouchdbException {
