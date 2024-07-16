@@ -231,7 +231,7 @@ public class CouchdbTestFixtures {
 
         HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "myrastoken");
 
-        URI rasURI = URI.create(rasUriStr);
+        URI rasURI = URI.create("couchdb:"+rasUriStr);
         CouchdbRasStore couchdbRasStore = new CouchdbRasStore(mockFramework, rasURI, mockHttpClientFactory, mockValidator, logFactory, requestFactory);
 
         return couchdbRasStore;
