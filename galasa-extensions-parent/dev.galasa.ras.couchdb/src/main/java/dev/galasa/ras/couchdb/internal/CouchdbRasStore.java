@@ -49,6 +49,10 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     private static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
     private static final String COUCHDB_AUTH_TYPE    = "Basic";
 
+    private static final String ARTIFACTS_DB         = "galasa_artifacts";
+    private static final String RUNS_DB              = "galasa_run";
+    private static final String LOG_DB               = "galasa_log";
+
     private final Log                          logger            ;
 
     private final IFramework                   framework;                                         // NOSONAR
@@ -130,11 +134,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
         artifacts.runName = this.run.getName();
 
         String jsonArtifacts = gson.toJson(artifacts);
-        PutPostResponse putPostResponse = createDocument("galasa_artifacts",jsonArtifacts);
-        if (putPostResponse.id == null || putPostResponse.rev == null) {
-            throw new CouchdbException("Unable to store the artifacts document - Invalid JSON response");
-        }
-
+        PutPostResponse putPostResponse = createDocument(ARTIFACTS_DB, jsonArtifacts);
         this.artifactDocumentId.add(putPostResponse.id);
         this.artifactDocumentRev = putPostResponse.rev;
     }
@@ -172,7 +172,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
 
         String jsonStructure = gson.toJson(logLines);
 
-        HttpPost request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/galasa_log");
+        HttpPost request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/"+LOG_DB);
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
 
         try{
@@ -218,9 +218,9 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
 
         HttpEntityEnclosingRequestBase request;
         if (runDocumentId == null) {
-            request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/galasa_run");
+            request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/"+RUNS_DB);
         } else {
-            request = httpRequestFactory.getHttpPutRequest(this.storeUri + "/galasa_run/" + runDocumentId);
+            request = httpRequestFactory.getHttpPutRequest(this.storeUri + "/"+RUNS_DB+"/" + runDocumentId);
             request.setHeader("If-Match", runDocumentRevision);
         }
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
@@ -247,7 +247,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
             throw new CouchdbException("Problem encoding artifact path", e);
         }
 
-        String artifactURI= this.storeUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath;
+        String artifactURI= this.storeUri + "/"+ARTIFACTS_DB+"/" + artifactRecordId + "/" + encodedPath;
         retrieveArtifactFromDatabase(artifactURI, cachePath,StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -255,7 +255,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
         StringBuilder sb = new StringBuilder();
 
         for (String logRecordId : ts.getLogRecordIds()) {
-            HttpGet httpGet = httpRequestFactory.getHttpGetRequest(this.storeUri + "/galasa_log/" + logRecordId);
+            HttpGet httpGet = httpRequestFactory.getHttpGetRequest(this.storeUri + "/"+LOG_DB+"/" + logRecordId);
 
             try{
                 String entity = sendHttpRequest(httpGet, HttpStatus.SC_OK);

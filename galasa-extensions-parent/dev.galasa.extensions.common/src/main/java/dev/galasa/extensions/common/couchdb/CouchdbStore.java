@@ -88,6 +88,9 @@ public abstract class CouchdbStore {
             String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT.getMessage(dbName);
             throw new CouchdbException(errorMessage);
         }
+        if (putPostResponse.id == null || putPostResponse.rev == null) {
+            throw new CouchdbException(ERROR_UNEXPECTED_RESPONSE_FROM_CREATE_DOCUMENT.getMessage());
+        }
         return putPostResponse;
     }
 

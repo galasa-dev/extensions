@@ -26,11 +26,11 @@ public class CouchdbValidatorImplTest {
     public TestName testName = new TestName();
 
 
-
+  
     public static class WelcomeInteractionOK extends BaseHttpInteraction {
 
-        public WelcomeInteractionOK(String rasUriStr, String documentId, String documentRev ) {
-            super(rasUriStr, documentId, "124");
+        public WelcomeInteractionOK() {
+            super(CouchdbTestFixtures.rasUriStr, CouchdbTestFixtures.documentId1, "124");
         }
 
         @Override
@@ -39,10 +39,48 @@ public class CouchdbValidatorImplTest {
             assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
         }
 
+        public void validateRequest(HttpHost host, HttpRequest request, String method) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo(method);
+        }
+
 
         @Override
         public void validateRequestContentType(HttpRequest request) {
             // We don't expect a Content-type header as there is no payload sent to the server
+        }
+       
+
+        @Override
+        public MockCloseableHttpResponse getResponse() {
+
+            // We expect a request to the couchdb system.
+            // We will reply with a PutPostResponse
+
+            Welcome welcomeBean = new Welcome();
+            welcomeBean.couchdb = "Welcome";
+            welcomeBean.version = "3.3.3";
+
+            GalasaGson gson = new GalasaGson();
+            String updateMessagePayload = gson.toJson(welcomeBean);
+
+            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
+
+            MockCloseableHttpResponse response = new MockCloseableHttpResponse();
+
+            MockStatusLine statusLine = new MockStatusLine();
+            statusLine.setStatusCode(HttpStatus.SC_OK);
+            response.setStatusLine(statusLine);
+            response.setEntity(entity);
+
+            return response;
+        }
+    }
+
+    public static class WelcomeInteractionBad extends WelcomeInteractionOK{
+
+        public WelcomeInteractionBad (){
+            super();
         }
 
         @Override
@@ -71,121 +109,79 @@ public class CouchdbValidatorImplTest {
         }
     }
 
-    public static class checkDatabasePresentInteraction extends BaseHttpInteraction {
+    public static class CheckDatabasePresentInteraction extends WelcomeInteractionOK {
 
-        public checkDatabasePresentInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+        public CheckDatabasePresentInteraction() {
+            super();
         }
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("HEAD");
-        }
-
-
-        @Override
-        public void validateRequestContentType(HttpRequest request) {
-            // We don't expect a Content-type header as there is no payload sent to the server
+            super.validateRequest(host,request,"HEAD");
         }
 
         @Override
         public MockCloseableHttpResponse getResponse() {
-
-            // We expect a request to the couchdb system.
-            // We will reply with a PutPostResponse
-
-            Welcome welcomeBean = new Welcome();
-            welcomeBean.couchdb = "dummy-edition";
-            welcomeBean.version = "3.3.3";
-
-            GalasaGson gson = new GalasaGson();
-            String updateMessagePayload = gson.toJson(welcomeBean);
-
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
-
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
             MockStatusLine statusLine = new MockStatusLine();
             statusLine.setStatusCode(HttpStatus.SC_OK);
             response.setStatusLine(statusLine);
-            response.setEntity(entity);
 
             return response;
         }
     }
 
-    public static class checkDatabasePresentNotFoundInteraction extends BaseHttpInteraction {
+    public static class CheckDatabasePresentNotFoundInteraction extends WelcomeInteractionOK {
 
-        public checkDatabasePresentNotFoundInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+        public CheckDatabasePresentNotFoundInteraction() {
+            super();
         }
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("HEAD");
-        }
-
-
-        @Override
-        public void validateRequestContentType(HttpRequest request) {
-            // We don't expect a Content-type header as there is no payload sent to the server
+            super.validateRequest(host,request,"HEAD");
         }
 
         @Override
             public MockCloseableHttpResponse getResponse() {
-
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
             MockStatusLine statusLine = new MockStatusLine();
             statusLine.setStatusCode(HttpStatus.SC_NOT_FOUND);
             response.setStatusLine(statusLine);
-
             return response;
         }
     }
-    public static class checkDatabasePresentConflictInteraction extends BaseHttpInteraction {
 
-        public checkDatabasePresentConflictInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+    public static class CheckDatabasePresentConflictInteraction extends WelcomeInteractionOK {
+
+        public CheckDatabasePresentConflictInteraction() {
+            super();
         }
 
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("PUT");
-        }
-
-
-        @Override
-        public void validateRequestContentType(HttpRequest request) {
-            // We don't expect a Content-type header as there is no payload sent to the server
+            super.validateRequest(host,request,"PUT");
         }
 
         @Override
             public MockCloseableHttpResponse getResponse() {
-
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
             MockStatusLine statusLine = new MockStatusLine();
             statusLine.setStatusCode(HttpStatus.SC_CONFLICT);
             response.setStatusLine(statusLine);
-
             return response;
         }
     }
 
-    public static class checkDatabaseHasDocumentInteraction extends BaseHttpInteraction {
+    public static class CheckDatabaseHasDocumentInteraction extends WelcomeInteractionOK {
 
-        public checkDatabaseHasDocumentInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+        public CheckDatabaseHasDocumentInteraction() {
+            super();
         }
         
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
+            super.validateRequest(host,request,"GET");
         }
 
         @Override
@@ -215,78 +211,44 @@ public class CouchdbValidatorImplTest {
 
     }
     
-    public static class submitDesignDocumentInteraction extends BaseHttpInteraction {
+    public static class SubmitDesignDocumentInteraction extends WelcomeInteractionOK {
 
-        public submitDesignDocumentInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+        public SubmitDesignDocumentInteraction() {
+            super();
         }
         
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("PUT");
+            super.validateRequest(host,request,"PUT");
         }
 
         @Override
         public MockCloseableHttpResponse getResponse() {
-
-            // We expect a request to the couchdb system.
-            // We will reply with a PutPostResponse
-
-            Welcome welcomeBean = new Welcome();
-            welcomeBean.couchdb = "dummy-edition";
-            welcomeBean.version = "3.3.3";
-
-            GalasaGson gson = new GalasaGson();
-            String updateMessagePayload = gson.toJson(welcomeBean);
-
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
-
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
             MockStatusLine statusLine = new MockStatusLine();
             statusLine.setStatusCode(HttpStatus.SC_CREATED);
             response.setStatusLine(statusLine);
-            response.setEntity(entity);
-
             return response;
         }
     }
 
-    public static class checkIndexPOSTInteraction extends BaseHttpInteraction {
+    public static class CheckIndexPOSTInteraction extends WelcomeInteractionOK {
 
-        public checkIndexPOSTInteraction(String rasUriStr, String documentId, String documentRev) {
-            super(rasUriStr, documentId, "124");
+        public CheckIndexPOSTInteraction() {
+            super();
         }
         
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
-            super.validateRequest(host,request);
-            assertThat(request.getRequestLine().getMethod()).isEqualTo("POST");
+            super.validateRequest(host,request,"POST");
         }
 
         @Override
         public MockCloseableHttpResponse getResponse() {
-
-            // We expect a request to the couchdb system.
-            // We will reply with a PutPostResponse
-
-            Welcome welcomeBean = new Welcome();
-            welcomeBean.couchdb = "dummy-edition";
-            welcomeBean.version = "3.3.3";
-
-            GalasaGson gson = new GalasaGson();
-            String updateMessagePayload = gson.toJson(welcomeBean);
-
-            HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
-
             MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-
             MockStatusLine statusLine = new MockStatusLine();
             statusLine.setStatusCode(HttpStatus.SC_OK);
             response.setStatusLine(statusLine);
-            response.setEntity(entity);
-
             return response;
         }
 
@@ -297,11 +259,7 @@ public class CouchdbValidatorImplTest {
 
         List <HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
-        interactions.add( new WelcomeInteractionOK(
-            CouchdbTestFixtures.rasUriStr,
-            CouchdbTestFixtures.documentId1, 
-            CouchdbTestFixtures.documentRev1 
-        ) );
+        interactions.add( new WelcomeInteractionBad() );
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -318,63 +276,37 @@ public class CouchdbValidatorImplTest {
 
     @Test
     public void TestRasStoreCreatesDBIfCouchDBReturnsWelcomeString() throws Exception {
-        String rasURI = CouchdbTestFixtures.rasUriStr;
-        String docID = CouchdbTestFixtures.documentId1; 
-        String docRev = CouchdbTestFixtures.documentRev1;
         List <HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         //Check Welcome Screen
-        interactions.add( new WelcomeInteractionOK( rasURI, docID,docRev ){
-            @Override
-            public MockCloseableHttpResponse getResponse() {
-    
-                // We expect a request to the couchdb system.
-                // We will reply with a PutPostResponse
-    
-                Welcome welcomeBean = new Welcome();
-                welcomeBean.couchdb = "Welcome";
-                welcomeBean.version = "3.3.3";
-    
-                GalasaGson gson = new GalasaGson();
-                String updateMessagePayload = gson.toJson(welcomeBean);
-    
-                HttpEntity entity = new MockHttpEntity(updateMessagePayload); 
-    
-                MockCloseableHttpResponse response = new MockCloseableHttpResponse();
-    
-                MockStatusLine statusLine = new MockStatusLine();
-                statusLine.setStatusCode(HttpStatus.SC_OK);
-                response.setStatusLine(statusLine);
-                response.setEntity(entity);
-
-                return response;
-            }
+        interactions.add( new WelcomeInteractionOK(){
+            
         } );
 
         //Add Interactions for checking the databases are present
-        interactions.add( new checkDatabasePresentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabasePresentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabasePresentInteraction( rasURI, docID,docRev ));
+        interactions.add( new CheckDatabasePresentInteraction());
+        interactions.add( new CheckDatabasePresentInteraction());
+        interactions.add( new CheckDatabasePresentInteraction());
 
         // Check Desing Docs Interactions
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new submitDesignDocumentInteraction( rasURI, docID,docRev ));
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new SubmitDesignDocumentInteraction());
 
         //Check Indexes Interactions
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkDatabaseHasDocumentInteraction( rasURI, docID,docRev ));
-        interactions.add( new checkIndexPOSTInteraction( rasURI, docID,docRev ));
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction());
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -389,13 +321,10 @@ public class CouchdbValidatorImplTest {
 
     @Test
     public void TestRasStoreCreatesDBIfDBNotPresentThrowsException() throws Exception {
-        String rasURI = CouchdbTestFixtures.rasUriStr;
-        String docID = CouchdbTestFixtures.documentId1; 
-        String docRev = CouchdbTestFixtures.documentRev1;
         List <HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         //Check Welcome Screen
-        interactions.add( new WelcomeInteractionOK( rasURI, docID,docRev ){
+        interactions.add( new WelcomeInteractionOK(){
             @Override
             public MockCloseableHttpResponse getResponse() {
     
@@ -423,7 +352,7 @@ public class CouchdbValidatorImplTest {
         } );
 
         //Add bad Interaction for checking the databases are present
-        interactions.add( new checkDatabasePresentInteraction( rasURI, docID,docRev )
+        interactions.add( new CheckDatabasePresentInteraction()
             {
                 @Override
                 public MockCloseableHttpResponse getResponse() {
@@ -452,14 +381,10 @@ public class CouchdbValidatorImplTest {
 
     @Test
     public void TestRasStoreCreatesDBIfDBNotPresentConflictResultsInExceptionAfterRetries() throws Exception {
-        String rasURI = CouchdbTestFixtures.rasUriStr;
-        String docID = CouchdbTestFixtures.documentId1; 
-        String docRev = CouchdbTestFixtures.documentRev1;
-
         List <HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         //Check Welcome Screen
-        interactions.add( new WelcomeInteractionOK( rasURI, docID,docRev ){
+        interactions.add( new WelcomeInteractionOK(){
             @Override
             public MockCloseableHttpResponse getResponse() {
     
@@ -489,26 +414,26 @@ public class CouchdbValidatorImplTest {
         // Add interaction for database check which results in not found (i.e. need to create database)
         
         //Add Interactions for checking the databases are present which result inc onflict to max out retry attempts
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentNotFoundInteraction(rasURI, docID,docRev));
-        interactions.add( new checkDatabasePresentConflictInteraction(rasURI, docID,docRev));
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
+        interactions.add( new CheckDatabasePresentNotFoundInteraction());
+        interactions.add( new CheckDatabasePresentConflictInteraction());
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
