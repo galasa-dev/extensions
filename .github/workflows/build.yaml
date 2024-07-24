@@ -10,7 +10,7 @@ env:
   IMAGE_TAG: main
     
 jobs:
-    build-gradle:
+    build-extensions:
         name: build and Test Extensions 
         runs-on: ubuntu-latest
 
@@ -44,13 +44,13 @@ jobs:
                 -PtargetMaven=${{ github.workspace }}/repo  -PjacocoEnabled=true -PisMainOrRelease=true
 
             
-            - name: Extract metadata for Gradle image
+            - name: Extract metadata for Extensions image
               id: metadata
               uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
               with:
                 images: ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/extensions-maven-artefacts
   
-            - name: Build Gradle image for development Maven registry
+            - name: Build Extensions image for development Maven registry
               id: build
               uses: docker/build-push-action@v5
               with:
