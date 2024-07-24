@@ -6,7 +6,7 @@ on:
         branches: [main]
 
 env:
-    NAMESPACE: jaydee029
+    NAMESPACE: galasa-dev
 
 jobs:
     build-gradle:
@@ -22,6 +22,10 @@ jobs:
               with:
                 java-version: '11'
                 distribution: 'semeru'
+            
+            - name: Print githash
+              run: |
+                echo $GITHUB_SHA > ./extensions.githash
 
             - name: Setup Gradle
               uses: gradle/actions/setup-gradle@v3
@@ -30,8 +34,18 @@ jobs:
 
             - name: Test and Build Extensions using gradle
               run: |
-               gradle -b galasa-extensions-parent/build.gradle clean build --scan \
+               gradle -b galasa-extensions-parent/build.gradle check publish \
                -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework \
                -PcentralMaven=https://repo.maven.apache.org/maven2/ \
-               -PtargetMaven=https://maven.pkg.github.com/${{env.NAMESPACE}}/extensions/
+               -PtargetMaven=${{ github.workspace }}/repo
           
+            - name: Build extensions Image for testing
+              uses: docker/build-push-action@v5
+              with:
+                context: .
+                file: dockerfiles/dockerfile
+                load: true
+                tags: extensions:test
+                build-args: |
+                  dockerRepository=harbor.galasa.dev
+                  tag=main
