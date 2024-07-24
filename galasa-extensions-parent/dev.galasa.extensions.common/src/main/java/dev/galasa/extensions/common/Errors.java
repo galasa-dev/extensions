@@ -56,6 +56,7 @@ public enum Errors {
     ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_NAMESPACES_NON_OK_STATUS     (7019,"GAL7019E: Could not get the namespace information from URL ''{0}''. Status code ''{1}'' is not 200."),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED                (7020,"GAL7020E: Could not get the CPS namespaces information from URL ''{0}''. Cause: {1}"),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_BAD_JSON_RETURNED     (7021,"GAL7021E: Could not get the CPS namespaces value from URL ''{0}''. Cause: Bad json returned from the server. {1}"),
+                    
     ;
 
     private String template;

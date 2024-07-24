@@ -70,7 +70,6 @@ Environment variables used:
 DEBUG - Optional. Valid values "1" (on) or "0" (off). Defaults to "0" (off).
 SOURCE_MAVEN - Optional. Where maven/gradle can look for pre-built development levels of things.
     Defaults to https://development.galasa.dev/main/maven-repo/framework/
-LOGS_DIR - Optional. Where logs are placed. Defaults to creating a temporary directory.
 
 EOF
 }
@@ -140,17 +139,8 @@ else
     info "SOURCE_MAVEN set to ${SOURCE_MAVEN} by caller."
 fi
 
-# Create a temporary dir.
-# Note: This bash 'spell' works in OSX and Linux.
-if [[ -z ${LOGS_DIR} ]]; then
-    export LOGS_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t "galasa-logs")
-    info "Logs are stored in the ${LOGS_DIR} folder."
-    info "Over-ride this setting using the LOGS_DIR environment variable."
-else
-    mkdir -p ${LOGS_DIR} 2>&1 > /dev/null # Don't show output. We don't care if it already existed.
-    info "Logs are stored in the ${LOGS_DIR} folder."
-    info "Over-ridden by caller using the LOGS_DIR variable."
-fi
+export LOGS_DIR=$BASEDIR/temp
+mkdir -p $LOGS_DIR
 
 info "Using source code at ${source_dir}"
 cd ${BASEDIR}/${source_dir}
