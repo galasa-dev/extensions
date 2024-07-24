@@ -34,7 +34,7 @@ jobs:
             - name: Test and Build Extensions using gradle
               run: |
                gradle -b galasa-extensions-parent/build.gradle check publish \
-               -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework \
+               -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework \
                -PcentralMaven=https://repo.maven.apache.org/maven2/ \
                -PtargetMaven=${{ github.workspace }}/repo
           
