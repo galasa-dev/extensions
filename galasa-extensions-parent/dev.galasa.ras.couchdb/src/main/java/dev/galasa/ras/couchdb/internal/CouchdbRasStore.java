@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -18,17 +17,12 @@ import java.util.Arrays;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.apache.commons.logging.Log;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IResultArchiveStoreService;
@@ -40,6 +34,8 @@ import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -48,22 +44,22 @@ import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.ras.couchdb.internal.pojos.Artifacts;
 import dev.galasa.ras.couchdb.internal.pojos.LogLines;
 
-public class CouchdbRasStore implements IResultArchiveStoreService {
+public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStoreService {
 
     private static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
     private static final String COUCHDB_AUTH_TYPE    = "Basic";
 
+    private static final String ARTIFACTS_DB         = "galasa_artifacts";
+    private static final String RUNS_DB              = "galasa_run";
+    private static final String LOG_DB               = "galasa_log";
+
     private final Log                          logger            ;
 
     private final IFramework                   framework;                                         // NOSONAR
-    private final URI                          rasUri;
 
-    private final CloseableHttpClient          httpClient;
     private boolean                            shutdown           = false;
 
     private final GalasaGson                   gson               = new GalasaGson();
-
-    private final HttpRequestFactory           requestFactory;
 
     private final CouchdbRasFileSystemProvider provider;
 
@@ -83,7 +79,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
     private LogFactory logFactory;
 
-    public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbRasException {
+    public CouchdbRasStore(IFramework framework, URI rasUri) throws CouchdbException, CouchdbRasException {
         this(
             framework,
             rasUri,
@@ -97,16 +93,14 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     // Note: We use logFactory here so we can propogate it downwards during unit testing.
     public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator,
         LogFactory logFactory, HttpRequestFactory requestFactory
-    ) throws CouchdbRasException {
+    ) throws  CouchdbRasException, CouchdbException {
+        super(rasUri, requestFactory, httpFactory);
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
         this.framework = framework;
-        this.rasUri = rasUri;
-        this.requestFactory = requestFactory;
          // *** Validate the connection to the server and it's version
-        this.httpClient = httpFactory.createClient();
 
-        validator.checkCouchdbDatabaseIsValid(rasUri,this.httpClient, this.requestFactory);
+        validator.checkCouchdbDatabaseIsValid(this.storeUri,this.httpClient, this.httpRequestFactory);
 
         this.run = this.framework.getTestRun();
 
@@ -117,7 +111,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
             try {
                 updateTestStructure(lastTestStructure);
             } catch (ResultArchiveStoreException e) {
-                throw new CouchdbRasException("Validation failed - unable to create initial run document", e);
+                throw new CouchdbException("Validation failed - unable to create initial run document", e);
             }
 
             createArtifactDocument();
@@ -129,40 +123,20 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
 
     // Protected so that we can create artifact documents from elsewhere.
-    protected void createArtifactDocument() throws CouchdbRasException {
+    protected void createArtifactDocument() throws CouchdbException {
         Artifacts artifacts = new Artifacts();
         createArtifactDocument(artifacts);
     }
 
-    protected void createArtifactDocument(Artifacts artifacts) throws CouchdbRasException {
+    protected void createArtifactDocument(Artifacts artifacts) throws CouchdbException {
 
         artifacts.runId = this.runDocumentId;
         artifacts.runName = this.run.getName();
 
         String jsonArtifacts = gson.toJson(artifacts);
-
-        HttpPost request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_artifacts");
-        request.setEntity(new StringEntity(jsonArtifacts, StandardCharsets.UTF_8));
-
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                throw new CouchdbRasException("Unable to store the artifacts document - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            PutPostResponse putPostResponse = gson.fromJson(EntityUtils.toString(entity), PutPostResponse.class);
-            if (putPostResponse.id == null || putPostResponse.rev == null) {
-                throw new CouchdbRasException("Unable to store the artifacts document - Invalid JSON response");
-            }
-
-            this.artifactDocumentId.add(putPostResponse.id);
-            this.artifactDocumentRev = putPostResponse.rev;
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Unable to store the artifacts document", e);
-        }
+        PutPostResponse putPostResponse = createDocument(ARTIFACTS_DB, jsonArtifacts);
+        this.artifactDocumentId.add(putPostResponse.id);
+        this.artifactDocumentRev = putPostResponse.rev;
     }
 
     @Override
@@ -198,26 +172,20 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         String jsonStructure = gson.toJson(logLines);
 
-        HttpPost request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_log");
+        HttpPost request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/"+LOG_DB);
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
 
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                throw new CouchdbRasException("Unable to store the test log - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            PutPostResponse putPostResponse = gson.fromJson(EntityUtils.toString(entity), PutPostResponse.class);
+        try{
+            String entity = sendHttpRequest(request, HttpStatus.SC_CREATED);
+            PutPostResponse putPostResponse = gson.fromJson(entity, PutPostResponse.class);
             if (putPostResponse.id == null || putPostResponse.rev == null) {
-                throw new CouchdbRasException("Unable to store the test log - Invalid JSON response");
+                throw new CouchdbException("Unable to store the test structure - Invalid JSON response");
             }
 
             this.logIds.add(putPostResponse.id);
-
             this.updateTestStructure(lastTestStructure);
-        } catch (CouchdbRasException e) {
-            throw e;
+        } catch (CouchdbException e) {
+            throw new ResultArchiveStoreException(e);
         } catch (Exception e) {
             throw new ResultArchiveStoreException("Unable to store the test log", e);
         }
@@ -250,87 +218,48 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
 
         HttpEntityEnclosingRequestBase request;
         if (runDocumentId == null) {
-            request = requestFactory.getHttpPostRequest(this.rasUri + "/galasa_run");
+            request = httpRequestFactory.getHttpPostRequest(this.storeUri + "/"+RUNS_DB);
         } else {
-            request = requestFactory.getHttpPutRequest(this.rasUri + "/galasa_run/" + runDocumentId);
+            request = httpRequestFactory.getHttpPutRequest(this.storeUri + "/"+RUNS_DB+"/" + runDocumentId);
             request.setHeader("If-Match", runDocumentRevision);
         }
         request.setEntity(new StringEntity(jsonStructure, StandardCharsets.UTF_8));
 
-        try (CloseableHttpResponse response = httpClient.execute(request)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
-                if (statusLine.getStatusCode() == HttpStatus.SC_CONFLICT) {
-                    logger.error(
-                            "The run document has been updated by another engine, terminating now to avoid corruption");
-                    System.exit(0);
+        try{
+            String entity = sendHttpRequest(request, HttpStatus.SC_CREATED);
+            PutPostResponse putPostResponse = gson.fromJson(entity, PutPostResponse.class);
+                if (putPostResponse.id == null || putPostResponse.rev == null) {
+                    throw new CouchdbException("Unable to store the test structure - Invalid JSON response");
                 }
-
-                throw new CouchdbRasException("Unable to store the test structure - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            PutPostResponse putPostResponse = gson.fromJson(EntityUtils.toString(entity), PutPostResponse.class);
-            if (putPostResponse.id == null || putPostResponse.rev == null) {
-                throw new CouchdbRasException("Unable to store the test structure - Invalid JSON response");
-            }
-            this.runDocumentId = putPostResponse.id;
-            this.runDocumentRevision = putPostResponse.rev;
-
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResultArchiveStoreException("Unable to store the test structure", e);
+                this.runDocumentId = putPostResponse.id;
+                this.runDocumentRevision = putPostResponse.rev;
+        } catch (CouchdbException e){
+            throw new ResultArchiveStoreException(e);
         }
     }
 
-    public void retrieveArtifact(CouchdbArtifactPath path, Path cachePath) throws CouchdbRasException {
+    public void retrieveArtifact(CouchdbArtifactPath path, Path cachePath) throws CouchdbException {
         String artifactRecordId = path.getArtifactRecordId();
         String encodedPath;
         try {
             encodedPath = URLEncoder.encode(path.toString(), "utf-8");
         } catch (UnsupportedEncodingException e) {
-            throw new CouchdbRasException("Problem encoding artifact path", e);
+            throw new CouchdbException("Problem encoding artifact path", e);
         }
 
-        HttpGet httpGet = requestFactory.getHttpGetRequest(this.rasUri + "/galasa_artifacts/" + artifactRecordId + "/" + encodedPath);
-
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException("Not found - " + path.toString());
-            }
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                throw new CouchdbRasException("Unable to find artifact - " + statusLine.toString());
-            }
-
-            HttpEntity entity = response.getEntity();
-            Files.copy(entity.getContent(), cachePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (CouchdbRasException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbRasException("Unable to find runs", e);
-        }
+        String artifactURI= this.storeUri + "/"+ARTIFACTS_DB+"/" + artifactRecordId + "/" + encodedPath;
+        retrieveArtifactFromDatabase(artifactURI, cachePath,StandardCopyOption.REPLACE_EXISTING);
     }
 
-    public String getLog(TestStructure ts) throws CouchdbRasException {
+    public String getLog(TestStructure ts) throws ResultArchiveStoreException {
         StringBuilder sb = new StringBuilder();
 
         for (String logRecordId : ts.getLogRecordIds()) {
-            HttpGet httpGet = requestFactory.getHttpGetRequest(this.rasUri + "/galasa_log/" + logRecordId);
+            HttpGet httpGet = httpRequestFactory.getHttpGetRequest(this.storeUri + "/"+LOG_DB+"/" + logRecordId);
 
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) { // TODO Ignore it for now
-                    continue;
-                }
-                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                    throw new CouchdbRasException("Unable to find logs - " + statusLine.toString());
-                }
-
-                HttpEntity entity = response.getEntity();
-                String responseEntity = EntityUtils.toString(entity);
-                LogLines logLines = gson.fromJson(responseEntity, LogLines.class);
+            try{
+                String entity = sendHttpRequest(httpGet, HttpStatus.SC_OK);
+                LogLines logLines = gson.fromJson(entity, LogLines.class);
                 if (logLines.lines != null) {
                     for (String line : logLines.lines) {
                         if (sb.length() > 0) {
@@ -339,10 +268,10 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
                         sb.append(line);
                     }
                 }
-            } catch (CouchdbRasException e) {
-                throw e;
+            } catch (CouchdbException e) {
+                throw new ResultArchiveStoreException(e);
             } catch (Exception e) {
-                throw new CouchdbRasException("Unable to find runs", e);
+                throw new ResultArchiveStoreException("Unable to find runs", e);
             }
         }
         return sb.toString();
@@ -397,7 +326,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
     public URI getCouchdbUri() {
-        return this.rasUri;
+        return this.storeUri;
     }
 
     public GalasaGson getGson() {
@@ -411,7 +340,7 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     @Override
     public @NotNull List<IResultArchiveStoreDirectoryService> getDirectoryServices() {
         ArrayList<IResultArchiveStoreDirectoryService> dirs = new ArrayList<>();
-        dirs.add(new CouchdbDirectoryService(this, this.logFactory, this.requestFactory));
+        dirs.add(new CouchdbDirectoryService(this, this.logFactory, this.httpRequestFactory));
         return dirs;
     }
 
@@ -425,6 +354,6 @@ public class CouchdbRasStore implements IResultArchiveStoreService {
     }
 
    public HttpRequestFactory getRequestFactory() {
-     return this.requestFactory;
+     return this.httpRequestFactory;
    }
 }

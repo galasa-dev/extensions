@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 
 import org.osgi.service.component.annotations.Component;
 
+import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 import dev.galasa.framework.spi.IResultArchiveStoreRegistration;
@@ -49,9 +50,9 @@ public class CouchdbRasRegistration implements IResultArchiveStoreRegistration {
 
         // *** Test we can contact the CouchDB server
         try {
-            store = new CouchdbRasStore(framework, new URI(this.rasUri.toString().substring(8)));
-        } catch (URISyntaxException e) {
-            throw new ResultArchiveStoreException("Invalid CouchDB URI " + this.rasUri.getPath());
+            store = new CouchdbRasStore(framework, this.rasUri);
+        } catch (CouchdbException e) {
+            throw new ResultArchiveStoreException(e);
         }
 
         // *** All good, register it
