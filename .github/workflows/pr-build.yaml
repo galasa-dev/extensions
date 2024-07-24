@@ -8,7 +8,7 @@ env:
     NAMESPACE: galasa-dev
 
 jobs:
-    build-gradle:
+    build-extensions:
         name: build,Test and Publish Extensions
         runs-on: ubuntu-latest
 
