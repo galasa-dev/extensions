@@ -1,5 +1,9 @@
+/*
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package dev.galasa.cps.rest.mocks;
-
 
 import java.util.*;
 
@@ -10,7 +14,11 @@ import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStore;
 
 
-/** A */
+/** 
+ * A CPS implementation which holds a hashmap as the basis of it's property store.
+ * 
+ * It sits in memory and leaves no debris, so is suitable for use with unit tests.
+ */
 public class MockCPS implements IConfigurationPropertyStore {
 
     public MockCPS() {

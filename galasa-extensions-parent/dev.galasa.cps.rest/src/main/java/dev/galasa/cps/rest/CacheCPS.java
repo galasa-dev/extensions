@@ -24,6 +24,11 @@ import org.apache.commons.logging.Log;
  * Up-front the implementation reads the entire contents from the CPS and caches it.
  * 
  * Set and Delete of properties are deleted, and the cache state is maintained.
+ * 
+ * The cache is turned on using the 'framework.cps.rest.cache.is.enabled' property.
+ * - true : The cacheing is turned on.
+ * - false : Calls pass directly through to the child CPS implementation.
+ * Default value: false.
  */
 public class CacheCPS implements IConfigurationPropertyStore {
 
