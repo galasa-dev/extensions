@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -70,9 +73,10 @@ public abstract class CouchdbStore {
      *
      * @param dbName the database to create the new document within
      * @param jsonContent the JSON content to send to CouchDB in order to populate the new document
+     * @return PutPostResponse the response from the CouchDB service
      * @throws CouchdbException if there is a problem accessing the CouchDB server or creating the document
      */
-    protected void createDocument(String dbName, String jsonContent) throws CouchdbException {
+    protected PutPostResponse createDocument(String dbName, String jsonContent) throws CouchdbException {
         // Create a new document in the tokens database with the new token to store
         HttpPost postDocument = httpRequestFactory.getHttpPostRequest(storeUri + "/" + dbName);
         postDocument.setEntity(new StringEntity(jsonContent, StandardCharsets.UTF_8));
@@ -84,6 +88,10 @@ public abstract class CouchdbStore {
             String errorMessage = ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT.getMessage(dbName);
             throw new CouchdbException(errorMessage);
         }
+        if (putPostResponse.id == null || putPostResponse.rev == null) {
+            throw new CouchdbException(ERROR_UNEXPECTED_RESPONSE_FROM_CREATE_DOCUMENT.getMessage());
+        }
+        return putPostResponse;
     }
 
     /**
@@ -125,6 +133,24 @@ public abstract class CouchdbStore {
         return gson.fromJson(sendHttpRequest(getDocumentRequest, HttpStatus.SC_OK), classOfObject);
     }
 
+
+    protected void retrieveArtifactFromDatabase(String URI, Path cachePath, CopyOption copyOption) throws CouchdbException{
+        HttpGet httpGet = httpRequestFactory.getHttpGetRequest(URI);
+        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                String errorMessage = ERROR_URI_IS_INVALID .getMessage(URI);
+                throw new CouchdbException(errorMessage);
+            }
+            HttpEntity entity = response.getEntity();
+            Files.copy(entity.getContent(), cachePath, copyOption);
+        } catch (CouchdbException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CouchdbException("Unable to retrieve artifact", e);
+        }
+    }
+
     /**
      * Deletes a document from a given database using its document ID by sending a
      * DELETE /{db}/{docid} request to the CouchDB server.
@@ -154,7 +180,7 @@ public abstract class CouchdbStore {
      * @return a string representation of the response.
      * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
      */
-    private String sendHttpRequest(HttpUriRequest httpRequest, int... expectedHttpStatusCodes) throws CouchdbException {
+    protected String sendHttpRequest(HttpUriRequest httpRequest, int... expectedHttpStatusCodes) throws CouchdbException {
         String responseEntity = "";
         try (CloseableHttpResponse response = httpClient.execute(httpRequest)) {
             StatusLine statusLine = response.getStatusLine();
