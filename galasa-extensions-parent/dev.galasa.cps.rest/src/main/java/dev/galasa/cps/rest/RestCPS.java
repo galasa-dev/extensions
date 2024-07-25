@@ -209,7 +209,7 @@ public class RestCPS implements IConfigurationPropertyStore {
             // So we use the /cps/{namespace}/properties?prefix=xxxx so that if the endpoint isn't available, we get 404, 
             // and if the property doesn't exist, then we get null in the map.
             // Although it's not as efficient on the server-side, performance isn't everything in this case, as local runs
-            // can be slower/less performant than the ecosyste runs.
+            // can be slower/less performant than the ecosystem runs.
             Map<String,String> properties = getPrefixedProperties(fullyQualifiedPropertyName);
             propertyValueResult = properties.get(fullyQualifiedPropertyName);
         }
@@ -441,7 +441,7 @@ public class RestCPS implements IConfigurationPropertyStore {
             GalasaPropertyData data = property.getData();
             String value = data.getValue();
 
-            log.info("galasacps: over rest (with prefix): "+fullyQualifiedPropName+" : "+value);
+            // log.info("galasacps: over rest (with prefix): "+fullyQualifiedPropName+" : "+value);
 
             if (!isPropertyRedacted(fullyQualifiedPropName)) {
                 results.put(fullyQualifiedPropName, value);
