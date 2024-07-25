@@ -48,7 +48,7 @@ import io.etcd.jetcd.options.GetOption;
  * 
  * All Responses from a etcd cluster have been mocked using mockito.
  * 
- * @author James Davies
+ *  
  */
 //@RunWith(MockitoJUnitRunner.class)
 public class Etcd3DssTest {

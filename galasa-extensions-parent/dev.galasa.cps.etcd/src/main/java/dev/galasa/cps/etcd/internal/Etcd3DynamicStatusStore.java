@@ -58,7 +58,7 @@ import io.etcd.jetcd.watch.WatchResponse;
  * This class implements the DSS store for the use of etcd3 as the k-v store. It
  * is interacting with the Jetcd Client offered from coreOs.
  * 
- * @author James Davies
+ *  
  */
 public class Etcd3DynamicStatusStore implements IDynamicStatusStore {
     private final Client                            client;
