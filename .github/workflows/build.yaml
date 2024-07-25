@@ -47,6 +47,13 @@ jobs:
           -PtargetMaven=${{ github.workspace }}/repo \
           -PjacocoEnabled=true \
           -PisMainOrRelease=true
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Extract metadata for Extensions image
         id: metadata
