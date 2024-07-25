@@ -37,8 +37,11 @@ jobs:
               env:
                 GITHUB_ACTOR: ${{github.actor}}
                 GITHUB_TOKEN: ${{ github.token }}
+                ORG_GRADLE_PROJECT_signingKeyId:  ${{ secrets.GPG_KEYID }}
+                ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_KEY }}
+                ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
               run: |
-                gradle -x sign -b galasa-extensions-parent/build.gradle check publish --info \
+                gradle -b galasa-extensions-parent/build.gradle check publish \
                 -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework  \
                 -PcentralMaven=https://repo.maven.apache.org/maven2/ \
                 -PtargetMaven=${{ github.workspace }}/repo  -PjacocoEnabled=true -PisMainOrRelease=true
