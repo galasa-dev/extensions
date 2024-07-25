@@ -17,6 +17,7 @@ import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.LogFactoryImpl;
 import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
+import dev.galasa.framework.spi.IConfigurationPropertyStore;
 import dev.galasa.framework.spi.IConfigurationPropertyStoreRegistration;
 import dev.galasa.framework.spi.IFrameworkInitialisation;
 
@@ -74,13 +75,17 @@ public class RestCPSRegistration implements IConfigurationPropertyStoreRegistrat
                 throw new ConfigurationPropertyStoreException(msg,ex);
             }
 
+            IConfigurationPropertyStore baseCPS = new RestCPS(
+                ecosystemRestApi, 
+                httpClientFacotory,
+                jwtProvider,
+                logFactory
+            );
+
+            IConfigurationPropertyStore cacheCPS = new CacheCPS(baseCPS, logFactory);
+
             frameworkInitialisation.registerConfigurationPropertyStore(
-                new RestCPS(
-                    ecosystemRestApi, 
-                    httpClientFacotory,
-                    jwtProvider,
-                    logFactory
-                )
+                cacheCPS
             );
         }
     }
