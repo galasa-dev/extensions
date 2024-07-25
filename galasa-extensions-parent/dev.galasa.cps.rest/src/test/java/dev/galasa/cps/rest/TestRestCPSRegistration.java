@@ -46,7 +46,7 @@ public class TestRestCPSRegistration {
 
         List<IConfigurationPropertyStore> stores = mockFrameworkInit.getRegisteredConfigurationPropertyStores();
         assertThat(stores).isNotNull().hasSize(1);
-        assertThat(stores.get(0)).isInstanceOf(RestCPS.class);
+        assertThat(stores.get(0)).isInstanceOf(CacheCPS.class);
     }
 
     @Test
