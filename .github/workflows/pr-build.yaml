@@ -46,5 +46,5 @@ jobs:
           load: true
           tags: extensions:test
           build-args: |
-            dockerRepository=harbor.galasa.dev
+            dockerRepository=ghcr.io
             tag=main
