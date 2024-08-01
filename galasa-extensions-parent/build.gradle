@@ -4,13 +4,13 @@ plugins {
     id 'maven-publish'
 }
 
-version = '0.15.0'
+version = '0.36.0'
 
 task clean {
-   // make sure the build directory is gone 
-   doFirst {
-      delete "${buildDir}"
-   }
+    // make sure the build directory is gone
+    doFirst {
+        delete layout.buildDirectory
+    }
 }
 
 //---------------------------------------------------------------
@@ -32,7 +32,7 @@ configurations {
     release_metadata
 }
 
-def overallManifestFilePath = "$buildDir/release.yaml"
+def overallManifestFile = layout.buildDirectory.file("release.yaml").get().asFile
 def overallHeader = """#
 # Copyright contributors to the Galasa project
 #
@@ -57,13 +57,12 @@ framework:
   bundles:
 """
 
-//----------------------------------------------------------
-// Flushes any existing content on the specified path, and
-// creates a new file, containing the header text.
-//----------------------------------------------------------
-def prepareGeneratedFile(path, header) {
+//---------------------------------------------------------------
+// Flushes any existing content in the given manifest file, and
+// replaces it with a fresh file containing only the header text.
+//---------------------------------------------------------------
+def prepareGeneratedFile(manifestFile, header) {
     // Make sure the manifest file is clean, and exists.
-    def manifestFile = new File(path)
     if (manifestFile.exists()) {
         // File exists, delete it and create a new one.
         manifestFile.delete()
@@ -84,11 +83,12 @@ task buildReleaseYaml() {
     // During execution phase, make sure the file exists.
     doFirst {
         // Make sure the build directory exists.
+        def buildDir = layout.buildDirectory.get().asFile
         if (!buildDir.exists()) {
             buildDir.mkdirs()
         }
 
-        prepareGeneratedFile(overallManifestFilePath, overallHeader)
+        prepareGeneratedFile(overallManifestFile, overallHeader)
     }
 
     subprojects {
@@ -112,26 +112,25 @@ task buildReleaseYaml() {
                         throw new Exception("Project has no name.")
                     }
 
-                    def f = new File(overallManifestFilePath)
-                    f.append("\n\n  - artifact: $projectName")
-                    f.append("\n    version: $version")
+                    overallManifestFile.append("\n\n  - artifact: $projectName")
+                    overallManifestFile.append("\n    version: $version")
                     if (includeInOBR != '') {
-                        f.append("\n    obr:          $includeInOBR")
+                        overallManifestFile.append("\n    obr:          $includeInOBR")
                     }
                     if (includeInMVP != '') {
-                        f.append("\n    mvp:          $includeInMVP")
+                        overallManifestFile.append("\n    mvp:          $includeInMVP")
                     }
                     if (includeInBOM != '') {
-                        f.append("\n    bom:          $includeInBOM")
+                        overallManifestFile.append("\n    bom:          $includeInBOM")
                     }
                     if (includeInJavadoc != '') {
-                        f.append("\n    javadoc:      $includeInJavadoc")
+                        overallManifestFile.append("\n    javadoc:      $includeInJavadoc")
                     }
                     if (includeInIsolated != '') {
-                        f.append("\n    isolated:     $includeInIsolated")
+                        overallManifestFile.append("\n    isolated:     $includeInIsolated")
                     }
                     if (includeInCodeCoverage != '') {
-                        f.append("\n    codecoverage: $includeInCodeCoverage")
+                        overallManifestFile.append("\n    codecoverage: $includeInCodeCoverage")
                     }
 
                 }
@@ -141,7 +140,7 @@ task buildReleaseYaml() {
 }
 
 // Declare that the uber-manifest release.yaml file exists, and how to build it.
-def myReleaseYaml = artifacts.add('release_metadata', file(overallManifestFilePath)) {
+def myReleaseYaml = artifacts.add('release_metadata', overallManifestFile) {
     builtBy 'buildReleaseYaml'
 }
 
