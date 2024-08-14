@@ -106,13 +106,14 @@ function bump_version {
     cat $source_file | sed "s/dev.galasa.framework:.*'/dev.galasa.framework:$component_version'/1" > $temp_file
     cp $temp_file $source_file
 
-    cat $source_file | sed "s/version = '.*'/version = '$component_version'/1" > $temp_file
+    cat $source_file | sed "s/version[ ]*=.*/version = '$component_version'/1" > $temp_file
     cp $temp_file $source_file
 }
 
 
 # Extensions base
 bump_version $BASEDIR/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle $temp_dir/galasa.extensions.gradle
+bump_version $BASEDIR/galasa-extensions-parent/build.gradle $temp_dir/extensions-parent.build.gradle
 
 # Couchdb...
 bump_version $BASEDIR/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle $temp_dir/couchdb-build.gradle
