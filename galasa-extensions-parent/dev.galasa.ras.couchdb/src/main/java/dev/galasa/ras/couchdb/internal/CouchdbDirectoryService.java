@@ -85,10 +85,13 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return false;
     }
 
-    private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
-
+    private CouchdbRasFileSystemProvider createFileSystemProvider() {
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
-        CouchdbRasFileSystemProvider runProvider = new CouchdbRasFileSystemProvider(fileStore, store, logFactory);
+        return new CouchdbRasFileSystemProvider(fileStore, store, logFactory);        
+    }
+
+    private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
+        CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
         if (ts.getArtifactRecordIds() == null || ts.getArtifactRecordIds().isEmpty()) {
             return runProvider.getRoot();
         }
@@ -407,12 +410,12 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                 }
 
                 for (TestStructureCouchdb ts : found.docs) {
-                    Path runArtifactPath = getRunArtifactPath(ts);
-
-                    // *** Add this run to the results
-                    CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
                     if (ts.isValid()) {
-                        runs.add(cdbrr);
+                        // Don't load the artifacts for the found runs, just set a root location for artifacts
+                        CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
+
+                        // Add this run to the results
+                        runs.add(new CouchdbRunResult(store, ts, runProvider.getRoot()));
                     }
                 }
 
