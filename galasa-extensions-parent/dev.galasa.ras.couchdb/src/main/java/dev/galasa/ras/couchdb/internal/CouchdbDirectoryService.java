@@ -332,57 +332,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
 
-        JsonObject selector = new JsonObject();
-        JsonArray and = new JsonArray();
-        selector.add("$and", and);
-
-        for(IRasSearchCriteria searchCriteria : searchCriterias) {
-            if (searchCriteria instanceof RasSearchCriteriaRequestor) {
-                RasSearchCriteriaRequestor sRequestor = (RasSearchCriteriaRequestor) searchCriteria;
-
-                inArray(and, "requestor", sRequestor.getRequestors());
-            } else if (searchCriteria instanceof RasSearchCriteriaRunName) {
-                RasSearchCriteriaRunName sRunName = (RasSearchCriteriaRunName) searchCriteria;
-
-                inArray(and, "runName", sRunName.getRunNames());
-            } else if (searchCriteria instanceof RasSearchCriteriaQueuedFrom) {
-                RasSearchCriteriaQueuedFrom sFrom = (RasSearchCriteriaQueuedFrom) searchCriteria;
-
-                JsonObject criteria = new JsonObject();
-                JsonObject jFrom = new JsonObject();
-                jFrom.addProperty("$gte", sFrom.getFrom().toString());
-                criteria.add("queued", jFrom);
-                and.add(criteria);
-            } else if (searchCriteria instanceof RasSearchCriteriaQueuedTo) {
-                RasSearchCriteriaQueuedTo sTo = (RasSearchCriteriaQueuedTo) searchCriteria;
-
-                JsonObject criteria = new JsonObject();
-                JsonObject jTo = new JsonObject();
-                jTo.addProperty("$lt", sTo.getTo().toString());
-                criteria.add("queued", jTo);
-                and.add(criteria);
-            } else if (searchCriteria instanceof RasSearchCriteriaTestName) {
-                RasSearchCriteriaTestName sTestName = (RasSearchCriteriaTestName) searchCriteria;
-
-                inArray(and, "testName", sTestName.getTestNames());
-            } else if (searchCriteria instanceof RasSearchCriteriaBundle) {
-                RasSearchCriteriaBundle sBundle = (RasSearchCriteriaBundle) searchCriteria;
-
-                inArray(and, "bundle", sBundle.getBundles());
-            } else if (searchCriteria instanceof RasSearchCriteriaResult) {
-                RasSearchCriteriaResult sResult = (RasSearchCriteriaResult) searchCriteria;
-
-                inArray(and, "result", sResult.getResults());
-            } else if(searchCriteria instanceof RasSearchCriteriaStatus){
-                RasSearchCriteriaStatus sStatus = (RasSearchCriteriaStatus) searchCriteria;
-                inArray(and, "status", sStatus.getStatusesAsStrings());
-            } else {
-                throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
-            }
-        }
-
         Find find = new Find();
-        find.selector = selector;
+        find.selector = buildGetRunsQuery(searchCriterias);
         find.execution_stats = true;
         find.limit = COUCHDB_RESULTS_LIMIT_PER_QUERY;
 
@@ -505,6 +456,58 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         } catch (Exception e) {
             throw new ResultArchiveStoreException(e);
         }
+    }
+
+    private JsonObject buildGetRunsQuery(IRasSearchCriteria... searchCriterias) throws ResultArchiveStoreException {
+        JsonObject selector = new JsonObject();
+        JsonArray and = new JsonArray();
+        selector.add("$and", and);
+
+        for(IRasSearchCriteria searchCriteria : searchCriterias) {
+            if (searchCriteria instanceof RasSearchCriteriaRequestor) {
+                RasSearchCriteriaRequestor sRequestor = (RasSearchCriteriaRequestor) searchCriteria;
+
+                inArray(and, "requestor", sRequestor.getRequestors());
+            } else if (searchCriteria instanceof RasSearchCriteriaRunName) {
+                RasSearchCriteriaRunName sRunName = (RasSearchCriteriaRunName) searchCriteria;
+
+                inArray(and, "runName", sRunName.getRunNames());
+            } else if (searchCriteria instanceof RasSearchCriteriaQueuedFrom) {
+                RasSearchCriteriaQueuedFrom sFrom = (RasSearchCriteriaQueuedFrom) searchCriteria;
+
+                JsonObject criteria = new JsonObject();
+                JsonObject jFrom = new JsonObject();
+                jFrom.addProperty("$gte", sFrom.getFrom().toString());
+                criteria.add("queued", jFrom);
+                and.add(criteria);
+            } else if (searchCriteria instanceof RasSearchCriteriaQueuedTo) {
+                RasSearchCriteriaQueuedTo sTo = (RasSearchCriteriaQueuedTo) searchCriteria;
+
+                JsonObject criteria = new JsonObject();
+                JsonObject jTo = new JsonObject();
+                jTo.addProperty("$lt", sTo.getTo().toString());
+                criteria.add("queued", jTo);
+                and.add(criteria);
+            } else if (searchCriteria instanceof RasSearchCriteriaTestName) {
+                RasSearchCriteriaTestName sTestName = (RasSearchCriteriaTestName) searchCriteria;
+
+                inArray(and, "testName", sTestName.getTestNames());
+            } else if (searchCriteria instanceof RasSearchCriteriaBundle) {
+                RasSearchCriteriaBundle sBundle = (RasSearchCriteriaBundle) searchCriteria;
+
+                inArray(and, "bundle", sBundle.getBundles());
+            } else if (searchCriteria instanceof RasSearchCriteriaResult) {
+                RasSearchCriteriaResult sResult = (RasSearchCriteriaResult) searchCriteria;
+
+                inArray(and, "result", sResult.getResults());
+            } else if(searchCriteria instanceof RasSearchCriteriaStatus) {
+                RasSearchCriteriaStatus sStatus = (RasSearchCriteriaStatus) searchCriteria;
+                inArray(and, "status", sStatus.getStatusesAsStrings());
+            } else {
+                throw new ResultArchiveStoreException("Unrecognised search criteria class " + searchCriteria.getClass().getName());
+            }
+        }
+        return selector;
     }
 
     private void inArray(JsonArray and, String field, String[] inArray) {
