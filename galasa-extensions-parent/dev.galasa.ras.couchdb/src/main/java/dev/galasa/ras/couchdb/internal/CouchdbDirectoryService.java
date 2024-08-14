@@ -68,6 +68,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
     private final CouchdbRasStore store;
 
+    private static final int COUCHDB_RESULTS_LIMIT_PER_QUERY = 100;
+
     public CouchdbDirectoryService(CouchdbRasStore store, LogFactory logFactory, HttpRequestFactory requestFactory) {
         this.store = store;
         this.logFactory = logFactory;
@@ -382,6 +384,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         Find find = new Find();
         find.selector = selector;
         find.execution_stats = true;
+        find.limit = COUCHDB_RESULTS_LIMIT_PER_QUERY;
 
         while (true) {
             String requestContent = store.getGson().toJson(find);
