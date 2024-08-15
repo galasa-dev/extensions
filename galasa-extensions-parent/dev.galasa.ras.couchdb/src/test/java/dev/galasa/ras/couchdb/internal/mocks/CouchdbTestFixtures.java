@@ -210,10 +210,18 @@ public class CouchdbTestFixtures {
 
         IRun mockIRun = new MockIRun(runName1);
 
+        return createCouchdbRasStore(mockCps, mockIRun, allInteractions, logFactory);
+    }
+
+    public CouchdbRasStore createCouchdbRasStore(List<HttpInteraction> allInteractions, MockLogFactory logFactory) throws Exception {
+        return createCouchdbRasStore(null, null, allInteractions, logFactory);
+    }
+
+    public CouchdbRasStore createCouchdbRasStore(MockConfigurationPropertyStoreService mockCps, IRun mockRun, List<HttpInteraction> allInteractions , MockLogFactory logFactory ) throws Exception {
         IFramework mockFramework = new MockFramework() {
             @Override
             public IRun getTestRun() {
-                return mockIRun;
+                return mockRun;
             }     
             @Override
             public @NotNull IConfigurationPropertyStoreService getConfigurationPropertyService(
