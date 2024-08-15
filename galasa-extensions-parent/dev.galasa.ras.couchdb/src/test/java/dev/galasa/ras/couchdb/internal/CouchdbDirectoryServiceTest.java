@@ -24,13 +24,18 @@ import org.junit.Test;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
+import dev.galasa.framework.TestRunLifecycleStatus;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
+import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
@@ -253,9 +258,17 @@ public class CouchdbDirectoryServiceTest {
 
         Instant queuedFromTime = Instant.MAX;
         Instant queuedToTime = Instant.MAX;
+        String resultStr = "Passed";
+        String requestorName = "me";
+        String testNameStr = "mytest";
+        String bundleName = "my.bundle";
         RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
         RasSearchCriteriaQueuedTo queuedTo = new RasSearchCriteriaQueuedTo(queuedToTime);
-        RasSearchCriteriaResult result = new RasSearchCriteriaResult("Passed");
+        RasSearchCriteriaResult result = new RasSearchCriteriaResult(resultStr);
+        RasSearchCriteriaRequestor requestor = new RasSearchCriteriaRequestor(requestorName);
+        RasSearchCriteriaTestName testName = new RasSearchCriteriaTestName(testNameStr);
+        RasSearchCriteriaBundle bundle = new RasSearchCriteriaBundle(bundleName);
+        RasSearchCriteriaStatus status = new RasSearchCriteriaStatus(List.of(TestRunLifecycleStatus.FINISHED));
 
         FoundRuns findRunsResponse = new FoundRuns();
         findRunsResponse.docs = List.of(mockRun1, mockRun2);
@@ -266,7 +279,8 @@ public class CouchdbDirectoryServiceTest {
 
         String expectedUri = "http://my.uri/galasa_run/_find";
         String[] expectedRequestBodyParts = new String[] {
-            "queued", "$gte", queuedFromTime.toString(), "$lt", queuedToTime.toString(), "result", "Passed"
+            "queued", "$gte", queuedFromTime.toString(), "$lt", queuedToTime.toString(), "result", resultStr,
+            "testName", testNameStr, "bundle", bundleName, "status", TestRunLifecycleStatus.FINISHED.toString()
         };
 
         List<HttpInteraction> interactions = List.of(
@@ -279,7 +293,7 @@ public class CouchdbDirectoryServiceTest {
         CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
 
         // When...
-        List<IRunResult> runs = directoryService.getRuns(queuedFrom, queuedTo, result);
+        List<IRunResult> runs = directoryService.getRuns(queuedFrom, queuedTo, result, requestor, testName, bundle, status);
 
         // Then...
         assertThat(runs).hasSize(2);
