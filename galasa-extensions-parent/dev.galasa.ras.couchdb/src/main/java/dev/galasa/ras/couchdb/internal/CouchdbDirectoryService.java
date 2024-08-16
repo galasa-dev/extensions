@@ -321,7 +321,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriterias)
+    public @NotNull List<IRunResult> getRuns(int maxResults, @NotNull IRasSearchCriteria... searchCriterias)
             throws ResultArchiveStoreException {
 
         if (searchCriterias.length == 0) {
@@ -335,7 +335,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         Find find = new Find();
         find.selector = buildGetRunsQuery(searchCriterias);
         find.execution_stats = true;
-        find.limit = COUCHDB_RESULTS_LIMIT_PER_QUERY;
+        find.limit = maxResults;
 
         while (true) {
             String requestContent = store.getGson().toJson(find);
@@ -383,6 +383,12 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         }
 
         return runs;
+    }
+
+    @Override
+    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriterias)
+            throws ResultArchiveStoreException {
+        return getRuns(COUCHDB_RESULTS_LIMIT_PER_QUERY, searchCriterias);
     }
 
     public void discardRun(String id) throws ResultArchiveStoreException {
