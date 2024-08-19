@@ -38,6 +38,7 @@ import dev.galasa.framework.spi.IResultArchiveStoreDirectoryService;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
+import dev.galasa.framework.spi.ras.RasRunResultPage;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
@@ -45,6 +46,7 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaRequestor;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
+import dev.galasa.framework.spi.ras.RasSortField;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasTestClass;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
@@ -321,7 +323,79 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull List<IRunResult> getRuns(int maxResults, @NotNull IRasSearchCriteria... searchCriterias)
+    public @NotNull RasRunResultPage getRunsPage(int maxResults, List<RasSortField> sortFields, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
+            throws ResultArchiveStoreException {
+
+        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
+
+        Find find = new Find();
+        find.selector = buildGetRunsQuery(searchCriterias);
+        find.execution_stats = true;
+        find.limit = maxResults;
+        find.bookmark = pageToken;
+        if (sortFields != null && !sortFields.isEmpty()) {
+            find.sort = buildQuerySortJson(sortFields);
+        }
+
+        return getRunsPageFromCouchdb(httpPost, find);
+    }
+
+    private RasRunResultPage getRunsPageFromCouchdb(HttpPost httpPost, Find query) throws ResultArchiveStoreException {
+        ArrayList<IRunResult> runs = new ArrayList<>();
+        RasRunResultPage runsPage = null;
+        String requestContent = store.getGson().toJson(query);
+        httpPost.setEntity(new StringEntity(requestContent, UTF8));
+
+        try (CloseableHttpResponse response = store.getHttpClient().execute(httpPost)) {
+            StatusLine statusLine = response.getStatusLine();
+            HttpEntity entity = response.getEntity();
+            String responseEntity = EntityUtils.toString(entity);
+
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+                throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
+            }
+
+            FoundRuns found = store.getGson().fromJson(responseEntity, FoundRuns.class);
+            if (found.docs == null) {
+                throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
+            }
+
+            if (found.warning != null) {
+                logger.warn("CouchDB warning detected - " + found.warning);
+            }
+
+            for (TestStructureCouchdb ts : found.docs) {
+                if (ts.isValid()) {
+                    // Don't load the artifacts for the found runs, just set a root location for artifacts
+                    CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
+
+                    // Add this run to the results
+                    runs.add(new CouchdbRunResult(store, ts, runProvider.getRoot()));
+                }
+            }
+
+            runsPage = new RasRunResultPage(runs, found.bookmark);
+        } catch (CouchdbRasException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResultArchiveStoreException("Unable to find runs", e);
+        }
+        return runsPage;
+    }
+
+    private JsonArray buildQuerySortJson(@NotNull List<RasSortField> sortFields) {
+        JsonArray sort = new JsonArray();
+
+        JsonObject primarySortJson = new JsonObject();
+        RasSortField primarySort = sortFields.get(0);
+        primarySortJson.addProperty(primarySort.getFieldName(), primarySort.getSortDirection());
+
+        sort.add(primarySortJson);
+        return sort;
+    }
+
+    @Override
+    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriterias)
             throws ResultArchiveStoreException {
 
         if (searchCriterias.length == 0) {
@@ -335,60 +409,23 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         Find find = new Find();
         find.selector = buildGetRunsQuery(searchCriterias);
         find.execution_stats = true;
-        find.limit = maxResults;
+        find.limit = COUCHDB_RESULTS_LIMIT_PER_QUERY;
 
         while (true) {
-            String requestContent = store.getGson().toJson(find);
-            httpPost.setEntity(new StringEntity(requestContent, UTF8));
+            RasRunResultPage runsPage = getRunsPageFromCouchdb(httpPost, find);
 
-            try (CloseableHttpResponse response = store.getHttpClient().execute(httpPost)) {
-                StatusLine statusLine = response.getStatusLine();
-                HttpEntity entity = response.getEntity();
-                String responseEntity = EntityUtils.toString(entity);
-
-                if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                    throw new CouchdbRasException("Unable to find runs - " + statusLine.toString());
-                }
-
-                FoundRuns found = store.getGson().fromJson(responseEntity, FoundRuns.class);
-                if (found.docs == null) {
-                    throw new CouchdbRasException("Unable to find runs - Invalid JSON response");
-                }
-
-                if (found.warning != null) {
-                    logger.warn("CouchDB warning detected - " + found.warning);
-                }
-
-                if (found.docs.isEmpty()) {
-                    break;
-                }
-
-                for (TestStructureCouchdb ts : found.docs) {
-                    if (ts.isValid()) {
-                        // Don't load the artifacts for the found runs, just set a root location for artifacts
-                        CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
-
-                        // Add this run to the results
-                        runs.add(new CouchdbRunResult(store, ts, runProvider.getRoot()));
-                    }
-                }
-
-                // *** find the next batch of runs
-                find.bookmark = found.bookmark;
-            } catch (CouchdbRasException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new ResultArchiveStoreException("Unable to find runs", e);
+            List<IRunResult> returnedRuns = runsPage.getRuns();
+            if (!returnedRuns.isEmpty()) {
+                runs.addAll(returnedRuns);
+            } else {
+                // No runs were found, so we've reached the end
+                break;
             }
+
+            find.bookmark = runsPage.getNextPageToken();
         }
 
         return runs;
-    }
-
-    @Override
-    public @NotNull List<IRunResult> getRuns(@NotNull IRasSearchCriteria... searchCriterias)
-            throws ResultArchiveStoreException {
-        return getRuns(COUCHDB_RESULTS_LIMIT_PER_QUERY, searchCriterias);
     }
 
     public void discardRun(String id) throws ResultArchiveStoreException {

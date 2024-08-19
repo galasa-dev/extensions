@@ -5,13 +5,15 @@
  */
 package dev.galasa.ras.couchdb.internal.pojos;
 
+import com.google.gson.JsonArray;
+
 public class Find {
 
-    public Object  selector;        // NOSONAR
-//	public List<Sort> sort; // NOSONAR
-    public Integer limit;           // NOSONAR
-    public Integer skip;            // NOSONAR
-    public Boolean execution_stats; // NOSONAR
-    public String  bookmark;        // NOSONAR
+    public Object    selector;
+	public JsonArray sort;
+    public Integer   limit;
+    public Integer   skip;
+    public Boolean   execution_stats;
+    public String    bookmark;
 
 }
