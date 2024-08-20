@@ -19,7 +19,7 @@ jobs:
       - name: Setup JDK 
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'semeru'
       
       - name: Print githash
@@ -29,11 +29,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 6.9.2
+          gradle-version: 8.9
 
       - name: Build Extensions source code with gradle
         run: |
-          gradle -b galasa-extensions-parent/build.gradle check publish \
+          gradle -b galasa-extensions-parent/build.gradle check publish --info \
           -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo
