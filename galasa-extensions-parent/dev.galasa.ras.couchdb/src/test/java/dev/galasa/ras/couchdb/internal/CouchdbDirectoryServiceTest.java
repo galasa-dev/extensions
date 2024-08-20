@@ -359,7 +359,7 @@ public class CouchdbDirectoryServiceTest {
         RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, null, null, queuedFrom);
 
         // Then...
-        assertThat(runsPage.getNextPageToken()).isEqualTo(findRunsResponse.bookmark);
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
 
         List<IRunResult> runs = runsPage.getRuns();
         assertThat(runs).hasSize(2);
@@ -377,7 +377,6 @@ public class CouchdbDirectoryServiceTest {
         RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
 
         RasSortField runNameSort = new RasSortField("runName", "desc");
-        List<RasSortField> sortFields = List.of(runNameSort);
 
         FoundRuns findRunsResponse = new FoundRuns();
         findRunsResponse.docs = List.of(mockRun1, mockRun2);
@@ -407,10 +406,10 @@ public class CouchdbDirectoryServiceTest {
         int maxResults = 100;
 
         // When...
-        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, sortFields, null, queuedFrom);
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, runNameSort, null, queuedFrom);
 
         // Then...
-        assertThat(runsPage.getNextPageToken()).isEqualTo(findRunsResponse.bookmark);
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
 
         List<IRunResult> runs = runsPage.getRuns();
         assertThat(runs).hasSize(2);
@@ -428,7 +427,6 @@ public class CouchdbDirectoryServiceTest {
         RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
 
         RasSortField runNameSort = new RasSortField("runName", "desc");
-        List<RasSortField> sortFields = List.of(runNameSort);
 
         FoundRuns findRunsResponse = new FoundRuns();
         findRunsResponse.docs = List.of(mockRun1, mockRun2);
@@ -462,10 +460,10 @@ public class CouchdbDirectoryServiceTest {
         int maxResults = 100;
 
         // When...
-        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, sortFields, bookmarkToRequest, queuedFrom);
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, runNameSort, bookmarkToRequest, queuedFrom);
 
         // Then...
-        assertThat(runsPage.getNextPageToken()).isEqualTo(findRunsResponse.bookmark);
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
 
         List<IRunResult> runs = runsPage.getRuns();
         assertThat(runs).hasSize(2);

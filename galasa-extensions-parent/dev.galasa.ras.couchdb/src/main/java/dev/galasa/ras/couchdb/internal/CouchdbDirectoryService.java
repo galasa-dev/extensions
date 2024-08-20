@@ -323,7 +323,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     @Override
-    public @NotNull RasRunResultPage getRunsPage(int maxResults, List<RasSortField> sortFields, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
+    public @NotNull RasRunResultPage getRunsPage(int maxResults, RasSortField primarySort, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
             throws ResultArchiveStoreException {
 
         HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
@@ -333,8 +333,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         find.execution_stats = true;
         find.limit = maxResults;
         find.bookmark = pageToken;
-        if (sortFields != null && !sortFields.isEmpty()) {
-            find.sort = buildQuerySortJson(sortFields);
+        if (primarySort != null) {
+            find.sort = buildQuerySortJson(primarySort);
         }
 
         return getRunsPageFromCouchdb(httpPost, find);
@@ -383,11 +383,10 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return runsPage;
     }
 
-    private JsonArray buildQuerySortJson(@NotNull List<RasSortField> sortFields) {
+    private JsonArray buildQuerySortJson(@NotNull RasSortField primarySort) {
         JsonArray sort = new JsonArray();
 
         JsonObject primarySortJson = new JsonObject();
-        RasSortField primarySort = sortFields.get(0);
         primarySortJson.addProperty(primarySort.getFieldName(), primarySort.getSortDirection());
 
         sort.add(primarySortJson);
@@ -422,7 +421,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                 break;
             }
 
-            find.bookmark = runsPage.getNextPageToken();
+            find.bookmark = runsPage.getNextCursor();
         }
 
         return runs;
