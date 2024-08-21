@@ -28,6 +28,7 @@ import dev.galasa.framework.TestRunLifecycleStatus;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
 import dev.galasa.framework.spi.ras.IRasSearchCriteria;
+import dev.galasa.framework.spi.ras.RasRunResultPage;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaBundle;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedFrom;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaQueuedTo;
@@ -36,6 +37,7 @@ import dev.galasa.framework.spi.ras.RasSearchCriteriaResult;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaRunName;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaStatus;
 import dev.galasa.framework.spi.ras.RasSearchCriteriaTestName;
+import dev.galasa.framework.spi.ras.RasSortField;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
 import dev.galasa.ras.couchdb.internal.mocks.MockLogFactory;
@@ -324,5 +326,148 @@ public class CouchdbDirectoryServiceTest {
         // Then...
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("Unrecognised search criteria");
+    }
+
+    @Test
+    public void testGetRunsPageByQueuedFromReturnsRunsOk() throws Exception {
+        // Given...
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun2 = createRunTestStructure("run2");
+
+        Instant queuedFromTime = Instant.EPOCH;
+        RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
+
+        FoundRuns findRunsResponse = new FoundRuns();
+        findRunsResponse.docs = List.of(mockRun1, mockRun2);
+        findRunsResponse.bookmark = "bookmark!";
+
+        FoundRuns emptyRunsResponse = new FoundRuns();
+        emptyRunsResponse.docs = new ArrayList<>();
+
+        String expectedUri = "http://my.uri/galasa_run/_find";
+        List<HttpInteraction> interactions = List.of(
+            new PostCouchdbFindRunsInteraction(expectedUri, findRunsResponse, "queued", "$gte", queuedFromTime.toString())
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        int maxResults = 100;
+
+        // When...
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, null, null, queuedFrom);
+
+        // Then...
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
+
+        List<IRunResult> runs = runsPage.getRuns();
+        assertThat(runs).hasSize(2);
+        assertThat(runs.get(0).getTestStructure().getRunName()).isEqualTo(mockRun1.getRunName());
+        assertThat(runs.get(1).getTestStructure().getRunName()).isEqualTo(mockRun2.getRunName());
+    }
+
+    @Test
+    public void testGetRunsPageByQueuedFromWithSortReturnsRunsOk() throws Exception {
+        // Given...
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun2 = createRunTestStructure("run2");
+
+        Instant queuedFromTime = Instant.EPOCH;
+        RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
+
+        RasSortField runNameSort = new RasSortField("runName", "desc");
+
+        FoundRuns findRunsResponse = new FoundRuns();
+        findRunsResponse.docs = List.of(mockRun1, mockRun2);
+        findRunsResponse.bookmark = "bookmark!";
+
+        FoundRuns emptyRunsResponse = new FoundRuns();
+        emptyRunsResponse.docs = new ArrayList<>();
+
+        String expectedUri = "http://my.uri/galasa_run/_find";
+        List<HttpInteraction> interactions = List.of(
+            new PostCouchdbFindRunsInteraction(
+                expectedUri,
+                findRunsResponse,
+                "queued",
+                "$gte",
+                queuedFromTime.toString(),
+                "sort",
+                runNameSort.getFieldName(),
+                runNameSort.getSortDirection()
+            )
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        int maxResults = 100;
+
+        // When...
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, runNameSort, null, queuedFrom);
+
+        // Then...
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
+
+        List<IRunResult> runs = runsPage.getRuns();
+        assertThat(runs).hasSize(2);
+        assertThat(runs.get(0).getTestStructure().getRunName()).isEqualTo(mockRun1.getRunName());
+        assertThat(runs.get(1).getTestStructure().getRunName()).isEqualTo(mockRun2.getRunName());
+    }
+
+    @Test
+    public void testGetRunsPageByQueuedFromWithSortAndPageTokenReturnsRunsOk() throws Exception {
+        // Given...
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun2 = createRunTestStructure("run2");
+
+        Instant queuedFromTime = Instant.EPOCH;
+        RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
+
+        RasSortField runNameSort = new RasSortField("runName", "desc");
+
+        FoundRuns findRunsResponse = new FoundRuns();
+        findRunsResponse.docs = List.of(mockRun1, mockRun2);
+        findRunsResponse.bookmark = "bookmark!";
+
+        FoundRuns emptyRunsResponse = new FoundRuns();
+        emptyRunsResponse.docs = new ArrayList<>();
+
+        String bookmarkToRequest = "iwantthispage";
+
+        String expectedUri = "http://my.uri/galasa_run/_find";
+        List<HttpInteraction> interactions = List.of(
+            new PostCouchdbFindRunsInteraction(
+                expectedUri,
+                findRunsResponse,
+                "queued",
+                "$gte",
+                queuedFromTime.toString(),
+                "sort",
+                runNameSort.getFieldName(),
+                runNameSort.getSortDirection(),
+                "bookmark",
+                bookmarkToRequest
+            )
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        int maxResults = 100;
+
+        // When...
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, runNameSort, bookmarkToRequest, queuedFrom);
+
+        // Then...
+        assertThat(runsPage.getNextCursor()).isEqualTo(findRunsResponse.bookmark);
+
+        List<IRunResult> runs = runsPage.getRuns();
+        assertThat(runs).hasSize(2);
+        assertThat(runs.get(0).getTestStructure().getRunName()).isEqualTo(mockRun1.getRunName());
+        assertThat(runs.get(1).getTestStructure().getRunName()).isEqualTo(mockRun2.getRunName());
     }
 }

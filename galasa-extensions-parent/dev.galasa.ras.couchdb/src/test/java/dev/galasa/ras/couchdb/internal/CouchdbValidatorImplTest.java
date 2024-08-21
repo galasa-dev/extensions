@@ -9,6 +9,7 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 import org.apache.http.*;
+import org.apache.http.client.methods.HttpPost;
 import org.junit.*;
 import org.junit.rules.TestName;
 
@@ -234,13 +235,17 @@ public class CouchdbValidatorImplTest {
 
     public static class CheckIndexPOSTInteraction extends WelcomeInteractionOK {
 
-        public CheckIndexPOSTInteraction() {
+        private String[] expectedIndexFields;
+
+        public CheckIndexPOSTInteraction(String... expectedIndexFields) {
             super();
+            this.expectedIndexFields = expectedIndexFields;
         }
         
         @Override
         public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
             super.validateRequest(host,request,"POST");
+            validatePostRequestBody((HttpPost) request, expectedIndexFields);
         }
 
         @Override
@@ -294,19 +299,21 @@ public class CouchdbValidatorImplTest {
 
         //Check Indexes Interactions
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("runName"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("requestor"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("queued"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("startTime"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("endTime"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("testName"));
         interactions.add( new CheckDatabaseHasDocumentInteraction());
-        interactions.add( new CheckIndexPOSTInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("bundle"));
+        interactions.add( new CheckDatabaseHasDocumentInteraction());
+        interactions.add( new CheckIndexPOSTInteraction("result"));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
