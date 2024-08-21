@@ -69,6 +69,8 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             checkIndex(httpClient, rasUri, 1, "galasa_run", "runName");
             checkIndex(httpClient, rasUri, 1, "galasa_run", "requestor");
             checkIndex(httpClient, rasUri, 1, "galasa_run", "queued");
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "startTime");
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "endTime");
             checkIndex(httpClient, rasUri, 1, "galasa_run", "testName");
             checkIndex(httpClient, rasUri, 1, "galasa_run", "bundle");
             checkIndex(httpClient, rasUri, 1, "galasa_run", "result");

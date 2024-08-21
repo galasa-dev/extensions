@@ -21,6 +21,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
@@ -86,6 +87,16 @@ public class CouchdbTestFixtures {
         public void validateRequestContentType(HttpRequest request) {
             assertThat(request.containsHeader("Content-Type")).as("Missing Content-Type header!").isTrue();
             assertThat(request.getHeaders("Content-Type")[0].getValue()).isEqualTo(getExpectedHttpContentType());
+        }
+
+        public void validatePostRequestBody(HttpPost postRequest, String... expectedRequestBodyParts) {
+            try {
+                String requestBody = EntityUtils.toString(postRequest.getEntity());
+                assertThat(requestBody).contains(expectedRequestBodyParts);
+
+            } catch (IOException ex) {
+                fail("Failed to parse POST request body");
+            }
         }
 
     }
