@@ -470,4 +470,34 @@ public class CouchdbDirectoryServiceTest {
         assertThat(runs.get(0).getTestStructure().getRunName()).isEqualTo(mockRun1.getRunName());
         assertThat(runs.get(1).getTestStructure().getRunName()).isEqualTo(mockRun2.getRunName());
     }
+
+    @Test
+    public void testGetRunsPageWithNilBookmarkReturnsPageWithNoNextCursor() throws Exception {
+        // Given...
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        Instant queuedFromTime = Instant.EPOCH;
+        RasSearchCriteriaQueuedFrom queuedFrom = new RasSearchCriteriaQueuedFrom(queuedFromTime);
+
+        FoundRuns findRunsResponse = new FoundRuns();
+        findRunsResponse.docs = List.of(mockRun1);
+        findRunsResponse.bookmark = "nil";
+
+        String expectedUri = "http://my.uri/galasa_run/_find";
+        List<HttpInteraction> interactions = List.of(
+            new PostCouchdbFindRunsInteraction(expectedUri, findRunsResponse, "queued", "$gte", queuedFromTime.toString())
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        int maxResults = 100;
+
+        // When...
+        RasRunResultPage runsPage = directoryService.getRunsPage(maxResults, null, null, queuedFrom);
+
+        // Then...
+        assertThat(runsPage.getNextCursor()).isNull();
+    }
 }
