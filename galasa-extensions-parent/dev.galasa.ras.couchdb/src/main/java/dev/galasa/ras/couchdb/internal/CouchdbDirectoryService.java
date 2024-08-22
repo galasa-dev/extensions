@@ -374,6 +374,12 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
                 }
             }
 
+            // CouchDB sometimes returns a 'nil' string as a bookmark to indicate no bookmark,
+            // so turn it into an actual null value
+            if (found.bookmark != null && found.bookmark.equals("nil")) {
+                found.bookmark = null;
+            }
+
             runsPage = new RasRunResultPage(runs, found.bookmark);
         } catch (CouchdbRasException e) {
             throw e;
