@@ -32,12 +32,13 @@ jobs:
           gradle-version: 8.9
 
       - name: Build Extensions source code with gradle
+        working-directory: galasa-extensions-parent
         run: |
-          gradle -b galasa-extensions-parent/build.gradle clean build --info \
-          --no-daemon --console plain \
+          gradle --no-daemon --console plain \
           -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework/ \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
-          -PtargetMaven=${{ github.workspace }}/repo
+          -PtargetMaven=${{ github.workspace }}/repo /
+          check publish --info
     
       - name: Build Extensions image for testing
         uses: docker/build-push-action@v5
