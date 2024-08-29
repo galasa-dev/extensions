@@ -39,7 +39,6 @@ jobs:
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo \
           clean build --info
-          # check publish --info
     
       - name: Build Extensions image for testing
         uses: docker/build-push-action@v5
