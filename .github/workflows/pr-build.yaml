@@ -33,10 +33,11 @@ jobs:
 
       - name: Build Extensions source code with gradle
         run: |
-          gradle -b galasa-extensions-parent/build.gradle check publish --info \
+          gradle -b galasa-extensions-parent/build.gradle \
           -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo \
+          check publish --info \
           --no-daemon --console plain
     
       - name: Build Extensions image for testing
