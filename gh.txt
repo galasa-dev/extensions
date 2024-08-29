@@ -1,0 +1,2112 @@
+Initialized native services in: /home/runner/.gradle/native
+Initialized jansi services in: /home/runner/.gradle/native
+Received JVM installation metadata from '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64': {JAVA_HOME=/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64, JAVA_VERSION=17.0.12, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=17.0.12+7, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=17.0.12+7, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Removing 0 daemon stop events from registry
+Starting a Gradle Daemon (subsequent builds will be faster)
+Starting process 'Gradle build daemon'. Working directory: /home/runner/.gradle/daemon/8.9 Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED -XX:MaxMetaspaceSize=384m -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -cp /home/runner/gradle-installations/installs/gradle-8.9/lib/gradle-daemon-main-8.9.jar -javaagent:/home/runner/gradle-installations/installs/gradle-8.9/lib/agents/gradle-instrumentation-agent-8.9.jar org.gradle.launcher.daemon.bootstrap.Gradle
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 0.934 secs.
+The client will now receive all logging from the daemon (pid: 1875). The daemon log file: /home/runner/.gradle/daemon/8.9/daemon-1875.out.log
+Starting build in new daemon [memory: 512 MiB]
+Using 4 worker leases.
+Received JVM installation metadata from '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64': {JAVA_HOME=/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64, JAVA_VERSION=17.0.12, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=17.0.12+7, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=17.0.12+7, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+Watching the file system is configured to be enabled if available
+Now considering [/home/runner/work/extensions/extensions/galasa-extensions-parent] as hierarchies to watch
+Now considering [/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc, /home/runner/work/extensions/extensions/galasa-extensions-parent] as hierarchies to watch
+File system watching is active
+Starting Build
+Settings evaluated using settings file '/home/runner/work/extensions/extensions/galasa-extensions-parent/settings.gradle'.
+Projects loaded. Root project using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/build.gradle'.
+Included projects: [root project 'galasa-extensions-parent', project ':dev.galasa.auth.couchdb', project ':dev.galasa.cps.etcd', project ':dev.galasa.cps.rest', project ':dev.galasa.events.kafka', project ':dev.galasa.extensions.common', project ':dev.galasa.extensions.mocks', project ':dev.galasa.ras.couchdb']
+> Configure project :buildSrc
+Evaluating project ':buildSrc' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/build.gradle'.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/resources', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/java', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/resources', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/java', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/build/groovy-dsl-plugins/output/adapter-src', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/resources', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/java', not found
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/build/groovy-dsl-plugins/output/adapter-src', not found
+Resolve mutations for :buildSrc:extractPluginRequests (Thread[Execution worker,5,main]) started.
+:buildSrc:extractPluginRequests (Thread[included builds,5,main]) started.
+> Task :buildSrc:extractPluginRequests
+Caching disabled for task ':buildSrc:extractPluginRequests' because:
+  Build cache is disabled
+Task ':buildSrc:extractPluginRequests' is not up-to-date because:
+  No history is available.
+Compiling script '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle' using SubsetScriptTransformer.
+Compiling script '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.java.gradle' using SubsetScriptTransformer.
+Resolve mutations for :buildSrc:generatePluginAdapters (Thread[included builds,5,main]) started.
+:buildSrc:generatePluginAdapters (Thread[included builds,5,main]) started.
+> Task :buildSrc:generatePluginAdapters
+Caching disabled for task ':buildSrc:generatePluginAdapters' because:
+  Build cache is disabled
+Task ':buildSrc:generatePluginAdapters' is not up-to-date because:
+  No history is available.
+Resolve mutations for :buildSrc:compileJava (Thread[Execution worker,5,main]) started.
+:buildSrc:compileJava (Thread[Execution worker,5,main]) started.
+> Task :buildSrc:compileJava
+Caching disabled for task ':buildSrc:compileJava' because:
+  Build cache is disabled
+Task ':buildSrc:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':buildSrc:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/java', not found
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.011 secs.
+Created classpath snapshot for incremental compilation in 0.519 secs.
+Resolve mutations for :buildSrc:compileGroovy (Thread[Execution worker,5,main]) started.
+:buildSrc:compileGroovy (Thread[included builds,5,main]) started.
+> Task :buildSrc:compileGroovy NO-SOURCE
+Skipping task ':buildSrc:compileGroovy' as it has no source files and no previous output files.
+Resolve mutations for :buildSrc:compileGroovyPlugins (Thread[included builds,5,main]) started.
+:buildSrc:compileGroovyPlugins (Thread[included builds,5,main]) started.
+> Task :buildSrc:compileGroovyPlugins
+Caching disabled for task ':buildSrc:compileGroovyPlugins' because:
+  Build cache is disabled
+Task ':buildSrc:compileGroovyPlugins' is not up-to-date because:
+  No history is available.
+Compiling script '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.extensions.gradle' using BuildScriptTransformer.
+Compiling script '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/groovy/galasa.java.gradle' using BuildScriptTransformer.
+Resolve mutations for :buildSrc:pluginDescriptors (Thread[included builds,5,main]) started.
+:buildSrc:pluginDescriptors (Thread[included builds,5,main]) started.
+> Task :buildSrc:pluginDescriptors
+Caching disabled for task ':buildSrc:pluginDescriptors' because:
+  Build cache is disabled
+  Not worth caching
+Task ':buildSrc:pluginDescriptors' is not up-to-date because:
+  No history is available.
+Resolve mutations for :buildSrc:processResources (Thread[Execution worker,5,main]) started.
+:buildSrc:processResources (Thread[Execution worker,5,main]) started.
+> Task :buildSrc:processResources
+Caching disabled for task ':buildSrc:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':buildSrc:processResources' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/src/main/resources', not found
+Resolve mutations for :buildSrc:classes (Thread[Execution worker,5,main]) started.
+:buildSrc:classes (Thread[included builds,5,main]) started.
+> Task :buildSrc:classes
+Skipping task ':buildSrc:classes' as it has no actions.
+Resolve mutations for :buildSrc:jar (Thread[included builds,5,main]) started.
+:buildSrc:jar (Thread[included builds,5,main]) started.
+> Task :buildSrc:jar
+Caching disabled for task ':buildSrc:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':buildSrc:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/buildSrc/build/classes/groovy/main', not found
+Transforming my-org-conventions.jar (project :buildSrc) with ProjectDependencyInstrumentingArtifactTransform
+> Configure project :
+Evaluating root project 'galasa-extensions-parent' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/build.gradle'.
+Resource missing. [HTTP HEAD: https://repo.maven.apache.org/maven2/dev/galasa/githash/dev.galasa.githash.gradle.plugin/0.15.0/dev.galasa.githash.gradle.plugin-0.15.0.jar]
+Transforming biz.aQute.bnd.builder.gradle.plugin-5.3.0.jar (biz.aQute.bnd.builder:biz.aQute.bnd.builder.gradle.plugin:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.gradle-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0) with InstrumentationAnalysisTransform
+Transforming dev.galasa.gradle.impl-0.15.0.jar (dev.galasa:dev.galasa.gradle.impl:0.15.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.resolve-5.3.0.jar (biz.aQute.bnd:biz.aQute.resolve:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.repository-5.3.0.jar (biz.aQute.bnd:biz.aQute.repository:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bndlib-5.3.0.jar (biz.aQute.bnd:biz.aQute.bndlib:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.embedded-repo-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.embedded-repo:5.3.0) with InstrumentationAnalysisTransform
+Transforming org.apache.felix.bundlerepository-2.0.10.jar (org.apache.felix:org.apache.felix.bundlerepository:2.0.10) with InstrumentationAnalysisTransform
+Transforming reflections-0.9.11.jar (org.reflections:reflections:0.9.11) with InstrumentationAnalysisTransform
+Transforming gson-2.8.5.jar (com.google.code.gson:gson:2.8.5) with InstrumentationAnalysisTransform
+Transforming slf4j-api-1.7.25.jar (org.slf4j:slf4j-api:1.7.25) with InstrumentationAnalysisTransform
+Transforming org.osgi.core-5.0.0.jar (org.osgi:org.osgi.core:5.0.0) with InstrumentationAnalysisTransform
+Transforming easymock-3.4.jar (org.easymock:easymock:3.4) with InstrumentationAnalysisTransform
+Transforming guava-20.0.jar (com.google.guava:guava:20.0) with InstrumentationAnalysisTransform
+Transforming javassist-3.21.0-GA.jar (org.javassist:javassist:3.21.0-GA) with InstrumentationAnalysisTransform
+Transforming objenesis-2.2.jar (org.objenesis:objenesis:2.2) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.builder.gradle.plugin-5.3.0.jar (biz.aQute.bnd.builder:biz.aQute.bnd.builder.gradle.plugin:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.builder.gradle.plugin-5.3.0.jar (biz.aQute.bnd.builder:biz.aQute.bnd.builder.gradle.plugin:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.gradle-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.gradle-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming dev.galasa.gradle.impl-0.15.0.jar (dev.galasa:dev.galasa.gradle.impl:0.15.0) with InstrumentationAnalysisTransform
+Transforming dev.galasa.gradle.impl-0.15.0.jar (dev.galasa:dev.galasa.gradle.impl:0.15.0) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.resolve-5.3.0.jar (biz.aQute.bnd:biz.aQute.resolve:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.resolve-5.3.0.jar (biz.aQute.bnd:biz.aQute.resolve:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.repository-5.3.0.jar (biz.aQute.bnd:biz.aQute.repository:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.repository-5.3.0.jar (biz.aQute.bnd:biz.aQute.repository:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.bndlib-5.3.0.jar (biz.aQute.bnd:biz.aQute.bndlib:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bndlib-5.3.0.jar (biz.aQute.bnd:biz.aQute.bndlib:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.embedded-repo-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.embedded-repo:5.3.0) with InstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.embedded-repo-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.embedded-repo:5.3.0) with MergeInstrumentationAnalysisTransform
+Transforming org.apache.felix.bundlerepository-2.0.10.jar (org.apache.felix:org.apache.felix.bundlerepository:2.0.10) with InstrumentationAnalysisTransform
+Transforming org.apache.felix.bundlerepository-2.0.10.jar (org.apache.felix:org.apache.felix.bundlerepository:2.0.10) with MergeInstrumentationAnalysisTransform
+Transforming reflections-0.9.11.jar (org.reflections:reflections:0.9.11) with InstrumentationAnalysisTransform
+Transforming reflections-0.9.11.jar (org.reflections:reflections:0.9.11) with MergeInstrumentationAnalysisTransform
+Transforming gson-2.8.5.jar (com.google.code.gson:gson:2.8.5) with InstrumentationAnalysisTransform
+Transforming gson-2.8.5.jar (com.google.code.gson:gson:2.8.5) with MergeInstrumentationAnalysisTransform
+Transforming slf4j-api-1.7.25.jar (org.slf4j:slf4j-api:1.7.25) with InstrumentationAnalysisTransform
+Transforming slf4j-api-1.7.25.jar (org.slf4j:slf4j-api:1.7.25) with MergeInstrumentationAnalysisTransform
+Transforming org.osgi.core-5.0.0.jar (org.osgi:org.osgi.core:5.0.0) with InstrumentationAnalysisTransform
+Transforming org.osgi.core-5.0.0.jar (org.osgi:org.osgi.core:5.0.0) with MergeInstrumentationAnalysisTransform
+Transforming easymock-3.4.jar (org.easymock:easymock:3.4) with InstrumentationAnalysisTransform
+Transforming easymock-3.4.jar (org.easymock:easymock:3.4) with MergeInstrumentationAnalysisTransform
+Transforming guava-20.0.jar (com.google.guava:guava:20.0) with InstrumentationAnalysisTransform
+Transforming guava-20.0.jar (com.google.guava:guava:20.0) with MergeInstrumentationAnalysisTransform
+Transforming javassist-3.21.0-GA.jar (org.javassist:javassist:3.21.0-GA) with InstrumentationAnalysisTransform
+Transforming javassist-3.21.0-GA.jar (org.javassist:javassist:3.21.0-GA) with MergeInstrumentationAnalysisTransform
+Transforming objenesis-2.2.jar (org.objenesis:objenesis:2.2) with InstrumentationAnalysisTransform
+Transforming objenesis-2.2.jar (org.objenesis:objenesis:2.2) with MergeInstrumentationAnalysisTransform
+Transforming biz.aQute.bnd.gradle-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming dev.galasa.gradle.impl-0.15.0.jar (dev.galasa:dev.galasa.gradle.impl:0.15.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming biz.aQute.resolve-5.3.0.jar (biz.aQute.bnd:biz.aQute.resolve:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming biz.aQute.bnd.builder.gradle.plugin-5.3.0.jar (biz.aQute.bnd.builder:biz.aQute.bnd.builder.gradle.plugin:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming biz.aQute.repository-5.3.0.jar (biz.aQute.bnd:biz.aQute.repository:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming biz.aQute.bndlib-5.3.0.jar (biz.aQute.bnd:biz.aQute.bndlib:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming biz.aQute.bnd.embedded-repo-5.3.0.jar (biz.aQute.bnd:biz.aQute.bnd.embedded-repo:5.3.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming org.apache.felix.bundlerepository-2.0.10.jar (org.apache.felix:org.apache.felix.bundlerepository:2.0.10) with ExternalDependencyInstrumentingArtifactTransform
+Transforming reflections-0.9.11.jar (org.reflections:reflections:0.9.11) with ExternalDependencyInstrumentingArtifactTransform
+Transforming gson-2.8.5.jar (com.google.code.gson:gson:2.8.5) with ExternalDependencyInstrumentingArtifactTransform
+Transforming easymock-3.4.jar (org.easymock:easymock:3.4) with ExternalDependencyInstrumentingArtifactTransform
+Transforming slf4j-api-1.7.25.jar (org.slf4j:slf4j-api:1.7.25) with ExternalDependencyInstrumentingArtifactTransform
+Transforming org.osgi.core-5.0.0.jar (org.osgi:org.osgi.core:5.0.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming guava-20.0.jar (com.google.guava:guava:20.0) with ExternalDependencyInstrumentingArtifactTransform
+Transforming javassist-3.21.0-GA.jar (org.javassist:javassist:3.21.0-GA) with ExternalDependencyInstrumentingArtifactTransform
+Transforming objenesis-2.2.jar (org.objenesis:objenesis:2.2) with ExternalDependencyInstrumentingArtifactTransform
+Building the release.yaml file...
+> Configure project :dev.galasa.auth.couchdb
+Evaluating project ':dev.galasa.auth.couchdb' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build.gradle'.
+Set :dev.galasa.auth.couchdb:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.cps.etcd
+Evaluating project ':dev.galasa.cps.etcd' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/build.gradle'.
+Set :dev.galasa.cps.etcd:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.cps.rest
+Evaluating project ':dev.galasa.cps.rest' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build.gradle'.
+Set :dev.galasa.cps.rest:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.events.kafka
+Evaluating project ':dev.galasa.events.kafka' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build.gradle'.
+Set :dev.galasa.events.kafka:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.extensions.common
+Evaluating project ':dev.galasa.extensions.common' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build.gradle'.
+Set :dev.galasa.extensions.common:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.extensions.mocks
+Evaluating project ':dev.galasa.extensions.mocks' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/build.gradle'.
+Set :dev.galasa.extensions.mocks:compileClasspath configuration attribute org.gradle.libraryelements to jar
+> Configure project :dev.galasa.ras.couchdb
+Evaluating project ':dev.galasa.ras.couchdb' using build file '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/build.gradle'.
+Set :dev.galasa.ras.couchdb:compileClasspath configuration attribute org.gradle.libraryelements to jar
+All projects evaluated.
+Task name matched 'check'
+Task name matched 'publish'
+Selected primary task 'check' from project :
+Cached resource https://repo.maven.apache.org/maven2/dev/galasa/dev.galasa.extensions.common/maven-metadata.xml is up-to-date (lastModified: Tue Aug 13 09:57:48 UTC 2024).
+Variant Selection Exception: org.gradle.internal.component.resolution.failure.exception.VariantSelectionException caused by Resolution Failure: org.gradle.internal.component.resolution.failure.type.IncompatibleGraphVariantFailure
+Cached resource https://repo.maven.apache.org/maven2/dev/galasa/dev.galasa.extensions.mocks/maven-metadata.xml is up-to-date (lastModified: Tue Aug 13 09:57:49 UTC 2024).
+Variant Selection Exception: org.gradle.internal.component.resolution.failure.exception.VariantSelectionException caused by Resolution Failure: org.gradle.internal.component.resolution.failure.type.IncompatibleGraphVariantFailure
+Selected primary task 'publish' from project :
+Tasks to be executed: [task ':check', task ':dev.galasa.extensions.common:compileJava', task ':dev.galasa.extensions.common:processResources', task ':dev.galasa.extensions.common:classes', task ':dev.galasa.extensions.common:gitHash', task ':dev.galasa.extensions.common:jar', task ':dev.galasa.auth.couchdb:compileJava', task ':dev.galasa.auth.couchdb:processResources', task ':dev.galasa.auth.couchdb:classes', task ':dev.galasa.auth.couchdb:gitHash', task ':dev.galasa.auth.couchdb:jar', task ':dev.galasa.auth.couchdb:javadoc', task ':dev.galasa.auth.couchdb:javadocJar', task ':dev.galasa.auth.couchdb:sourcesJar', task ':dev.galasa.extensions.mocks:compileJava', task ':dev.galasa.auth.couchdb:compileTestJava', task ':dev.galasa.auth.couchdb:processTestResources', task ':dev.galasa.auth.couchdb:testClasses', task ':dev.galasa.extensions.mocks:processResources', task ':dev.galasa.extensions.mocks:classes', task ':dev.galasa.extensions.mocks:gitHash', task ':dev.galasa.extensions.mocks:jar', task ':dev.galasa.auth
+Tasks that were excluded: []
+Resolve mutations for :check (Thread[included builds,5,main]) started.
+:check (Thread[included builds,5,main]) started.
+destroyer locations for task group 0 (Thread[Execution worker,5,main]) started.
+> Task :check UP-TO-DATE
+Skipping task ':check' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.common:compileJava (Thread[included builds,5,main]) started.
+:dev.galasa.extensions.common:compileJava (Thread[included builds,5,main]) started.
+> Task :dev.galasa.extensions.common:compileJava
+Caching disabled for task ':dev.galasa.extensions.common:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.common:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.extensions.common:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.009 secs.
+Created classpath snapshot for incremental compilation in 0.016 secs.
+work action resolve main (project :dev.galasa.extensions.common) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :dev.galasa.extensions.common:processResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:processResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.common:processResources NO-SOURCE
+Skipping task ':dev.galasa.extensions.common:processResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.common:classes (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:classes (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.common:classes
+Skipping task ':dev.galasa.extensions.common:classes' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.common:gitHash (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:gitHash (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.common:gitHash
+Custom actions are attached to task ':dev.galasa.extensions.common:gitHash'.
+Caching disabled for task ':dev.galasa.extensions.common:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.extensions.common:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.extensions.common:jar (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.extensions.common:jar (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.extensions.common:jar
+Custom actions are attached to task ':dev.galasa.extensions.common:jar'.
+Caching disabled for task ':dev.galasa.extensions.common:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.common:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build/resources/main', not found
+work action resolve dev.galasa.extensions.common-0.37.0.jar (project :dev.galasa.extensions.common) (Thread[Execution worker Thread 3,5,main]) started.
+Resolve mutations for :dev.galasa.auth.couchdb:compileJava (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.auth.couchdb:compileJava (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.auth.couchdb:compileJava
+Caching disabled for task ':dev.galasa.auth.couchdb:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.auth.couchdb:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.auth.couchdb:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.002 secs.
+Created classpath snapshot for incremental compilation in 0.04 secs.
+Resolve mutations for :dev.galasa.auth.couchdb:processResources (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.auth.couchdb:processResources (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.auth.couchdb:processResources NO-SOURCE
+Skipping task ':dev.galasa.auth.couchdb:processResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.auth.couchdb:classes (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.auth.couchdb:classes (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.auth.couchdb:classes
+Skipping task ':dev.galasa.auth.couchdb:classes' as it has no actions.
+Resolve mutations for :dev.galasa.auth.couchdb:gitHash (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.auth.couchdb:gitHash (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.auth.couchdb:gitHash
+Custom actions are attached to task ':dev.galasa.auth.couchdb:gitHash'.
+Caching disabled for task ':dev.galasa.auth.couchdb:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.auth.couchdb:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.auth.couchdb:jar (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.auth.couchdb:jar (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.auth.couchdb:jar
+Custom actions are attached to task ':dev.galasa.auth.couchdb:jar'.
+Caching disabled for task ':dev.galasa.auth.couchdb:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.auth.couchdb:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/resources/main', not found
+Resolve mutations for :dev.galasa.auth.couchdb:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.auth.couchdb:javadoc (Thread[Execution worker,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStore.java:42: warning: no comment
+    public static final String COUCHDB_AUTH_ENV_VAR = "GALASA_AUTHSTORE_TOKEN";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStore.java:43: warning: no comment
+    public static final String COUCHDB_AUTH_TYPE    = "Basic";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStore.java:41: warning: no comment
+    public static final String TOKENS_DATABASE_NAME = "galasa_tokens";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStore.java:48: warning: no comment
+    public CouchdbAuthStore(
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStoreRegistration.java:29: warning: no comment
+public class CouchdbAuthStoreRegistration implements IAuthStoreRegistration {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStoreRegistration.java:36: warning: no comment
+    public CouchdbAuthStoreRegistration() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStoreRegistration.java:45: warning: no comment
+    public CouchdbAuthStoreRegistration(HttpClientFactory httpClientFactory, HttpRequestFactory httpRequestFactory, LogFactory logFactory, CouchdbValidator couchdbValidator) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthStoreValidator.java:18: warning: no comment
+public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthToken.java:13: warning: no comment
+public class CouchdbAuthToken implements IInternalAuthToken {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthToken.java:28: warning: no comment
+    public CouchdbAuthToken(String documentId, String clientId, String description, Instant creationTime, CouchdbUser owner) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbAuthToken.java:21: warning: no comment
+    public CouchdbAuthToken(String clientId, String description, Instant creationTime, CouchdbUser owner) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbUser.java:12: warning: no comment
+public class CouchdbUser implements IInternalUser {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbUser.java:23: warning: no comment
+    public CouchdbUser(IInternalUser user) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/java/dev/galasa/auth/couchdb/internal/CouchdbUser.java:18: warning: no comment
+    public CouchdbUser(String loginId, String dexUserId) {
+           ^
+14 warnings
+> Task :dev.galasa.auth.couchdb:javadoc
+Caching disabled for task ':dev.galasa.auth.couchdb:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.auth.couchdb:javadoc' is not up-to-date because:
+  No history is available.
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/tmp/javadoc/javadoc.options
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.auth.couchdb:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.auth.couchdb:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.auth.couchdb:javadocJar
+Caching disabled for task ':dev.galasa.auth.couchdb:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.auth.couchdb:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.auth.couchdb:sourcesJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.auth.couchdb:sourcesJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.auth.couchdb:sourcesJar
+Caching disabled for task ':dev.galasa.auth.couchdb:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.auth.couchdb:sourcesJar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/src/main/resources', not found
+Resolve mutations for :dev.galasa.extensions.mocks:compileJava (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.mocks:compileJava (Thread[Execution worker,5,main]) started.
+Note: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpEntity.java uses or overrides a deprecated API.
+> Task :dev.galasa.extensions.mocks:compileJava
+Caching disabled for task ':dev.galasa.extensions.mocks:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.mocks:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.extensions.mocks:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.008 secs.
+Created classpath snapshot for incremental compilation in 0.012 secs.
+work action resolve main (project :dev.galasa.extensions.mocks) (Thread[Execution worker,5,main]) started.
+Resolve mutations for :dev.galasa.auth.couchdb:compileTestJava (Thread[Execution worker,5,main]) started.
+:dev.galasa.auth.couchdb:compileTestJava (Thread[Execution worker,5,main]) started.
+Note: Recompile with -Xlint:deprecation for details.
+> Task :dev.galasa.auth.couchdb:compileTestJava
+Caching disabled for task ':dev.galasa.auth.couchdb:compileTestJava' because:
+  Build cache is disabled
+Task ':dev.galasa.auth.couchdb:compileTestJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.auth.couchdb:compileTestJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.005 secs.
+Created classpath snapshot for incremental compilation in 0.012 secs.
+Resolve mutations for :dev.galasa.auth.couchdb:processTestResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.auth.couchdb:processTestResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.auth.couchdb:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.auth.couchdb:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.auth.couchdb:testClasses (Thread[Execution worker,5,main]) started.
+:dev.galasa.auth.couchdb:testClasses (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.auth.couchdb:testClasses
+Skipping task ':dev.galasa.auth.couchdb:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.mocks:processResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.mocks:processResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.mocks:processResources NO-SOURCE
+Skipping task ':dev.galasa.extensions.mocks:processResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.mocks:classes (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:classes (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:classes
+Skipping task ':dev.galasa.extensions.mocks:classes' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.mocks:gitHash (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:gitHash (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:gitHash
+Custom actions are attached to task ':dev.galasa.extensions.mocks:gitHash'.
+Caching disabled for task ':dev.galasa.extensions.mocks:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.extensions.mocks:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.extensions.mocks:jar (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.mocks:jar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.mocks:jar
+Custom actions are attached to task ':dev.galasa.extensions.mocks:jar'.
+Caching disabled for task ':dev.galasa.extensions.mocks:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.mocks:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/build/resources/main', not found
+work action resolve dev.galasa.extensions.mocks-0.37.0.jar (project :dev.galasa.extensions.mocks) (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :dev.galasa.auth.couchdb:test (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.auth.couchdb:test (Thread[Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 1 started executing tests.
+Gradle Test Executor 1 finished executing tests.
+> Task :dev.galasa.auth.couchdb:test
+Custom actions are attached to task ':dev.galasa.auth.couchdb:test'.
+Caching disabled for task ':dev.galasa.auth.couchdb:test' because:
+  Build cache is disabled
+Task ':dev.galasa.auth.couchdb:test' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 1'. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java -Dorg.gradle.internal.worker.tmpdir=/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/tmp/test/work -javaagent:/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/tmp/.cache/expanded/zip_cde35f471dab581134460fc9a50e2c59/jacocoagent.jar=destfile=build/jacoco/test.exec,append=true,inclnolocationclasses=false,dumponexit=true,output=file,jmx=false @/home/runner/.gradle/.tmp/gradle-worker-classpath9158553687181118396txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 1'
+Successfully started process 'Gradle Test Executor 1'
+TestCouchdbAuthStore > testDeleteTokenSendsRequestToDeleteTokenDocumentOK STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/my-old-token HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+    Http request:
+      target: https://my-auth-store 
+      request: DELETE https://my-auth-store/galasa_tokens/my-old-token?rev=this-is-a-revision HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testStoreTokenWithFailingRequestToCreateTokenDocumentReturnsError STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: POST https://my-auth-store/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testStoreTokenWithFailingRequestToCreateTokenDocumentReturnsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6102E: Failed to store auth token in the CouchDB tokens database. Cause: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens'. Expected status code(s) [201] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    dev.galasa.extensions.common.couchdb.CouchdbException: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens'. Expected status code(s) [201] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.sendHttpRequest(CouchdbStore.java:195)
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.createDocument(CouchdbStore.java:83)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.storeToken(CouchdbAuthStore.java:103)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.lambda$testStoreTokenWithFailingRequestToCreateTokenDocumentReturnsError$1(TestCouchdbAuthStore.java:199)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.testStoreTokenWithFailingRequestToCreateTokenDocumentReturnsError(TestCouchdbAuthStore.java:199)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStore > testGetTokensReturnsTokensWithFailingRequestReturnsError STANDARD_OUT
+    dev.galasa.auth.couchdb.internal.CouchdbAuthStore : info : Retrieving tokens from CouchDB
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/_all_docs HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testGetTokensReturnsTokensWithFailingRequestReturnsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6101E: Failed to get auth tokens from the CouchDB auth store. Cause: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/_all_docs'. Expected status code(s) [200] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    dev.galasa.extensions.common.couchdb.CouchdbException: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/_all_docs'. Expected status code(s) [200] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.sendHttpRequest(CouchdbStore.java:195)
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.getAllDocsFromDatabase(CouchdbStore.java:107)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.getTokens(CouchdbAuthStore.java:71)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.lambda$testGetTokensReturnsTokensWithFailingRequestReturnsError$0(TestCouchdbAuthStore.java:118)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.testGetTokensReturnsTokensWithFailingRequestReturnsError(TestCouchdbAuthStore.java:118)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStore > testDeleteTokenWithFailingRequestToDeleteTokenDocumentThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/my-old-token HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+    Http request:
+      target: https://my-auth-store 
+      request: DELETE https://my-auth-store/galasa_tokens/my-old-token?rev=this-is-a-revision HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testDeleteTokenWithFailingRequestToDeleteTokenDocumentThrowsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/my-old-token?rev=this-is-a-revision'. Expected status code(s) [200, 202] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    dev.galasa.extensions.common.couchdb.CouchdbException: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/my-old-token?rev=this-is-a-revision'. Expected status code(s) [200, 202] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.sendHttpRequest(CouchdbStore.java:195)
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.deleteDocumentFromDatabase(CouchdbStore.java:172)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.deleteToken(CouchdbAuthStore.java:113)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.lambda$testDeleteTokenWithFailingRequestToDeleteTokenDocumentThrowsError$2(TestCouchdbAuthStore.java:299)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.testDeleteTokenWithFailingRequestToDeleteTokenDocumentThrowsError(TestCouchdbAuthStore.java:298)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStore > testDeleteTokenWithFailingRequestToGetTokenDocumentThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/my-old-token HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testDeleteTokenWithFailingRequestToGetTokenDocumentThrowsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/my-old-token'. Expected status code(s) [200] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    dev.galasa.extensions.common.couchdb.CouchdbException: GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to 'https://my-auth-store/galasa_tokens/my-old-token'. Expected status code(s) [200] but received 500. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner.
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.sendHttpRequest(CouchdbStore.java:195)
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.getDocumentFromDatabase(CouchdbStore.java:133)
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.deleteDocumentFromDatabase(CouchdbStore.java:163)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.deleteToken(CouchdbAuthStore.java:113)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.lambda$testDeleteTokenWithFailingRequestToGetTokenDocumentThrowsError$3(TestCouchdbAuthStore.java:335)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.testDeleteTokenWithFailingRequestToGetTokenDocumentThrowsError(TestCouchdbAuthStore.java:334)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStore > testGetTokensReturnsTokensFromCouchdbOK STANDARD_OUT
+    dev.galasa.auth.couchdb.internal.CouchdbAuthStore : info : Retrieving tokens from CouchDB
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/_all_docs HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/token1 HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+    dev.galasa.auth.couchdb.internal.CouchdbAuthStore : info : Tokens retrieved from CouchDB OK
+TestCouchdbAuthStore > testDeleteTokenWithAcceptedRequestToDeleteTokenDocumentDoesNotError STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/my-old-token HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+    Http request:
+      target: https://my-auth-store 
+      request: DELETE https://my-auth-store/galasa_tokens/my-old-token?rev=this-is-a-revision HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testStoreTokenSendsRequestToCreateTokenDocumentOK STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: POST https://my-auth-store/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testDeleteTokenWithBadGetTokenDocumentResponseBodyThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-auth-store 
+      request: GET https://my-auth-store/galasa_tokens/my-old-token HTTP/1.1
+    Http request: interaction https://my-auth-store received from the code under test as expected.
+TestCouchdbAuthStore > testDeleteTokenWithBadGetTokenDocumentResponseBodyThrowsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: GAL6011E: Internal server error. Failed to get document with ID 'my-old-token' from the 'galasa_tokens' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner.
+    dev.galasa.extensions.common.couchdb.CouchdbException: GAL6011E: Internal server error. Failed to get document with ID 'my-old-token' from the 'galasa_tokens' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner.
+    	at dev.galasa.extensions.common.couchdb.CouchdbStore.deleteDocumentFromDatabase(CouchdbStore.java:167)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.deleteToken(CouchdbAuthStore.java:113)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.lambda$testDeleteTokenWithBadGetTokenDocumentResponseBodyThrowsError$4(TestCouchdbAuthStore.java:367)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStore.testDeleteTokenWithBadGetTokenDocumentResponseBodyThrowsError(TestCouchdbAuthStore.java:366)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStoreRegistration > TestInitialiseRegistrationWithFailingValidationReturnsError STANDARD_ERROR
+    Aug 29, 2024 11:20:57 AM dev.galasa.framework.spi.auth.AuthStoreException <init>
+    SEVERE: GAL6103E: Failed to initialise the Galasa CouchDB auth store. Cause: simulating a validation failure!
+    dev.galasa.extensions.common.couchdb.CouchdbException: simulating a validation failure!
+    	at dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator.checkCouchdbDatabaseIsValid(MockCouchdbValidator.java:27)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStore.<init>(CouchdbAuthStore.java:60)
+    	at dev.galasa.auth.couchdb.internal.CouchdbAuthStoreRegistration.initialise(CouchdbAuthStoreRegistration.java:67)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStoreRegistration.lambda$TestInitialiseRegistrationWithFailingValidationReturnsError$0(TestCouchdbAuthStoreRegistration.java:94)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:62)
+    	at org.assertj.core.api.ThrowableAssert.catchThrowableOfType(ThrowableAssert.java:72)
+    	at org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType(AssertionsForClassTypes.java:792)
+    	at org.assertj.core.api.Assertions.catchThrowableOfType(Assertions.java:1234)
+    	at dev.galasa.auth.couchdb.TestCouchdbAuthStoreRegistration.TestInitialiseRegistrationWithFailingValidationReturnsError(TestCouchdbAuthStoreRegistration.java:94)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+    	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+    	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+    	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+    	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+    	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+    	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+    	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+    	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+    	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+    	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+    	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+    	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.runTestClass(JUnitTestClassExecutor.java:112)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:58)
+    	at org.gradle.api.internal.tasks.testing.junit.JUnitTestClassExecutor.execute(JUnitTestClassExecutor.java:40)
+    	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestClassProcessor.processTestClass(AbstractJUnitTestClassProcessor.java:54)
+    	at org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.processTestClass(SuiteTestClassProcessor.java:53)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+    	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+    	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+    	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)
+    	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)
+    	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+    	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:92)
+    	at jdk.proxy2/jdk.proxy2.$Proxy6.processTestClass(Unknown Source)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:181)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:130)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:101)
+    	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:61)
+    	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+    	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+    	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithMajorVersionMismatchThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithInvalidVersionThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithPatchVersionMismatchThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithSuccessfulDatabaseCreationIsOK STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: HEAD https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: PUT https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithValidDatabaseIsOK STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: HEAD https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithFailingDatabaseCreationReturnsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: HEAD https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: PUT https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithMinorVersionMismatchThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithInvalidWelcomeMessageThrowsError STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+TestCouchdbAuthStoreValidator > testCheckCouchdbDatabaseIsValidWithNewerCouchdbVersionIsOK STANDARD_OUT
+    Http request:
+      target: https://my-couchdb-server 
+      request: GET https://my-couchdb-server HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+    Http request:
+      target: https://my-couchdb-server 
+      request: HEAD https://my-couchdb-server/galasa_tokens HTTP/1.1
+    Http request: interaction https://my-couchdb-server received from the code under test as expected.
+Finished generating test XML results (0.016 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.022 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.auth.couchdb/build/reports/tests/test
+Resolve mutations for :dev.galasa.auth.couchdb:check (Thread[Execution worker,5,main]) started.
+:dev.galasa.auth.couchdb:check (Thread[included builds,5,main]) started.
+> Task :dev.galasa.auth.couchdb:check
+Skipping task ':dev.galasa.auth.couchdb:check' as it has no actions.
+Resolve mutations for :dev.galasa.cps.etcd:compileJava (Thread[included builds,5,main]) started.
+:dev.galasa.cps.etcd:compileJava (Thread[included builds,5,main]) started.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+> Task :dev.galasa.cps.etcd:compileJava
+Caching disabled for task ':dev.galasa.cps.etcd:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.etcd:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.cps.etcd:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.007 secs.
+Created classpath snapshot for incremental compilation in 0.023 secs.
+Resolve mutations for :dev.galasa.cps.etcd:processResources (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:processResources (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.cps.etcd:processResources
+Caching disabled for task ':dev.galasa.cps.etcd:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.etcd:processResources' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.cps.etcd:classes (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:classes (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.etcd:classes
+Skipping task ':dev.galasa.cps.etcd:classes' as it has no actions.
+Resolve mutations for :dev.galasa.cps.etcd:gitHash (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.etcd:gitHash (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.etcd:gitHash
+Custom actions are attached to task ':dev.galasa.cps.etcd:gitHash'.
+Caching disabled for task ':dev.galasa.cps.etcd:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.cps.etcd:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.cps.etcd:jar (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:jar (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.cps.etcd:jar
+Custom actions are attached to task ':dev.galasa.cps.etcd:jar'.
+Caching disabled for task ':dev.galasa.cps.etcd:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.etcd:jar' is not up-to-date because:
+  No history is available.
+warning: Classes found in the wrong directory: {META-INF/versions/9/module-info.class=module-info}
+Resolve mutations for :dev.galasa.cps.etcd:javadoc (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:javadoc (Thread[Execution worker,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:10: warning: no comment
+> Task :dev.galasa.cps.etcd:javadoc
+Caching disabled for task ':dev.galasa.cps.etcd:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.etcd:javadoc' is not up-to-date because:
+  No history is available.
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/build/tmp/javadoc/javadoc.options
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.cps.etcd:javadocJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.etcd:javadocJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.etcd:javadocJar
+Caching disabled for task ':dev.galasa.cps.etcd:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.etcd:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.cps.etcd:sourcesJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.etcd:sourcesJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.etcd:sourcesJar
+Caching disabled for task ':dev.galasa.cps.etcd:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.etcd:sourcesJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.cps.etcd:compileTestJava (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:compileTestJava (Thread[Execution worker Thread 3,5,main]) started.
+public class Etcd3ClientException extends Etcd3ManagerException {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:13: warning: no comment
+    public Etcd3ClientException() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:16: warning: no comment
+    public Etcd3ClientException(String message) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:24: warning: no comment
+    public Etcd3ClientException(String message, Throwable cause) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:28: warning: no comment
+    public Etcd3ClientException(String message, Throwable cause, boolean enableSuppression,
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/Etcd3ClientException.java:20: warning: no comment
+    public Etcd3ClientException(Throwable cause) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:8: warning: no comment
+public class Etcd3ManagerException extends Exception {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:11: warning: no comment
+    public Etcd3ManagerException() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:14: warning: no comment
+    public Etcd3ManagerException(String message) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:22: warning: no comment
+    public Etcd3ManagerException(String message, Throwable cause) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:26: warning: no comment
+    public Etcd3ManagerException(String message, Throwable cause, boolean enableSuppression,
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/Etcd3ManagerException.java:18: warning: no comment
+    public Etcd3ManagerException(Throwable cause) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/IEtcd3Listener.java:35: warning: no comment
+    DELETE,
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/IEtcd3Listener.java:34: warning: no comment
+    PUT,
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/main/java/dev/galasa/cps/etcd/spi/IEtcd3Listener.java:36: warning: no comment
+    UNKNOWN
+    ^
+15 warnings
+Note: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/src/test/java/test/force/codecoverage/Etcd3DssTest.java uses unchecked or unsafe operations.
+> Task :dev.galasa.cps.etcd:compileTestJava
+Caching disabled for task ':dev.galasa.cps.etcd:compileTestJava' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.etcd:compileTestJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.cps.etcd:compileTestJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.002 secs.
+Created classpath snapshot for incremental compilation in 0.011 secs.
+Resolve mutations for :dev.galasa.cps.etcd:processTestResources (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.cps.etcd:processTestResources (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.cps.etcd:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.cps.etcd:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.cps.etcd:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.etcd:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.cps.etcd:testClasses
+Skipping task ':dev.galasa.cps.etcd:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.cps.etcd:test (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.etcd:test (Thread[Execution worker Thread 2,5,main]) started.
+Note: Recompile with -Xlint:unchecked for details.
+Gradle Test Executor 2 started executing tests.
+Gradle Test Executor 2 finished executing tests.
+> Task :dev.galasa.cps.etcd:test
+Caching disabled for task ':dev.galasa.cps.etcd:test' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.etcd:test' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 2'. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java -Dorg.gradle.internal.worker.tmpdir=/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/build/tmp/test/work @/home/runner/.gradle/.tmp/gradle-worker-classpath10914566429184092427txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 2'
+Successfully started process 'Gradle Test Executor 2'
+Finished generating test XML results (0.0 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.002 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.etcd/build/reports/tests/test
+Resolve mutations for :dev.galasa.cps.etcd:check (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.etcd:check (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.cps.etcd:check
+Skipping task ':dev.galasa.cps.etcd:check' as it has no actions.
+Resolve mutations for :dev.galasa.cps.rest:compileJava (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.rest:compileJava (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.cps.rest:compileJava
+Caching disabled for task ':dev.galasa.cps.rest:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.rest:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.cps.rest:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.001 secs.
+Created classpath snapshot for incremental compilation in 0.003 secs.
+Resolve mutations for :dev.galasa.cps.rest:processResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:processResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:processResources NO-SOURCE
+Skipping task ':dev.galasa.cps.rest:processResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.cps.rest:classes (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:classes (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:classes
+Skipping task ':dev.galasa.cps.rest:classes' as it has no actions.
+Resolve mutations for :dev.galasa.cps.rest:gitHash (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:gitHash (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:gitHash
+Custom actions are attached to task ':dev.galasa.cps.rest:gitHash'.
+Caching disabled for task ':dev.galasa.cps.rest:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.cps.rest:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.cps.rest:jar (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:jar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:jar
+Custom actions are attached to task ':dev.galasa.cps.rest:jar'.
+Caching disabled for task ':dev.galasa.cps.rest:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.rest:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build/resources/main', not found
+Resolve mutations for :dev.galasa.cps.rest:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.rest:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/CacheCPS.java:54: warning: no comment
+> Task :dev.galasa.cps.rest:javadoc
+    public CacheCPS( IConfigurationPropertyStore childCPS , LogFactory logFactory) throws ConfigurationPropertyStoreException {
+Caching disabled for task ':dev.galasa.cps.rest:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.rest:javadoc' is not up-to-date because:
+  No history is available.
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/JwtProvider.java:14: warning: no comment
+    String getJwt() throws ConfigurationPropertyStoreException;
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/JwtProviderSystemProp.java:6: warning: no comment
+public class JwtProviderSystemProp implements JwtProvider {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:73: warning: no comment
+    public static final String NULL_INFIX = null ;
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:72: warning: no comment
+    public static final String NULL_PREFIX = null ;
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:74: warning: no comment
+    public static final String NULL_SUFFIX = null ;
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:69: warning: no comment
+    public static final boolean PRETTY_PRINTING_ENABLED = true;
+                                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:65: warning: no comment
+    public static final String URL_SCHEMA_REST = "galasacps";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPS.java:113: warning: no comment
+    public RestCPS(
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPSRegistration.java:25: warning: no comment
+public class RestCPSRegistration implements IConfigurationPropertyStoreRegistration {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPSRegistration.java:31: warning: no comment
+    public RestCPSRegistration() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/java/dev/galasa/cps/rest/RestCPSRegistration.java:39: warning: no comment
+    public RestCPSRegistration( 
+           ^
+12 warnings
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build/tmp/javadoc/javadoc.options
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.cps.rest:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.rest:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.cps.rest:javadocJar
+Caching disabled for task ':dev.galasa.cps.rest:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.rest:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.cps.rest:sourcesJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.cps.rest:sourcesJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.cps.rest:sourcesJar
+Caching disabled for task ':dev.galasa.cps.rest:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.cps.rest:sourcesJar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/src/main/resources', not found
+Resolve mutations for :dev.galasa.cps.rest:compileTestJava (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:compileTestJava (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:compileTestJava
+Caching disabled for task ':dev.galasa.cps.rest:compileTestJava' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.rest:compileTestJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.cps.rest:compileTestJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.003 secs.
+Created classpath snapshot for incremental compilation in 0.004 secs.
+Resolve mutations for :dev.galasa.cps.rest:processTestResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:processTestResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.cps.rest:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.cps.rest:testClasses (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:testClasses (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:testClasses
+Skipping task ':dev.galasa.cps.rest:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.cps.rest:test (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:test (Thread[Execution worker,5,main]) started.
+Gradle Test Executor 3 started executing tests.
+Gradle Test Executor 3 finished executing tests.
+> Task :dev.galasa.cps.rest:test
+Caching disabled for task ':dev.galasa.cps.rest:test' because:
+  Build cache is disabled
+Task ':dev.galasa.cps.rest:test' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 3'. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java -Dorg.gradle.internal.worker.tmpdir=/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build/tmp/test/work @/home/runner/.gradle/.tmp/gradle-worker-classpath11634394743331744816txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 3'
+Successfully started process 'Gradle Test Executor 3'
+TestCacheCPS > testCanGetAllPropertiesFromANamespaceOkCacheDisabled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of false
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testGettingTwoPropertiesWithCacheEnabledOnlyGetsOnePropertyIndividuallyFromTheChildCPS STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 3 properties.
+TestCacheCPS > testCanGetNamespacesOk STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 3 properties.
+TestCacheCPS > testCanGetNamespacesOkWithCacheDisabled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled not found in child CPS.
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testSecureNamespacePropsAreNotCached STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 1 properties.
+TestCacheCPS > testNamespacesAreCached STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 3 properties.
+TestCacheCPS > testGettingTwoPropertiesWithCacheDisabledGetsThreePropertiesIndividuallyFromTheChildCPS STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled not found in child CPS.
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testSettingAPropertyCanCreateANewNamespaceInCache STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 1 properties.
+TestCacheCPS > testDeletePropertyDelegatesToChildCPS STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 5 properties.
+TestCacheCPS > testSetPropertyDelegatesToClientCPSWithCacheDisbaled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of false
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testCanGetAPropertyByPrefix STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 5 properties.
+TestCacheCPS > testTryToGetAMissingPropertyToGetNullValueBackWithCacheDisabled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of false
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testCanGetAllPropertiesFromANamespaceOk STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 5 properties.
+TestCacheCPS > testTryToGetAMissingPropertyToGetNullValueBack STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 3 properties.
+TestCacheCPS > testCanGetAPropertyByPrefixCacheDisabled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of false
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testDeletePropertyDelegatesToChildCPSCacheDisabled STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of false
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is not enabled...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 0 properties.
+TestCacheCPS > testSetPropertyDelegatesToClientCPS STANDARD_OUT
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache property framework.cps.rest.cache.is.enabled has a value of true
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache is enabled, and being primed...
+    dev.galasa.cps.rest.CacheCPS : info : CPS Cache primed with 5 properties.
+TestRestCPS > testCanGetAllPropertiesInANamespace STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    Http request:
+      target: https://my.host 
+      request: GET https://my.host/api/cps/myNamespace/properties HTTP/1.1
+    Http request: interaction https://my.host received from the code under test as expected.
+TestRestCPS > testAttemptsToGetFrameworkCredsStorePropertyGetsRedacted STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    dev.galasa.cps.rest.RestCPS : info : galasacps: over rest : key framework.credentials.store is redacted. Not used for local runs.
+TestRestCPS > testCanCreateARestCPS STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+TestRestCPS > testCanGetAllNamespaces STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    Http request:
+      target: https://my.host 
+      request: GET https://my.host/api/cps/namespace/ HTTP/1.1
+    Http request: interaction https://my.host received from the code under test as expected.
+TestRestCPS > testAttemptsToGetFrameworkDSSStorePropertyGetsRedacted STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    dev.galasa.cps.rest.RestCPS : info : galasacps: over rest : key framework.dynamicstatus.store is redacted. Not used for local runs.
+TestRestCPS > testAttemptsToGetASecurePropertyGetsRedacted STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    dev.galasa.cps.rest.RestCPS : info : galasacps: over rest : key secure.any.key is redacted because that whole namespace is redacted.
+TestRestCPS > testCanGetACpsProperty STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    Http request:
+      target: https://my.host 
+      request: GET https://my.host/api/cps/myNamespace/properties?prefix=myPrefix.myMiddle.mySuffix HTTP/1.1
+    Http request: interaction https://my.host received from the code under test as expected.
+TestRestCPS > testCanGetPrefixedProperties STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+    Http request:
+      target: https://my.host 
+      request: GET https://my.host/api/cps/myNamespace/properties?prefix=myPrefix HTTP/1.1
+    Http request: interaction https://my.host received from the code under test as expected.
+TestRestCPSRegistration > TestCanInitialiseARegistrationOK STANDARD_OUT
+    dev.galasa.cps.rest.RestCPS : info : Got a jwt OK.
+Finished generating test XML results (0.001 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.004 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.cps.rest/build/reports/tests/test
+Resolve mutations for :dev.galasa.cps.rest:check (Thread[Execution worker,5,main]) started.
+:dev.galasa.cps.rest:check (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.cps.rest:check
+Skipping task ':dev.galasa.cps.rest:check' as it has no actions.
+Resolve mutations for :dev.galasa.events.kafka:compileJava (Thread[Execution worker,5,main]) started.
+:dev.galasa.events.kafka:compileJava (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.events.kafka:compileJava
+Caching disabled for task ':dev.galasa.events.kafka:compileJava' because:
+  Build cache is disabled
+Task ':dev.galasa.events.kafka:compileJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.events.kafka:compileJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.004 secs.
+Created classpath snapshot for incremental compilation in 0.013 secs.
+Resolve mutations for :dev.galasa.events.kafka:processResources (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:processResources (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:processResources NO-SOURCE
+Skipping task ':dev.galasa.events.kafka:processResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.events.kafka:classes (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:classes (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:classes
+Skipping task ':dev.galasa.events.kafka:classes' as it has no actions.
+Resolve mutations for :dev.galasa.events.kafka:gitHash (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:gitHash (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:gitHash
+Custom actions are attached to task ':dev.galasa.events.kafka:gitHash'.
+Caching disabled for task ':dev.galasa.events.kafka:gitHash' because:
+  Build cache is disabled
+  Gradle would require more information to cache this task
+Task ':dev.galasa.events.kafka:gitHash' is not up-to-date because:
+  No history is available.
+Starting process 'command 'git''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka Command: git log --pretty=format:%H -1 .
+Successfully started process 'command 'git''
+Resolve mutations for :dev.galasa.events.kafka:jar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:jar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:jar
+Custom actions are attached to task ':dev.galasa.events.kafka:jar'.
+Caching disabled for task ':dev.galasa.events.kafka:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.events.kafka:jar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/resources/main', not found
+Resolve mutations for :dev.galasa.events.kafka:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/IEventProducerFactory.java:14: warning: no comment
+public interface IEventProducerFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/IEventProducerFactory.java:16: warning: no comment
+    IEventProducer createProducer(Properties properties, String topic) throws EventsException;
+                   ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/IEventProducerFactory.java:18: warning: no comment
+    Properties createProducerConfig(IConfigurationPropertyStoreService cps, String topic) throws KafkaException;
+               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventProducer.java:17: warning: no comment
+public class KafkaEventProducer implements IEventProducer {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventProducer.java:22: warning: no comment
+    public KafkaEventProducer(Properties properties, String topic) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventProducerFactory.java:17: warning: no comment
+public class KafkaEventProducerFactory implements IEventProducerFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventProducerFactory.java:22: warning: no comment
+    public KafkaEventProducerFactory(String authToken, String runName) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventsService.java:21: warning: no comment
+public class KafkaEventsService implements IEventsService {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventsService.java:34: warning: no comment
+    public KafkaEventsService(IConfigurationPropertyStoreService cps, IEventProducerFactory producerFactory) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventsService.java:80: warning: no comment
+    public Map<String, IEventProducer> getProducers() {
+                                       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaEventsServiceRegistration.java:22: warning: no comment
+public class KafkaEventsServiceRegistration implements IEventsServiceRegistration {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/java/dev/galasa/events/kafka/internal/KafkaException.java:11: warning: no comment
+public class KafkaException extends EventsException {
+       ^
+12 warnings
+> Task :dev.galasa.events.kafka:javadoc
+Caching disabled for task ':dev.galasa.events.kafka:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.events.kafka:javadoc' is not up-to-date because:
+  No history is available.
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/tmp/javadoc/javadoc.options
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.events.kafka:javadocJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.events.kafka:javadocJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.events.kafka:javadocJar
+Caching disabled for task ':dev.galasa.events.kafka:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.events.kafka:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.events.kafka:sourcesJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.events.kafka:sourcesJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.events.kafka:sourcesJar
+Caching disabled for task ':dev.galasa.events.kafka:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.events.kafka:sourcesJar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/src/main/resources', not found
+Resolve mutations for :dev.galasa.events.kafka:compileTestJava (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:compileTestJava (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:compileTestJava
+Caching disabled for task ':dev.galasa.events.kafka:compileTestJava' because:
+  Build cache is disabled
+Task ':dev.galasa.events.kafka:compileTestJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.events.kafka:compileTestJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.004 secs.
+Created classpath snapshot for incremental compilation in 0.008 secs.
+Resolve mutations for :dev.galasa.events.kafka:processTestResources (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:processTestResources (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.events.kafka:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.events.kafka:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.events.kafka:testClasses
+Skipping task ':dev.galasa.events.kafka:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.events.kafka:test (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.events.kafka:test (Thread[Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 4 started executing tests.
+Gradle Test Executor 4 finished executing tests.
+> Task :dev.galasa.events.kafka:test
+Custom actions are attached to task ':dev.galasa.events.kafka:test'.
+Caching disabled for task ':dev.galasa.events.kafka:test' because:
+  Build cache is disabled
+Task ':dev.galasa.events.kafka:test' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 4'. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java -Dorg.gradle.internal.worker.tmpdir=/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/tmp/test/work -javaagent:/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/tmp/.cache/expanded/zip_cde35f471dab581134460fc9a50e2c59/jacocoagent.jar=destfile=build/jacoco/test.exec,append=true,inclnolocationclasses=false,dumponexit=true,output=file,jmx=false @/home/runner/.gradle/.tmp/gradle-worker-classpath14911784628942701595txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 4'
+Successfully started process 'Gradle Test Executor 4'
+TestKafkaEventsService > TestProduceTwoEventsWithSameTopicUsesCachedProducer STANDARD_ERROR
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService produceEvent
+    INFO: Creating a new producer as one does not exist for the topic Topic.MyTopic
+TestKafkaEventsService > TestProduceTwoEventsWithDifferentTopicsUseDifferentProducers STANDARD_ERROR
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService produceEvent
+    INFO: Creating a new producer as one does not exist for the topic Topic.MyTopic1
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService produceEvent
+    INFO: Creating a new producer as one does not exist for the topic Topic.MyTopic2
+TestKafkaEventsService > TestCanProduceAnEventWithValidTopicAndValidEvent STANDARD_ERROR
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService produceEvent
+    INFO: Creating a new producer as one does not exist for the topic Topic.MyTopic
+TestKafkaEventsService > TestCanShutdown STANDARD_ERROR
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService produceEvent
+    INFO: Creating a new producer as one does not exist for the topic Topic.MyTopic
+    Aug 29, 2024 11:21:10 AM dev.galasa.events.kafka.internal.KafkaEventsService shutdown
+    INFO: Shutting down all cached producers
+Finished generating test XML results (0.001 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.002 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.events.kafka/build/reports/tests/test
+Resolve mutations for :dev.galasa.events.kafka:check (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.events.kafka:check (Thread[Execution worker Thread 3,5,main]) started.
+> Task :dev.galasa.events.kafka:check
+Skipping task ':dev.galasa.events.kafka:check' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.common:javadoc (Thread[Execution worker Thread 3,5,main]) started.
+:dev.galasa.extensions.common:javadoc (Thread[Execution worker Thread 3,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbBaseValidator.java:34: warning: no comment
+> Task :dev.galasa.extensions.common:javadoc
+public abstract class CouchdbBaseValidator implements CouchdbValidator {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbBaseValidator.java:36: warning: no comment
+    public static final String COUCHDB_MIN_VERSION = "3.3.3";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbValidator.java:15: warning: no comment
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException;
+Caching disabled for task ':dev.galasa.extensions.common:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.common:javadoc' is not up-to-date because:
+  No history is available.
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build/tmp/javadoc/javadoc.options
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.extensions.common:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.common:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.common:javadocJar
+Caching disabled for task ':dev.galasa.extensions.common:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.common:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.extensions.common:sourcesJar (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:sourcesJar (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.common:sourcesJar
+Caching disabled for task ':dev.galasa.extensions.common:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.common:sourcesJar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/resources', not found
+Resolve mutations for :dev.galasa.extensions.common:compileTestJava (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:compileTestJava (Thread[Execution worker,5,main]) started.
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbException.java:8: warning: no comment
+public class CouchdbException extends Exception {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:54: warning: no comment
+    protected GalasaGson gson = new GalasaGson();
+                         ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:53: warning: no comment
+    protected CloseableHttpClient httpClient;
+                                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:52: warning: no comment
+    protected HttpRequestFactory httpRequestFactory;
+                                 ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:50: warning: no comment
+    protected final URI storeUri;
+                        ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:48: warning: no comment
+    public static final String URL_SCHEME = "couchdb";
+                               ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:56: warning: no comment
+    public CouchdbStore(URI storeUri, HttpRequestFactory httpRequestFactory, HttpClientFactory httpClientFactory) throws CouchdbException {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbStore.java:137: warning: no comment
+    protected void retrieveArtifactFromDatabase(String URI, Path cachePath, CopyOption copyOption) throws CouchdbException{
+                   ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/CouchdbValidator.java:14: warning: no comment
+public interface CouchdbValidator {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:71: warning: no comment
+    public String getMessage() {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:86: warning: no comment
+    public String getMessage(Object o1) {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:103: warning: no comment
+    public String getMessage(Object o1, Object o2) {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:118: warning: no comment
+    public String getMessage(Object o1, Object o2, Object o3) {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:10: warning: no comment
+public enum Errors {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:17: warning: no comment
+    ERROR_FAILED_TO_ACCESS_COUCHDB_SERVER                            (6000,"GAL6000E: Internal server error. Failed to access CouchDB server. Status code {1} from CouchDB server is not 200. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:21: warning: no comment
+    ERROR_FAILED_TO_CREATE_COUCHDB_DATABASE                          (6004,"GAL6004E: Internal server error. Failed to create CouchDB database ''{0}''. Status code {1} from CouchDB server is not 201. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:23: warning: no comment
+    ERROR_FAILED_TO_CREATE_COUCHDB_DOCUMENT                          (6006,"GAL6006E: Internal server error. Failed to create new document in the CouchDB database ''{0}''. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:34: warning: no comment
+    ERROR_FAILED_TO_CREATE_TOKEN_DOCUMENT                            (6102,"GAL6102E: Failed to store auth token in the CouchDB tokens database. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:36: warning: no comment
+    ERROR_FAILED_TO_DELETE_TOKEN_DOCUMENT                            (6104,"GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:28: warning: no comment
+    ERROR_FAILED_TO_GET_DOCUMENT_FROM_DATABASE                       (6011,"GAL6011E: Internal server error. Failed to get document with ID ''{0}'' from the ''{1}'' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:26: warning: no comment
+    ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE                      (6009,"GAL6009E: Internal server error. Failed to get all documents in the ''{0}'' database. Invalid JSON response returned from CouchDB. CouchDB could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:35: warning: no comment
+    ERROR_FAILED_TO_INITIALISE_AUTH_STORE                            (6103,"GAL6103E: Failed to initialise the Galasa CouchDB auth store. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:33: warning: no comment
+    ERROR_FAILED_TO_RETRIEVE_TOKENS                                  (6101,"GAL6101E: Failed to get auth tokens from the CouchDB auth store. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:20: warning: no comment
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_DATABASE                        (6003,"GAL6003E: Internal server error. Failed to determine whether the ''{0}'' database exists. Status code {1} from CouchDB server is not 200. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:19: warning: no comment
+    ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER                          (6002,"GAL6002E: Internal server error. Failed to validate CouchDB server configuration. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:25: warning: no comment
+    ERROR_FAILURE_OCCURRED_WHEN_CONTACTING_COUCHDB                   (6008,"GAL6008E: Internal server error. Unexpected failure occurred during HTTP request to CouchDB server at URL ''{0}''. Cause: ''{1}''"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:32: warning: no comment
+    ERROR_GALASA_AUTH_STORE_SHUTDOWN_FAILED                          (6100,"GAL6100E: Failed to shut down Galasa CouchDB auth store. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:43: warning: no comment
+    ERROR_GALASA_CANT_GET_JWT_TOKEN                                    (7005,"GAL7005E: Could not find the GALASA_JWT in the available configuration."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:40: warning: no comment
+    ERROR_GALASA_CONSTRUCTED_URL_TO_REMOTE_CPS_INVALID_SYNTAX          (7002,"GAL7002E: URL ''{0}'' is of an invalid syntax. {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:47: warning: no comment
+    ERROR_GALASA_CPS_DELETE_OPERATIONS_NOT_PERMITTED                   (7009,"GAL7009E: Local test runs are not permitted to delete CPS properties on the remote Galasa server."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:55: warning: no comment
+    ERROR_GALASA_CPS_PROPERTIES_RETURNED_BADLY_FORMED_DATA             (7017,"GAL7017E: Galasa server error. Payload returned is not what we expected. Data field is missing from a property definition."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:52: warning: no comment
+    ERROR_GALASA_CPS_PROPERTIES_RETURNED_BADLY_FORMED_METADATA         (7014,"GAL7014E: Galasa server error. Payload returned is not what we expected. Metadata field is missing from a property definition."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:54: warning: no comment
+    ERROR_GALASA_CPS_PROPERTIES_RETURNED_BADLY_FORMED_NAME             (7016,"GAL7016E: Galasa server error. Payload returned is not what we expected. Metadata.name field is missing from a property definition."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:53: warning: no comment
+    ERROR_GALASA_CPS_PROPERTIES_RETURNED_BADLY_FORMED_NAMESPACE        (7015,"GAL7015E: Galasa server error. Payload returned is not what we expected. Metadata.namespsace field is missing from a property definition."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:56: warning: no comment
+    ERROR_GALASA_CPS_PROPERTIES_RETURNED_BADLY_FORMED_VALUE            (7018,"GAL7018E: Galasa server error. Payload returned is not what we expected. Data.value field is missing from a property definition."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:46: warning: no comment
+    ERROR_GALASA_CPS_SET_OPERATIONS_NOT_PERMITTED                      (7008,"GAL7008E: Local test runs are not permitted to set CPS properties on the remote Galasa server."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:48: warning: no comment
+    ERROR_GALASA_CPS_SHUTDOWN_FAILED                                   (7010,"GAL7010E: Galasa internal error. Rest-based CPS store failed to shut down. Cause: {0}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:57: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_NAMESPACES_NON_OK_STATUS     (7019,"GAL7019E: Could not get the namespace information from URL ''{0}''. Status code ''{1}'' is not 200."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:51: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_ALL_CPS_PROPERTIES_NON_OK_STATUS     (7013,"GAL7013E: Could not get all the CPS property values from URL ''{0}''. Status code ''{1}'' is not 200."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:59: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_BAD_JSON_RETURNED     (7021,"GAL7021E: Could not get the CPS namespaces value from URL ''{0}''. Cause: Bad json returned from the server. {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:58: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED                (7020,"GAL7020E: Could not get the CPS namespaces information from URL ''{0}''. Cause: {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:50: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTIES_FAILED                (7012,"GAL7012E: Could not get the CPS property value from URL ''{0}''. Cause: {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:49: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTIES_FAILED_NON_OK_STATUS  (7011,"GAL7011E: Could not get the CPS property values from URL ''{0}''. Status code ''{1}'' is not 200."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:44: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_BAD_JSON_RETURNED       (7006,"GAL7006E: Could not get the CPS property value from URL ''{0}''. Cause: Bad json returned from the server. {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:42: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_FAILED                  (7004,"GAL7004E: Could not get the CPS property value from URL ''{0}''. Cause: {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:41: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_FAILED_NON_OK_STATUS    (7003,"GAL7003E: Could not get the CPS property value from URL ''{0}''. Status code ''{1}'' is not 200."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:45: warning: no comment
+    ERROR_GALASA_REST_CALL_TO_GET_CPS_PROPERTY_TOO_FEW_OR_MANY_RETURNED(7007,"GAL7007E: Could not get the CPS property value from URL ''{0}''. Unexpected number of results. Expected {1} got {2}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:39: warning: no comment
+    ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE                 (6999,"GAL6999E: Failed to render message template. Not the expected number of parameters. Got ''{0}''. Expected ''{1}''"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:27: warning: no comment
+    ERROR_INVALID_COUCHDB_VERSION_FORMAT                             (6010,"GAL6010E: Invalid CouchDB server version format detected. The CouchDB version ''{0}'' must be in the semantic versioning format (e.g. major.minor.patch). Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:18: warning: no comment
+    ERROR_INVALID_COUCHDB_WELCOME_RESPONSE                           (6001,"GAL6001E: Internal server error. Invalid CouchDB Welcome message returned from the CouchDB server. The CouchDB server could be experiencing temporary issues or is not correctly configured. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:22: warning: no comment
+    ERROR_OUTDATED_COUCHDB_VERSION                                   (6005,"GAL6005E: Outdated CouchDB server version ''{0}'' detected. Expected version ''{1}'' or above. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:24: warning: no comment
+    ERROR_UNEXPECTED_COUCHDB_HTTP_RESPONSE                           (6007,"GAL6007E: Internal server error. Unexpected response received from CouchDB server after sending a HTTP request to ''{0}''. Expected status code(s) [{1}] but received {2}. The CouchDB server could be experiencing temporary issues. Report the problem to your Galasa Ecosystem owner."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:29: warning: no comment
+    ERROR_UNEXPECTED_RESPONSE_FROM_CREATE_DOCUMENT                   (6012,"GAL6012E: Internal server error. Unable to store the artifacts document - the JSON response received does not match the expected format."),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:13: warning: no comment
+    ERROR_URI_DOESNT_START_WITH_EXPECTED_SCHEME                      (7000,"GAL7000E: URL of ''{0}'' is invalid. It does not start with ''{1}''"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/Errors.java:14: warning: no comment
+    ERROR_URI_IS_INVALID                                             (7001,"GAL7001E: URL of ''{0}'' is invalid. {1}"),
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpClientFactory.java:10: warning: no comment
+public interface HttpClientFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpClientFactory.java:11: warning: no comment
+    CloseableHttpClient createClient();
+                        ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/impl/HttpClientFactoryImpl.java:13: warning: no comment
+public class HttpClientFactoryImpl implements HttpClientFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:14: warning: no comment
+public interface HttpRequestFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:24: warning: no comment
+    public HttpDelete getHttpDeleteRequest(String url);
+                      ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:16: warning: no comment
+    public HttpGet getHttpGetRequest(String url);
+                   ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:18: warning: no comment
+    public HttpHead getHttpHeadRequest(String url);
+                    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:20: warning: no comment
+    public HttpPost getHttpPostRequest(String url);
+                    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/HttpRequestFactory.java:22: warning: no comment
+    public HttpPut getHttpPutRequest(String url);
+                   ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/impl/HttpRequestFactoryImpl.java:21: warning: no comment
+public class HttpRequestFactoryImpl implements HttpRequestFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/impl/HttpRequestFactoryImpl.java:25: warning: no comment
+    public HttpRequestFactoryImpl() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/impl/HttpRequestFactoryImpl.java:30: warning: no comment
+    public HttpRequestFactoryImpl(String authType, String authToken) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/IdRev.java:8: warning: no comment
+public class IdRev  {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/IdRev.java:10: warning: no comment
+    public String _id;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/IdRev.java:11: warning: no comment
+    public String _rev;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/LogFactory.java:12: warning: no comment
+public interface LogFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/api/LogFactory.java:13: warning: no comment
+    Log getLog(Class<?> clazz);
+        ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/impl/LogFactoryImpl.java:15: warning: no comment
+public class LogFactoryImpl implements LogFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/PutPostResponse.java:8: warning: no comment
+public class PutPostResponse {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/PutPostResponse.java:10: warning: no comment
+    public String id;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/PutPostResponse.java:11: warning: no comment
+    public boolean ok;
+                   ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/PutPostResponse.java:12: warning: no comment
+    public String rev;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Row.java:8: warning: no comment
+public class Row {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Row.java:10: warning: no comment
+    public String id;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Row.java:11: warning: no comment
+    public String key;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/ViewResponse.java:10: warning: no comment
+public class ViewResponse {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/ViewResponse.java:12: warning: no comment
+    public List<ViewRow> rows;
+                         ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/ViewRow.java:8: warning: no comment
+public class ViewRow {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/ViewRow.java:10: warning: no comment
+    public String key;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/ViewRow.java:11: warning: no comment
+    public Object value;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Welcome.java:8: warning: no comment
+public class Welcome {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Welcome.java:10: warning: no comment
+    public String couchdb;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/src/main/java/dev/galasa/extensions/common/couchdb/pojos/Welcome.java:11: warning: no comment
+    public String version;
+                  ^
+91 warnings
+> Task :dev.galasa.extensions.common:compileTestJava
+Caching disabled for task ':dev.galasa.extensions.common:compileTestJava' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.common:compileTestJava' is not up-to-date because:
+  No history is available.
+The input changes require a full rebuild for incremental task ':dev.galasa.extensions.common:compileTestJava'.
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Class dependency analysis for incremental compilation took 0.001 secs.
+Created classpath snapshot for incremental compilation in 0.005 secs.
+Resolve mutations for :dev.galasa.extensions.common:processTestResources (Thread[Execution worker,5,main]) started.
+:dev.galasa.extensions.common:processTestResources (Thread[Execution worker,5,main]) started.
+> Task :dev.galasa.extensions.common:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.extensions.common:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.common:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.common:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.common:testClasses
+Skipping task ':dev.galasa.extensions.common:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.common:test (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.common:test (Thread[Execution worker Thread 2,5,main]) started.
+Gradle Test Executor 5 started executing tests.
+Gradle Test Executor 5 finished executing tests.
+> Task :dev.galasa.extensions.common:test
+Caching disabled for task ':dev.galasa.extensions.common:test' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.common:test' is not up-to-date because:
+  No history is available.
+Starting process 'Gradle Test Executor 5'. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/java -Dorg.gradle.internal.worker.tmpdir=/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build/tmp/test/work @/home/runner/.gradle/.tmp/gradle-worker-classpath18394535884893488907txt -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -ea worker.org.gradle.process.internal.worker.GradleWorkerMain 'Gradle Test Executor 5'
+Successfully started process 'Gradle Test Executor 5'
+Finished generating test XML results (0.0 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build/test-results/test
+Generating HTML test report...
+Finished generating test html results (0.002 secs) into: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.common/build/reports/tests/test
+Resolve mutations for :dev.galasa.extensions.common:check (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.common:check (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.common:check
+Skipping task ':dev.galasa.extensions.common:check' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.mocks:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:javadoc (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:javadoc
+Caching disabled for task ':dev.galasa.extensions.mocks:javadoc' because:
+  Build cache is disabled
+Task ':dev.galasa.extensions.mocks:javadoc' is not up-to-date because:
+  No history is available.
+Starting process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''. Working directory: /home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks Command: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc @/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/build/tmp/javadoc/javadoc.options
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpEntity.java:16: warning: no comment
+public class BaseHttpEntity implements HttpEntity {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:17: warning: no comment
+public abstract class BaseHttpInteraction implements HttpInteraction {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:32: warning: no comment
+    public BaseHttpInteraction(String expectedBaseUri, int responseStatusCode) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:27: warning: no comment
+    public BaseHttpInteraction(String expectedBaseUri, String returnedDocument ) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:37: warning: no comment
+    public String getExpectedBaseUri() {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:45: warning: no comment
+    public String getExpectedHttpContentType() {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/HttpInteraction.java:14: warning: no comment
+    public MockCloseableHttpResponse getResponse();
+                                     ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:41: warning: no comment
+    public String getReturnedDocument() {
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:49: warning: no comment
+    public void setResponsePayload(Object responsePayload) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/HttpInteraction.java:13: warning: no comment
+    void validateRequest(HttpHost target, HttpRequest request) throws RuntimeException;
+         ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/BaseHttpInteraction.java:62: warning: no comment
+    public void validateRequestContentType(HttpRequest request) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/HttpInteraction.java:12: warning: no comment
+public interface HttpInteraction {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockCloseableHttpClient.java:23: warning: no comment
+public class MockCloseableHttpClient extends CloseableHttpClient {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockCloseableHttpClient.java:28: warning: no comment
+    public MockCloseableHttpClient( List<HttpInteraction> interactions) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockCloseableHttpResponse.java:19: warning: no comment
+public class MockCloseableHttpResponse implements CloseableHttpResponse {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/cps/MockConfigurationPropertyStoreService.java:17: warning: no comment
+public class MockConfigurationPropertyStoreService implements IConfigurationPropertyStoreService {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/cps/MockConfigurationPropertyStoreService.java:20: warning: no comment
+    public MockConfigurationPropertyStoreService(Map<String,String> props) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/couchdb/MockCouchdbValidator.java:16: warning: no comment
+public class MockCouchdbValidator implements CouchdbValidator {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/couchdb/MockCouchdbValidator.java:20: warning: no comment
+    public void setThrowException(boolean throwException) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockEnvironment.java:12: warning: no comment
+public class MockEnvironment implements Environment {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockEnvironment.java:16: warning: no comment
+    public MockEnvironment() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockEnvironment.java:20: warning: no comment
+    public void setenv(String propertyName, String value ) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/events/MockEvent.java:7: warning: no comment
+public class MockEvent implements IEvent {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/events/MockEvent.java:13: warning: no comment
+    public MockEvent(String timestamp, String message) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFramework.java:37: warning: no comment
+public class MockFramework implements IFramework {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:31: warning: no comment
+public class MockFrameworkInitialisation implements IApiServerInitialisation {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:35: warning: no comment
+    protected URI authStoreUri;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:36: warning: no comment
+    protected URI cpsBootstrapUri;
+                  ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:42: warning: no comment
+    public MockFrameworkInitialisation() {}
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:44: warning: no comment
+    public MockFrameworkInitialisation(URI cpsBootstrapUri) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:76: warning: no comment
+    public List<IAuthStore> getRegisteredAuthStores() {
+                            ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:67: warning: no comment
+    public List<IConfigurationPropertyStore> getRegisteredConfigurationPropertyStores() {
+                                             ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:134: warning: no comment
+    public List<IEventsService> getRegisteredEventsServices() {
+                                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockFrameworkInitialisation.java:48: warning: no comment
+    public void setAuthStoreUri(URI authStoreUri) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHeaderElement.java:11: warning: no comment
+public class MockHeaderElement implements HeaderElement {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHeaderElement.java:16: warning: no comment
+    public MockHeaderElement(String name, String value) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpClientFactory.java:12: warning: no comment
+public class MockHttpClientFactory implements HttpClientFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpClientFactory.java:15: warning: no comment
+    public MockHttpClientFactory(CloseableHttpClient clientToReturn) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpEntity.java:15: warning: no comment
+public class MockHttpEntity extends BaseHttpEntity {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpEntity.java:20: warning: no comment
+    public MockHttpEntity(String payloadMessage) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpHeader.java:12: warning: no comment
+public class MockHttpHeader implements Header {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockHttpHeader.java:17: warning: no comment
+    public MockHttpHeader(String name, String value) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockLog.java:15: warning: no comment
+public class MockLog implements Log {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockLog.java:26: warning: no comment
+    public MockLog( PrintWriter output, Class<?> clazz ) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockLogFactory.java:19: warning: no comment
+public class MockLogFactory implements LogFactory {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockLogFactory.java:24: warning: no comment
+    public MockLogFactory() {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockStatusLine.java:12: warning: no comment
+public class MockStatusLine implements StatusLine {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockStatusLine.java:27: warning: no comment
+    public void setStatusCode(int newCode) {
+                ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockTimeService.java:12: warning: no comment
+public class MockTimeService implements ITimeService {
+       ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockTimeService.java:16: warning: no comment
+    public MockTimeService(Instant currentTime) {
+           ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/java/dev/galasa/extensions/mocks/MockTimeService.java:25: warning: no comment
+    public void setCurrentTime(Instant currentTime) {
+                ^
+51 warnings
+Successfully started process 'command '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64/bin/javadoc''
+Resolve mutations for :dev.galasa.extensions.mocks:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:javadocJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:javadocJar
+Caching disabled for task ':dev.galasa.extensions.mocks:javadocJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.mocks:javadocJar' is not up-to-date because:
+  No history is available.
+Resolve mutations for :dev.galasa.extensions.mocks:sourcesJar (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:sourcesJar (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:sourcesJar
+Caching disabled for task ':dev.galasa.extensions.mocks:sourcesJar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':dev.galasa.extensions.mocks:sourcesJar' is not up-to-date because:
+  No history is available.
+file or directory '/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.extensions.mocks/src/main/resources', not found
+Resolve mutations for :dev.galasa.extensions.mocks:compileTestJava (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:compileTestJava (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:compileTestJava NO-SOURCE
+Skipping task ':dev.galasa.extensions.mocks:compileTestJava' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.mocks:processTestResources (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:processTestResources (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:processTestResources NO-SOURCE
+Skipping task ':dev.galasa.extensions.mocks:processTestResources' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.mocks:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:testClasses (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:testClasses UP-TO-DATE
+Skipping task ':dev.galasa.extensions.mocks:testClasses' as it has no actions.
+Resolve mutations for :dev.galasa.extensions.mocks:test (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:test (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:test NO-SOURCE
+Skipping task ':dev.galasa.extensions.mocks:test' as it has no source files and no previous output files.
+Resolve mutations for :dev.galasa.extensions.mocks:check (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.extensions.mocks:check (Thread[Execution worker Thread 2,5,main]) started.
+> Task :dev.galasa.extensions.mocks:check UP-TO-DATE
+Skipping task ':dev.galasa.extensions.mocks:check' as it has no actions.
+Resolve mutations for :dev.galasa.ras.couchdb:compileJava (Thread[Execution worker Thread 2,5,main]) started.
+:dev.galasa.ras.couchdb:compileJava (Thread[Execution worker Thread 2,5,main]) started.
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:41: error: cannot find symbol
+import dev.galasa.framework.spi.ras.RasRunResultPage;
+> Task :dev.galasa.ras.couchdb:compileJava FAILED
+                                   ^
+Caching disabled for task ':dev.galasa.ras.couchdb:compileJava' because:
+  symbol:   class RasRunResultPage
+  Build cache is disabled
+  location: package dev.galasa.framework.spi.ras
+Task ':dev.galasa.ras.couchdb:compileJava' is not up-to-date because:
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:49: error: cannot find symbol
+  No history is available.
+import dev.galasa.framework.spi.ras.RasSortField;
+                                   ^
+  symbol:   class RasSortField
+The input changes require a full rebuild for incremental task ':dev.galasa.ras.couchdb:compileJava'.
+  location: package dev.galasa.framework.spi.ras
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:326: error: cannot find symbol
+    public @NotNull RasRunResultPage getRunsPage(int maxResults, RasSortField primarySort, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
+                                                                 ^
+  symbol:   class RasSortField
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:326: error: cannot find symbol
+    public @NotNull RasRunResultPage getRunsPage(int maxResults, RasSortField primarySort, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
+                    ^
+  symbol:   class RasRunResultPage
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:343: error: cannot find symbol
+    private RasRunResultPage getRunsPageFromCouchdb(HttpPost httpPost, Find query) throws ResultArchiveStoreException {
+            ^
+  symbol:   class RasRunResultPage
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:392: error: cannot find symbol
+    private JsonArray buildQuerySortJson(@NotNull RasSortField primarySort) {
+                                                  ^
+  symbol:   class RasSortField
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:325: error: method does not override or implement a method from a supertype
+    @Override
+    ^
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:345: error: cannot find symbol
+        RasRunResultPage runsPage = null;
+        ^
+  symbol:   class RasRunResultPage
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:383: error: cannot find symbol
+            runsPage = new RasRunResultPage(runs, found.bookmark);
+                           ^
+  symbol:   class RasRunResultPage
+  location: class CouchdbDirectoryService
+/home/runner/work/extensions/extensions/galasa-extensions-parent/dev.galasa.ras.couchdb/src/main/java/dev/galasa/ras/couchdb/internal/CouchdbDirectoryService.java:420: error: cannot find symbol
+            RasRunResultPage runsPage = getRunsPageFromCouchdb(httpPost, find);
+            ^
+  symbol:   class RasRunResultPage
+  location: class CouchdbDirectoryService
+10 errors
+FAILURE: Build failed with an exception.
+* What went wrong:
+Execution failed for task ':dev.galasa.ras.couchdb:compileJava'.
+> Compilation failed; see the compiler error output for details.
+* Try:
+> Run with --scan to get full insights.
+BUILD FAILED in 32s
+Compilation mode: in-process compilation
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with toolchain '/opt/hostedtoolcache/Java_Adopt_jdk/17.0.12-7/x64'.
+Compiling with JDK Java compiler API.
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+For more on this, please refer to https://docs.gradle.org/8.9/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+55 actionable tasks: 55 executed
