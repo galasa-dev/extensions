@@ -32,9 +32,8 @@ jobs:
           gradle-version: 8.9
 
       - name: Build Extensions source code with gradle
-        working-directory: galasa-extensions-parent
         run: |
-          gradle --no-daemon --console plain \
+          gradle -b galasa-extensions-parent/build.gradle --no-daemon --console plain \
           -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework/ \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo /
