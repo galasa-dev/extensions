@@ -31,10 +31,14 @@ jobs:
         with:
           gradle-version: 8.9
 
+      - name: Echo jade
+        run : |
+          echo "Jade"
+
       - name: Build Extensions source code with gradle
         run: |
           gradle -b galasa-extensions-parent/build.gradle \
-          -PsourceMaven=https://development.galasa.dev/gh/maven-repo/framework \
+          -PsourceMaven=https://development.galasa.dev/main/maven-repo/framework \
           -PcentralMaven=https://repo.maven.apache.org/maven2/ \
           -PtargetMaven=${{ github.workspace }}/repo \
           --no-daemon --console plain \
