@@ -51,7 +51,7 @@ task gitHash(dependsOn : 'classes') {
 repositories {
     mavenLocal()
     maven {
-        url "https://development.galasa.dev/gh/maven-repo/framework"
+        url "$sourceMaven"
     }
     maven {
         url "$centralMaven"
