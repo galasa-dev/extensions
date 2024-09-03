@@ -73,6 +73,10 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
         }
     }
 
+    public HttpRequestFactory getRequestFactory() {
+        return requestFactory;
+    }
+
     /**
      * Checks if a database with the given name exists in the CouchDB server. If not, the database is created.
      *

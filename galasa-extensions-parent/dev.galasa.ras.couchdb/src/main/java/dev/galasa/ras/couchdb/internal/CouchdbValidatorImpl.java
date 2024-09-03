@@ -33,6 +33,8 @@ import com.google.gson.JsonPrimitive;
 
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
@@ -41,7 +43,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
     private final Log                          logger             = LogFactory.getLog(getClass());
     private       HttpRequestFactory requestFactory;
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbRasException {
+    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbException {
        this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 
@@ -76,16 +78,16 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             checkIndex(httpClient, rasUri, 1, "galasa_run", "result");
 
             logger.debug("RAS CouchDB at " + rasUri.toString() + " validated");
-        } catch (CouchdbRasException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
+            throw new CouchdbException("Validation failed "+ e);
         }
     }
 
 
 
-    private void checkDatabasePresent( CloseableHttpClient httpClient, URI rasUri, int attempts, String dbName) throws CouchdbRasException {
+    private void checkDatabasePresent( CloseableHttpClient httpClient, URI rasUri, int attempts, String dbName) throws CouchdbException {
         HttpHead httpHead = requestFactory.getHttpHeadRequest(rasUri + "/" + dbName);
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
@@ -95,13 +97,13 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 return;
             }
             if (statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException(
+                throw new CouchdbException(
                         "Validation failed of database " + dbName + " - " + statusLine.toString());
             }
-        } catch (CouchdbRasException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
 
         logger.info("CouchDB database " + dbName + " is missing,  creating");
@@ -114,7 +116,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 // Someone possibly updated
                 attempts++;
                 if (attempts > 10) {
-                    throw new CouchdbRasException(
+                    throw new CouchdbException(
                             "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
                 }
                 Thread.sleep(1000 + new Random().nextInt(3000));
@@ -124,19 +126,19 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
             if (statusLine.getStatusCode() != HttpStatus.SC_CREATED) {
                 EntityUtils.consumeQuietly(response.getEntity());
-                throw new CouchdbRasException(
+                throw new CouchdbException(
                         "Create Database " + dbName + " failed on CouchDB server - " + statusLine.toString());
             }
 
             EntityUtils.consumeQuietly(response.getEntity());
-        } catch (CouchdbRasException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbRasException("Create database " + dbName + " failed", e);
+            throw new CouchdbException("Create database " + dbName + " failed", e);
         }
     }
 
-    private void checkRunDesignDocument( CloseableHttpClient httpClient , URI rasUri , int attempts) throws CouchdbRasException {
+    private void checkRunDesignDocument( CloseableHttpClient httpClient , URI rasUri , int attempts) throws CouchdbException {
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_design/docs");
 
         String docJson = null;
@@ -145,16 +147,16 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             docJson = EntityUtils.toString(response.getEntity());
             if (statusLine.getStatusCode() != HttpStatus.SC_OK
                     && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException(
+                throw new CouchdbException(
                         "Validation failed of database galasa_run designdocument - " + statusLine.toString());
             }
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 docJson = "{}";
             }
-        } catch (CouchdbRasException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
 
         boolean updated = false;
@@ -236,7 +238,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                     // Someone possibly updated
                     attempts++;
                     if (attempts > 10) {
-                        throw new CouchdbRasException(
+                        throw new CouchdbException(
                                 "Update of galasa_run design document failed on CouchDB server due to conflicts, attempted 10 times");
                     }
                     Thread.sleep(1000 + new Random().nextInt(3000));
@@ -246,15 +248,15 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 
                 if (statusCode != HttpStatus.SC_CREATED) {
                     EntityUtils.consumeQuietly(response.getEntity());
-                    throw new CouchdbRasException(
+                    throw new CouchdbException(
                             "Update of galasa_run design document failed on CouchDB server - " + statusLine.toString());
                 }
 
                 EntityUtils.consumeQuietly(response.getEntity());
-            } catch (CouchdbRasException e) {
+            } catch (CouchdbException e) {
                 throw e;
             } catch (Exception e) {
-                throw new CouchdbRasException("Update of galasa_run design document faile", e);
+                throw new CouchdbException("Update of galasa_run design document faile", e);
             }
         }
     }
@@ -298,14 +300,14 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
     }
 
     private void checkVersion(String version, int minVersion, int minRelease, int minModification)
-            throws CouchdbRasException {
+            throws CouchdbException {
         String minVRM = minVersion + "." + minRelease + "." + minModification;
 
         Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
         Matcher m = vrm.matcher(version);
 
         if (!m.find()) {
-            throw new CouchdbRasException("Invalid CouchDB version " + version);
+            throw new CouchdbException("Invalid CouchDB version " + version);
         }
 
         int actualVersion = 0;
@@ -317,7 +319,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             actualRelease = Integer.parseInt(m.group(2));
             actualModification = Integer.parseInt(m.group(3));
         } catch (NumberFormatException e) {
-            throw new CouchdbRasException("Unable to determine CouchDB version " + version, e);
+            throw new CouchdbException("Unable to determine CouchDB version " + version, e);
         }
 
         if (actualVersion > minVersion) {
@@ -325,7 +327,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         }
 
         if (actualVersion < minVersion) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
         if (actualRelease > minRelease) {
@@ -333,7 +335,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         }
 
         if (actualRelease < minRelease) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
         if (actualModification > minModification) {
@@ -341,7 +343,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         }
 
         if (actualModification < minModification) {
-            throw new CouchdbRasException("CouchDB version " + version + " is below minimum " + minVRM);
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
         }
 
         return;
@@ -350,7 +352,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
 
 
-    private void checkIndex(CloseableHttpClient httpClient, URI rasUri , int attempts, String dbName, String field) throws CouchdbRasException {
+    private void checkIndex(CloseableHttpClient httpClient, URI rasUri , int attempts, String dbName, String field) throws CouchdbException {
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_index");
 
         String idxJson = null;
@@ -359,15 +361,15 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             idxJson = EntityUtils.toString(response.getEntity());
             if (statusLine.getStatusCode() != HttpStatus.SC_OK
                     && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbRasException("Validation failed of database indexes - " + statusLine.toString());
+                throw new CouchdbException("Validation failed of database indexes - " + statusLine.toString());
             }
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 idxJson = "{}";
             }
-        } catch (CouchdbRasException e) {
+        } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbRasException("Validation failed", e);
+            throw new CouchdbException("Validation failed", e);
         }
 
         JsonObject idx = gson.fromJson(idxJson, JsonObject.class);
@@ -424,7 +426,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                     // Someone possibly updated
                     attempts++;
                     if (attempts > 10) {
-                        throw new CouchdbRasException(
+                        throw new CouchdbException(
                                 "Update of galasa_run index failed on CouchDB server due to conflicts, attempted 10 times");
                     }
                     Thread.sleep(1000 + new Random().nextInt(3000));
@@ -433,14 +435,14 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 }
 
                 if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-                    throw new CouchdbRasException(
+                    throw new CouchdbException(
                             "Update of galasa_run index failed on CouchDB server - " + statusLine.toString());
                 }
 
-            } catch (CouchdbRasException e) {
+            } catch (CouchdbException e) {
                 throw e;
             } catch (Exception e) {
-                throw new CouchdbRasException("Update of galasa_run index faile", e);
+                throw new CouchdbException("Update of galasa_run index faile", e);
             }
         }
 

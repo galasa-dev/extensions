@@ -19,27 +19,26 @@ public abstract class BaseHttpInteraction implements HttpInteraction {
     private GalasaGson gson = new GalasaGson();
 
     private String expectedBaseUri ;
-    private String returnedDocument;
 
     private String responsePayload = "";
     private int responseStatusCode = HttpStatus.SC_OK;
 
-    public BaseHttpInteraction(String expectedBaseUri, String returnedDocument ) {
+    public BaseHttpInteraction(String expectedBaseUri, Object responsePayload) {
+        this(expectedBaseUri, responsePayload, HttpStatus.SC_OK);
+    }
+
+    public BaseHttpInteraction(String expectedBaseUri, Object responsePayload, int responseStatusCode) {
         this.expectedBaseUri = expectedBaseUri;
-        this.returnedDocument = returnedDocument;
+        this.responseStatusCode = responseStatusCode;
+        setResponsePayload(responsePayload);
     }
 
     public BaseHttpInteraction(String expectedBaseUri, int responseStatusCode) {
-        this.expectedBaseUri = expectedBaseUri;
-        this.responseStatusCode = responseStatusCode;
+        this(expectedBaseUri, null, responseStatusCode);
     }
 
     public String getExpectedBaseUri() {
         return this.expectedBaseUri;
-    }
-
-    public String getReturnedDocument() {
-        return this.returnedDocument;
     }
 
     public String getExpectedHttpContentType() {

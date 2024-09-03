@@ -16,6 +16,8 @@ import org.junit.rules.TestName;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
@@ -276,7 +278,7 @@ public class CouchdbValidatorImplTest {
 
         // Then..
         assertThat(thrown).isNotNull();
-        assertThat(thrown).as("exception caught is of type "+thrown.getClass().toString()).isInstanceOf(CouchdbRasException.class);
+        assertThat(thrown).as("exception caught is of type "+thrown.getClass().toString()).isInstanceOf(CouchdbException.class);
     }
 
     @Test

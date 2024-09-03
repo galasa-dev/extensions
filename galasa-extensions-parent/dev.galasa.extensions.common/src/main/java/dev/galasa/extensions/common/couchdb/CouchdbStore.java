@@ -118,6 +118,32 @@ public abstract class CouchdbStore {
     }
 
     /**
+     * Sends a GET request to CouchDB's /{db}/_design/docs/_view/loginId-view?key={loginId} endpoint and returns the "rows" list in the response,
+     * which corresponds to the list of documents within the given database.
+     *
+     * @param dbName the name of the database to retrieve the documents of
+     * @param loginId the loginId of the user to retrieve the doucemnts of
+     * @return a list of rows corresponding to documents within the database
+     * @throws CouchdbException if there was a problem accessing the CouchDB store or its response
+     */
+    protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId) throws CouchdbException {
+        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_design/docs/_view/loginId-view?key=" + loginId);
+        getTokensDocs.addHeader("Content-Type", "application/json");
+
+        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+
+        ViewResponse docByLoginId = gson.fromJson(responseEntity, ViewResponse.class);
+        List<ViewRow> viewRows = docByLoginId.rows;
+
+        if (viewRows == null) {
+            String errorMessage = ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE.getMessage(dbName);
+            throw new CouchdbException(errorMessage);
+        }
+
+        return viewRows;
+    }
+
+    /**
      * Gets an object from a given database's document using its document ID by sending a
      * GET /{db}/{docid} request to the CouchDB server.
      *

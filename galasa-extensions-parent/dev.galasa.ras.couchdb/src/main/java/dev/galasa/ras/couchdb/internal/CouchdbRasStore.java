@@ -36,6 +36,7 @@ import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbStore;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -93,7 +94,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     // Note: We use logFactory here so we can propogate it downwards during unit testing.
     public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator,
         LogFactory logFactory, HttpRequestFactory requestFactory
-    ) throws  CouchdbRasException, CouchdbException {
+    ) throws CouchdbException {
         super(rasUri, requestFactory, httpFactory);
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
@@ -120,7 +121,6 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
     }
-
 
     // Protected so that we can create artifact documents from elsewhere.
     protected void createArtifactDocument() throws CouchdbException {
