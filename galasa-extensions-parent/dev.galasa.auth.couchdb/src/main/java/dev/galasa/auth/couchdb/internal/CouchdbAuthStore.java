@@ -83,7 +83,6 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         return tokens;
     }
 
-    @Override
 	public List<IInternalAuthToken> getTokensByLoginId(String loginId) throws AuthStoreException {
 		logger.info("Retrieving tokens from CouchDB");
         List<ViewRow> tokenDocuments = new ArrayList<>();
