@@ -6,6 +6,8 @@
 package dev.galasa.auth.couchdb.internal.beans;
 
 public class TokensDBNameViewDesign {
+    public String _rev;
+    public String _id;
     public TokenDBViews views;
     public String language;
 }
