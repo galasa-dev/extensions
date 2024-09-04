@@ -50,29 +50,10 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator{
     }
     
     public void checkTokensDesignDocument( CloseableHttpClient httpClient , URI couchdbUri , int attempts) throws CouchdbException {
-        HttpRequestFactory requestFactory = super.getRequestFactory();
-        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/galasa_tokens/_design/docs");
-
-        String docJson = null;
-        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-
-            StatusLine statusLine = response.getStatusLine();
-
-            docJson = EntityUtils.toString(response.getEntity());
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK
-                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
-                throw new CouchdbException(
-                        "Validation failed of database galasa_tokens design document - " + statusLine.toString());
-            }
-            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                docJson = "{}";
-            }
-        } catch (CouchdbException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CouchdbException("Validation failed", e);
-        }
-
+        
+        //Get the design document from couchdb
+        String docJson = getTokenDesignDocument(httpClient, couchdbUri, attempts);
+        
         boolean updated = false;
 
         JsonObject doc = gson.fromJson(docJson, JsonObject.class);
@@ -96,12 +77,47 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator{
             views.add("loginId-view", requestors);
         }
 
-        if (checkView(requestors, "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }", "javascript")) {
+        if (isViewUpdated(requestors, "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }", "javascript")) {
             updated = true;
         }
 
         if (updated) {
-            logger.info("Updating the galasa_tokens design document");
+            updateTokenDesignDocument(httpClient, couchdbUri, attempts, doc, rev);
+        }
+    }
+
+    private String getTokenDesignDocument(CloseableHttpClient httpClient , URI couchdbUri , int attempts) throws CouchdbException{
+        HttpRequestFactory requestFactory = super.getRequestFactory();
+        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/galasa_tokens/_design/docs");
+
+        String docJson = null;
+        try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+
+            StatusLine statusLine = response.getStatusLine();
+
+            docJson = EntityUtils.toString(response.getEntity());
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK
+                    && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
+                throw new CouchdbException(
+                        "Validation failed of database galasa_tokens design document - " + statusLine.toString());
+            }
+            if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                docJson = "{}";
+            }
+
+            return docJson;
+
+        } catch (CouchdbException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CouchdbException("Validation failed", e);
+        }
+    }
+
+    private void updateTokenDesignDocument(CloseableHttpClient httpClient , URI couchdbUri , int attempts, JsonObject doc, String rev) throws CouchdbException{
+        HttpRequestFactory requestFactory = super.getRequestFactory();
+
+        logger.info("Updating the galasa_tokens design document");
 
             HttpEntity entity = new StringEntity(gson.toJson(doc), ContentType.APPLICATION_JSON);
 
@@ -127,38 +143,41 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator{
                     return;
                 }
                 
+                EntityUtils.consumeQuietly(response.getEntity());
                 if (statusCode != HttpStatus.SC_CREATED) {
-                    EntityUtils.consumeQuietly(response.getEntity());
+                    
                     throw new CouchdbException(
                             "Update of galasa_tokens design document failed on CouchDB server - " + statusLine.toString());
                 }
-
-                EntityUtils.consumeQuietly(response.getEntity());
+                
             } catch (CouchdbException e) {
                 throw e;
             } catch (Exception e) {
                 throw new CouchdbException("Update of galasa_tokens design document failed", e);
             }
-        }
     }
-    private boolean checkView(JsonObject view, String targetMap, String targetReduce) {
+
+    /**
+     * @returns a boolean flag indicating if a couchdb view was updated. 
+     */
+    private boolean isViewUpdated(JsonObject view, String targetMap, String targetReduce) {
 
         boolean updated = false;
 
-        if (checkViewString(view, "map", targetMap)) {
+        if (isViewStringPresent(view, "map", targetMap)) {
             updated = true;
         }
-        if (checkViewString(view, "reduce", targetReduce)) {
+        if (isViewStringPresent(view, "reduce", targetReduce)) {
             updated = true;
         }
-        if (checkViewString(view, "language", "javascript")) {
+        if (isViewStringPresent(view, "language", "javascript")) {
             updated = true;
         }
 
         return updated;
     }
 
-    private boolean checkViewString(JsonObject view, String field, String value) {
+    private boolean isViewStringPresent(JsonObject view, String field, String value) {
 
         JsonElement element = view.get(field);
         if (element == null) {

@@ -17,10 +17,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Test;
 
-import com.google.gson.annotations.SerializedName;
-
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreValidator;
+import dev.galasa.auth.couchdb.internal.beans.*;
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
@@ -118,17 +117,7 @@ public class TestCouchdbAuthStoreValidator {
 //   },
 //   "language": "javascript"
 // }    
-    public static class TokensDBNameViewDesign {
-        TokenDBViews views;
-        String language;
-    }
-    public static class TokenDBViews {
-        @SerializedName("loginId-view")
-        TokenDBLoginView loginIdView;
-    }
-    public static class TokenDBLoginView {
-        String map;
-    }
+
 
     @Test
     public void testCheckCouchdbDatabaseIsValidWithValidDatabaseIsOK() throws Exception {
