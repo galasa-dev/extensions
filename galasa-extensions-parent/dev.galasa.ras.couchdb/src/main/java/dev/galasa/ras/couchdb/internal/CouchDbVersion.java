@@ -38,7 +38,7 @@ import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.framework.spi.utils.GalasaGson;
 
 
-public class CouchDbVersion {
+public class CouchDbVersion implements Comparable<CouchDbVersion> {
 
     private int version ;
     private int release;
@@ -106,6 +106,27 @@ public class CouchDbVersion {
         hash = 31 * hash + (int) this.release;
         hash = 31 * hash + (int) this.modification;
         return hash;
+    }
+
+    @Override
+    public int compareTo(CouchDbVersion other) {
+        int result ;
+        if (this.version > other.version) {
+            result = +1;
+        } else if (this.version < other.version) {
+            result = -1;
+        } else if (this.release > other.release) {
+            result = +1;
+        } else if (this.release < other.release) {
+            result = -1;
+        } else if (this.modification > other.modification) {
+            result = +1;
+        } else if (this.modification < other.modification) {
+            result = -1;
+        } else {
+            result = 0;
+        }
+        return result;
     }
 
 
