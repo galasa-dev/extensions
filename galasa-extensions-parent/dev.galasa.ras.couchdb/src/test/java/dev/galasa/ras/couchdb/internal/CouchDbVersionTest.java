@@ -8,20 +8,8 @@ package dev.galasa.ras.couchdb.internal;
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
-import org.apache.http.*;
-import org.apache.http.client.methods.HttpPost;
 import org.junit.*;
-import org.junit.rules.TestName;
-
-import dev.galasa.framework.spi.utils.GalasaGson;
-import dev.galasa.extensions.common.couchdb.pojos.Welcome;
-import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
-import dev.galasa.extensions.common.couchdb.CouchdbValidator;
-import dev.galasa.extensions.common.api.HttpRequestFactory;
-import dev.galasa.extensions.mocks.*;
-import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
-import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
 
 
 public class CouchDbVersionTest {
@@ -159,5 +147,21 @@ public class CouchDbVersionTest {
         CouchDbVersion biggerVersion  = new CouchDbVersion("1.3.3");
         assertThat( smallerVersion).isLessThan(biggerVersion);
         assertThat( biggerVersion).isGreaterThan(smallerVersion);
+    }
+
+    @Test
+    public void testToStringOfVersionIsCorrect() throws Exception {
+        CouchDbVersion version = new CouchDbVersion("1.2.3");
+        assertThat(version.toString()).isEqualTo("1.2.3");
+
+        CouchDbVersion version2 = new CouchDbVersion(1,2,3);
+        assertThat(version2.toString()).isEqualTo("1.2.3");
+    }
+
+    @Test
+    public void testToStringMethodGetsCalledImplicitly() throws Exception {
+        CouchDbVersion version = new CouchDbVersion(1,2,3);
+        String s = "something "+version;
+        assertThat(s).isEqualTo("something 1.2.3");
     }
 }

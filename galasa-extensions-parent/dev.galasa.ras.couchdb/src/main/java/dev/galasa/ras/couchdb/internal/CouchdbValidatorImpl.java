@@ -43,6 +43,8 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
     private final Log                          logger             = LogFactory.getLog(getClass());
     private       HttpRequestFactory requestFactory;
 
+    private static final CouchDbVersion minCouchDbVersion = new CouchDbVersion(3,3,3);
+
     public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbException {
        this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
@@ -61,7 +63,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                 throw new CouchdbRasException("Validation failed to CouchDB server - invalid json response");
             }
 
-            checkVersion(welcome.version, 3, 3, 3);
+            checkVersion(welcome.version, minCouchDbVersion);
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_run");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_log");
             checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts");
@@ -299,55 +301,16 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         return false;
     }
 
-    private void checkVersion(String version, int minVersion, int minRelease, int minModification)
+    private void checkVersion(String version, CouchDbVersion minVersion)
             throws CouchdbException {
-        String minVRM = minVersion + "." + minRelease + "." + minModification;
 
-        Pattern vrm = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
-        Matcher m = vrm.matcher(version);
+        CouchDbVersion actualCouchVersion = new CouchDbVersion(version);
 
-        if (!m.find()) {
-            throw new CouchdbException("Invalid CouchDB version " + version);
-        }
-
-        int actualVersion = 0;
-        int actualRelease = 0;
-        int actualModification = 0;
-
-        try {
-            actualVersion = Integer.parseInt(m.group(1));
-            actualRelease = Integer.parseInt(m.group(2));
-            actualModification = Integer.parseInt(m.group(3));
-        } catch (NumberFormatException e) {
-            throw new CouchdbException("Unable to determine CouchDB version " + version, e);
-        }
-
-        if (actualVersion > minVersion) {
-            return;
-        }
-
-        if (actualVersion < minVersion) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        if (actualRelease > minRelease) {
-            return;
-        }
-
-        if (actualRelease < minRelease) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
-        }
-
-        if (actualModification > minModification) {
-            return;
-        }
-
-        if (actualModification < minModification) {
-            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVRM);
+        if ( actualCouchVersion.compareTo(minVersion) < 0) {
+            throw new CouchdbException("CouchDB version " + version + " is below minimum " + minVersion);
         }
 
         return;
-
     }
 
 

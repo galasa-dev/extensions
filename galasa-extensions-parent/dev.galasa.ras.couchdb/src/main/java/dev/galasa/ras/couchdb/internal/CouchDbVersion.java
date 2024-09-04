@@ -5,37 +5,10 @@
  */
 package dev.galasa.ras.couchdb.internal;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import java.net.URI;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-
-import dev.galasa.extensions.common.couchdb.pojos.Welcome;
-import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
-import dev.galasa.extensions.common.couchdb.CouchdbValidator;
-import dev.galasa.framework.spi.utils.GalasaGson;
 
 
 public class CouchDbVersion implements Comparable<CouchDbVersion> {
@@ -129,5 +102,17 @@ public class CouchDbVersion implements Comparable<CouchDbVersion> {
         return result;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder buffer  = new StringBuilder();
+
+        buffer.append(this.version);
+        buffer.append('.');
+        buffer.append(this.release);
+        buffer.append('.');
+        buffer.append(this.modification);
+
+        return buffer.toString();
+    }
 
 }
