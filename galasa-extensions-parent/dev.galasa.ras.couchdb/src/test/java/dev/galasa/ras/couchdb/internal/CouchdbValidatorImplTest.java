@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.junit.*;
 import org.junit.rules.TestName;
 
+
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -21,7 +22,7 @@ import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
-import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 
 public class CouchdbValidatorImplTest {
     

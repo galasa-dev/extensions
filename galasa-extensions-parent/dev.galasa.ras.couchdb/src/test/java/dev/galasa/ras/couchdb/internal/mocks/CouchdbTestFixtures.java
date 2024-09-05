@@ -35,6 +35,7 @@ import dev.galasa.framework.spi.IFramework;
 import dev.galasa.framework.spi.IRun;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.ras.couchdb.internal.CouchdbRasStore;
+import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 
 public class CouchdbTestFixtures {
 
