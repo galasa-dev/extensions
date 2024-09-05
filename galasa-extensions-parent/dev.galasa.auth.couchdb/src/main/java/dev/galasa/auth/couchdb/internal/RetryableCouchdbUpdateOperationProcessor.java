@@ -44,7 +44,7 @@ public class RetryableCouchdbUpdateOperationProcessor {
 
                 logger.info("Clashing update detected. Backing off for a short time to avoid another clash immediately. ");
 
-                waitForBackoffDelay();
+                waitForBackoffDelay(timeService);
 
                 attemptsToGoBeforeGiveUp -= 1;
                 if (attemptsToGoBeforeGiveUp == 0) {
@@ -56,12 +56,12 @@ public class RetryableCouchdbUpdateOperationProcessor {
         }
     }
 
-    private void waitForBackoffDelay() {
+    private void waitForBackoffDelay(ITimeService timeService) {
         Long delayMilliSecs = 1000L + new Random().nextInt(3000);
 
         try {
             logger.info("Waiting "+delayMilliSecs+" during a back-off delay. starting now.");
-            timeService.wait(delayMilliSecs);
+            timeService.sleepMillis(delayMilliSecs);
         } catch(InterruptedException ex ) {
             logger.info("Interrupted from waiting during a back-off delay. Ignoring this, but cutting our wait short.");
         }

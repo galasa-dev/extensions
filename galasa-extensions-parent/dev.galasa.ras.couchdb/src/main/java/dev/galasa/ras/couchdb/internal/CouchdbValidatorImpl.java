@@ -45,7 +45,13 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
     private static final CouchDbVersion minCouchDbVersion = new CouchDbVersion(3,3,3);
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory, ITimeService timeService) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid( 
+        URI rasUri, 
+        CloseableHttpClient httpClient , 
+        HttpRequestFactory httpRequestFactory, 
+        ITimeService timeService
+    ) throws CouchdbException {
+
        this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 
@@ -64,20 +70,20 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
             }
 
             checkVersion(welcome.version, minCouchDbVersion);
-            checkDatabasePresent(httpClient, rasUri, 1, "galasa_run");
-            checkDatabasePresent(httpClient, rasUri, 1, "galasa_log");
-            checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts");
+            checkDatabasePresent(httpClient, rasUri, 1, "galasa_run", timeService);
+            checkDatabasePresent(httpClient, rasUri, 1, "galasa_log", timeService);
+            checkDatabasePresent(httpClient, rasUri, 1, "galasa_artifacts", timeService);
 
-            checkRunDesignDocument(httpClient, rasUri,1);
+            checkRunDesignDocument(httpClient, rasUri,1, timeService);
 
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "runName");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "requestor");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "queued");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "startTime");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "endTime");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "testName");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "bundle");
-            checkIndex(httpClient, rasUri, 1, "galasa_run", "result");
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "runName",timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "requestor",timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "queued",timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "startTime", timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "endTime", timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "testName", timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "bundle", timeService);
+            checkIndex(httpClient, rasUri, 1, "galasa_run", "result", timeService);
 
             logger.debug("RAS CouchDB at " + rasUri.toString() + " validated");
         } catch (CouchdbException e) {
@@ -89,7 +95,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
 
 
-    private void checkDatabasePresent( CloseableHttpClient httpClient, URI rasUri, int attempts, String dbName) throws CouchdbException {
+    private void checkDatabasePresent( CloseableHttpClient httpClient, URI rasUri, int attempts, String dbName, ITimeService timeService) throws CouchdbException {
         HttpHead httpHead = requestFactory.getHttpHeadRequest(rasUri + "/" + dbName);
 
         try (CloseableHttpResponse response = httpClient.execute(httpHead)) {
@@ -121,8 +127,8 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                     throw new CouchdbException(
                             "Create Database " + dbName + " failed on CouchDB server due to conflicts, attempted 10 times");
                 }
-                Thread.sleep(1000 + new Random().nextInt(3000));
-                checkDatabasePresent(httpClient, rasUri, attempts, dbName);
+                timeService.sleepMillis(1000 + new Random().nextInt(3000));
+                checkDatabasePresent(httpClient, rasUri, attempts, dbName, timeService);
                 return;
             }
 
@@ -140,7 +146,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
         }
     }
 
-    private void checkRunDesignDocument( CloseableHttpClient httpClient , URI rasUri , int attempts) throws CouchdbException {
+    private void checkRunDesignDocument( CloseableHttpClient httpClient , URI rasUri , int attempts, ITimeService timeService) throws CouchdbException {
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_design/docs");
 
         String docJson = null;
@@ -243,8 +249,8 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                         throw new CouchdbException(
                                 "Update of galasa_run design document failed on CouchDB server due to conflicts, attempted 10 times");
                     }
-                    Thread.sleep(1000 + new Random().nextInt(3000));
-                    checkRunDesignDocument(httpClient, rasUri, attempts);
+                    timeService.sleepMillis(1000 + new Random().nextInt(3000));
+                    checkRunDesignDocument(httpClient, rasUri, attempts, timeService);
                     return;
                 }
                 
@@ -315,7 +321,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
 
 
-    private void checkIndex(CloseableHttpClient httpClient, URI rasUri , int attempts, String dbName, String field) throws CouchdbException {
+    private void checkIndex(CloseableHttpClient httpClient, URI rasUri , int attempts, String dbName, String field, ITimeService timeService) throws CouchdbException {
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri + "/galasa_run/_index");
 
         String idxJson = null;
@@ -392,8 +398,8 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
                         throw new CouchdbException(
                                 "Update of galasa_run index failed on CouchDB server due to conflicts, attempted 10 times");
                     }
-                    Thread.sleep(1000 + new Random().nextInt(3000));
-                    checkIndex(httpClient, rasUri, attempts, dbName, field);
+                    timeService.sleepMillis(1000 + new Random().nextInt(3000));
+                    checkIndex(httpClient, rasUri, attempts, dbName, field, timeService);
                     return;
                 }
 
