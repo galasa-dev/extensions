@@ -37,7 +37,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
     private final Log logger = LogFactory.getLog(getClass());
     private final GalasaGson gson = new GalasaGson();
 
-
+    // A couchDB view, it gets all the access tokens of a the user based on the loginId provided.
     public static final String DB_TABLE_TOKENS_DESIGN = "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }";
 
     @Override
@@ -75,7 +75,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
         TokensDBNameViewDesign tableDesign = parseTokenDesignFromJson(docJson);
 
-        boolean isDesignUpdated = transformDesignToDesired(tableDesign);
+        boolean isDesignUpdated = updateDesignDocToDesiredDesignDoc(tableDesign);
 
         if (isDesignUpdated) {
             updateTokenDesignDocument(httpClient, couchdbUri, attempts, tableDesign);
@@ -96,7 +96,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         return tableDesign;
     }
 
-    private boolean transformDesignToDesired(TokensDBNameViewDesign tableDesign) {
+    private boolean updateDesignDocToDesiredDesignDoc(TokensDBNameViewDesign tableDesign) {
         boolean isUpdated = false;
 
         if (tableDesign.views == null) {
@@ -126,7 +126,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
     private String getTokenDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts)
             throws CouchdbException {
         HttpRequestFactory requestFactory = super.getRequestFactory();
-        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/galasa_tokens/_design/docs");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME +"/_design/docs");
 
         String docJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -160,7 +160,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
         HttpEntity entity = new StringEntity(gson.toJson(tokenViewDesign), ContentType.APPLICATION_JSON);
 
-        HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/galasa_tokens/_design/docs");
+        HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME +"/_design/docs");
         httpPut.setEntity(entity);
 
         if (tokenViewDesign._rev != null) {

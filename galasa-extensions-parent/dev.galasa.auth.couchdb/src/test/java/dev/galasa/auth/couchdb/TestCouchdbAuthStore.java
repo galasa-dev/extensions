@@ -195,6 +195,30 @@ public class TestCouchdbAuthStore {
     }
 
     @Test
+    public void testGetTokensReturnsTokensByLoginIdWithFailingRequestReturnsError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=johndoe", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> authStore.getTokensByLoginId("johndoe"), AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6101E", "Failed to get auth tokens from the CouchDB auth store");
+    }
+
+    @Test
     public void testStoreTokenSendsRequestToCreateTokenDocumentOK() throws Exception {
         // Given...
         URI authStoreUri = URI.create("couchdb:https://my-auth-store");

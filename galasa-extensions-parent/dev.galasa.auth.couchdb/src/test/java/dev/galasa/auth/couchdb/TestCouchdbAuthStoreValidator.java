@@ -108,19 +108,6 @@ public class TestCouchdbAuthStoreValidator {
         }
     }
 
-
-
-//   "_id": "_design/docs",
-//   "_rev": "3-9e69612124f138c029ab40c9c9072deb",
-//   "views": {
-//     "loginId-view": {
-//       "map": "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}"
-//     }
-//   },
-//   "language": "javascript"
-// }    
-
-
     @Test
     public void testCheckCouchdbDatabaseIsValidWithValidDatabaseIsOK() throws Exception {
         // Given...
