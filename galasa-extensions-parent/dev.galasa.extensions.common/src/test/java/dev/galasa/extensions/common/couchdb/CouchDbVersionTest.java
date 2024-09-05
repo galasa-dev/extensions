@@ -3,14 +3,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal;
+package dev.galasa.extensions.common.couchdb;
 
 import java.util.*;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.*;
-import dev.galasa.extensions.common.couchdb.CouchdbException;
-
 
 public class CouchDbVersionTest {
 
@@ -32,17 +30,23 @@ public class CouchDbVersionTest {
 
     @Test
     public void testInvalidVersionStringThrowsParsingError() throws Exception {
-        CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion("1.2..3"); },
+
+        String invalidVersion = "1.2..3";
+
+        CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion(invalidVersion); },
              CouchdbException.class );
-        assertThat(ex).hasMessageContaining("1.2..3");
+        assertThat(ex).hasMessageContaining("GAL6010E: Invalid CouchDB server version format detected. The CouchDB version '" + invalidVersion + "'");
         // TODO: Assert that more of the message is in here.
     }
 
     @Test
     public void testInvalidLeadingDotVersionStringThrowsParsingError() throws Exception {
-        CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion(".1.2.3"); },
+
+        String invalidVersion = ".1.2.3";
+
+        CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion(invalidVersion); },
              CouchdbException.class );
-        assertThat(ex).hasMessageContaining(".1.2.3");
+        assertThat(ex).hasMessageContaining("GAL6010E: Invalid CouchDB server version format detected. The CouchDB version '" + invalidVersion + "'");
         // TODO: Assert that more of the message is in here.
     }
 

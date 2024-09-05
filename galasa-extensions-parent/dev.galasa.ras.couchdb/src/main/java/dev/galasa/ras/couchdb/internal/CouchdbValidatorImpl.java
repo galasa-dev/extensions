@@ -15,8 +15,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.net.URI;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +31,7 @@ import com.google.gson.JsonPrimitive;
 
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
+import dev.galasa.extensions.common.couchdb.CouchDbVersion;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.framework.spi.utils.GalasaGson;

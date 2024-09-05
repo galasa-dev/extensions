@@ -11,6 +11,8 @@ import dev.galasa.extensions.common.couchdb.CouchdbClashingUpdateException;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.framework.spi.utils.ITimeService;
 
+import org.apache.commons.logging.Log;
+
 /**
  * Allows a lambda function to be used, and that function will be retried a number of times before giving up.
  */
@@ -18,7 +20,7 @@ public class RetryableCouchdbUpdateOperationProcessor {
 
     public int MAX_ATTEMPTS_TO_GO_BEFORE_GIVE_UP = 10;
     private ITimeService timeService ;
-
+    private Log logger;
     public interface RetryableCouchdbUpdateOperation {
         public void tryToUpdateCouchDb() throws CouchdbException;
     }
@@ -40,12 +42,15 @@ public class RetryableCouchdbUpdateOperationProcessor {
                 isDone = true;
             } catch (CouchdbClashingUpdateException updateClashedEx) {
 
+                logger.info("Clashing update detected. Backing off for a short time to avoid another clash immediately. ");
+
                 waitForBackoffDelay();
 
-                // TODO: Log it
                 attemptsToGoBeforeGiveUp -= 1;
                 if (attemptsToGoBeforeGiveUp == 0) {
-                    throw new CouchdbException("tried x times and could not update doc...", updateClashedEx);
+                    throw new CouchdbException("Failed after " + Integer.toString(MAX_ATTEMPTS_TO_GO_BEFORE_GIVE_UP) + " attempts to update the design document in CouchDB due to conflicts.", updateClashedEx);
+                } else {
+                    logger.info("Failed to update CouchDB design document, retrying...");
                 }
             }
         }
@@ -55,10 +60,10 @@ public class RetryableCouchdbUpdateOperationProcessor {
         Long delayMilliSecs = 1000L + new Random().nextInt(3000);
 
         try {
+            logger.info("Waiting "+delayMilliSecs+" during a back-off delay. starting now.");
             timeService.wait(delayMilliSecs);
         } catch(InterruptedException ex ) {
-            // TODO: Log it and continue. 
+            logger.info("Interrupted from waiting during a back-off delay. Ignoring this, but cutting our wait short.");
         }
-        
     }
 }

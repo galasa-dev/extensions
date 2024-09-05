@@ -3,19 +3,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.ras.couchdb.internal;
+package dev.galasa.extensions.common.couchdb;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import dev.galasa.extensions.common.couchdb.CouchdbException;
+import static dev.galasa.extensions.common.Errors.*;
 
 
 public class CouchDbVersion implements Comparable<CouchDbVersion> {
 
+
     private int version ;
     private int release;
     private int modification;
+
+    public static final CouchDbVersion COUCHDB_MIN_VERSION = new CouchDbVersion(3,3,3);
     
     public CouchDbVersion(int version, int release, int modification) {
         this.version = version ;
@@ -28,7 +31,8 @@ public class CouchDbVersion implements Comparable<CouchDbVersion> {
         Matcher m = vrm.matcher(dotSeparatedVersion);
 
         if (!m.find()) {
-            throw new CouchdbException("Invalid CouchDB version " + dotSeparatedVersion); // TODO: Make this error msg better.
+            String errorMessage = ERROR_INVALID_COUCHDB_VERSION_FORMAT.getMessage(dotSeparatedVersion, COUCHDB_MIN_VERSION);
+            throw new CouchdbException(errorMessage);
         }
 
         try {
@@ -36,7 +40,7 @@ public class CouchDbVersion implements Comparable<CouchDbVersion> {
             this.release = Integer.parseInt(m.group(2));
             this.modification = Integer.parseInt(m.group(3));
         } catch (NumberFormatException e) {
-            throw new CouchdbException("Unable to determine CouchDB version " + dotSeparatedVersion, e);
+            throw new CouchdbException(ERROR_INVALID_COUCHDB_VERSION_FORMAT.getMessage(dotSeparatedVersion), e); // TODO: Common error.
         }
     }
 

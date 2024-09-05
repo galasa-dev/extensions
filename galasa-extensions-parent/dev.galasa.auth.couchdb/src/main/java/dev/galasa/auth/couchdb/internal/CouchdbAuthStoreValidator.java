@@ -31,6 +31,8 @@ import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.framework.spi.utils.ITimeService;
 import dev.galasa.framework.spi.utils.SystemTimeService;
 
+import static dev.galasa.auth.couchdb.internal.Errors.*;
+
 public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
     private final Log logger = LogFactory.getLog(getClass());
@@ -45,7 +47,13 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         CloseableHttpClient httpClient,
         HttpRequestFactory httpRequestFactory
     ) throws CouchdbException {
+
         ITimeService timeService = new SystemTimeService();
+
+        // Do some generic checks against the auth DB.
+        // super.checkCouchdbDatabaseIsValid(couchdbUri,httpClient,httpRequestFactory); TODO: Why can't we do this ? Should we ?
+
+        // Check specifics which make the auth db different from other couchdb databases.
         checkCouchdbDatabaseIsValid(couchdbUri,httpClient,httpRequestFactory,timeService);
     }
 
@@ -93,7 +101,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         try {
             tableDesign = gson.fromJson(docJson, TokensDBNameViewDesign.class);
         } catch (JsonSyntaxException ex) {
-            throw new CouchdbException("", ex); // TODO: Throw a couchdb exception up.
+            throw new CouchdbException(ERROR_FAILED_TO_PARSE_COUCHDB_DESIGN_DOC.getMessage(ex.getMessage()), ex);
         }
 
         if (tableDesign == null) {
@@ -179,7 +187,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
             if (statusCode == HttpStatus.SC_CONFLICT) {
                 // Someone possibly updated the document while we were thinking about it.
                 // It was probably another instance of this exact code.
-                throw new CouchdbClashingUpdateException(""); // TODO: Add proper message.
+                throw new CouchdbClashingUpdateException(ERROR_FAILED_TO_UPDATE_COUCHDB_DESING_DOC_CONFLICT.toString());
             }
 
             EntityUtils.consumeQuietly(response.getEntity());

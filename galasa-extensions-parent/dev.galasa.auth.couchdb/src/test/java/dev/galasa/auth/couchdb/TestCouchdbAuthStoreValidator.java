@@ -20,7 +20,6 @@ import org.junit.Test;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreValidator;
 import dev.galasa.auth.couchdb.internal.beans.*;
-import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
@@ -28,6 +27,8 @@ import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
 import dev.galasa.extensions.mocks.MockCloseableHttpClient;
+
+import dev.galasa.extensions.common.couchdb.CouchDbVersion;
 
 public class TestCouchdbAuthStoreValidator {
 
@@ -128,7 +129,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
@@ -173,7 +174,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
         List<HttpInteraction> interactions = new ArrayList<>();
@@ -202,7 +203,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
         List<HttpInteraction> interactions = new ArrayList<>();
@@ -239,7 +240,7 @@ public class TestCouchdbAuthStoreValidator {
         URI couchdbUri = URI.create(couchdbUriStr);
         CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
 
-        String[] versionParts = CouchdbBaseValidator.COUCHDB_MIN_VERSION.split("\\.");
+        String[] versionParts = CouchDbVersion.COUCHDB_MIN_VERSION.toString().split("\\.");
         int majorVersion = Integer.parseInt(versionParts[0]);
         int minorVersion = Integer.parseInt(versionParts[1]);
         int patchVersion = Integer.parseInt(versionParts[2]);
@@ -274,7 +275,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "not welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
@@ -316,7 +317,7 @@ public class TestCouchdbAuthStoreValidator {
 
         // Then...
         assertThat(thrown).isNotNull();
-        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchdbBaseValidator.COUCHDB_MIN_VERSION + "' or above");
+        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchDbVersion.COUCHDB_MIN_VERSION.toString() + "' or above");
     }
 
     @Test
@@ -353,7 +354,7 @@ public class TestCouchdbAuthStoreValidator {
         URI couchdbUri = URI.create(couchdbUriStr);
         CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
 
-        String majorVersion = CouchdbBaseValidator.COUCHDB_MIN_VERSION.split("\\.")[0];
+        String majorVersion = CouchDbVersion.COUCHDB_MIN_VERSION.toString().split("\\.")[0];
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
@@ -372,7 +373,7 @@ public class TestCouchdbAuthStoreValidator {
 
         // Then...
         assertThat(thrown).isNotNull();
-        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchdbBaseValidator.COUCHDB_MIN_VERSION + "' or above");
+        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchDbVersion.COUCHDB_MIN_VERSION.toString() + "' or above");
     }
 
     @Test
@@ -382,7 +383,7 @@ public class TestCouchdbAuthStoreValidator {
         URI couchdbUri = URI.create(couchdbUriStr);
         CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
 
-        String[] minVersionParts = CouchdbBaseValidator.COUCHDB_MIN_VERSION.split("\\.");
+        String[] minVersionParts = CouchDbVersion.COUCHDB_MIN_VERSION.toString().split("\\.");
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
@@ -401,7 +402,7 @@ public class TestCouchdbAuthStoreValidator {
 
         // Then...
         assertThat(thrown).isNotNull();
-        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchdbBaseValidator.COUCHDB_MIN_VERSION + "' or above");
+        assertThat(thrown.getMessage()).contains("GAL6005E", "Expected version '" + CouchDbVersion.COUCHDB_MIN_VERSION.toString() + "' or above");
     }
 
     @Test
@@ -413,7 +414,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
@@ -462,7 +463,7 @@ public class TestCouchdbAuthStoreValidator {
 
         Welcome welcomeMessage = new Welcome();
         welcomeMessage.couchdb = "Welcome";
-        welcomeMessage.version = CouchdbBaseValidator.COUCHDB_MIN_VERSION;
+        welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
