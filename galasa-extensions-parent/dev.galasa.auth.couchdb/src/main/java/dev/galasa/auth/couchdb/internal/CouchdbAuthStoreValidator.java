@@ -29,7 +29,6 @@ import dev.galasa.auth.couchdb.internal.beans.*;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.framework.spi.utils.ITimeService;
-import dev.galasa.framework.spi.utils.SystemTimeService;
 
 import static dev.galasa.auth.couchdb.internal.Errors.*;
 
@@ -45,24 +44,12 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
     public void checkCouchdbDatabaseIsValid(
         URI couchdbUri, 
         CloseableHttpClient httpClient,
-        HttpRequestFactory httpRequestFactory
-    ) throws CouchdbException {
-
-        ITimeService timeService = new SystemTimeService();
-
-        // Do some generic checks against the auth DB.
-        // super.checkCouchdbDatabaseIsValid(couchdbUri,httpClient,httpRequestFactory); TODO: Why can't we do this ? Should we ?
-
-        // Check specifics which make the auth db different from other couchdb databases.
-        checkCouchdbDatabaseIsValid(couchdbUri,httpClient,httpRequestFactory,timeService);
-    }
-
-    protected void checkCouchdbDatabaseIsValid(
-        URI couchdbUri, 
-        CloseableHttpClient httpClient,
         HttpRequestFactory httpRequestFactory,
         ITimeService timeService
     ) throws CouchdbException {
+
+        // Perform the base CouchDB checks
+        super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory, timeService);
 
         RetryableCouchdbUpdateOperationProcessor retryProcessor = new RetryableCouchdbUpdateOperationProcessor(timeService);
         
@@ -75,8 +62,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
     private void tryToCheckAndUpdateCouchDBTokenView(URI couchdbUri, CloseableHttpClient httpClient,
             HttpRequestFactory httpRequestFactory) throws CouchdbException {
-        // Perform the base CouchDB checks
-        super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory);
+       
         validateDatabasePresent(couchdbUri, CouchdbAuthStore.TOKENS_DATABASE_NAME);
         checkTokensDesignDocument(httpClient, couchdbUri, 1);
     }

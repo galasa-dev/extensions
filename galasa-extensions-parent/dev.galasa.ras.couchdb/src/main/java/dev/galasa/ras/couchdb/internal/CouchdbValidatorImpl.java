@@ -35,6 +35,7 @@ import dev.galasa.extensions.common.couchdb.CouchDbVersion;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.utils.ITimeService;
 
 public class CouchdbValidatorImpl implements CouchdbValidator {
     
@@ -44,7 +45,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
     private static final CouchDbVersion minCouchDbVersion = new CouchDbVersion(3,3,3);
 
-    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid( URI rasUri, CloseableHttpClient httpClient , HttpRequestFactory httpRequestFactory, ITimeService timeService) throws CouchdbException {
        this.requestFactory = httpRequestFactory;
         HttpGet httpGet = requestFactory.getHttpGetRequest(rasUri.toString());
 

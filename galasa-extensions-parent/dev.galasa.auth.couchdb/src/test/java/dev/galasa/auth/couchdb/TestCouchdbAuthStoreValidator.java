@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -27,7 +28,7 @@ import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
 import dev.galasa.extensions.mocks.MockCloseableHttpClient;
-
+import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.common.couchdb.CouchDbVersion;
 
 public class TestCouchdbAuthStoreValidator {
@@ -152,6 +153,7 @@ public class TestCouchdbAuthStoreValidator {
         views.loginIdView = view;
         TokensDBNameViewDesign designDocToPassBack = new TokensDBNameViewDesign();
         designDocToPassBack.language = "javascript";
+        
 
 
         String tokensDesignDocUrl = couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME + "/_design/docs";
@@ -160,9 +162,10 @@ public class TestCouchdbAuthStoreValidator {
 
         interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "", HttpStatus.SC_CREATED));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When...
-        validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl());
+        validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService);
     }
 
     @Test
@@ -182,10 +185,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_NOT_FOUND));
         interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_INTERNAL_SERVER_ERROR));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 
@@ -222,12 +226,13 @@ public class TestCouchdbAuthStoreValidator {
         String tokensDesignDocUrl = couchdbUriStr + "/" + tokensDatabaseName + "/_design/docs";
         interactions.add(new GetTokensDatabaseDesignInteraction(tokensDesignDocUrl, designDocToPassBack));
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "",HttpStatus.SC_CREATED));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         // When...
-        validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl());
+        validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(),mockTimeService);
 
         // Then...
         // The validation should have passed, so no errors should have been thrown
@@ -255,9 +260,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_INTERNAL_SERVER_ERROR));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 
@@ -282,9 +289,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 
@@ -309,9 +318,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(),mockTimeService),
             CouchdbException.class
         );
 
@@ -336,9 +347,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(),mockTimeService),
             CouchdbException.class
         );
 
@@ -365,9 +378,12 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(),mockTimeService),
             CouchdbException.class
         );
 
@@ -394,9 +410,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 
@@ -443,9 +461,11 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseDesignInteraction(tokensDesignDocUrl, designDocToPassBack, HttpStatus.SC_INTERNAL_SERVER_ERROR));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 
@@ -492,10 +512,12 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseDesignInteraction(tokensDesignDocUrl, designDocToPassBack, HttpStatus.SC_OK));
         interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "", HttpStatus.SC_INTERNAL_SERVER_ERROR));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+        
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When...
         CouchdbException thrown = catchThrowableOfType(
-            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl()),
+            () -> validator.checkCouchdbDatabaseIsValid(couchdbUri, mockHttpClient, new HttpRequestFactoryImpl(), mockTimeService),
             CouchdbException.class
         );
 

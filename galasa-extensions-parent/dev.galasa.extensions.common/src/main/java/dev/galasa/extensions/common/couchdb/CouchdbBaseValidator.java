@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.utils.ITimeService;
 
 public abstract class CouchdbBaseValidator implements CouchdbValidator {
 
@@ -37,7 +38,7 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
     private CloseableHttpClient httpClient;
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory, ITimeService timeService) throws CouchdbException {
         this.requestFactory = httpRequestFactory;
         this.httpClient = httpClient;
 

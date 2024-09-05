@@ -57,7 +57,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         this.logger = logFactory.getLog(getClass());
         this.timeService = timeService;
 
-        validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory);
+        validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory, timeService);
     }
 
     @Override

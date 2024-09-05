@@ -32,6 +32,8 @@ import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.utils.ITimeService;
+import dev.galasa.framework.spi.utils.SystemTimeService;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
@@ -77,6 +79,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     private String                             artifactDocumentRev;
 
     private TestStructure                      lastTestStructure;
+    private ITimeService timeService ;
 
     private LogFactory logFactory;
 
@@ -99,9 +102,10 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
         this.framework = framework;
+        this.timeService = new SystemTimeService();
          // *** Validate the connection to the server and it's version
 
-        validator.checkCouchdbDatabaseIsValid(this.storeUri,this.httpClient, this.httpRequestFactory);
+        validator.checkCouchdbDatabaseIsValid(this.storeUri,this.httpClient, this.httpRequestFactory, timeService);
 
         this.run = this.framework.getTestRun();
 
