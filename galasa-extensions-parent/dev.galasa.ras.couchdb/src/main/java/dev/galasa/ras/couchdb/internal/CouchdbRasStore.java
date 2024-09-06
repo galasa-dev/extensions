@@ -49,9 +49,9 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     private static final String COUCHDB_AUTH_ENV_VAR = "GALASA_RAS_TOKEN";
     private static final String COUCHDB_AUTH_TYPE    = "Basic";
 
-    private static final String ARTIFACTS_DB         = "galasa_artifacts";
-    private static final String RUNS_DB              = "galasa_run";
-    private static final String LOG_DB               = "galasa_log";
+    public static final String ARTIFACTS_DB         = "galasa_artifacts";
+    public static final String RUNS_DB              = "galasa_run";
+    public static final String LOG_DB               = "galasa_log";
 
     private final Log                          logger            ;
 

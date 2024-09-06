@@ -147,7 +147,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         ArrayList<IRunResult> runs = new ArrayList<>();
 
-        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/galasa_run/_all_docs");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_all_docs");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -183,12 +183,24 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return runs;
     }
 
-    private CouchdbRunResult fetchRun(String id) throws ParseException, IOException, CouchdbRasException {
-        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/galasa_run/" + id);
+    private CouchdbRunResult fetchRun(String id) throws ParseException, IOException, ResultArchiveStoreException {
+        CouchdbRunResult runResult = fetchRunWithoutArtifacts(id);
+        TestStructureCouchdb testStructure = (TestStructureCouchdb) runResult.getTestStructure();
+
+        // Populate the run's artifacts filesystem
+        Path runArtifactPath = getRunArtifactPath(testStructure);
+
+        runResult = new CouchdbRunResult(store, testStructure, runArtifactPath);
+        return runResult;
+    }
+
+    private CouchdbRunResult fetchRunWithoutArtifacts(String id) throws ParseException, IOException, CouchdbRasException {
+        HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/" + id);
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode != HttpStatus.SC_OK) {
                 return null;
             }
 
@@ -196,10 +208,8 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             String responseEntity = EntityUtils.toString(entity);
             TestStructureCouchdb ts = store.getGson().fromJson(responseEntity, TestStructureCouchdb.class);
 
-            Path runArtifactPath = getRunArtifactPath(ts);
-
             // *** Add this run to the results
-            CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, runArtifactPath);
+            CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, createFileSystemProvider().getRoot());
             return cdbrr;
         }
     }
@@ -209,7 +219,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         ArrayList<String> requestors = new ArrayList<>();
 
         HttpGet httpGet = requestFactory.getHttpGetRequest(
-                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/requestors-view?group=true");
+                store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_design/docs/_view/requestors-view?group=true");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -241,7 +251,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         ArrayList<String> results = new ArrayList<>();
 
         HttpGet httpGet = requestFactory.getHttpGetRequest(
-                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/result-view?group=true");
+                store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_design/docs/_view/result-view?group=true");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -278,7 +288,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         ArrayList<RasTestClass> tests = new ArrayList<>();
 
         HttpGet httpGet = requestFactory.getHttpGetRequest(
-                store.getCouchdbUri() + "/galasa_run/_design/docs/_view/bundle-testnames-view?group=true");
+                store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_design/docs/_view/bundle-testnames-view?group=true");
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
@@ -326,7 +336,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     public @NotNull RasRunResultPage getRunsPage(int maxResults, RasSortField primarySort, String pageToken, @NotNull IRasSearchCriteria... searchCriterias)
             throws ResultArchiveStoreException {
 
-        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
+        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_find");
 
         Find find = new Find();
         find.selector = buildGetRunsQuery(searchCriterias);
@@ -409,7 +419,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         ArrayList<IRunResult> runs = new ArrayList<>();
 
-        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/galasa_run/_find");
+        HttpPost httpPost = requestFactory.getHttpPostRequest(store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/_find");
 
         Find find = new Find();
         find.selector = buildGetRunsQuery(searchCriterias);
@@ -435,13 +445,17 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
     public void discardRun(String id) throws ResultArchiveStoreException {
         try {
-            CouchdbRunResult run = fetchRun(id);
-            TestStructureCouchdb testStructure = (TestStructureCouchdb) run.getTestStructure();
-
-            discardRunLogs(testStructure.getLogRecordIds());
-            discardRunArtifacts(testStructure.getArtifactRecordIds());
-
-            discardRecord("galasa_run", id);
+            CouchdbRunResult run = fetchRunWithoutArtifacts(id);
+            if (run == null) {
+                logger.info("Run with ID " + id + " does not exist or has already been discarded");
+            } else {
+                TestStructureCouchdb testStructure = (TestStructureCouchdb) run.getTestStructure();
+    
+                discardRunLogs(testStructure.getLogRecordIds());
+                discardRunArtifacts(testStructure.getArtifactRecordIds());
+    
+                discardRecord(CouchdbRasStore.RUNS_DB, id, testStructure._rev);
+            }
         } catch (CouchdbRasException | ParseException | IOException e) {
             throw new ResultArchiveStoreException("Failed to discard run: " + id, e);
         }
@@ -449,21 +463,25 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
     private void discardRunLogs(List<String> ids) throws ResultArchiveStoreException {
         for (String id : ids) {
-            discardRecord("galasa_log", id);
+            discardRecord(CouchdbRasStore.LOG_DB, id);
         }
     }
 
     private void discardRunArtifacts(List<String> ids) throws ResultArchiveStoreException {
         for (String id : ids) {
-            discardRecord("galasa_artifacts", id);
+            discardRecord(CouchdbRasStore.ARTIFACTS_DB, id);
         }
     }
 
     private void discardRecord(String databaseName, String id) throws ResultArchiveStoreException {
+        discardRecord(databaseName, id, getRevision(databaseName, id));
+    }
+
+    private void discardRecord(String databaseName, String id, String revision) throws ResultArchiveStoreException {
         URIBuilder builder;
         try {
             builder = new URIBuilder(store.getCouchdbUri() + "/" + databaseName + "/" + id);
-            builder.addParameter("rev", getRevision(databaseName, id));
+            builder.addParameter("rev", revision);
 
             HttpDelete httpDelete = requestFactory.getHttpDeleteRequest(builder.build().toString());
 
