@@ -31,4 +31,10 @@ public class MockTimeService implements ITimeService {
     public void setCurrentTime(Instant currentTime) {
         this.currentTime = currentTime;
     }
+
+    @Override
+    public void sleepMillis(long millisToSleep) throws InterruptedException {
+        // Pretend we are sleeping, so the current time advances.
+        setCurrentTime(currentTime.plusMillis(millisToSleep));
+    }
 }
