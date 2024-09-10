@@ -199,8 +199,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
             StatusLine statusLine = response.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
-            if (statusCode != HttpStatus.SC_OK) {
+            if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
                 return null;
             }
 
