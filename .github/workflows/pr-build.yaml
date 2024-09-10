@@ -35,6 +35,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.9
+          cache-disabled: true
 
       - name: Build Extensions source code with gradle
         run: |
