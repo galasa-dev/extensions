@@ -94,7 +94,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return new CouchdbRasFileSystemProvider(fileStore, store, logFactory);        
     }
 
-    private Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
+    public Path getRunArtifactPath(TestStructureCouchdb ts) throws CouchdbRasException {
         CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
         if (ts.getArtifactRecordIds() == null || ts.getArtifactRecordIds().isEmpty()) {
             return runProvider.getRoot();
@@ -184,17 +184,7 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
     }
 
     private CouchdbRunResult fetchRun(String id) throws ParseException, IOException, ResultArchiveStoreException {
-        CouchdbRunResult runResult = fetchRunWithoutArtifacts(id);
-        TestStructureCouchdb testStructure = (TestStructureCouchdb) runResult.getTestStructure();
-
-        // Populate the run's artifacts filesystem
-        Path runArtifactPath = getRunArtifactPath(testStructure);
-
-        runResult = new CouchdbRunResult(store, testStructure, runArtifactPath);
-        return runResult;
-    }
-
-    private CouchdbRunResult fetchRunWithoutArtifacts(String id) throws ParseException, IOException, CouchdbRasException {
+        CouchdbRunResult runResult = null;
         HttpGet httpGet = requestFactory.getHttpGetRequest(store.getCouchdbUri() + "/" + CouchdbRasStore.RUNS_DB + "/" + id);
 
         try (CloseableHttpResponse response = store.getHttpClient().execute(httpGet)) {
@@ -207,10 +197,9 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
             String responseEntity = EntityUtils.toString(entity);
             TestStructureCouchdb ts = store.getGson().fromJson(responseEntity, TestStructureCouchdb.class);
 
-            // *** Add this run to the results
-            CouchdbRunResult cdbrr = new CouchdbRunResult(store, ts, createFileSystemProvider().getRoot());
-            return cdbrr;
+            runResult = new CouchdbRunResult(store, ts, logFactory);
         }
+        return runResult;
     }
 
     @Override
@@ -375,11 +364,10 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
 
             for (TestStructureCouchdb ts : found.docs) {
                 if (ts.isValid()) {
-                    // Don't load the artifacts for the found runs, just set a root location for artifacts
-                    CouchdbRasFileSystemProvider runProvider = createFileSystemProvider();
 
-                    // Add this run to the results
-                    runs.add(new CouchdbRunResult(store, ts, runProvider.getRoot()));
+                    // Don't load the artifacts for the found runs, just set a root location for artifacts
+                    // and add this run to the results
+                    runs.add(new CouchdbRunResult(store, ts, logFactory));
                 }
             }
 
@@ -442,21 +430,14 @@ public class CouchdbDirectoryService implements IResultArchiveStoreDirectoryServ
         return runs;
     }
 
-    public void discardRun(String id) throws ResultArchiveStoreException {
+    public void discardRun(@NotNull TestStructureCouchdb runTestStructure) throws ResultArchiveStoreException {
         try {
-            CouchdbRunResult run = fetchRunWithoutArtifacts(id);
-            if (run == null) {
-                logger.info("Run with ID " + id + " does not exist or has already been discarded");
-            } else {
-                TestStructureCouchdb testStructure = (TestStructureCouchdb) run.getTestStructure();
-    
-                discardRunLogs(testStructure.getLogRecordIds());
-                discardRunArtifacts(testStructure.getArtifactRecordIds());
-    
-                discardRecord(CouchdbRasStore.RUNS_DB, id, testStructure._rev);
-            }
-        } catch (CouchdbRasException | ParseException | IOException e) {
-            throw new ResultArchiveStoreException("Failed to discard run: " + id, e);
+            discardRunLogs(runTestStructure.getLogRecordIds());
+            discardRunArtifacts(runTestStructure.getArtifactRecordIds());
+
+            discardRecord(CouchdbRasStore.RUNS_DB, runTestStructure._id, runTestStructure._rev);
+        } catch (CouchdbRasException | ParseException e) {
+            throw new ResultArchiveStoreException("Failed to discard run: " + runTestStructure._id, e);
         }
     }
 

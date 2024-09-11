@@ -7,25 +7,30 @@ package dev.galasa.ras.couchdb.internal;
 
 import java.nio.file.Path;
 
+import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.framework.spi.IRunResult;
 import dev.galasa.framework.spi.ResultArchiveStoreException;
+import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.ras.couchdb.internal.pojos.TestStructureCouchdb;
 
 public class CouchdbRunResult implements IRunResult {
 
     private final TestStructureCouchdb   testStructure;
-    private final Path            path;
     private final CouchdbRasStore store;
+    private Path path;
 
-    public CouchdbRunResult(CouchdbRasStore store, TestStructureCouchdb testStructure, Path path) {
+    public CouchdbRunResult(CouchdbRasStore store, TestStructureCouchdb testStructure, LogFactory logFactory) {
         this.store = store;
         if (testStructure == null) {
             this.testStructure = new TestStructureCouchdb();
         } else {
             this.testStructure = testStructure;
         }
-        this.path = path;
+
+        // Create an empty artifact filesystem and set the artifacts path to the root of this filesystem
+        ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
+        this.path = new CouchdbRasFileSystemProvider(fileStore, store, logFactory).getRoot();
     }
 
     @Override
@@ -46,12 +51,18 @@ public class CouchdbRunResult implements IRunResult {
 	@Override
 	public void discard() throws ResultArchiveStoreException {
         CouchdbDirectoryService storeService =  (CouchdbDirectoryService) store.getDirectoryServices().get(0);
-        storeService.discardRun(this.testStructure._id);
+        storeService.discardRun(this.testStructure);
 	}
 
     @Override
     public String getRunId() {
         return "cdb-" + this.testStructure._id;
+    }
+
+    @Override
+    public void loadArtifacts() throws ResultArchiveStoreException {
+        CouchdbDirectoryService storeService = (CouchdbDirectoryService) store.getDirectoryServices().get(0);
+        this.path = storeService.getRunArtifactPath(this.testStructure);
     }
 
 }
