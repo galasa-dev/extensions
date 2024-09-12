@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
+import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.BaseHttpInteraction;
 import dev.galasa.extensions.mocks.HttpInteraction;
@@ -82,12 +83,62 @@ public class CouchdbDirectoryServiceTest {
         }
     }
 
+    class GetRunByIdFromCouchdbInteraction extends BaseHttpInteraction {
+
+        public GetRunByIdFromCouchdbInteraction(String expectedUri, int statusCode, TestStructureCouchdb runTestStructure) {
+            super(expectedUri, statusCode);
+            setResponsePayload(runTestStructure);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
+        }
+    }
+
+    class GetDocumentByIdFromCouchdbInteraction extends BaseHttpInteraction {
+
+        public GetDocumentByIdFromCouchdbInteraction(String expectedUri, int statusCode, IdRev idRev) {
+            super(expectedUri, statusCode);
+            setResponsePayload(idRev);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("GET");
+        }
+    }
+
+    class DeleteDocumentFromCouchdbInteraction extends BaseHttpInteraction {
+
+        public DeleteDocumentFromCouchdbInteraction(String expectedUri, int statusCode) {
+            super(expectedUri, statusCode);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("DELETE");
+        }
+    }
+
     private TestStructureCouchdb createRunTestStructure(String runName) {
         TestStructureCouchdb mockTestStructure = new TestStructureCouchdb();
         mockTestStructure._id = runName;
+        mockTestStructure._rev = "this-is-a-revision";
         mockTestStructure.setRunName(runName);
+        mockTestStructure.setArtifactRecordIds(new ArrayList<>());
+        mockTestStructure.setLogRecordIds(new ArrayList<>());
         return mockTestStructure;
     }
+
+    //------------------------------------------
+    //
+    // Tests for getting runs by criteria
+    //
+    //------------------------------------------
 
     @Test
     public void testGetRunsByQueuedFromOnePageReturnsRunsOk() throws Exception {
@@ -499,5 +550,195 @@ public class CouchdbDirectoryServiceTest {
 
         // Then...
         assertThat(runsPage.getNextCursor()).isNull();
+    }
+
+    //------------------------------------------
+    //
+    // Tests for deleting runs
+    //
+    //------------------------------------------
+
+    @Test
+    public void testDiscardRunDeletesRunOk() throws Exception {
+        // Given...
+        String runId = "ABC123";
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        IdRev mockIdRev = new IdRev();
+        String revision = "this-is-a-revision";
+        mockIdRev._id = "this-is-an-id";
+        mockIdRev._rev = revision;
+
+        String artifactId1 = "artifact1";
+        String artifactId2 = "artifact2";
+        List<String> mockArtifactIds = List.of(artifactId1, artifactId2);
+
+        String logId1 = "log1"; 
+        String logId2 = "log2"; 
+        List<String> mockLogRecordIds = List.of(logId1, logId2);
+
+        mockRun1.setArtifactRecordIds(mockArtifactIds);
+        mockRun1.setLogRecordIds(mockLogRecordIds);
+
+        String baseUri = "http://my.uri";
+        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
+        String artifactsDbUri = baseUri + "/" + CouchdbRasStore.ARTIFACTS_DB;
+        String logsDbUri = baseUri + "/" + CouchdbRasStore.LOG_DB;
+        List<HttpInteraction> interactions = List.of(
+            // Fetch the run to be deleted
+            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
+            
+            // Start discarding the run's log records
+            new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId1, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId1 + "?rev=" + revision, HttpStatus.SC_OK),
+            new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId2, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId2 + "?rev=" + revision, HttpStatus.SC_OK),
+            
+            // Start discarding the run's artifact records
+            new GetDocumentByIdFromCouchdbInteraction(artifactsDbUri + "/" + artifactId1, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(artifactsDbUri + "/" + artifactId1 + "?rev=" + revision, HttpStatus.SC_OK),
+            new GetDocumentByIdFromCouchdbInteraction(artifactsDbUri + "/" + artifactId2, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(artifactsDbUri + "/" + artifactId2 + "?rev=" + revision, HttpStatus.SC_OK),
+
+            // Delete the record of the run
+            new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_OK)
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        // When...
+        directoryService.discardRun(runId);
+
+        // Then...
+        // The assertions in the interactions should not have failed
+    }
+
+    @Test
+    public void testDiscardRunWithNoArtifactsDeletesRunOk() throws Exception {
+        // Given...
+        String runId = "ABC123";
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        IdRev mockIdRev = new IdRev();
+        String revision = "this-is-a-revision";
+        mockIdRev._id = "this-is-an-id";
+        mockIdRev._rev = revision;
+
+        String logId1 = "log1"; 
+        String logId2 = "log2"; 
+        List<String> mockLogRecordIds = List.of(logId1, logId2);
+
+        mockRun1.setLogRecordIds(mockLogRecordIds);
+
+        String baseUri = "http://my.uri";
+        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
+        String logsDbUri = baseUri + "/" + CouchdbRasStore.LOG_DB;
+        List<HttpInteraction> interactions = List.of(
+            // Fetch the run to be deleted
+            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
+            
+            // Start discarding the run's log records
+            new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId1, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId1 + "?rev=" + revision, HttpStatus.SC_OK),
+            new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId2, HttpStatus.SC_OK, mockIdRev),
+            new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId2 + "?rev=" + revision, HttpStatus.SC_OK),
+
+            // Delete the record of the run
+            new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_OK)
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        // When...
+        directoryService.discardRun(runId);
+
+        // Then...
+        // The assertions in the interactions should not have failed
+    }
+
+    @Test
+    public void testDiscardRunWithNoArtifactsAndLogsDeletesRunOk() throws Exception {
+        // Given...
+        String runId = "ABC123";
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        String baseUri = "http://my.uri";
+        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
+        List<HttpInteraction> interactions = List.of(
+            // Fetch the run to be deleted
+            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
+
+            // Delete the record of the run
+            new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_OK)
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        // When...
+        directoryService.discardRun(runId);
+
+        // Then...
+        // The assertions in the interactions should not have failed
+    }
+
+    @Test
+    public void testDiscardRunWithCouchdbServerErrorThrowsCorrectError() throws Exception {
+        // Given...
+        String runId = "ABC123";
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        String baseUri = "http://my.uri";
+        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
+        List<HttpInteraction> interactions = List.of(
+            // Fetch the run to be deleted
+            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
+
+            // Delete the record of the run
+            new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_INTERNAL_SERVER_ERROR)
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        // When...
+        ResultArchiveStoreException thrown = catchThrowableOfType(() -> {
+            directoryService.discardRun(runId);
+        }, ResultArchiveStoreException.class);
+
+        // Then...
+        // The assertions in the interactions should not have failed
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("Unable to delete run", runId);
+    }
+
+    @Test
+    public void testDiscardRunWithNonExistantRunDoesNotThrowError() throws Exception {
+        // Given...
+        String runId = "ABC123";
+        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+
+        String baseUri = "http://my.uri";
+        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
+        List<HttpInteraction> interactions = List.of(
+            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_INTERNAL_SERVER_ERROR, mockRun1)
+        );
+
+        MockLogFactory mockLogFactory = new MockLogFactory();
+        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
+        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
+
+        // When...
+        directoryService.discardRun(runId);
+
+        // Then...
+        // The assertions in the interactions should not have failed
+        assertThat(mockLogFactory.toString()).contains(runId, "does not exist or has already been discarded");
     }
 }
