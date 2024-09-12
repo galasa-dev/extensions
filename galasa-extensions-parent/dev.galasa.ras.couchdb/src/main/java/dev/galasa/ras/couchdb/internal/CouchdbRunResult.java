@@ -18,10 +18,12 @@ public class CouchdbRunResult implements IRunResult {
 
     private final TestStructureCouchdb   testStructure;
     private final CouchdbRasStore store;
+    private final CouchdbDirectoryService storeService;
     private Path path;
 
     public CouchdbRunResult(CouchdbRasStore store, TestStructureCouchdb testStructure, LogFactory logFactory) {
         this.store = store;
+        this.storeService = (CouchdbDirectoryService) store.getDirectoryServices().get(0);
         if (testStructure == null) {
             this.testStructure = new TestStructureCouchdb();
         } else {
@@ -50,7 +52,6 @@ public class CouchdbRunResult implements IRunResult {
 
 	@Override
 	public void discard() throws ResultArchiveStoreException {
-        CouchdbDirectoryService storeService =  (CouchdbDirectoryService) store.getDirectoryServices().get(0);
         storeService.discardRun(this.testStructure);
 	}
 
@@ -61,7 +62,6 @@ public class CouchdbRunResult implements IRunResult {
 
     @Override
     public void loadArtifacts() throws ResultArchiveStoreException {
-        CouchdbDirectoryService storeService = (CouchdbDirectoryService) store.getDirectoryServices().get(0);
         this.path = storeService.getRunArtifactPath(this.testStructure);
     }
 
