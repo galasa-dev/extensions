@@ -7,6 +7,7 @@ package dev.galasa.extensions.common.couchdb.pojos;
 
 public class ViewRow {
 
+    public String id;
     public String key;
     public Object value;
 

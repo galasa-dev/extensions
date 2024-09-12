@@ -45,6 +45,7 @@ public class CouchdbValidatorImpl implements CouchdbValidator {
 
     private static final CouchDbVersion minCouchDbVersion = new CouchDbVersion(3,3,3);
 
+    @Override
     public void checkCouchdbDatabaseIsValid( 
         URI rasUri, 
         CloseableHttpClient httpClient , 

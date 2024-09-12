@@ -8,7 +8,6 @@ package dev.galasa.auth.couchdb.internal;
 import java.net.URI;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -22,9 +21,13 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.gson.JsonSyntaxException;
 
+
+import dev.galasa.extensions.common.api.LogFactory;
+
 import dev.galasa.extensions.common.couchdb.CouchdbBaseValidator;
 import dev.galasa.extensions.common.couchdb.CouchdbClashingUpdateException;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.RetryableCouchdbUpdateOperationProcessor;
 import dev.galasa.auth.couchdb.internal.beans.*;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
@@ -34,11 +37,26 @@ import static dev.galasa.auth.couchdb.internal.Errors.*;
 
 public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
-    private final Log logger = LogFactory.getLog(getClass());
+    private final Log logger ;
     private final GalasaGson gson = new GalasaGson();
+    private final LogFactory logFactory;
 
     // A couchDB view, it gets all the access tokens of a the user based on the loginId provided.
     public static final String DB_TABLE_TOKENS_DESIGN = "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }";
+
+    public CouchdbAuthStoreValidator() {
+        this(new LogFactory(){
+            @Override
+            public Log getLog(Class<?> clazz) {
+                return org.apache.commons.logging.LogFactory.getLog(clazz);
+            }
+        });
+    }
+
+    public CouchdbAuthStoreValidator(LogFactory logFactory) {
+        this.logFactory = logFactory;
+        this.logger = logFactory.getLog(getClass());
+    }
 
     @Override
     public void checkCouchdbDatabaseIsValid(
@@ -51,7 +69,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         // Perform the base CouchDB checks
         super.checkCouchdbDatabaseIsValid(couchdbUri, httpClient, httpRequestFactory, timeService);
 
-        RetryableCouchdbUpdateOperationProcessor retryProcessor = new RetryableCouchdbUpdateOperationProcessor(timeService);
+        RetryableCouchdbUpdateOperationProcessor retryProcessor = new RetryableCouchdbUpdateOperationProcessor(timeService, this.logFactory);
         
         retryProcessor.retryCouchDbUpdateOperation( 
             ()->{ tryToCheckAndUpdateCouchDBTokenView(couchdbUri, httpClient, httpRequestFactory); 
@@ -170,13 +188,15 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
             StatusLine statusLine = response.getStatusLine();
             int statusCode = statusLine.getStatusCode();
+
+            EntityUtils.consumeQuietly(response.getEntity());
+
             if (statusCode == HttpStatus.SC_CONFLICT) {
                 // Someone possibly updated the document while we were thinking about it.
                 // It was probably another instance of this exact code.
                 throw new CouchdbClashingUpdateException(ERROR_FAILED_TO_UPDATE_COUCHDB_DESING_DOC_CONFLICT.toString());
             }
 
-            EntityUtils.consumeQuietly(response.getEntity());
             if (statusCode != HttpStatus.SC_CREATED) {
 
                 throw new CouchdbException(

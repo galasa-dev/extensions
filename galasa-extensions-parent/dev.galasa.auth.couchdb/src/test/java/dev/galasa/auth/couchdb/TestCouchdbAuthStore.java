@@ -105,7 +105,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs?include_docs=true&endkey=%22_%22", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -137,7 +137,7 @@ public class TestCouchdbAuthStore {
 
         CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new CouchdbUser("johndoe", "dex-user-id"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs?include_docs=true&endkey=%22_%22", HttpStatus.SC_OK, mockAllDocsResponse));
         interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
@@ -164,7 +164,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         ViewRow tokenDoc = new ViewRow();
-        tokenDoc.key = "token1";
+        tokenDoc.id = "token1";
         List<ViewRow> mockDocs = List.of(tokenDoc);
 
         ViewResponse mockAllDocsResponse = new ViewResponse();
@@ -173,7 +173,7 @@ public class TestCouchdbAuthStore {
         CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new CouchdbUser("johndoe", "dex-user-id"));
         CouchdbAuthToken mockToken2 = new CouchdbAuthToken("token2", "dex-client", "my test token", Instant.now(), new CouchdbUser("notJohnDoe", "dex-user-id"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=johndoe", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
         interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
         interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken2));
 
@@ -183,7 +183,6 @@ public class TestCouchdbAuthStore {
         MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
-
         // When...
         List<IInternalAuthToken> tokens = authStore.getTokensByLoginId("johndoe");
 
@@ -201,7 +200,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=johndoe", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 

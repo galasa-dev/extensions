@@ -94,7 +94,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
             // Build up a list of all the tokens using the document IDs
             for (ViewRow row : tokenDocuments) {
-                tokens.add(getAuthTokenFromDocument(row.key));
+                tokens.add(getAuthTokenFromDocument(row.id));
             }
 
             logger.info("Tokens retrieved from CouchDB OK");

@@ -36,7 +36,6 @@ public class CouchDbVersionTest {
         CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion(invalidVersion); },
              CouchdbException.class );
         assertThat(ex).hasMessageContaining("GAL6010E: Invalid CouchDB server version format detected. The CouchDB version '" + invalidVersion + "'");
-        // TODO: Assert that more of the message is in here.
     }
 
     @Test
@@ -47,7 +46,6 @@ public class CouchDbVersionTest {
         CouchdbException ex = catchThrowableOfType( ()->{ new CouchDbVersion(invalidVersion); },
              CouchdbException.class );
         assertThat(ex).hasMessageContaining("GAL6010E: Invalid CouchDB server version format detected. The CouchDB version '" + invalidVersion + "'");
-        // TODO: Assert that more of the message is in here.
     }
 
 
