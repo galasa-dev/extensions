@@ -13,13 +13,16 @@ import org.apache.http.client.methods.HttpPost;
 import org.junit.*;
 import org.junit.rules.TestName;
 
+import java.time.Instant;
 import dev.galasa.framework.spi.utils.GalasaGson;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
+import dev.galasa.extensions.common.couchdb.CouchdbException;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.extensions.mocks.*;
 import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures;
-import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;;
+import dev.galasa.ras.couchdb.internal.mocks.CouchdbTestFixtures.BaseHttpInteraction;
 
 public class CouchdbValidatorImplTest {
     
@@ -270,13 +273,14 @@ public class CouchdbValidatorImplTest {
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
         HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "checkisvalid");
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When..
-        Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));
+        Throwable thrown = catchThrowable(()-> validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory, mockTimeService));
 
         // Then..
         assertThat(thrown).isNotNull();
-        assertThat(thrown).as("exception caught is of type "+thrown.getClass().toString()).isInstanceOf(CouchdbRasException.class);
+        assertThat(thrown).as("exception caught is of type "+thrown.getClass().toString()).isInstanceOf(CouchdbException.class);
     }
 
     @Test
@@ -319,9 +323,10 @@ public class CouchdbValidatorImplTest {
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
         HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "checkisvalid");
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When..
-        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));
+        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory, mockTimeService));
 
         assertThat(thrown).isNull();
     }
@@ -378,9 +383,10 @@ public class CouchdbValidatorImplTest {
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
         HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "checkisvalid");
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When..
-        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));
+        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory, mockTimeService));
 
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("Validation failed of database galasa_run");
@@ -446,9 +452,10 @@ public class CouchdbValidatorImplTest {
 
         CouchdbValidator validatorUnderTest = new CouchdbValidatorImpl();
         HttpRequestFactory requestFactory = new HttpRequestFactoryImpl("Basic", "checkisvalid");
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
         // When..
-        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory));
+        Throwable thrown = catchThrowable(()->validatorUnderTest.checkCouchdbDatabaseIsValid( CouchdbTestFixtures.rasUri , mockHttpClient, requestFactory,mockTimeService));
 
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("Create Database galasa_run failed on CouchDB server due to conflicts, attempted 10 times");

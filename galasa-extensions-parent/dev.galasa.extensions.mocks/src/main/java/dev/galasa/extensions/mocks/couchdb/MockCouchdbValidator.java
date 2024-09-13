@@ -11,6 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
+import dev.galasa.framework.spi.utils.ITimeService;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 
 public class MockCouchdbValidator implements CouchdbValidator {
@@ -22,7 +23,7 @@ public class MockCouchdbValidator implements CouchdbValidator {
     }
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory requestFactory, ITimeService timeService) throws CouchdbException {
         if (throwException) {
             throw new CouchdbException("simulating a validation failure!");
         }

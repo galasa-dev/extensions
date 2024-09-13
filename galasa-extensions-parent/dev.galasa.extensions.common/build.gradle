@@ -11,6 +11,8 @@ dependencies {
     implementation ('org.apache.httpcomponents:httpclient-osgi:4.5.13')
     implementation ('org.apache.httpcomponents:httpcore-osgi:4.4.14')
     implementation ('com.google.code.gson:gson:2.10.1')
+
+    testImplementation(project(':dev.galasa.extensions.mocks'))
 }
 
 // Note: These values are consumed by the parent build process

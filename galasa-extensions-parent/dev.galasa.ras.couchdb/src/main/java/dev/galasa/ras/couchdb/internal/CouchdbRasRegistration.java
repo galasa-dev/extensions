@@ -6,7 +6,6 @@
 package dev.galasa.ras.couchdb.internal;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;

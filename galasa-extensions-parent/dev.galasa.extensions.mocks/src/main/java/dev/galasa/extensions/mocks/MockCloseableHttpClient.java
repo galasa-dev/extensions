@@ -35,7 +35,7 @@ public class MockCloseableHttpClient extends CloseableHttpClient {
         if (interactionWalker.hasNext()) {
             this.currentInteraction = interactionWalker.next();
         } else {
-             this.currentInteraction = null ;
+            this.currentInteraction = null ;
         }
     }
 

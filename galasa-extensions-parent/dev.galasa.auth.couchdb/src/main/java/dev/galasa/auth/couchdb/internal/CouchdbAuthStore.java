@@ -57,7 +57,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         this.logger = logFactory.getLog(getClass());
         this.timeService = timeService;
 
-        validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory);
+        validator.checkCouchdbDatabaseIsValid(this.storeUri, this.httpClient, this.httpRequestFactory, timeService);
     }
 
     @Override
@@ -82,6 +82,28 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         }
         return tokens;
     }
+
+	public List<IInternalAuthToken> getTokensByLoginId(String loginId) throws AuthStoreException {
+		logger.info("Retrieving tokens from CouchDB");
+        List<ViewRow> tokenDocuments = new ArrayList<>();
+        List<IInternalAuthToken> tokens = new ArrayList<>();
+
+        try {
+            // Get all of the documents in the tokens database
+            tokenDocuments = getAllDocsByLoginId(TOKENS_DATABASE_NAME, loginId);
+
+            // Build up a list of all the tokens using the document IDs
+            for (ViewRow row : tokenDocuments) {
+                tokens.add(getAuthTokenFromDocument(row.id));
+            }
+
+            logger.info("Tokens retrieved from CouchDB OK");
+        } catch (CouchdbException e) {
+            String errorMessage = ERROR_FAILED_TO_RETRIEVE_TOKENS.getMessage(e.getMessage());
+            throw new AuthStoreException(errorMessage, e);
+        }
+        return tokens;
+	}
 
     @Override
     public void shutdown() throws AuthStoreException {

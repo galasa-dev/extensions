@@ -32,10 +32,13 @@ import dev.galasa.framework.spi.SystemEnvironment;
 import dev.galasa.framework.spi.ras.ResultArchiveStoreFileStore;
 import dev.galasa.framework.spi.teststructure.TestStructure;
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.utils.ITimeService;
+import dev.galasa.framework.spi.utils.SystemTimeService;
 import dev.galasa.extensions.common.api.HttpClientFactory;
 import dev.galasa.extensions.common.api.LogFactory;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbStore;
+import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.impl.HttpClientFactoryImpl;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
@@ -76,6 +79,7 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     private String                             artifactDocumentRev;
 
     private TestStructure                      lastTestStructure;
+    private ITimeService timeService ;
 
     private LogFactory logFactory;
 
@@ -93,14 +97,15 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
     // Note: We use logFactory here so we can propogate it downwards during unit testing.
     public CouchdbRasStore(IFramework framework, URI rasUri, HttpClientFactory httpFactory , CouchdbValidator validator,
         LogFactory logFactory, HttpRequestFactory requestFactory
-    ) throws  CouchdbRasException, CouchdbException {
+    ) throws CouchdbException {
         super(rasUri, requestFactory, httpFactory);
         this.logFactory = logFactory;
         this.logger = logFactory.getLog(getClass());
         this.framework = framework;
+        this.timeService = new SystemTimeService();
          // *** Validate the connection to the server and it's version
 
-        validator.checkCouchdbDatabaseIsValid(this.storeUri,this.httpClient, this.httpRequestFactory);
+        validator.checkCouchdbDatabaseIsValid(this.storeUri,this.httpClient, this.httpRequestFactory, timeService);
 
         this.run = this.framework.getTestRun();
 
@@ -120,7 +125,6 @@ public class CouchdbRasStore extends CouchdbStore implements IResultArchiveStore
         ResultArchiveStoreFileStore fileStore = new ResultArchiveStoreFileStore();
         this.provider = new CouchdbRasFileSystemProvider(fileStore, this, this.logFactory);
     }
-
 
     // Protected so that we can create artifact documents from elsewhere.
     protected void createArtifactDocument() throws CouchdbException {

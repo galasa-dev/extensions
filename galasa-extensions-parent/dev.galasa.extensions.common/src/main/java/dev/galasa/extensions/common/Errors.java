@@ -58,6 +58,7 @@ public enum Errors {
     ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_FAILED                (7020,"GAL7020E: Could not get the CPS namespaces information from URL ''{0}''. Cause: {1}"),
     ERROR_GALASA_REST_CALL_TO_GET_CPS_NAMESPACES_BAD_JSON_RETURNED     (7021,"GAL7021E: Could not get the CPS namespaces value from URL ''{0}''. Cause: Bad json returned from the server. {1}"),
                     
+    ERROR_GALASA_COUCHDB_UPDATED_FAILED_AFTER_RETRIES                  (7022,"GAL7022E: Couchdb operation failed after {0} attempts, due to conflicts."),
     ;
 
     private String template;

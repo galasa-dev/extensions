@@ -20,9 +20,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,10 +27,9 @@ import org.apache.commons.logging.LogFactory;
 import dev.galasa.extensions.common.couchdb.pojos.Welcome;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.utils.GalasaGson;
+import dev.galasa.framework.spi.utils.ITimeService;
 
 public abstract class CouchdbBaseValidator implements CouchdbValidator {
-
-    public static final String COUCHDB_MIN_VERSION = "3.3.3";
 
     private final GalasaGson gson = new GalasaGson();
     private final Log logger = LogFactory.getLog(getClass());
@@ -42,7 +38,7 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
     private CloseableHttpClient httpClient;
 
     @Override
-    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory) throws CouchdbException {
+    public void checkCouchdbDatabaseIsValid(URI couchdbUri, CloseableHttpClient httpClient, HttpRequestFactory httpRequestFactory, ITimeService timeService) throws CouchdbException {
         this.requestFactory = httpRequestFactory;
         this.httpClient = httpClient;
 
@@ -71,6 +67,10 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
             String errorMessage = ERROR_FAILED_TO_VALIDATE_COUCHDB_SERVER.getMessage(e.getMessage());
             throw new CouchdbException(errorMessage, e);
         }
+    }
+
+    public HttpRequestFactory getRequestFactory() {
+        return requestFactory;
     }
 
     /**
@@ -152,36 +152,17 @@ public abstract class CouchdbBaseValidator implements CouchdbValidator {
      * @throws CouchdbException if the version of CouchDB is older than the minimum required version
      */
     private void checkVersion(String actualVersion) throws CouchdbException {
-        Pattern versionPattern = Pattern.compile("^(\\d+)\\.(\\d+)\\.(\\d+)$");
-        Matcher versionMatcher = versionPattern.matcher(actualVersion);
 
-        // Make sure the given version follows semantic versioning rules (i.e. major.minor.patch)
-        if (!versionMatcher.find()) {
-            String errorMessage = ERROR_INVALID_COUCHDB_VERSION_FORMAT.getMessage(actualVersion, COUCHDB_MIN_VERSION);
-            throw new CouchdbException(errorMessage);
-        }
-
-        int[] actualVersionParts = getVersionStringAsArray(actualVersion);
-        int[] minVersionParts = getVersionStringAsArray(COUCHDB_MIN_VERSION);
+        CouchDbVersion actualCouchDbVersion = new CouchDbVersion(actualVersion);
 
         // Check if the actual version is older than the minimum version
         // If the actual version matches the minimum version, then this loop will continue until
         // all parts of the versions have been compared
-        for (int i = 0; i < minVersionParts.length; i++) {
-            if (actualVersionParts[i] < minVersionParts[i]) {
+        if ( actualCouchDbVersion.compareTo(CouchDbVersion.COUCHDB_MIN_VERSION) < 0) {
 
-                // The minimum CouchDB version is later than the actual version, so throw an error
-                String errorMessage = ERROR_OUTDATED_COUCHDB_VERSION.getMessage(actualVersion, COUCHDB_MIN_VERSION);
-                throw new CouchdbException(errorMessage);
-
-            } else if (actualVersionParts[i] > minVersionParts[i]) {
-                // The minimum CouchDB version is older than the actual version, this is fine
-                break;
-            }
+            // The minimum CouchDB version is later than the actual version, so throw an error
+            String errorMessage = ERROR_OUTDATED_COUCHDB_VERSION.getMessage(actualVersion, CouchDbVersion.COUCHDB_MIN_VERSION);
+            throw new CouchdbException(errorMessage);
         }
-    }
-
-    private int[] getVersionStringAsArray(String versionStr) {
-        return Arrays.stream(versionStr.split("\\.")).mapToInt(Integer::parseInt).toArray();
     }
 }
