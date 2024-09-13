@@ -562,7 +562,7 @@ public class CouchdbDirectoryServiceTest {
     public void testDiscardRunDeletesRunOk() throws Exception {
         // Given...
         String runId = "ABC123";
-        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun1 = createRunTestStructure(runId);
 
         IdRev mockIdRev = new IdRev();
         String revision = "this-is-a-revision";
@@ -584,10 +584,7 @@ public class CouchdbDirectoryServiceTest {
         String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
         String artifactsDbUri = baseUri + "/" + CouchdbRasStore.ARTIFACTS_DB;
         String logsDbUri = baseUri + "/" + CouchdbRasStore.LOG_DB;
-        List<HttpInteraction> interactions = List.of(
-            // Fetch the run to be deleted
-            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
-            
+        List<HttpInteraction> interactions = List.of(            
             // Start discarding the run's log records
             new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId1, HttpStatus.SC_OK, mockIdRev),
             new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId1 + "?rev=" + revision, HttpStatus.SC_OK),
@@ -609,7 +606,7 @@ public class CouchdbDirectoryServiceTest {
         CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
 
         // When...
-        directoryService.discardRun(runId);
+        directoryService.discardRun(mockRun1);
 
         // Then...
         // The assertions in the interactions should not have failed
@@ -619,7 +616,7 @@ public class CouchdbDirectoryServiceTest {
     public void testDiscardRunWithNoArtifactsDeletesRunOk() throws Exception {
         // Given...
         String runId = "ABC123";
-        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun1 = createRunTestStructure(runId);
 
         IdRev mockIdRev = new IdRev();
         String revision = "this-is-a-revision";
@@ -636,9 +633,6 @@ public class CouchdbDirectoryServiceTest {
         String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
         String logsDbUri = baseUri + "/" + CouchdbRasStore.LOG_DB;
         List<HttpInteraction> interactions = List.of(
-            // Fetch the run to be deleted
-            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
-            
             // Start discarding the run's log records
             new GetDocumentByIdFromCouchdbInteraction(logsDbUri + "/" + logId1, HttpStatus.SC_OK, mockIdRev),
             new DeleteDocumentFromCouchdbInteraction(logsDbUri + "/" + logId1 + "?rev=" + revision, HttpStatus.SC_OK),
@@ -654,7 +648,7 @@ public class CouchdbDirectoryServiceTest {
         CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
 
         // When...
-        directoryService.discardRun(runId);
+        directoryService.discardRun(mockRun1);
 
         // Then...
         // The assertions in the interactions should not have failed
@@ -664,14 +658,11 @@ public class CouchdbDirectoryServiceTest {
     public void testDiscardRunWithNoArtifactsAndLogsDeletesRunOk() throws Exception {
         // Given...
         String runId = "ABC123";
-        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun1 = createRunTestStructure(runId);
 
         String baseUri = "http://my.uri";
         String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
         List<HttpInteraction> interactions = List.of(
-            // Fetch the run to be deleted
-            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
-
             // Delete the record of the run
             new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_OK)
         );
@@ -681,7 +672,7 @@ public class CouchdbDirectoryServiceTest {
         CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
 
         // When...
-        directoryService.discardRun(runId);
+        directoryService.discardRun(mockRun1);
 
         // Then...
         // The assertions in the interactions should not have failed
@@ -691,14 +682,11 @@ public class CouchdbDirectoryServiceTest {
     public void testDiscardRunWithCouchdbServerErrorThrowsCorrectError() throws Exception {
         // Given...
         String runId = "ABC123";
-        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
+        TestStructureCouchdb mockRun1 = createRunTestStructure(runId);
 
         String baseUri = "http://my.uri";
         String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
         List<HttpInteraction> interactions = List.of(
-            // Fetch the run to be deleted
-            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_OK, mockRun1),
-
             // Delete the record of the run
             new DeleteDocumentFromCouchdbInteraction(runDbUri + "?rev=" + mockRun1._rev, HttpStatus.SC_INTERNAL_SERVER_ERROR)
         );
@@ -709,36 +697,12 @@ public class CouchdbDirectoryServiceTest {
 
         // When...
         ResultArchiveStoreException thrown = catchThrowableOfType(() -> {
-            directoryService.discardRun(runId);
+            directoryService.discardRun(mockRun1);
         }, ResultArchiveStoreException.class);
 
         // Then...
         // The assertions in the interactions should not have failed
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("Unable to delete run", runId);
-    }
-
-    @Test
-    public void testDiscardRunWithNonExistantRunDoesNotThrowError() throws Exception {
-        // Given...
-        String runId = "ABC123";
-        TestStructureCouchdb mockRun1 = createRunTestStructure("run1");
-
-        String baseUri = "http://my.uri";
-        String runDbUri = baseUri + "/" + CouchdbRasStore.RUNS_DB + "/" + runId;
-        List<HttpInteraction> interactions = List.of(
-            new GetRunByIdFromCouchdbInteraction(runDbUri, HttpStatus.SC_INTERNAL_SERVER_ERROR, mockRun1)
-        );
-
-        MockLogFactory mockLogFactory = new MockLogFactory();
-        CouchdbRasStore mockRasStore = fixtures.createCouchdbRasStore(interactions, mockLogFactory);
-        CouchdbDirectoryService directoryService = new CouchdbDirectoryService(mockRasStore, mockLogFactory, new HttpRequestFactoryImpl());
-
-        // When...
-        directoryService.discardRun(runId);
-
-        // Then...
-        // The assertions in the interactions should not have failed
-        assertThat(mockLogFactory.toString()).contains(runId, "does not exist or has already been discarded");
     }
 }
