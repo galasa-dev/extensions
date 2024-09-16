@@ -8,7 +8,6 @@ package dev.galasa.extensions.common.couchdb;
 import static dev.galasa.extensions.common.Errors.*;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -20,8 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -54,8 +51,6 @@ public abstract class CouchdbStore {
     public static final String URL_SCHEME = "couchdb";
 
     protected final URI storeUri;
-
-    private Log logger = LogFactory.getLog(this.getClass());
 
     protected HttpRequestFactory httpRequestFactory;
     protected CloseableHttpClient httpClient;
@@ -117,9 +112,7 @@ public abstract class CouchdbStore {
      */
     protected List<ViewRow> getAllDocsFromDatabase(String dbName) throws CouchdbException {
 
-        //The end key is "_" because, design docs start with "_design",
-        // this will exclude any design documents from being fetched from couchdb.
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs?include_docs=true&endkey=%22_%22");
+        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
         String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
 
         ViewResponse allDocs = gson.fromJson(responseEntity, ViewResponse.class);
@@ -129,6 +122,11 @@ public abstract class CouchdbStore {
             String errorMessage = ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE.getMessage(dbName);
             throw new CouchdbException(errorMessage);
         }
+
+        // Filter out design documents from the results
+        viewRows = viewRows.stream()
+            .filter((row) -> !row.key.equals("_design/docs"))
+            .collect(Collectors.toList());
         
         return viewRows;
     }
@@ -144,7 +142,6 @@ public abstract class CouchdbStore {
      * @return a list of rows corresponding to documents within the database
      * @throws CouchdbException             if there was a problem accessing the
      *                                      CouchDB store or its response
-     * @throws UnsupportedEncodingException A failure occurred.
      */
     protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId) throws CouchdbException {
 
