@@ -5,7 +5,7 @@ plugins {
     id 'signing'
 }
 
-version = '0.37.0'
+version = '0.38.0'
 
 //---------------------------------------------------------------
 // We need to gather the release and packaging metadata from each
@@ -167,7 +167,7 @@ publishing {
                 name = "Manifest for extensions bundle versions"
                 artifactId = "dev.galasa.extensions.manifest"
                 groupId = 'dev.galasa'
-				version = '0.37.0'
+				version = '0.38.0'
                 description = "Conveys bundle version information to OBR builds."
                 licenses {
                     license {
