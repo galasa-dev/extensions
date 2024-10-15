@@ -88,6 +88,12 @@ public class MockEtcdKvClient implements KV {
     }
 
     @Override
+    public CompletableFuture<DeleteResponse> delete(ByteSequence key) {
+        kvContents.remove(key.toString());
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public CompletableFuture<CompactResponse> compact(long key) {
         throw new UnsupportedOperationException("Unimplemented method 'compact'");
     }
@@ -95,11 +101,6 @@ public class MockEtcdKvClient implements KV {
     @Override
     public CompletableFuture<CompactResponse> compact(long key, CompactOption options) {
         throw new UnsupportedOperationException("Unimplemented method 'compact'");
-    }
-
-    @Override
-    public CompletableFuture<DeleteResponse> delete(ByteSequence key) {
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
     @Override

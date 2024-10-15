@@ -20,6 +20,7 @@ import io.etcd.jetcd.Watch;
 public class MockEtcdClient implements Client {
 
     private KV kvClient;
+    private Watch watchClient;
     private boolean isClientShutDown = false;
 
     public MockEtcdClient(Map<String, String> kvContents) {
@@ -38,6 +39,12 @@ public class MockEtcdClient implements Client {
 
     public boolean isClientShutDown() {
         return isClientShutDown;
+    }
+
+    @Override
+    public Watch getWatchClient() {
+        // Not initialised yet...
+        return watchClient;
     }
 
     @Override
@@ -69,10 +76,4 @@ public class MockEtcdClient implements Client {
     public Maintenance getMaintenanceClient() {
         throw new UnsupportedOperationException("Unimplemented method 'getMaintenanceClient'");
     }
-
-    @Override
-    public Watch getWatchClient() {
-        throw new UnsupportedOperationException("Unimplemented method 'getWatchClient'");
-    }
-    
 }

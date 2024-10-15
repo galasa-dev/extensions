@@ -8,7 +8,6 @@ package dev.galasa.cps.etcd.internal;
 import static com.google.common.base.Charsets.UTF_8;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import dev.galasa.framework.spi.ConfigurationPropertyStoreException;
 import dev.galasa.framework.spi.IConfigurationPropertyStore;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
-import io.etcd.jetcd.KV;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.GetOption;
@@ -34,9 +32,11 @@ import io.etcd.jetcd.options.GetOption;
  * @author James Davies
  * @author Matthew Chivers
  */
-public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {
-    private final Client client;
-    private final KV kvClient;
+public class Etcd3ConfigurationPropertyStore extends Etcd3Store implements IConfigurationPropertyStore {
+
+    public Etcd3ConfigurationPropertyStore(Client client) {
+        super(client);
+    }
 
     /**
      * This constructor create a priate KVClient from JETCD for store interactions.
@@ -44,8 +44,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
      * @param cpsUri - location of the etcd
      */
     public Etcd3ConfigurationPropertyStore(URI cpsUri) {
-        client = Client.builder().endpoints(cpsUri).build();
-        kvClient = client.getKVClient();
+        this(Client.builder().endpoints(cpsUri).build());
     }
 
     /**
@@ -56,15 +55,9 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
      */
     @Override
     public @Null String getProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
-        ByteSequence bsKey = ByteSequence.from(key, UTF_8);
-        CompletableFuture<GetResponse> getFuture = kvClient.get(bsKey);
+        String value = null;
         try {
-            GetResponse response = getFuture.get();
-            List<KeyValue> kvs = response.getKvs();
-            if (kvs.isEmpty()) {
-                return null;
-            }
-            return kvs.get(0).getValue().toString(UTF_8);
+            value = getValueFromStore(key);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new ConfigurationPropertyStoreException("Could not retrieve key, interrupted", e);
@@ -72,6 +65,7 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
             Thread.currentThread().interrupt();
             throw new ConfigurationPropertyStoreException("Could not retrieve key", e);
         }
+        return value;
     }
 
     @Override
@@ -102,16 +96,13 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
 
     @Override
     public void shutdown() throws ConfigurationPropertyStoreException {
-        kvClient.close();
-        client.close();
+        super.shutdownStore();
     }
 
     @Override
     public void setProperty(@NotNull String key, @NotNull String value) throws ConfigurationPropertyStoreException {
-        ByteSequence bytesKey = ByteSequence.from(key, UTF_8);
-        ByteSequence bytesValue = ByteSequence.from(value, UTF_8);
         try {
-            kvClient.put(bytesKey, bytesValue).get();
+            setPropertyInStore(key, value);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new ConfigurationPropertyStoreException("Could not set key and value.", e);
@@ -120,9 +111,8 @@ public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertySt
     
     @Override
     public void deleteProperty(@NotNull String key) throws ConfigurationPropertyStoreException {
-        ByteSequence bytesKey = ByteSequence.from(key, StandardCharsets.UTF_8);
         try {
-            kvClient.delete(bytesKey).get();
+            deletePropertyFromStore(key);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new ConfigurationPropertyStoreException("Could not delete key.", e);

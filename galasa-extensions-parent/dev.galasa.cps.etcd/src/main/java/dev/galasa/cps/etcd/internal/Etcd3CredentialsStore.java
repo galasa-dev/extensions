@@ -81,8 +81,8 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     public ICredentials getCredentials(String credentialsId) throws CredentialsException {
         try {
             ICredentials credentials = null;
-            String token = get("secure.credentials." + credentialsId + ".token");
-            String username = get("secure.credentials." + credentialsId + ".username");
+            String token = getValueFromStore("secure.credentials." + credentialsId + ".token");
+            String username = getValueFromStore("secure.credentials." + credentialsId + ".username");
 
             // Check if the credentials are UsernameToken or Token
             if (token != null && username != null) {
@@ -91,7 +91,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
                 credentials = new CredentialsToken(key, token);
             } else if (username != null) {
                 // We have a username, so check if the credentials are UsernamePassword or Username
-                String password = get("secure.credentials." + credentialsId + ".password");
+                String password = getValueFromStore("secure.credentials." + credentialsId + ".password");
                 if (password != null) {
                    credentials = new CredentialsUsernamePassword(key, username, password); 
                 } else {
@@ -125,7 +125,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
 
         try {
             for (Entry<Object, Object> property : credentialProperties.entrySet()) {
-                put((String) property.getKey(), encryptionService.encrypt((String) property.getValue()));
+                setPropertyInStore((String) property.getKey(), encryptionService.encrypt((String) property.getValue()));
             }
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
@@ -136,7 +136,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     @Override
     public void deleteCredentials(String credentialsId) throws CredentialsException {
         try {
-            deletePrefix("secure.credentials." + credentialsId);
+            deletePropertiesByPrefix("secure.credentials." + credentialsId);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new CredentialsException("Failed to delete credentials", e);

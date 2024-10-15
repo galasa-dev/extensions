@@ -40,7 +40,7 @@ public abstract class Etcd3Store {
         this(Client.builder().endpoints(etcdUri).build());
     }
 
-    protected String get(String key) throws InterruptedException, ExecutionException {
+    protected String getValueFromStore(String key) throws InterruptedException, ExecutionException {
         ByteSequence bsKey = ByteSequence.from(key, UTF_8);
         CompletableFuture<GetResponse> getFuture = kvClient.get(bsKey);
         GetResponse response = getFuture.get();
@@ -53,18 +53,18 @@ public abstract class Etcd3Store {
         return retrievedKey;
     }
 
-    protected void put(String key, String value) throws InterruptedException, ExecutionException {
+    protected void setPropertyInStore(String key, String value) throws InterruptedException, ExecutionException {
         ByteSequence bytesKey = ByteSequence.from(key, UTF_8);
         ByteSequence bytesValue = ByteSequence.from(value, UTF_8);
         kvClient.put(bytesKey, bytesValue).get();
     }
 
-    protected void delete(@NotNull String key) throws InterruptedException, ExecutionException {
+    protected void deletePropertyFromStore(@NotNull String key) throws InterruptedException, ExecutionException {
         ByteSequence bytesKey = ByteSequence.from(key, StandardCharsets.UTF_8);
         kvClient.delete(bytesKey).get();
     }
 
-    protected void deletePrefix(@NotNull String keyPrefix) throws InterruptedException, ExecutionException {
+    protected void deletePropertiesByPrefix(@NotNull String keyPrefix) throws InterruptedException, ExecutionException {
         ByteSequence bsKey = ByteSequence.from(keyPrefix, UTF_8);
         DeleteOption options = DeleteOption.newBuilder().isPrefix(true).build();
         kvClient.delete(bsKey, options).get();
