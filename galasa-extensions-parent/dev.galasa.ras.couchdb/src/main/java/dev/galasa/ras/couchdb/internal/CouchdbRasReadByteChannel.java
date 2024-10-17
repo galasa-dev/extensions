@@ -14,7 +14,7 @@ import java.nio.file.Path;
 /**
  * Dummy Byte Channel for a null Result Archive Store
  *
- * @author Michael Baylis
+ *  
  *
  */
 public class CouchdbRasReadByteChannel implements SeekableByteChannel {

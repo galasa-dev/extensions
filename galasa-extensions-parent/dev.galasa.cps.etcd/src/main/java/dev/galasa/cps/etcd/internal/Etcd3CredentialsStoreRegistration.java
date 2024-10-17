@@ -20,7 +20,7 @@ import dev.galasa.framework.spi.creds.ICredentialsStoreRegistration;
  * This Class is a small OSGI bean that registers the Credentials store as a
  * ETCD cluster or quietly fails.
  * 
- * @author James Davies
+ *  
  */
 @Component(service = { ICredentialsStoreRegistration.class })
 public class Etcd3CredentialsStoreRegistration implements ICredentialsStoreRegistration {
