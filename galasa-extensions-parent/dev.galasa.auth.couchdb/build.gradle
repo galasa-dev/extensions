@@ -1,7 +1,6 @@
 plugins {
     id 'biz.aQute.bnd.builder'
     id 'galasa.extensions'
-    id 'jacoco'
 }
 
 description = 'Galasa Authentication - CouchDB'
@@ -19,14 +18,6 @@ dependencies {
     implementation (project(':dev.galasa.extensions.common'))
 
     testImplementation(project(':dev.galasa.extensions.mocks'))
-}
-
-jacocoTestReport {
-    reports {
-        xml.required = true
-        csv.required = true
-        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
-    }
 }
 
 // Note: These values are consumed by the parent build process
