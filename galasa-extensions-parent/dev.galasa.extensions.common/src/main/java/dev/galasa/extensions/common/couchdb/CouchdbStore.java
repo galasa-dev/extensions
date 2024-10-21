@@ -112,8 +112,8 @@ public abstract class CouchdbStore {
      */
     protected List<ViewRow> getAllDocsFromDatabase(String dbName) throws CouchdbException {
 
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
-        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+        HttpGet fetchedDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
+        String responseEntity = sendHttpRequest(fetchedDocs, HttpStatus.SC_OK);
 
         ViewResponse allDocs = gson.fromJson(responseEntity, ViewResponse.class);
         List<ViewRow> viewRows = allDocs.rows;
@@ -124,9 +124,11 @@ public abstract class CouchdbStore {
         }
 
         // Filter out design documents from the results
-        viewRows = viewRows.stream()
-            .filter((row) -> !row.key.equals("_design/docs"))
-            .collect(Collectors.toList());
+        if(viewRows.get(0).key != null){
+            viewRows = viewRows.stream()
+                .filter((row) -> !row.key.equals("_design/docs"))
+                .collect(Collectors.toList());
+        }
         
         return viewRows;
     }
@@ -143,15 +145,15 @@ public abstract class CouchdbStore {
      * @throws CouchdbException             if there was a problem accessing the
      *                                      CouchDB store or its response
      */
-    protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId) throws CouchdbException {
+    protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId, String viewName) throws CouchdbException {
 
         String encodedLoginId = URLEncoder.encode("\"" + loginId + "\"", StandardCharsets.UTF_8);
-        String url = storeUri + "/" + dbName + "/_design/docs/_view/loginId-view?key=" + encodedLoginId;
+        String url = storeUri + "/" + dbName + "/_design/docs/_view/" + viewName + "?key=" + encodedLoginId;
 
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(url);
-        getTokensDocs.addHeader("Content-Type", "application/json");
+        HttpGet getDocs = httpRequestFactory.getHttpGetRequest(url);
+        getDocs.addHeader("Content-Type", "application/json");
 
-        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+        String responseEntity = sendHttpRequest(getDocs, HttpStatus.SC_OK);
 
         ViewResponse docByLoginId = gson.fromJson(responseEntity, ViewResponse.class);
         List<ViewRow> viewRows = docByLoginId.rows;

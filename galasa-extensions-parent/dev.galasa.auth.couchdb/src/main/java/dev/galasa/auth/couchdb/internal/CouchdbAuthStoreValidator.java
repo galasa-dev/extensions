@@ -43,6 +43,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
     // A couchDB view, it gets all the access tokens of a the user based on the loginId provided.
     public static final String DB_TABLE_TOKENS_DESIGN = "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }";
+    public static final String DB_TABLE_USERS_DESIGN = "function (doc) { if (doc['login-id']) { emit(doc['login-id'], doc); } }";
 
     public CouchdbAuthStoreValidator() {
         this(new LogFactory(){
@@ -72,7 +73,8 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         RetryableCouchdbUpdateOperationProcessor retryProcessor = new RetryableCouchdbUpdateOperationProcessor(timeService, this.logFactory);
         
         retryProcessor.retryCouchDbUpdateOperation( 
-            ()->{ tryToCheckAndUpdateCouchDBTokenView(couchdbUri, httpClient, httpRequestFactory); 
+            ()->{ 
+                tryToCheckAndUpdateCouchDBTokenView(couchdbUri, httpClient, httpRequestFactory); 
         });
         
         logger.debug("Auth Store CouchDB at " + couchdbUri.toString() + " validated");
@@ -82,39 +84,41 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
             HttpRequestFactory httpRequestFactory) throws CouchdbException {
        
         validateDatabasePresent(couchdbUri, CouchdbAuthStore.TOKENS_DATABASE_NAME);
-        checkTokensDesignDocument(httpClient, couchdbUri, 1);
+        validateDatabasePresent(couchdbUri, CouchdbAuthStore.USERS_DATABASE_NAME);
+        checkTokensDesignDocument(httpClient, couchdbUri, 1, CouchdbAuthStore.TOKENS_DATABASE_NAME);
+        checkTokensDesignDocument(httpClient, couchdbUri, 1, CouchdbAuthStore.USERS_DATABASE_NAME);
     }
 
-    public void checkTokensDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts)
+    public void checkTokensDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts, String dbName)
             throws CouchdbException {
 
         // Get the design document from couchdb
-        String docJson = getTokenDesignDocument(httpClient, couchdbUri, attempts);
+        String docJson = getDatabaseDesignDocument(httpClient, couchdbUri, attempts, dbName);
 
-        TokensDBNameViewDesign tableDesign = parseTokenDesignFromJson(docJson);
+        AuthDBNameViewDesign tableDesign = parseTokenDesignFromJson(docJson);
 
         boolean isDesignUpdated = updateDesignDocToDesiredDesignDoc(tableDesign);
 
         if (isDesignUpdated) {
-            updateTokenDesignDocument(httpClient, couchdbUri, attempts, tableDesign);
+            updateTokenDesignDocument(httpClient, couchdbUri, attempts, tableDesign, dbName);
         }
     }
 
-    private TokensDBNameViewDesign parseTokenDesignFromJson(String docJson) throws CouchdbException {
-        TokensDBNameViewDesign tableDesign;
+    private AuthDBNameViewDesign parseTokenDesignFromJson(String docJson) throws CouchdbException {
+        AuthDBNameViewDesign tableDesign;
         try {
-            tableDesign = gson.fromJson(docJson, TokensDBNameViewDesign.class);
+            tableDesign = gson.fromJson(docJson, AuthDBNameViewDesign.class);
         } catch (JsonSyntaxException ex) {
             throw new CouchdbException(ERROR_FAILED_TO_PARSE_COUCHDB_DESIGN_DOC.getMessage(ex.getMessage()), ex);
         }
 
         if (tableDesign == null) {
-            tableDesign = new TokensDBNameViewDesign();
+            tableDesign = new AuthDBNameViewDesign();
         }
         return tableDesign;
     }
 
-    private boolean updateDesignDocToDesiredDesignDoc(TokensDBNameViewDesign tableDesign) {
+    private boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign) {
         boolean isUpdated = false;
 
         if (tableDesign.views == null) {
@@ -141,10 +145,10 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         return isUpdated;
     }
 
-    private String getTokenDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts)
+    private String getDatabaseDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts, String dbName)
             throws CouchdbException {
         HttpRequestFactory requestFactory = super.getRequestFactory();
-        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME +"/_design/docs");
+        HttpGet httpGet = requestFactory.getHttpGetRequest(couchdbUri + "/" + dbName +"/_design/docs");
 
         String docJson = null;
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -155,7 +159,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
             if (statusLine.getStatusCode() != HttpStatus.SC_OK
                     && statusLine.getStatusCode() != HttpStatus.SC_NOT_FOUND) {
                 throw new CouchdbException(
-                        "Validation failed of database galasa_tokens design document - " + statusLine.toString());
+                        "Validation failed of database " + dbName + " design document - " + statusLine.toString());
             }
             if (statusLine.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 docJson = "{}";
@@ -171,14 +175,14 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
     }
 
     private void updateTokenDesignDocument(CloseableHttpClient httpClient, URI couchdbUri, int attempts,
-            TokensDBNameViewDesign tokenViewDesign) throws CouchdbException {
+            AuthDBNameViewDesign tokenViewDesign, String dbName) throws CouchdbException {
         HttpRequestFactory requestFactory = super.getRequestFactory();
 
-        logger.info("Updating the galasa_tokens design document");
+        logger.info("Updating the " + dbName + " design document");
 
         HttpEntity entity = new StringEntity(gson.toJson(tokenViewDesign), ContentType.APPLICATION_JSON);
 
-        HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME +"/_design/docs");
+        HttpPut httpPut = requestFactory.getHttpPutRequest(couchdbUri + "/" + dbName +"/_design/docs");
         httpPut.setEntity(entity);
 
         if (tokenViewDesign._rev != null) {
@@ -200,13 +204,13 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
             if (statusCode != HttpStatus.SC_CREATED) {
 
                 throw new CouchdbException(
-                        "Update of galasa_tokens design document failed on CouchDB server - " + statusLine.toString());
+                        "Update of " + dbName +  " design document failed on CouchDB server - " + statusLine.toString());
             }
 
         } catch (CouchdbException e) {
             throw e;
         } catch (Exception e) {
-            throw new CouchdbException("Update of galasa_tokens design document failed", e);
+            throw new CouchdbException("Update of " +dbName +  " design document failed", e);
         }
     }
 }

@@ -20,6 +20,8 @@ import org.junit.Test;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
 import dev.galasa.auth.couchdb.internal.CouchdbAuthToken;
 import dev.galasa.auth.couchdb.internal.CouchdbUser;
+import dev.galasa.auth.couchdb.internal.beans.TokenDBViews;
+import dev.galasa.auth.couchdb.internal.beans.AuthDBNameViewDesign;
 import dev.galasa.extensions.common.couchdb.pojos.IdRev;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
@@ -33,13 +35,15 @@ import dev.galasa.extensions.mocks.MockLogFactory;
 import dev.galasa.extensions.mocks.MockTimeService;
 import dev.galasa.extensions.mocks.couchdb.MockCouchdbValidator;
 import dev.galasa.framework.spi.auth.AuthStoreException;
+import dev.galasa.framework.spi.auth.FrontendClient;
 import dev.galasa.framework.spi.auth.IInternalAuthToken;
+import dev.galasa.framework.spi.auth.UserDoc;
 
 public class TestCouchdbAuthStore {
 
-    class GetAllTokenDocumentsInteraction extends BaseHttpInteraction {
+    class GetAllDocumentsInteraction extends BaseHttpInteraction {
 
-        public GetAllTokenDocumentsInteraction(String expectedUri, int responseStatusCode, ViewResponse tokenDocsToReturn) {
+        public GetAllDocumentsInteraction(String expectedUri, int responseStatusCode, ViewResponse tokenDocsToReturn) {
             super(expectedUri, responseStatusCode);
             setResponsePayload(tokenDocsToReturn);
         }
@@ -51,9 +55,9 @@ public class TestCouchdbAuthStore {
         }
     }
 
-    class GetTokenDocumentInteraction<T> extends BaseHttpInteraction {
+    class GetDocumentInteraction<T> extends BaseHttpInteraction {
 
-        public GetTokenDocumentInteraction(String expectedUri, int responseStatusCode, T responseObjToReturn) {
+        public GetDocumentInteraction(String expectedUri, int responseStatusCode, T responseObjToReturn) {
             super(expectedUri, responseStatusCode);
             setResponsePayload(responseObjToReturn);
         }
@@ -79,9 +83,9 @@ public class TestCouchdbAuthStore {
         }
     }
 
-    class CreateTokenDocInteraction extends BaseHttpInteraction {
+    class CreateDocumentInteraction extends BaseHttpInteraction {
 
-        public CreateTokenDocInteraction(String expectedUri, int responseStatusCode) {
+        public CreateDocumentInteraction(String expectedUri, int responseStatusCode) {
             super(expectedUri, responseStatusCode);
 
             PutPostResponse responseTransportBean = new PutPostResponse();
@@ -98,14 +102,33 @@ public class TestCouchdbAuthStore {
         }
     }
 
+    class UpdateDocumentInteraction extends BaseHttpInteraction {
+
+        public UpdateDocumentInteraction(String expectedUri, int responseStatusCode) {
+            super(expectedUri, responseStatusCode);
+
+            PutPostResponse responseTransportBean = new PutPostResponse();
+            responseTransportBean.id = "id";
+            responseTransportBean.ok = true;
+            responseTransportBean.rev = "rev";
+            setResponsePayload(responseTransportBean);
+        }
+
+        @Override
+        public void validateRequest(HttpHost host, HttpRequest request) throws RuntimeException {
+            super.validateRequest(host,request);
+            assertThat(request.getRequestLine().getMethod()).isEqualTo("PUT");
+        }
+    }
+
     @Test
-    public void testGetTokensReturnsTokensWithFailingRequestReturnsError() throws Exception {
+    public void testGetTokensReturnsTokensWithFailingRequestReturnsErrorDup() throws Exception {
         // Given...
         URI authStoreUri = URI.create("couchdb:https://my-auth-store");
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -137,8 +160,8 @@ public class TestCouchdbAuthStore {
 
         CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new CouchdbUser("johndoe", "dex-user-id"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
-        interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_tokens/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -173,9 +196,9 @@ public class TestCouchdbAuthStore {
         CouchdbAuthToken mockToken = new CouchdbAuthToken("token1", "dex-client", "my test token", Instant.now(), new CouchdbUser("johndoe", "dex-user-id"));
         CouchdbAuthToken mockToken2 = new CouchdbAuthToken("token2", "dex-client", "my test token", Instant.now(), new CouchdbUser("notJohnDoe", "dex-user-id"));
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
-        interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
-        interactions.add(new GetTokenDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken2));
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken));
+        interactions.add(new GetDocumentInteraction<CouchdbAuthToken>("https://my-auth-store/galasa_tokens/token1", HttpStatus.SC_OK, mockToken2));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -200,7 +223,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetAllTokenDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_tokens/_design/docs/_view/loginId-view?key=%22johndoe%22", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -224,7 +247,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new CreateTokenDocInteraction("https://my-auth-store/galasa_tokens", HttpStatus.SC_CREATED));
+        interactions.add(new CreateDocumentInteraction("https://my-auth-store/galasa_tokens", HttpStatus.SC_CREATED));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -246,7 +269,7 @@ public class TestCouchdbAuthStore {
         MockLogFactory logFactory = new MockLogFactory();
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new CreateTokenDocInteraction("https://my-auth-store/galasa_tokens", HttpStatus.SC_INTERNAL_SERVER_ERROR));
+        interactions.add(new CreateDocumentInteraction("https://my-auth-store/galasa_tokens", HttpStatus.SC_INTERNAL_SERVER_ERROR));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -278,7 +301,7 @@ public class TestCouchdbAuthStore {
         String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+        interactions.add(new GetDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
         interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_OK));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
@@ -309,7 +332,7 @@ public class TestCouchdbAuthStore {
         String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+        interactions.add(new GetDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
 
         // The DELETE request may return a 202 Accepted, which shouldn't be a problem for us
         interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_ACCEPTED));
@@ -342,7 +365,7 @@ public class TestCouchdbAuthStore {
         String expectedDeleteRequestUrl = "https://my-auth-store/galasa_tokens/" + tokenIdToDelete + "?rev=" + mockIdRev._rev;
 
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
-        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
+        interactions.add(new GetDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, mockIdRev));
 
         // Simulate an internal server error
         interactions.add(new DeleteTokenDocumentInteraction(expectedDeleteRequestUrl, HttpStatus.SC_INTERNAL_SERVER_ERROR));
@@ -381,7 +404,7 @@ public class TestCouchdbAuthStore {
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         // Simulate an internal server error
-        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_INTERNAL_SERVER_ERROR, mockIdRev));
+        interactions.add(new GetDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_INTERNAL_SERVER_ERROR, mockIdRev));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -413,7 +436,7 @@ public class TestCouchdbAuthStore {
         List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
 
         // Simulate an internal server error
-        interactions.add(new GetTokenDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, null));
+        interactions.add(new GetDocumentInteraction<IdRev>(expectedGetRequestUrl, HttpStatus.SC_OK, null));
 
         MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
@@ -431,5 +454,220 @@ public class TestCouchdbAuthStore {
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("GAL6104E", "Failed to delete auth token from the CouchDB tokens database");
         assertThat(thrown.getMessage()).contains("GAL6011E", "Failed to get document with ID 'my-old-token' from the 'galasa_tokens' database");
+    }
+
+    @Test
+    public void testGetAllUsersReturnsListOfUsersFroasmCouchdbOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-users-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        ViewRow userDoc = new ViewRow();
+        ViewRow userDoc2 = new ViewRow();
+
+        userDoc.id = "user1";
+        userDoc2.id = "user2";
+
+        List<ViewRow> mockDocs = List.of(userDoc,userDoc2);
+
+        ViewResponse mockAllDocsResponse = new ViewResponse();
+        mockAllDocsResponse.rows = mockDocs;
+
+        UserDoc mockUser = new UserDoc("user1", List.of());
+        UserDoc mockUser2 = new UserDoc("user2", List.of());
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-users-store/galasa_users/_all_docs", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-users-store/galasa_users/user1", HttpStatus.SC_OK, mockUser));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-users-store/galasa_users/user2", HttpStatus.SC_OK, mockUser2));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+        // When...
+        List<UserDoc> users = authStore.getAllUsers();
+
+        // Then...
+        assertThat(users).hasSize(2);
+    }
+
+    @Test
+    public void testGetTokensReturnsTokensWithFailingRequestReturnsError() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-users-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-users-store/galasa_users/_all_docs", HttpStatus.SC_INTERNAL_SERVER_ERROR, null));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        AuthStoreException thrown = catchThrowableOfType(() -> authStore.getAllUsers(), AuthStoreException.class);
+
+        // Then...
+        assertThat(thrown).isNotNull();
+        assertThat(thrown.getMessage()).contains("GAL6202E", "Failed to get user documents from the CouchDB users store.");
+    }
+
+    @Test
+    public void testStoreTokenSendsRequestToasCreateTokenDocumentOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-users-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new CreateDocumentInteraction("https://my-users-store/galasa_users", HttpStatus.SC_CREATED));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+
+        // When...
+        authStore.createUser("this-is-a-login-id", "rest-api");
+
+        // Then the assertions made in the create users document interaction shouldn't have failed.
+    }
+
+    @Test
+    public void testGetUserReturnsUsersByLoginIdFromCouchdbOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        ViewRow userDoc1 = new ViewRow();
+
+        userDoc1.id = "user1";
+        List<ViewRow> mockDocs = List.of(userDoc1);
+
+        ViewResponse mockAllDocsResponse = new ViewResponse();
+        mockAllDocsResponse.rows = mockDocs;
+
+        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontendClient("web-ui", Instant.now())));
+    
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_users/_design/docs/_view/users-loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-auth-store/galasa_users/user1", HttpStatus.SC_OK, mockUser));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+        // When...
+        UserDoc user = authStore.getUserByLoginId("johndoe");
+
+        assertThat(user).isNotNull();
+    }
+
+    @Test
+    public void testGetUserReturnsCorrectUserByLoginIdFromCouchdbOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        ViewRow userDoc1 = new ViewRow();
+
+        userDoc1.id = "user1";
+        List<ViewRow> mockDocs = List.of(userDoc1);
+
+        ViewResponse mockAllDocsResponse = new ViewResponse();
+        mockAllDocsResponse.rows = mockDocs;
+
+        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontendClient("web-ui", Instant.now())));
+    
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_users/_design/docs/_view/users-loginId-view?key=%22notJohndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-auth-store/galasa_users/user1", HttpStatus.SC_OK, mockUser));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+        // When...
+        UserDoc user = authStore.getUserByLoginId("notJohndoe");
+
+        assertThat(user).usingRecursiveComparison().isNotEqualTo(mockUser);
+    }
+
+    @Test
+    public void testUpdateUserUpdatesExisitingClientOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        ViewRow userDoc1 = new ViewRow();
+
+        userDoc1.id = "user1";
+        List<ViewRow> mockDocs = List.of(userDoc1);
+
+        ViewResponse mockAllDocsResponse = new ViewResponse();
+        mockAllDocsResponse.rows = mockDocs;
+
+        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontendClient("web-ui", Instant.now())));
+    
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_users/_design/docs/_view/users-loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-auth-store/galasa_users/user1", HttpStatus.SC_OK, mockUser));
+        interactions.add(new UpdateDocumentInteraction("https://my-auth-store/galasa_users/user1", HttpStatus.SC_CREATED));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+        
+        authStore.updateUserClientActivity("johndoe", "web-ui");
+
+        // Then the assertions made in the updates users document interaction shouldn't have failed.
+    }
+
+    @Test
+    public void testUpdateUserAddsNewClientToUserOK() throws Exception {
+        // Given...
+        URI authStoreUri = URI.create("couchdb:https://my-auth-store");
+        MockLogFactory logFactory = new MockLogFactory();
+
+        ViewRow userDoc1 = new ViewRow();
+
+        userDoc1.id = "user1";
+        userDoc1.key = "admin";
+        userDoc1.value = new AuthDBNameViewDesign("hello", "world", new TokenDBViews(), "javascript");
+        List<ViewRow> mockDocs = List.of(userDoc1);
+
+        ViewResponse mockAllDocsResponse = new ViewResponse();
+        mockAllDocsResponse.rows = mockDocs;
+
+        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontendClient("web-ui", Instant.now())));
+    
+        List<HttpInteraction> interactions = new ArrayList<HttpInteraction>();
+        interactions.add(new GetAllDocumentsInteraction("https://my-auth-store/galasa_users/_design/docs/_view/users-loginId-view?key=%22johndoe%22", HttpStatus.SC_OK, mockAllDocsResponse));
+        interactions.add(new GetDocumentInteraction<UserDoc>("https://my-auth-store/galasa_users/user1", HttpStatus.SC_OK, mockUser));
+        interactions.add(new UpdateDocumentInteraction("https://my-auth-store/galasa_users/user1", HttpStatus.SC_CREATED));
+
+        MockCloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
+
+        MockHttpClientFactory httpClientFactory = new MockHttpClientFactory(mockHttpClient);
+        MockTimeService mockTimeService = new MockTimeService(Instant.now());
+
+        CouchdbAuthStore authStore = new CouchdbAuthStore(authStoreUri, httpClientFactory, new HttpRequestFactoryImpl(), logFactory, new MockCouchdbValidator(), mockTimeService);
+        
+        authStore.updateUserClientActivity("johndoe", "rest-api");
+
+        // Then the assertions made in the updates users document interaction shouldn't have failed.
     }
 }
