@@ -14,7 +14,7 @@ import dev.galasa.cps.etcd.Etcd3ManagerException;
 /**
  * The service to obtain an Etcd3 Client.
  * 
- * @author Michael Baylis
+ *  
  *
  */
 public interface IEtcd3ClientService {
