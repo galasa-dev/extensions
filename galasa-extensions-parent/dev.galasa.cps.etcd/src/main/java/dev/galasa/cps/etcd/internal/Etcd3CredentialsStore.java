@@ -5,14 +5,12 @@
  */
 package dev.galasa.cps.etcd.internal;
 
-import static com.google.common.base.Charsets.UTF_8;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.Properties;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -25,12 +23,10 @@ import dev.galasa.framework.spi.creds.CredentialsToken;
 import dev.galasa.framework.spi.creds.CredentialsUsername;
 import dev.galasa.framework.spi.creds.CredentialsUsernamePassword;
 import dev.galasa.framework.spi.creds.CredentialsUsernameToken;
+import dev.galasa.framework.spi.creds.FrameworkEncryptionService;
 import dev.galasa.framework.spi.creds.ICredentialsStore;
-import io.etcd.jetcd.ByteSequence;
+import dev.galasa.framework.spi.creds.IEncryptionService;
 import io.etcd.jetcd.Client;
-import io.etcd.jetcd.KV;
-import io.etcd.jetcd.KeyValue;
-import io.etcd.jetcd.kv.GetResponse;
 
 /**
  * This class implements the credential store in a etcd store. Usernames,
@@ -38,10 +34,9 @@ import io.etcd.jetcd.kv.GetResponse;
  * 
  * "secure.credentials.{SomeCredentialId};.username"
  */
-public class Etcd3CredentialsStore implements ICredentialsStore {
-    private final Client        client;
-    private final KV            kvClient;
+public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsStore {
     private final SecretKeySpec key;
+    private final IEncryptionService encryptionService;
 
     /**
      * This constructor instantiates the Key value client that can retrieve values
@@ -51,10 +46,8 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
      * @throws CredentialsException A failure occurred.
      */
     public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
+        super(etcd);
         try {
-            client = Client.builder().endpoints(etcd).build();
-            kvClient = client.getKVClient();
-
             IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService("secure");
             String encryptionKey = cpsService.getProperty("credentials.file", "encryption.key");
             if (encryptionKey != null) {
@@ -62,9 +55,17 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
             } else {
                 key = null;
             }
+
+            this.encryptionService = new FrameworkEncryptionService(key);
         } catch (Exception e) {
             throw new CredentialsException("Unable to initialise the etcd credentials store", e);
         }
+    }
+
+    public Etcd3CredentialsStore(SecretKeySpec key, IEncryptionService encryptionService, Client etcdClient) throws CredentialsException {
+        super(etcdClient);
+        this.key = key;
+        this.encryptionService = encryptionService;
     }
 
     /**
@@ -78,50 +79,30 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
      * @throws CredentialsException A failure occurred.
      */
     public ICredentials getCredentials(String credentialsId) throws CredentialsException {
-        String token = get("secure.credentials." + credentialsId + ".token");
-        if (token != null) {
+        try {
+            ICredentials credentials = null;
+            String token = get("secure.credentials." + credentialsId + ".token");
             String username = get("secure.credentials." + credentialsId + ".username");
 
-            if (username != null) {
-                return new CredentialsUsernameToken(key, username, token);
+            // Check if the credentials are UsernameToken or Token
+            if (token != null && username != null) {
+                credentials = new CredentialsUsernameToken(key, username, token);
+            } else if (token != null) {
+                credentials = new CredentialsToken(key, token);
+            } else if (username != null) {
+                // We have a username, so check if the credentials are UsernamePassword or Username
+                String password = get("secure.credentials." + credentialsId + ".password");
+                if (password != null) {
+                   credentials = new CredentialsUsernamePassword(key, username, password); 
+                } else {
+                    credentials = new CredentialsUsername(key, username);
+                }
             }
-            return new CredentialsToken(key, token);
-        }
-
-        String username = get("secure.credentials." + credentialsId + ".username");
-        String password = get("secure.credentials." + credentialsId + ".password");
-
-        if (username == null) {
-            return null;
-        }
-
-        if (password == null) {
-            return new CredentialsUsername(key, username);
-        }
-
-        return new CredentialsUsernamePassword(key, username, password);
-    }
-
-    /**
-     * A get method which interacts with the etcd client correctly.
-     * 
-     * @param key - the full key to search for with CredId and type of credential.
-     * @return String vaule response.
-     * @throws CredentialsException
-     */
-    private String get(String key) throws CredentialsException {
-        ByteSequence bsKey = ByteSequence.from(key, UTF_8);
-        CompletableFuture<GetResponse> getFuture = kvClient.get(bsKey);
-        try {
-            GetResponse response = getFuture.get();
-            List<KeyValue> kvs = response.getKvs();
-            if (kvs.isEmpty()) {
-                return null;
-            }
-            return kvs.get(0).getValue().toString(UTF_8);
+    
+            return credentials;
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
-            throw new CredentialsException("Could not retrieve key.", e);
+            throw new CredentialsException("Failed to get credentials", e);
         }
     }
 
@@ -135,8 +116,30 @@ public class Etcd3CredentialsStore implements ICredentialsStore {
 
     @Override
     public void shutdown() throws CredentialsException {
-        kvClient.close();
-        client.close();
+        super.shutdownStore();
     }
 
+    @Override
+    public void setCredentials(String credentialsId, ICredentials credentials) throws CredentialsException {
+        Properties credentialProperties = credentials.toProperties(credentialsId);
+
+        try {
+            for (Entry<Object, Object> property : credentialProperties.entrySet()) {
+                put((String) property.getKey(), encryptionService.encrypt((String) property.getValue()));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new CredentialsException("Failed to set credentials", e);
+        }
+    }
+
+    @Override
+    public void deleteCredentials(String credentialsId) throws CredentialsException {
+        try {
+            deletePrefix("secure.credentials." + credentialsId);
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new CredentialsException("Failed to delete credentials", e);
+        }
+    }
 }
