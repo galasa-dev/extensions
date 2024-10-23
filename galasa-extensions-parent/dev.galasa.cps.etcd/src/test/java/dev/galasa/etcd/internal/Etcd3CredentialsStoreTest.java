@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import dev.galasa.ICredentials;
 import dev.galasa.cps.etcd.internal.Etcd3CredentialsStore;
 import dev.galasa.etcd.internal.mocks.MockEncryptionService;
 import dev.galasa.etcd.internal.mocks.MockEtcdClient;
@@ -21,6 +22,155 @@ import dev.galasa.framework.spi.creds.CredentialsUsernameToken;
 import static org.assertj.core.api.Assertions.*;
 
 public class Etcd3CredentialsStoreTest {
+
+    @Test
+    public void testGetAllCredentialsReturnsCredentialsOk() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        Map<String, String> mockCreds = new HashMap<>();
+        String credsId1 = "CRED1";
+        String username1 = "my-user";
+        String token1 = "my-token";
+        
+        mockCreds.put("secure.credentials." + credsId1 + ".username", username1);
+        mockCreds.put("secure.credentials." + credsId1 + ".token", token1);
+
+        String credsId2 = "CRED2";
+        String username2 = "another-username";
+        String password2 = "a-password";
+        mockCreds.put("secure.credentials." + credsId2 + ".username", username2);
+        mockCreds.put("secure.credentials." + credsId2 + ".password", password2);
+
+        String credsId3 = "CRED3";
+        String token3 = "another-token";
+        mockCreds.put("secure.credentials." + credsId3 + ".token", token3);
+
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        // When...
+        Map<String, ICredentials> creds = store.getAllCredentials();
+
+        // Then...
+        assertThat(creds).isNotNull();
+        assertThat(creds).hasSize(3);
+
+        CredentialsUsernameToken actualCreds1 = (CredentialsUsernameToken) creds.get(credsId1);
+        CredentialsUsernamePassword actualCreds2 = (CredentialsUsernamePassword) creds.get(credsId2);
+        CredentialsToken actualCreds3 = (CredentialsToken) creds.get(credsId3);
+
+        assertThat(actualCreds1.getUsername()).isEqualTo(username1);
+        assertThat(actualCreds1.getToken()).isEqualTo(token1.getBytes());
+
+        assertThat(actualCreds2.getUsername()).isEqualTo(username2);
+        assertThat(actualCreds2.getPassword()).isEqualTo(password2);
+
+        assertThat(actualCreds3.getToken()).isEqualTo(token3.getBytes());
+    }
+
+    @Test
+    public void testGetAllCredentialsWithMissingPropertySuffixReturnsValidProperties() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        Map<String, String> mockCreds = new HashMap<>();
+        String credsId1 = "CRED1";
+        String username1 = "my-user";
+        String token1 = "my-token";
+        
+        mockCreds.put("secure.credentials." + credsId1 + ".username", username1);
+        mockCreds.put("secure.credentials." + credsId1 + ".token", token1);
+
+        String credsId2 = "CRED2";
+        String username2 = "another-username";
+        String password2 = "a-password";
+        mockCreds.put("secure.credentials." + credsId2 + ".password", password2);
+        
+        // This property is missing a credentials ID and suffix, so the property should be ignored
+        mockCreds.put("secure.credentials", username2);
+
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        // When...
+        Map<String, ICredentials> creds = store.getAllCredentials();
+
+        // Then...
+        assertThat(creds).isNotNull();
+        assertThat(creds).hasSize(1);
+
+        CredentialsUsernameToken actualCreds1 = (CredentialsUsernameToken) creds.get(credsId1);
+
+        assertThat(actualCreds1.getUsername()).isEqualTo(username1);
+        assertThat(actualCreds1.getToken()).isEqualTo(token1.getBytes());
+    }
+
+    @Test
+    public void testGetAllCredentialsWithBadlyFormedPropertyReturnsValidProperties() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        Map<String, String> mockCreds = new HashMap<>();
+        String credsId1 = "CRED1";
+        String username1 = "my-user";
+        String token1 = "my-token";
+        
+        mockCreds.put("secure.credentials." + credsId1 + ".username", username1);
+        mockCreds.put("secure.credentials." + credsId1 + ".token", token1);
+
+        String credsId2 = "CRED2";
+        String username2 = "another-username";
+        String password2 = "a-password";
+        mockCreds.put("secure.credentials." + credsId2 + ".password", password2);
+        
+        // This property is missing a ".username" suffix, so the credential should be ignored
+        mockCreds.put("secure.credentials." + credsId2, username2);
+
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        // When...
+        Map<String, ICredentials> creds = store.getAllCredentials();
+
+        // Then...
+        assertThat(creds).isNotNull();
+        assertThat(creds).hasSize(1);
+
+        CredentialsUsernameToken actualCreds1 = (CredentialsUsernameToken) creds.get(credsId1);
+
+        assertThat(actualCreds1.getUsername()).isEqualTo(username1);
+        assertThat(actualCreds1.getToken()).isEqualTo(token1.getBytes());
+    }
+
+    @Test
+    public void testGetAllCredentialsWithOtherPrefixesReturnsOnlyCredentials() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        Map<String, String> mockCreds = new HashMap<>();
+        String credsId1 = "CRED1";
+        String username1 = "my-user";
+        String token1 = "my-token";
+        
+        mockCreds.put("secure.credentials." + credsId1 + ".username", username1);
+        mockCreds.put("secure.credentials." + credsId1 + ".token", token1);
+
+        String credsId2 = "NOT_A_CRED";
+        String username2 = "a-random-value";
+        mockCreds.put("secure.not-credentials." + credsId2, username2);
+
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        // When...
+        Map<String, ICredentials> creds = store.getAllCredentials();
+
+        // Then...
+        assertThat(creds).isNotNull();
+        assertThat(creds).hasSize(1);
+
+        CredentialsUsernameToken actualCreds1 = (CredentialsUsernameToken) creds.get(credsId1);
+
+        assertThat(actualCreds1.getUsername()).isEqualTo(username1);
+        assertThat(actualCreds1.getToken()).isEqualTo(token1.getBytes());
+    }
 
     @Test
     public void testGetUsernameCredentialsReturnsCredentialsOk() throws Exception {
