@@ -10,8 +10,13 @@ import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
+import java.util.Set;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -38,6 +43,9 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     private final SecretKeySpec key;
     private final IEncryptionService encryptionService;
 
+    private static final String CREDS_NAMESPACE = "secure";
+    private static final String CREDS_PROPERTY_PREFIX = CREDS_NAMESPACE + ".credentials";
+
     /**
      * This constructor instantiates the Key value client that can retrieve values
      * from the etcd store.
@@ -48,7 +56,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     public Etcd3CredentialsStore(IFramework framework, URI etcd) throws CredentialsException {
         super(etcd);
         try {
-            IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService("secure");
+            IConfigurationPropertyStoreService cpsService = framework.getConfigurationPropertyService(CREDS_NAMESPACE);
             String encryptionKey = cpsService.getProperty("credentials.file", "encryption.key");
             if (encryptionKey != null) {
                 key = createKey(encryptionKey);
@@ -79,31 +87,19 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
      * @throws CredentialsException A failure occurred.
      */
     public ICredentials getCredentials(String credentialsId) throws CredentialsException {
+        ICredentials credentials = null;
         try {
-            ICredentials credentials = null;
-            String token = get("secure.credentials." + credentialsId + ".token");
-            String username = get("secure.credentials." + credentialsId + ".username");
+            String token = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".token");
+            String username = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".username");
+            String password = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".password");
 
-            // Check if the credentials are UsernameToken or Token
-            if (token != null && username != null) {
-                credentials = new CredentialsUsernameToken(key, username, token);
-            } else if (token != null) {
-                credentials = new CredentialsToken(key, token);
-            } else if (username != null) {
-                // We have a username, so check if the credentials are UsernamePassword or Username
-                String password = get("secure.credentials." + credentialsId + ".password");
-                if (password != null) {
-                   credentials = new CredentialsUsernamePassword(key, username, password); 
-                } else {
-                    credentials = new CredentialsUsername(key, username);
-                }
-            }
-    
-            return credentials;
+            credentials = convertValuesIntoCredentials(username, password, token);
+
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new CredentialsException("Failed to get credentials", e);
         }
+        return credentials;
     }
 
     private static SecretKeySpec createKey(String secret)
@@ -136,10 +132,80 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     @Override
     public void deleteCredentials(String credentialsId) throws CredentialsException {
         try {
-            deletePrefix("secure.credentials." + credentialsId);
+            deletePrefix(CREDS_PROPERTY_PREFIX + "." + credentialsId);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new CredentialsException("Failed to delete credentials", e);
         }
+    }
+
+    @Override
+    public Map<String, ICredentials> getAllCredentials() throws CredentialsException {
+        Map<String, ICredentials> credentials = new HashMap<>();
+        try {
+            Map<String, String> credentialsKeyValues = getPrefix(CREDS_PROPERTY_PREFIX + ".");
+
+            // Build a set of all credential IDs stored in etcd
+            Set<Entry<String, String>> credentialsEntries = credentialsKeyValues.entrySet();
+            Set<String> credentialIds = new HashSet<>();
+            for (Entry<String, String> entry : credentialsEntries) {
+                String credsId = getCredentialsIdFromKey(entry.getKey());
+                if (credsId != null) {
+                    credentialIds.add(credsId);
+                }
+            }
+
+            // For each credential ID, convert its properties into a credentials object for use by the framework
+            for (String id : credentialIds) {
+                Map<String, String> idProperties = credentialsEntries.stream()
+                    .filter(entry -> entry.getKey().contains("." + id + "."))
+                    .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+                String username = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".username");
+                String password = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".password");
+                String token = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".token");
+
+                ICredentials convertedCredentials = convertValuesIntoCredentials(username, password, token);
+                if (convertedCredentials != null) {
+                    credentials.put(id, convertedCredentials);
+                }
+            }
+
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new CredentialsException("Failed to get credentials", e);
+        }
+        return credentials;
+    }
+
+    private ICredentials convertValuesIntoCredentials(String username, String password, String token) throws CredentialsException {
+        ICredentials credentials = null;
+
+        // Check if the credentials are UsernameToken or Token
+        if (token != null && username != null) {
+            credentials = new CredentialsUsernameToken(key, username, token);
+        } else if (token != null) {
+            credentials = new CredentialsToken(key, token);
+        } else if (username != null) {
+            // We have a username, so check if the credentials are UsernamePassword or Username
+            if (password != null) {
+                credentials = new CredentialsUsernamePassword(key, username, password); 
+            } else {
+                credentials = new CredentialsUsername(key, username);
+            }
+        }
+        return credentials;
+    }
+
+    private String getCredentialsIdFromKey(String key) {
+        // Keys for credentials should be in the form:
+        //     secure.credentials.CRED_ID.suffix
+        // so let's split on "." and grab the third part
+        String credentialsId = null;
+        String[] keyParts = key.split("\\.");
+        if (keyParts.length >= 3) {
+            credentialsId = keyParts[2];
+        }
+        return credentialsId;
     }
 }

@@ -5,11 +5,15 @@
  */
 package dev.galasa.etcd.internal.mocks;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.google.protobuf.ByteString;
 
@@ -45,15 +49,40 @@ public class MockEtcdKvClient implements KV {
         if (value == null) {
             rangeResponse = RangeResponse.newBuilder().build();
         } else {
-            ByteString keyByteStr = ByteString.copyFromUtf8(keyStr);
-            Builder builder = KeyValue.newBuilder().setKey(keyByteStr);
-            ByteString valueByteStr = ByteString.copyFromUtf8(value);
-            builder = builder.setValue(valueByteStr);
-            KeyValue kv = builder.build();
-            rangeResponse = RangeResponse.newBuilder().addKvs(kv).build();
+            rangeResponse = RangeResponse.newBuilder()
+                .addKvs(createKeyValue(keyStr, value))
+                .build();
         }
         GetResponse mockResponse = new GetResponse(rangeResponse, key);
         return CompletableFuture.completedFuture(mockResponse);
+    }
+
+    @Override
+    public CompletableFuture<GetResponse> get(ByteSequence key, GetOption options) {
+        CompletableFuture<GetResponse> response = null;
+        String keyStr = key.toString();
+        if (options.isPrefix()) {
+            Map<String, String> matchingKeyValues = kvContents.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().startsWith(keyStr))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+            
+            RangeResponse rangeResponse;
+            if (matchingKeyValues.isEmpty()) {
+                rangeResponse = RangeResponse.newBuilder().build();
+            } else {
+                List<KeyValue> keyValues = new ArrayList<>();
+                for (Entry<String, String> matchingEntry : matchingKeyValues.entrySet()) {
+                    KeyValue kv = createKeyValue(matchingEntry.getKey(), matchingEntry.getValue());
+                    keyValues.add(kv);
+                }
+                rangeResponse = RangeResponse.newBuilder().addAllKvs(keyValues).build();
+
+            }
+            GetResponse mockResponse = new GetResponse(rangeResponse, key);
+            response = CompletableFuture.completedFuture(mockResponse);
+        }
+        return response;
     }
 
     @Override
@@ -87,6 +116,14 @@ public class MockEtcdKvClient implements KV {
         return CompletableFuture.completedFuture(null);
     }
 
+    private KeyValue createKeyValue(String key, String value) {
+        ByteString keyByteStr = ByteString.copyFromUtf8(key);
+        Builder builder = KeyValue.newBuilder().setKey(keyByteStr);
+        ByteString valueByteStr = ByteString.copyFromUtf8(value);
+        builder = builder.setValue(valueByteStr);
+        return builder.build();
+    }
+
     @Override
     public CompletableFuture<CompactResponse> compact(long key) {
         throw new UnsupportedOperationException("Unimplemented method 'compact'");
@@ -100,11 +137,6 @@ public class MockEtcdKvClient implements KV {
     @Override
     public CompletableFuture<DeleteResponse> delete(ByteSequence key) {
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
-    }
-
-    @Override
-    public CompletableFuture<GetResponse> get(ByteSequence key, GetOption options) {
-        throw new UnsupportedOperationException("Unimplemented method 'get'");
     }
 
     @Override
