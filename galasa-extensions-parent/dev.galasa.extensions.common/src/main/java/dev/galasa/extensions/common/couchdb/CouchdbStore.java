@@ -183,6 +183,9 @@ public abstract class CouchdbStore {
     protected <T> T getDocumentFromDatabase(String dbName, String documentId, Class<T> classOfObject)
             throws CouchdbException {
         HttpGet getDocumentRequest = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
+
+        System.out.println("Fetched Document = " + getDocumentRequest);
+
         return gson.fromJson(sendHttpRequest(getDocumentRequest, HttpStatus.SC_OK), classOfObject);
     }
 

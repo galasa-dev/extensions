@@ -9,10 +9,10 @@ package dev.galasa.auth.couchdb.internal.beans;
 public class AuthDBNameViewDesign {
     public String _rev;
     public String _id;
-    public TokenDBViews views;
+    public AuthStoreDBViews views;
     public String language;
 
-    public AuthDBNameViewDesign(String _rev, String _id, TokenDBViews views, String language) {
+    public AuthDBNameViewDesign(String _rev, String _id, AuthStoreDBViews views, String language) {
         this._rev = _rev;
         this._id = _id;
         this.views = views;

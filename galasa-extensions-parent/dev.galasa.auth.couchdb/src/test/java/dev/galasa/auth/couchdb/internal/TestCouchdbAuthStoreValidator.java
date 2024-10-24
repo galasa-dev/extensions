@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.auth.couchdb;
+package dev.galasa.auth.couchdb.internal;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -18,8 +18,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Test;
 
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreValidator;
 import dev.galasa.auth.couchdb.internal.beans.*;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
@@ -135,9 +133,9 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
         AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
@@ -208,9 +206,9 @@ public class TestCouchdbAuthStoreValidator {
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + usersDatabaseName, HttpStatus.SC_NOT_FOUND));
         interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + usersDatabaseName, HttpStatus.SC_CREATED));
 
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
         AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
@@ -446,9 +444,9 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
         AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
@@ -497,9 +495,9 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
         AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";

@@ -97,7 +97,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
         AuthDBNameViewDesign tableDesign = parseTokenDesignFromJson(docJson);
 
-        boolean isDesignUpdated = updateDesignDocToDesiredDesignDoc(tableDesign);
+        boolean isDesignUpdated = updateDesignDocToDesiredDesignDoc(tableDesign, dbName);
 
         if (isDesignUpdated) {
             updateTokenDesignDocument(httpClient, couchdbUri, attempts, tableDesign, dbName);
@@ -118,23 +118,27 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         return tableDesign;
     }
 
-    private boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign) {
+    private boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign, String dbName) {
         boolean isUpdated = false;
 
         if (tableDesign.views == null) {
             isUpdated = true;
-            tableDesign.views = new TokenDBViews();
+            tableDesign.views = new AuthStoreDBViews();
         }
 
         if (tableDesign.views.loginIdView == null) {
             isUpdated = true;
-            tableDesign.views.loginIdView = new TokenDBLoginView();
+            tableDesign.views.loginIdView = new AuthStoreDBLoginView();
         }
 
-        if (tableDesign.views.loginIdView.map == null
-                || !DB_TABLE_TOKENS_DESIGN.equals(tableDesign.views.loginIdView.map)) {
+        if (tableDesign.views.loginIdView.map == null) {
             isUpdated = true;
-            tableDesign.views.loginIdView.map = DB_TABLE_TOKENS_DESIGN;
+            if(dbName.equals("galasa_tokens")){
+                tableDesign.views.loginIdView.map = DB_TABLE_TOKENS_DESIGN;
+            }
+            else{
+                tableDesign.views.loginIdView.map = DB_TABLE_USERS_DESIGN;
+            }
         }
 
         if (tableDesign.language == null || !tableDesign.language.equals("javascript")) {

@@ -36,9 +36,14 @@ public enum Errors {
     ERROR_FAILED_TO_DELETE_TOKEN_DOCUMENT                            (6104,"GAL6104E: Failed to delete auth token from the CouchDB tokens database. Cause: {0}"),
 
     // CouchDB Users Store error
-    ERROR_FAILED_TO_INITIALISE_USERS_STORE                            (6200,"GAL6200E: Failed to initialise the Galasa CouchDB users store. Cause: {0}"),
-    ERROR_FAILED_TO_CREATE_USER_DOCUMENT                              (6201,"GAL6201E: Failed to store users token in the CouchDB users database. Cause: {0}"),
-    ERROR_FAILED_TO_RETRIEVE_USERS                                    (6202,"GAL6202E: Failed to get user documents from the CouchDB users store. Cause: {0}"),
+    ERROR_FAILED_TO_INITIALISE_USERS_STORE                              (6200,"GAL6200E: Failed to initialise the Galasa CouchDB users store. Cause: {0}"),
+    ERROR_FAILED_TO_CREATE_USER_DOCUMENT                                (6201,"GAL6201E: Failed to store users token in the CouchDB users database. Cause: {0}"),
+    ERROR_FAILED_TO_RETRIEVE_USERS                                      (6202,"GAL6202E: Failed to get user documents from the CouchDB users store. Cause: {0}"),
+    ERROR_FAILED_TO_UPDATE_USER_DOCUMENT                                (6203,"GAL6203E: Failed to update user document in the CouchDB users store. Cause: {0}"),
+    ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_INVALID_RESP                   (6204,"GAL6204E: Failed to update user document in the CouchDB users store. Cause: Couchdb returned an unexpected json response with no _rev or _id field."),
+    ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_MISMATCH_DOC_ID                (6205,"GAL6205E: Failed to update user document in the CouchDB users store. Cause: Couchdb returned a document with an unexpected _id field."),
+    ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_INPUT_INVALID_NULL_USER_NUMBER (6206,"GAL6206E: Failed to update user document in the CouchDB users store. Cause: Bad input. User number is invalid or null."),
+    ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_INPUT_INVALID_NULL_USER_VERSION(6207,"GAL6207E: Failed to update user document in the CouchDB users store. Cause: Bad input. User document version is invalid or null."),
 
     // REST CPS errors
     ERROR_GALASA_WRONG_NUMBER_OF_PARAMETERS_IN_MESSAGE                 (6999,"GAL6999E: Failed to render message template. Not the expected number of parameters. Got ''{0}''. Expected ''{1}''"),
