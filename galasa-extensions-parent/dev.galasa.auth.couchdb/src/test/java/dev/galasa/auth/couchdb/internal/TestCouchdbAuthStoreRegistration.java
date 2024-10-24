@@ -3,12 +3,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.auth.couchdb;
+package dev.galasa.auth.couchdb.internal;
 
 import org.junit.Test;
 
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreRegistration;
 import dev.galasa.extensions.common.impl.HttpRequestFactoryImpl;
 import dev.galasa.extensions.mocks.MockFrameworkInitialisation;
 import dev.galasa.extensions.mocks.MockHttpClientFactory;

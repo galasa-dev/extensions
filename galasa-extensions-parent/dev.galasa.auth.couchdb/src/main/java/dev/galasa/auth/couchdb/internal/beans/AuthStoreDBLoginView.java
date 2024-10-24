@@ -5,6 +5,6 @@
  */
 package dev.galasa.auth.couchdb.internal.beans;
 
-public class TokenDBLoginView {
+public class AuthStoreDBLoginView {
     public String map;
 }
