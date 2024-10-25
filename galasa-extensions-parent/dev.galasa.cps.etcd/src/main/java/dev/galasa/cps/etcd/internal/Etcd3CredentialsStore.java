@@ -120,6 +120,9 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
         Properties credentialProperties = credentials.toProperties(credentialsId);
 
         try {
+            // Clear any existing properties with the same credentials ID
+            deleteCredentials(credentialsId);
+
             for (Entry<Object, Object> property : credentialProperties.entrySet()) {
                 put((String) property.getKey(), encryptionService.encrypt((String) property.getValue()));
             }
