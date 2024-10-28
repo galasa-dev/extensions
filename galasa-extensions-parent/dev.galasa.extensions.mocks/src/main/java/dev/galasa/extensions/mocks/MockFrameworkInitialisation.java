@@ -33,7 +33,6 @@ public class MockFrameworkInitialisation implements IApiServerInitialisation {
     private MockFramework framework;
     
     protected URI authStoreUri;
-    protected URI usersStoreUri;
     protected URI cpsBootstrapUri;
 
     private List<IAuthStore> registeredAuthStores = new ArrayList<IAuthStore>();

@@ -9,6 +9,7 @@ import static dev.galasa.extensions.common.Errors.*;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -29,6 +32,7 @@ import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.CouchdbStore;
 import dev.galasa.extensions.common.couchdb.CouchdbValidator;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
+import dev.galasa.extensions.common.couchdb.pojos.ViewResponse;
 import dev.galasa.extensions.common.couchdb.pojos.ViewRow;
 import dev.galasa.extensions.common.api.HttpRequestFactory;
 import dev.galasa.framework.spi.auth.IInternalAuthToken;
@@ -184,7 +188,9 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
             userDocuments = getAllDocsFromDatabase(USERS_DATABASE_NAME);
 
             for (ViewRow row : userDocuments) {
-                users.add(getUserFromDocument(row.id));
+                UserDoc couchdbUserDocBean = getUserFromDocument(row.id);
+                UserImpl wrappedUser = new UserImpl(couchdbUserDocBean);
+                users.add(wrappedUser);
             }
 
             logger.info("Users retrieved from CouchDB OK");
@@ -214,7 +220,6 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
             throw new AuthStoreException(errorMessage, e);
         }
 
-        return;
     }
 
     @Override
@@ -233,7 +238,6 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
 
                 // Fetch the user document from the CouchDB using the ID from the row
                 UserDoc fetchedUser = getUserFromDocument(row.id);
-                logger.info("Fetched user: " + fetchedUser);
 
                 if (row.value != null) {
                     AuthDBNameViewDesign nameViewDesign = gson.fromJson(gson.toJson(row.value),
@@ -242,7 +246,7 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
                 }
 
                 // Assign fetchedUser to the user variable
-                user = fetchedUser;
+                user = new UserImpl(fetchedUser);
             }
 
             logger.info("User retrieved from CouchDB OK");
@@ -259,15 +263,48 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
     public IUser updateUser(IUser user) throws AuthStoreException {
         // Take a clone of the user we are passed, so we can guarantee we are using our bean which
         // serialises to the correct format.
-        UserDoc userDoc = new UserDoc(user);
-        updateUserDoc(httpClient, storeUri, 0, userDoc);
-        return userDoc;
+        UserImpl userImpl = new UserImpl(user);
+        updateUser(httpClient, storeUri, userImpl);
+        return userImpl;
     }
 
-    private void updateUserDoc(CloseableHttpClient httpClient, URI couchdbUri, int attempts, UserDoc user)
+    /**
+     * Sends a GET request to CouchDB's
+     * /{db}/_design/docs/_view/loginId-view?key={loginId} endpoint and returns the
+     * "rows" list in the response,
+     * which corresponds to the list of documents within the given database.
+     *
+     * @param dbName  the name of the database to retrieve the documents of
+     * @param loginId the loginId of the user to retrieve the doucemnts of
+     * @return a list of rows corresponding to documents within the database
+     * @throws CouchdbException             if there was a problem accessing the
+     *                                      CouchDB store or its response
+     */
+    protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId, String viewName) throws CouchdbException {
+
+        String encodedLoginId = URLEncoder.encode("\"" + loginId + "\"", StandardCharsets.UTF_8);
+        String url = storeUri + "/" + dbName + "/_design/docs/_view/" + viewName + "?key=" + encodedLoginId;
+
+        HttpGet getDocs = httpRequestFactory.getHttpGetRequest(url);
+        getDocs.addHeader("Content-Type", "application/json");
+
+        String responseEntity = sendHttpRequest(getDocs, HttpStatus.SC_OK);
+
+        ViewResponse docByLoginId = gson.fromJson(responseEntity, ViewResponse.class);
+        List<ViewRow> viewRows = docByLoginId.rows;
+
+        if (viewRows == null) {
+            String errorMessage = ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE.getMessage(dbName);
+            throw new CouchdbException(errorMessage);
+        }
+
+        return viewRows;
+    }
+
+    private void updateUser(CloseableHttpClient httpClient, URI couchdbUri, UserImpl user)
             throws AuthStoreException {
 
-        validateUserDoc(user);
+        user.validate();
 
         HttpEntityEnclosingRequestBase request = buildUpdateUserDocRequest(user, couchdbUri);
 
@@ -293,10 +330,10 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         return putResponse;
     }
 
-    private HttpEntityEnclosingRequestBase buildUpdateUserDocRequest(UserDoc user, URI couchdbUri) {
-         HttpEntityEnclosingRequestBase request;
+    private HttpPut buildUpdateUserDocRequest(UserImpl user, URI couchdbUri) {
+        HttpPut request;
 
-        String jsonStructure = gson.toJson(user);
+        String jsonStructure = user.toJson(gson);
         request = httpRequestFactory
                 .getHttpPutRequest(couchdbUri + "/" + USERS_DATABASE_NAME + "/" + user.getUserNumber());
         request.setHeader("If-Match", user.getVersion());
@@ -316,17 +353,6 @@ public class CouchdbAuthStore extends CouchdbStore implements IAuthStore {
         }
     }
 
-    private void validateUserDoc(UserDoc user) throws AuthStoreException {
-        if (user.getUserNumber() == null) {
-            String errorMessage = ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_INPUT_INVALID_NULL_USER_NUMBER.getMessage();
-            throw new AuthStoreException(errorMessage);
-        } 
-
-        if (user.getVersion() == null) {
-            String errorMessage = ERROR_FAILED_TO_UPDATE_USER_DOCUMENT_INPUT_INVALID_NULL_USER_VERSION.getMessage();
-            throw new AuthStoreException(errorMessage);
-        } 
-    }
 
     @Override
     public void deleteUser(IUser user) throws AuthStoreException {

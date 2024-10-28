@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.auth.couchdb.internal.beans;
+package dev.galasa.auth.couchdb.internal;
 
 import static org.assertj.core.api.Assertions.*;
 import java.time.Instant;
@@ -13,23 +13,37 @@ import java.util.List;
 
 import org.junit.Test;
 
+import dev.galasa.auth.couchdb.internal.beans.FrontEndClient;
 import dev.galasa.framework.spi.auth.IFrontEndClient;
 import dev.galasa.framework.spi.auth.IUser;
 
 
-public class TestUserDoc {
+public class TestUserImpl {
 
     @Test
-    public void testCanConstructUserDocGivenAUserDoc() throws Exception  {
-        UserDoc doc1 = new UserDoc("myLoginId",null);
-        assertThat(doc1.getLoginId()).isEqualTo("myLoginId");
+    public void testCanConstructUserImplGivenAnIUser() throws Exception  {
+        // Given...
+        UserImpl docInput = new UserImpl();
+        docInput.setUserNumber("1234");
+        docInput.setLoginId("myLoginId");
+
+        // When..
+        UserImpl docOutput = new UserImpl(docInput);
+        
+        // Then...
+        assertThat(docOutput.getLoginId()).isEqualTo("myLoginId");
+        assertThat(docOutput.getUserNumber()).isEqualTo("1234");
     }
 
     @Test
     public void testCanConstructUserDocGivenAUserDocWithClient() throws Exception  {
-        UserDoc doc1 = new UserDoc("myLoginId",List.of(new FrontEndClient("myClient1",Instant.MIN)));
 
-        IFrontEndClient clientGotBack = doc1.getClient("myClient1");
+        UserImpl docInput = new UserImpl();
+
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(new FrontEndClient("myClient1",Instant.MIN));
+
+        IFrontEndClient clientGotBack = docInput.getClient("myClient1");
         assertThat(clientGotBack).isNotNull();
         assertThat(clientGotBack.getClientName()).isEqualTo("myClient1");
         assertThat(clientGotBack.getLastLogin()).isEqualTo(Instant.MIN);
@@ -37,17 +51,25 @@ public class TestUserDoc {
 
     @Test
     public void testCanLookForClientWhichIsntInTheUserDocReturnsNull() throws Exception  {
-        UserDoc doc1 = new UserDoc("myLoginId",List.of(new FrontEndClient("myClient1",Instant.MIN)));
+        
+        UserImpl docInput = new UserImpl();
 
-        IFrontEndClient clientGotBack = doc1.getClient("myClient2"); // Client2 isn't there!
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(new FrontEndClient("myClient1",Instant.MIN));
+
+        IFrontEndClient clientGotBack = docInput.getClient("myClient2"); // Client2 isn't there!
         assertThat(clientGotBack).isNull();
     }
 
     @Test
     public void testCanTryLookingForClientWithNullNameShouldReturnNull() throws Exception  {
-        UserDoc doc1 = new UserDoc("myLoginId",List.of(new FrontEndClient("myClient1",Instant.MIN)));
+        
+        UserImpl docInput = new UserImpl();
 
-        IFrontEndClient clientGotBack = doc1.getClient(null); 
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(new FrontEndClient("myClient1",Instant.MIN));
+
+        IFrontEndClient clientGotBack = docInput.getClient(null); 
         assertThat(clientGotBack).isNull();
     }
 
@@ -98,10 +120,13 @@ public class TestUserDoc {
     public void testCanCloneUserDocFromIUser() throws Exception {
         MockIUser doc1 = new MockIUser("myLoginId",null);
 
-        UserDoc doc2 = new UserDoc(doc1);
+        UserImpl docInput = new UserImpl();
 
-        assertThat(doc2).isNotNull();
-        assertThat(doc2.getLoginId()).isEqualTo("myLoginId");
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(new FrontEndClient("myClient1",Instant.MIN));
+
+        assertThat(docInput).isNotNull();
+        assertThat(docInput.getLoginId()).isEqualTo("myLoginId");
     }
 
     class MockIFrontEndClient implements IFrontEndClient {
@@ -132,26 +157,31 @@ public class TestUserDoc {
 
     @Test
     public void testCanSetIFrontEndClientsInAndGetThemBack() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId",List.of(new FrontEndClient("myClient1",Instant.MIN)));
+        
         MockIFrontEndClient mockClient = new MockIFrontEndClient("client2", Instant.MIN.plusSeconds(2));
 
-        doc1.addClient(mockClient);
+        UserImpl docInput = new UserImpl();
 
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(mockClient);
 
         // Then...
-        IFrontEndClient gotBack = doc1.getClient("client2");
+        IFrontEndClient gotBack = docInput.getClient("client2");
         assertThat(gotBack).isNotNull();
         assertThat(gotBack.getLastLogin()).isEqualTo(Instant.MIN.plusSeconds(2));
     }
 
     @Test
     public void testCanGetClientsWhenClientsArePresent() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of(
-                new FrontEndClient("client1", Instant.MIN),
-                new FrontEndClient("client2", Instant.now())
-        ));
+        MockIFrontEndClient mockClient1 = new MockIFrontEndClient("client1", Instant.MIN.plusSeconds(2));
+        MockIFrontEndClient mockClient2 = new MockIFrontEndClient("client2", Instant.MIN.plusSeconds(2));
+        
+        UserImpl docInput = new UserImpl();
+        docInput.setLoginId("myLoginId");
+        docInput.addClient(mockClient1);
+        docInput.addClient(mockClient2);
 
-        Collection<IFrontEndClient> clients = doc1.getClients();
+        Collection<IFrontEndClient> clients = docInput.getClients();
 
         assertThat(clients).isNotNull();
         assertThat(clients).hasSize(2);
@@ -160,9 +190,10 @@ public class TestUserDoc {
 
     @Test
     public void testCanGetClientsWhenNoClientsArePresent() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
+        
+        UserImpl docInput = new UserImpl();
 
-        Collection<IFrontEndClient> clients = doc1.getClients();
+        Collection<IFrontEndClient> clients = docInput.getClients();
 
         assertThat(clients).isNotNull();
         assertThat(clients).isEmpty();
@@ -170,10 +201,10 @@ public class TestUserDoc {
 
     @Test
     public void testCanSetAndGetUserNumber() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        doc1.setUserNumber("12345");
+        UserImpl docInput = new UserImpl();
+        docInput.setUserNumber("12345");
 
-        String userNumber = doc1.getUserNumber();
+        String userNumber = docInput.getUserNumber();
 
         assertThat(userNumber).isNotNull();
         assertThat(userNumber).isEqualTo("12345");
@@ -181,19 +212,18 @@ public class TestUserDoc {
 
     @Test
     public void testGetUserNumberReturnsNullWhenNotSet() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-
-        String userNumber = doc1.getUserNumber();
+        UserImpl docInput = new UserImpl();
+        String userNumber = docInput.getUserNumber();
 
         assertThat(userNumber).isNull();
     }
 
     @Test
     public void testCanSetAndGetVersion() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        doc1.setVersion("1.0");
+        UserImpl docInput = new UserImpl();
+        docInput.setVersion("1.0");
 
-        String version = doc1.getVersion();
+        String version = docInput.getVersion();
 
         assertThat(version).isNotNull();
         assertThat(version).isEqualTo("1.0");
@@ -201,19 +231,19 @@ public class TestUserDoc {
 
     @Test
     public void testGetVersionReturnsNullWhenNotSet() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-
-        String version = doc1.getVersion();
+        
+        UserImpl docInput = new UserImpl();
+        String version = docInput.getVersion();
 
         assertThat(version).isNull();
     }
 
     @Test
     public void testCanSetAndGetLoginId() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        doc1.setLoginId("newLoginId");
+        UserImpl docInput = new UserImpl();
+        docInput.setLoginId("newLoginId");
 
-        String loginId = doc1.getLoginId();
+        String loginId = docInput.getLoginId();
 
         assertThat(loginId).isNotNull();
         assertThat(loginId).isEqualTo("newLoginId");
@@ -221,58 +251,11 @@ public class TestUserDoc {
 
     @Test
     public void testGetLoginIdReturnsNullWhenNotSet() throws Exception {
-        UserDoc doc1 = new UserDoc(null, List.of());
+        UserImpl docInput = new UserImpl();
 
-        String loginId = doc1.getLoginId();
+        String loginId = docInput.getLoginId();
 
         assertThat(loginId).isNull();
-    }
-
-    @Test
-    public void testCanSetClientsSuccessfully() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        Collection<IFrontEndClient> clients = List.of(
-                new FrontEndClient("client1", Instant.MIN),
-                new FrontEndClient("client2", Instant.now())
-        );
-
-        doc1.setClients(clients);
-
-        Collection<IFrontEndClient> clientsGotBack = doc1.getClients();
-        assertThat(clientsGotBack).isNotNull();
-        assertThat(clientsGotBack).hasSize(2);
-        assertThat(clientsGotBack).extracting("clientName").containsExactlyInAnyOrder("client1", "client2");
-    }
-
-    @Test
-    public void testSetClientsDoesNotModifyOriginalCollection() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        List<IFrontEndClient> originalClients = new ArrayList<>();
-        originalClients.add(new FrontEndClient("client1", Instant.MIN));
-
-        doc1.setClients(originalClients);
-
-        // Modify the original collection after setting it
-        originalClients.add(new FrontEndClient("client2", Instant.now()));
-
-        Collection<IFrontEndClient> clientsGotBack = doc1.getClients();
-        assertThat(clientsGotBack).hasSize(1); // Should only contain the first client
-        assertThat(clientsGotBack).extracting("clientName").containsExactly("client1");
-    }
-
-    @Test
-    public void testSetClientsShouldInvokeAddClientForEachClient() throws Exception {
-        UserDoc doc1 = new UserDoc("myLoginId", List.of());
-        Collection<IFrontEndClient> clients = List.of(
-                new FrontEndClient("client1", Instant.MIN),
-                new FrontEndClient("client2", Instant.now())
-        );
-
-        doc1.setClients(clients);
-
-        Collection<IFrontEndClient> clientsGotBack = doc1.getClients();
-        assertThat(clientsGotBack).hasSize(2);
-        assertThat(clientsGotBack).extracting("clientName").contains("client1", "client2");
     }
 
 }

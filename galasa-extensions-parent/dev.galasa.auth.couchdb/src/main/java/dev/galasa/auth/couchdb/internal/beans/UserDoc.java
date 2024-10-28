@@ -1,16 +1,19 @@
+/*
+ * Copyright contributors to the Galasa project
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 package dev.galasa.auth.couchdb.internal.beans;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.ArrayList;
-
-
+import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
-import dev.galasa.framework.spi.auth.IFrontEndClient;
-import dev.galasa.framework.spi.auth.IUser;
-
-public class UserDoc implements IUser{
+/**
+ * A document serialised to exchange json with couchdb, representing a user in the system.
+ */
+public class UserDoc {
 
     @SerializedName("_id")
     private String userNumber;
@@ -24,19 +27,15 @@ public class UserDoc implements IUser{
     @SerializedName("activity")
     private List<FrontEndClient> clients;
 
+    public UserDoc() {
+        setClients(new ArrayList<FrontEndClient>());
+    }
+
     public UserDoc(String loginId, List<FrontEndClient> clients) {
         this.loginId = loginId;
         setClients( clients);
     }
 
-    public UserDoc(IUser user){
-        this.loginId = user.getLoginId();
-        this.version = user.getVersion();
-        this.userNumber = user.getUserNumber();
-        setClients(user.getClients());
-    }
-
-    @Override
     public String getUserNumber(){
         return userNumber;
     }
@@ -53,7 +52,6 @@ public class UserDoc implements IUser{
         this.version = version;
     }
 
-    @Override
     public String getLoginId() {
         return loginId;
     }
@@ -61,54 +59,13 @@ public class UserDoc implements IUser{
     public void setLoginId(String loginId) {
         this.loginId = loginId;
     }
-
-    @Override
-    public Collection<IFrontEndClient> getClients() {
-        Collection<IFrontEndClient> results = new ArrayList<IFrontEndClient>();
-        for( FrontEndClient client : this.clients) {
-            results.add(client);
-        }
-        return results;
+    
+    public List<FrontEndClient> getClients() {
+        return clients;
     }
 
     public void setClients(List<FrontEndClient> clients) {
-        this.clients = new ArrayList<FrontEndClient>();
-        if( clients != null) {
-            for (IFrontEndClient clientIn: clients) {
-                addClient(clientIn);
-            }
-        }
+        this.clients = clients;
     }
-
-    // Setter for clients. Takes a deep copy of any clients it is passed.
-    public void setClients(Collection<IFrontEndClient> clients) {
-
-        this.clients = new ArrayList<FrontEndClient>();
-        if( clients != null) {
-            for (IFrontEndClient clientIn: clients) {
-                addClient(clientIn);
-            }
-        }
-    }
-
-    @Override
-    public IFrontEndClient getClient(String clientName) {
-        IFrontEndClient match = null; 
-        if (clientName != null) {
-            for (FrontEndClient frontEndClient : clients) {
-                if(clientName.equals(frontEndClient.getClientName())){
-                    match = frontEndClient;
-                    break;
-                }
-            }
-        }
-        return match;
-    }
-
-    @Override
-    public void addClient(IFrontEndClient client) {
-        clients.add( new FrontEndClient(client));
-    }
-
     
 }

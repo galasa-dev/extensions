@@ -133,7 +133,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
         if (tableDesign.views.loginIdView.map == null) {
             isUpdated = true;
-            if(dbName.equals("galasa_tokens")){
+            if(dbName.equals(DB_TABLE_TOKENS_DESIGN)){
                 tableDesign.views.loginIdView.map = DB_TABLE_TOKENS_DESIGN;
             }
             else{

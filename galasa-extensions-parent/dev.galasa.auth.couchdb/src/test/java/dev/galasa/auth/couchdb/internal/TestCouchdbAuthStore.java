@@ -623,7 +623,7 @@ public class TestCouchdbAuthStore {
         // When...
         IUser user = authStore.getUserByLoginId("user1");
 
-        assertThat(user).isInstanceOf(UserDoc.class);
+        assertThat(user).isInstanceOf(UserImpl.class);
         assertThat(user).isNotNull();
         assertThat(user.getLoginId()).isEqualTo("johndoe");
     }
@@ -668,7 +668,7 @@ public class TestCouchdbAuthStore {
     @Test
     public void testUpdateUserUpdatesExisitingClientOK() throws Exception {
         // Given...
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("web-ui", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("web-ui", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber("user1");
 
@@ -686,7 +686,7 @@ public class TestCouchdbAuthStore {
     @Test
     public void testUpdateUserCouchDBPassesBackANullVersionField() throws Exception {
         // Given...
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber("user1");
 
@@ -705,7 +705,7 @@ public class TestCouchdbAuthStore {
     @Test
     public void testUpdateUserCouchDBPassesBackADocIdWithWrongUserNumberField() throws Exception {
         // Given...
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber("user1");
 
@@ -725,7 +725,7 @@ public class TestCouchdbAuthStore {
     public void testUpdateUserCouchDBPassesBackADocIdWithMissingIdField() throws Exception {
         // Given...
 
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber("user1");
 
@@ -744,7 +744,7 @@ public class TestCouchdbAuthStore {
     @Test
     public void testUpdateUserCouchDBPassesBackAnUnexpectedServerError() throws Exception {
         // Given...
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber("user1");
 
@@ -762,7 +762,7 @@ public class TestCouchdbAuthStore {
 
     @Test
     public void testUpdateUserWithBadUserNullIdFieldGetsDetectedAsError() throws Exception {
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion("1");
         mockUser.setUserNumber(null);
 
@@ -775,7 +775,7 @@ public class TestCouchdbAuthStore {
 
     @Test
     public void testUpdateUserWithBadUserNullVersionFieldGetsDetectedAsError() throws Exception {
-        UserDoc mockUser = new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN)));
+        UserImpl mockUser = new UserImpl(new UserDoc("johndoe", List.of(new FrontEndClient("rest-api", Instant.MIN))));
         mockUser.setVersion(null);
         mockUser.setUserNumber("user1");
 
