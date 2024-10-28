@@ -10,7 +10,6 @@ import static dev.galasa.extensions.common.Errors.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
@@ -112,8 +111,8 @@ public abstract class CouchdbStore {
      */
     protected List<ViewRow> getAllDocsFromDatabase(String dbName) throws CouchdbException {
 
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
-        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
+        HttpGet fetchedDocs = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/_all_docs");
+        String responseEntity = sendHttpRequest(fetchedDocs, HttpStatus.SC_OK);
 
         ViewResponse allDocs = gson.fromJson(responseEntity, ViewResponse.class);
         List<ViewRow> viewRows = allDocs.rows;
@@ -124,45 +123,15 @@ public abstract class CouchdbStore {
         }
 
         // Filter out design documents from the results
-        viewRows = viewRows.stream()
-            .filter((row) -> !row.key.equals("_design/docs"))
-            .collect(Collectors.toList());
+        if(viewRows.get(0).key != null){
+            viewRows = viewRows.stream()
+                .filter((row) -> !row.key.equals("_design/docs"))
+                .collect(Collectors.toList());
+        }
         
         return viewRows;
     }
 
-    /**
-     * Sends a GET request to CouchDB's
-     * /{db}/_design/docs/_view/loginId-view?key={loginId} endpoint and returns the
-     * "rows" list in the response,
-     * which corresponds to the list of documents within the given database.
-     *
-     * @param dbName  the name of the database to retrieve the documents of
-     * @param loginId the loginId of the user to retrieve the doucemnts of
-     * @return a list of rows corresponding to documents within the database
-     * @throws CouchdbException             if there was a problem accessing the
-     *                                      CouchDB store or its response
-     */
-    protected List<ViewRow> getAllDocsByLoginId(String dbName, String loginId) throws CouchdbException {
-
-        String encodedLoginId = URLEncoder.encode("\"" + loginId + "\"", StandardCharsets.UTF_8);
-        String url = storeUri + "/" + dbName + "/_design/docs/_view/loginId-view?key=" + encodedLoginId;
-
-        HttpGet getTokensDocs = httpRequestFactory.getHttpGetRequest(url);
-        getTokensDocs.addHeader("Content-Type", "application/json");
-
-        String responseEntity = sendHttpRequest(getTokensDocs, HttpStatus.SC_OK);
-
-        ViewResponse docByLoginId = gson.fromJson(responseEntity, ViewResponse.class);
-        List<ViewRow> viewRows = docByLoginId.rows;
-
-        if (viewRows == null) {
-            String errorMessage = ERROR_FAILED_TO_GET_DOCUMENTS_FROM_DATABASE.getMessage(dbName);
-            throw new CouchdbException(errorMessage);
-        }
-
-        return viewRows;
-    }
 
     /**
      * Gets an object from a given database's document using its document ID by
@@ -181,6 +150,7 @@ public abstract class CouchdbStore {
     protected <T> T getDocumentFromDatabase(String dbName, String documentId, Class<T> classOfObject)
             throws CouchdbException {
         HttpGet getDocumentRequest = httpRequestFactory.getHttpGetRequest(storeUri + "/" + dbName + "/" + documentId);
+
         return gson.fromJson(sendHttpRequest(getDocumentRequest, HttpStatus.SC_OK), classOfObject);
     }
 

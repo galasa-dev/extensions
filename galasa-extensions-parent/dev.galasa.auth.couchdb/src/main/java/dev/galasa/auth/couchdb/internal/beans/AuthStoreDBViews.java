@@ -7,7 +7,7 @@ package dev.galasa.auth.couchdb.internal.beans;
 
 import com.google.gson.annotations.SerializedName;
 
-public class TokenDBViews {
+public class AuthStoreDBViews {
     @SerializedName("loginId-view")
-    public TokenDBLoginView loginIdView;
+    public AuthStoreDBLoginView loginIdView;
 }

@@ -3,7 +3,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package dev.galasa.auth.couchdb;
+package dev.galasa.auth.couchdb.internal;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -18,8 +18,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.Test;
 
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStore;
-import dev.galasa.auth.couchdb.internal.CouchdbAuthStoreValidator;
 import dev.galasa.auth.couchdb.internal.beans.*;
 import dev.galasa.extensions.common.couchdb.CouchdbException;
 import dev.galasa.extensions.common.couchdb.pojos.PutPostResponse;
@@ -122,6 +120,7 @@ public class TestCouchdbAuthStoreValidator {
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.USERS_DATABASE_NAME, HttpStatus.SC_OK));
 
 
         // We are expecting this to ne returned from our mock couchdb server to the code:
@@ -134,20 +133,21 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
-        TokensDBNameViewDesign designDocToPassBack = new TokensDBNameViewDesign();
+        AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
-        
-
 
         String tokensDesignDocUrl = couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME + "/_design/docs";
         interactions.add(new GetTokensDatabaseDesignInteraction(tokensDesignDocUrl, designDocToPassBack));
-
-
         interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "", HttpStatus.SC_CREATED));
+        
+        String usersDesignDocUrl = couchdbUriStr + "/" + CouchdbAuthStore.USERS_DATABASE_NAME + "/_design/docs";
+        interactions.add(new GetTokensDatabaseDesignInteraction(usersDesignDocUrl, designDocToPassBack));
+        interactions.add(new UpdateTokensDatabaseDesignInteraction(usersDesignDocUrl, "", HttpStatus.SC_CREATED));
+    
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
         MockTimeService mockTimeService = new MockTimeService(Instant.now());
 
@@ -197,25 +197,33 @@ public class TestCouchdbAuthStoreValidator {
         welcomeMessage.version = CouchDbVersion.COUCHDB_MIN_VERSION.toString();
 
         String tokensDatabaseName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
+        String usersDatabaseName = CouchdbAuthStore.USERS_DATABASE_NAME;
+
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_NOT_FOUND));
         interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + tokensDatabaseName, HttpStatus.SC_CREATED));
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + usersDatabaseName, HttpStatus.SC_NOT_FOUND));
+        interactions.add(new CreateDatabaseInteraction(couchdbUriStr + "/" + usersDatabaseName, HttpStatus.SC_CREATED));
 
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
-        TokensDBNameViewDesign designDocToPassBack = new TokensDBNameViewDesign();
+        AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
 
 
         String tokensDesignDocUrl = couchdbUriStr + "/" + tokensDatabaseName + "/_design/docs";
+        String userDesignDocUrl = couchdbUriStr + "/" + usersDatabaseName + "/_design/docs";
+
         interactions.add(new GetTokensDatabaseDesignInteraction(tokensDesignDocUrl, designDocToPassBack));
+        interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "",HttpStatus.SC_CREATED));
+
+        interactions.add(new GetTokensDatabaseDesignInteraction(userDesignDocUrl, designDocToPassBack));
+        interactions.add(new UpdateTokensDatabaseDesignInteraction(userDesignDocUrl, "",HttpStatus.SC_CREATED));
 
         MockTimeService mockTimeService = new MockTimeService(Instant.now());
-
-        interactions.add(new UpdateTokensDatabaseDesignInteraction(tokensDesignDocUrl, "",HttpStatus.SC_CREATED));
         CloseableHttpClient mockHttpClient = new MockCloseableHttpClient(interactions);
 
         // When...
@@ -424,7 +432,7 @@ public class TestCouchdbAuthStoreValidator {
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
-
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.USERS_DATABASE_NAME, HttpStatus.SC_OK));
 
         // We are expecting this to ne returned from our mock couchdb server to the code:
         //   "_id": "_design/docs",
@@ -436,11 +444,11 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
-        TokensDBNameViewDesign designDocToPassBack = new TokensDBNameViewDesign();
+        AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
 
 
@@ -475,7 +483,7 @@ public class TestCouchdbAuthStoreValidator {
         List<HttpInteraction> interactions = new ArrayList<>();
         interactions.add(new GetCouchdbWelcomeInteraction(couchdbUriStr, welcomeMessage));
         interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.TOKENS_DATABASE_NAME, HttpStatus.SC_OK));
-
+        interactions.add(new GetTokensDatabaseInteraction(couchdbUriStr + "/" + CouchdbAuthStore.USERS_DATABASE_NAME, HttpStatus.SC_OK));
 
         // We are expecting this to ne returned from our mock couchdb server to the code:
         //   "_id": "_design/docs",
@@ -487,11 +495,11 @@ public class TestCouchdbAuthStoreValidator {
         //   },
         //   "language": "javascript"
         // }
-        TokenDBLoginView view = new TokenDBLoginView();
+        AuthStoreDBLoginView view = new AuthStoreDBLoginView();
         view.map = "function (doc) {\n  if (doc.owner && doc.owner.loginId) {\n    emit(doc.owner.loginId, doc);\n  }\n}";
-        TokenDBViews views = new TokenDBViews();
+        AuthStoreDBViews views = new AuthStoreDBViews();
         views.loginIdView = view;
-        TokensDBNameViewDesign designDocToPassBack = new TokensDBNameViewDesign();
+        AuthDBNameViewDesign designDocToPassBack = new AuthDBNameViewDesign();
         designDocToPassBack.language = "javascript";
 
 
