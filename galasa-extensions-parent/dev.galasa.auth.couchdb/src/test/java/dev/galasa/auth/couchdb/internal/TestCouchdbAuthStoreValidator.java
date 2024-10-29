@@ -6,6 +6,10 @@
 package dev.galasa.auth.couchdb.internal;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -519,6 +523,44 @@ public class TestCouchdbAuthStoreValidator {
         // Then...
         assertThat(thrown).isNotNull();
         assertThat(thrown.getMessage()).contains("Update of galasa_tokens design");
+    }
+
+     // Test when all fields are null and dbName is TOKENS_DATABASE_NAME
+    @Test
+    public void testAllFieldsNull_TokensDatabase() {
+        AuthDBNameViewDesign tableDesign = new AuthDBNameViewDesign();
+        String dbName = CouchdbAuthStore.TOKENS_DATABASE_NAME;
+
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        boolean isUpdated = validator.updateDesignDocToDesiredDesignDoc(tableDesign, dbName);
+
+        String DB_TABLE_TOKENS_DESIGN = "function (doc) { if (doc.owner && doc.owner.loginId) {emit(doc.owner.loginId, doc); } }";
+
+        assertTrue(isUpdated);
+        assertNotNull(tableDesign.views);
+        assertNotNull(tableDesign.views.loginIdView);
+        assertEquals(DB_TABLE_TOKENS_DESIGN, tableDesign.views.loginIdView.map);
+        assertEquals("javascript", tableDesign.language);
+    }
+
+    // Test when all fields are null and dbName is not TOKENS_DATABASE_NAME
+    @Test
+    public void testAllFieldsNull_OtherDatabase() {
+        AuthDBNameViewDesign tableDesign = new AuthDBNameViewDesign();
+        String dbName = CouchdbAuthStore.USERS_DATABASE_NAME;
+
+        CouchdbAuthStoreValidator validator = new CouchdbAuthStoreValidator();
+
+        boolean isUpdated = validator.updateDesignDocToDesiredDesignDoc(tableDesign, dbName);
+
+        String DB_TABLE_USERS_DESIGN = "function (doc) { if (doc['login-id']) { emit(doc['login-id'], doc); } }";
+
+        assertTrue(isUpdated);
+        assertNotNull(tableDesign.views);
+        assertNotNull(tableDesign.views.loginIdView);
+        assertEquals(DB_TABLE_USERS_DESIGN, tableDesign.views.loginIdView.map);
+        assertEquals("javascript", tableDesign.language);
     }
     
 }

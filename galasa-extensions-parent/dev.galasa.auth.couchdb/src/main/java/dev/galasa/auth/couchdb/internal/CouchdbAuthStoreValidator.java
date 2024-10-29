@@ -118,7 +118,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         return tableDesign;
     }
 
-    private boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign, String dbName) {
+    protected boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign, String dbName) {
         boolean isUpdated = false;
 
         if (tableDesign.views == null) {
@@ -133,7 +133,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
 
         if (tableDesign.views.loginIdView.map == null) {
             isUpdated = true;
-            if(dbName.equals(DB_TABLE_TOKENS_DESIGN)){
+            if(dbName.equals(CouchdbAuthStore.TOKENS_DATABASE_NAME)){
                 tableDesign.views.loginIdView.map = DB_TABLE_TOKENS_DESIGN;
             }
             else{
