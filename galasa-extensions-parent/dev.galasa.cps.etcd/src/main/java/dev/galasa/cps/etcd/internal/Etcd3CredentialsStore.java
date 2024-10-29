@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.Set;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     private final IEncryptionService encryptionService;
 
     private static final String CREDS_NAMESPACE = "secure";
-    private static final String CREDS_PROPERTY_PREFIX = CREDS_NAMESPACE + ".credentials";
+    private static final String CREDS_PROPERTY_PREFIX = CREDS_NAMESPACE + ".credentials.";
 
     /**
      * This constructor instantiates the Key value client that can retrieve values
@@ -89,11 +90,8 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     public ICredentials getCredentials(String credentialsId) throws CredentialsException {
         ICredentials credentials = null;
         try {
-            String token = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".token");
-            String username = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".username");
-            String password = get(CREDS_PROPERTY_PREFIX + "." + credentialsId + ".password");
-
-            credentials = convertValuesIntoCredentials(username, password, token);
+            Map<String, String> credentialsProperties = getPrefix(CREDS_PROPERTY_PREFIX + credentialsId);
+            credentials = convertPropertiesIntoCredentials(credentialsProperties, credentialsId);
 
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
@@ -118,14 +116,14 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     @Override
     public void setCredentials(String credentialsId, ICredentials credentials) throws CredentialsException {
         Properties credentialProperties = credentials.toProperties(credentialsId);
+        Properties metadataProperties = credentials.getMetadataProperties(credentialsId);
 
         try {
             // Clear any existing properties with the same credentials ID
             deleteCredentials(credentialsId);
 
-            for (Entry<Object, Object> property : credentialProperties.entrySet()) {
-                put((String) property.getKey(), encryptionService.encrypt((String) property.getValue()));
-            }
+            putAllProperties(credentialProperties, true);
+            putAllProperties(metadataProperties, false);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new CredentialsException("Failed to set credentials", e);
@@ -135,7 +133,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     @Override
     public void deleteCredentials(String credentialsId) throws CredentialsException {
         try {
-            deletePrefix(CREDS_PROPERTY_PREFIX + "." + credentialsId);
+            deletePrefix(CREDS_PROPERTY_PREFIX + credentialsId);
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new CredentialsException("Failed to delete credentials", e);
@@ -146,7 +144,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
     public Map<String, ICredentials> getAllCredentials() throws CredentialsException {
         Map<String, ICredentials> credentials = new HashMap<>();
         try {
-            Map<String, String> credentialsKeyValues = getPrefix(CREDS_PROPERTY_PREFIX + ".");
+            Map<String, String> credentialsKeyValues = getPrefix(CREDS_PROPERTY_PREFIX);
 
             // Build a set of all credential IDs stored in etcd
             Set<Entry<String, String>> credentialsEntries = credentialsKeyValues.entrySet();
@@ -164,11 +162,7 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
                     .filter(entry -> entry.getKey().contains("." + id + "."))
                     .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-                String username = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".username");
-                String password = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".password");
-                String token = idProperties.get(CREDS_PROPERTY_PREFIX + "." + id + ".token");
-
-                ICredentials convertedCredentials = convertValuesIntoCredentials(username, password, token);
+                ICredentials convertedCredentials = convertPropertiesIntoCredentials(idProperties, id);
                 if (convertedCredentials != null) {
                     credentials.put(id, convertedCredentials);
                 }
@@ -181,7 +175,11 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
         return credentials;
     }
 
-    private ICredentials convertValuesIntoCredentials(String username, String password, String token) throws CredentialsException {
+    private ICredentials convertPropertiesIntoCredentials(Map<String, String> credProperties, String credentialsId) throws CredentialsException {
+        String token = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".token");
+        String username = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".username");
+        String password = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".password");
+
         ICredentials credentials = null;
 
         // Check if the credentials are UsernameToken or Token
@@ -197,6 +195,18 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
                 credentials = new CredentialsUsername(key, username);
             }
         }
+
+        if (credentials != null) {
+            String description = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".description");
+            String lastUpdatedTime = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".lastUpdated.time");
+            String lastUpdatedUser = credProperties.get(CREDS_PROPERTY_PREFIX + credentialsId + ".lastUpdated.user");
+
+            credentials.setDescription(description);
+            credentials.setLastUpdatedByUser(lastUpdatedUser);
+            if (lastUpdatedTime != null) {
+                credentials.setLastUpdatedTime(Instant.parse(lastUpdatedTime));
+            }
+        }
         return credentials;
     }
 
@@ -210,5 +220,16 @@ public class Etcd3CredentialsStore extends Etcd3Store implements ICredentialsSto
             credentialsId = keyParts[2];
         }
         return credentialsId;
+    }
+
+    private void putAllProperties(Properties properties, boolean encryptValues) throws CredentialsException, InterruptedException, ExecutionException {
+        for (Entry<Object, Object> property : properties.entrySet()) {
+            String key = (String) property.getKey();
+            String value = (String) property.getValue();
+            if (encryptValues) {
+                value = encryptionService.encrypt(value);
+            }
+            put(key, value);
+        }
     }
 }

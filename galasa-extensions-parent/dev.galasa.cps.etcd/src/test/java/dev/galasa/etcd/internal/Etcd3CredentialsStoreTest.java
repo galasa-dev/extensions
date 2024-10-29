@@ -5,6 +5,7 @@
  */
 package dev.galasa.etcd.internal;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -218,6 +219,39 @@ public class Etcd3CredentialsStoreTest {
     }
 
     @Test
+    public void testGetUsernamePasswordCredentialsWithMetadataReturnsCredentialsOk() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        String credsId = "CRED1";
+        String username = "my-user";
+        String password = "not-a-password";
+        String description = "a description of my credentials";
+        String lastUpdatedUser = "myUsername";
+        Instant lastUpdatedTime = Instant.EPOCH;
+        
+        Map<String, String> mockCreds = new HashMap<>();
+        mockCreds.put("secure.credentials." + credsId + ".username", username);
+        mockCreds.put("secure.credentials." + credsId + ".password", password);
+        mockCreds.put("secure.credentials." + credsId + ".description", description);
+        mockCreds.put("secure.credentials." + credsId + ".lastUpdated.time", lastUpdatedTime.toString());
+        mockCreds.put("secure.credentials." + credsId + ".lastUpdated.user", lastUpdatedUser);
+
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        // When...
+        CredentialsUsernamePassword creds = (CredentialsUsernamePassword) store.getCredentials(credsId);
+
+        // Then...
+        assertThat(creds).isNotNull();
+        assertThat(creds.getUsername()).isEqualTo(username);
+        assertThat(creds.getPassword()).isEqualTo(password);
+        assertThat(creds.getDescription()).isEqualTo(description);
+        assertThat(creds.getLastUpdatedByUser()).isEqualTo(lastUpdatedUser);
+        assertThat(creds.getLastUpdatedTime()).isEqualTo(lastUpdatedTime);
+    }
+
+    @Test
     public void testGetUsernameTokenCredentialsReturnsCredentialsOk() throws Exception {
         // Given...
         MockEncryptionService mockEncryptionService = new MockEncryptionService();
@@ -424,5 +458,40 @@ public class Etcd3CredentialsStoreTest {
 
         // Then...
         assertThat(mockClient.isClientShutDown()).isTrue();
+    }
+
+    @Test
+    public void testSetCredentialsWithMetadataSetsCredentialsOk() throws Exception {
+        // Given...
+        MockEncryptionService mockEncryptionService = new MockEncryptionService();
+        String credsId = "CRED1";
+        String username = "a-username";
+        String lastUpdatedUser = "myuser";
+        Instant lastUpdatedTime = Instant.EPOCH;
+        String description = "this is a description of my username secret";
+        
+        
+        Map<String, String> mockCreds = new HashMap<>();
+        MockEtcdClient mockClient = new MockEtcdClient(mockCreds);
+        Etcd3CredentialsStore store = new Etcd3CredentialsStore(null, mockEncryptionService, mockClient);
+
+        CredentialsUsername mockUsernameCreds = new CredentialsUsername(username);
+        mockUsernameCreds.setDescription(description);
+        mockUsernameCreds.setLastUpdatedByUser(lastUpdatedUser);
+        mockUsernameCreds.setLastUpdatedTime(lastUpdatedTime);
+
+        // When...
+        store.setCredentials(credsId, mockUsernameCreds);
+
+        // Then...
+        assertThat(mockCreds).hasSize(4);
+        assertThat(mockCreds.get("secure.credentials." + credsId + ".username")).isEqualTo(username);
+        assertThat(mockCreds.get("secure.credentials." + credsId + ".description")).isEqualTo(description);
+        assertThat(mockCreds.get("secure.credentials." + credsId + ".lastUpdated.time")).isEqualTo(lastUpdatedTime.toString());
+        assertThat(mockCreds.get("secure.credentials." + credsId + ".lastUpdated.user")).isEqualTo(lastUpdatedUser);
+        
+        // The credentials should have been encrypted when being set, but the metadata should not be encrypted
+        assertThat(mockEncryptionService.getEncryptCount()).isEqualTo(1);
+        assertThat(mockEncryptionService.getDecryptCount()).isEqualTo(0);
     }
 }
