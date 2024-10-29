@@ -118,7 +118,7 @@ public class CouchdbAuthStoreValidator extends CouchdbBaseValidator {
         return tableDesign;
     }
 
-    private boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign, String dbName) {
+    protected boolean updateDesignDocToDesiredDesignDoc(AuthDBNameViewDesign tableDesign, String dbName) {
         boolean isUpdated = false;
 
         if (tableDesign.views == null) {
