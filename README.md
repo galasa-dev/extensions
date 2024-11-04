@@ -1,3 +1,8 @@
+# BEFORE YOU READ ON...
+
+This repository is no longer used. Any code which is still relevant has been moved to the main galasa
+repository here: https://github.com/galasa-dev/galasa
+
 # Galasa Extensions
 This respository contains implementations of extensions that are required by the Galasa infrastructure, including RAS (ResultArchiveStore), etcd and CouchDB databases for storing test information.
 
