@@ -19,7 +19,7 @@ import javax.validation.constraints.NotNull;
  * {@link IEtcd3Client#registerWatch(IEtcd3Listener, String)}
  * </p>
  * 
- * @author Michael Baylis
+ *  
  *
  */
 public interface IEtcd3Listener {
@@ -27,7 +27,7 @@ public interface IEtcd3Listener {
     /**
      * The type of event that triggered the watch
      * 
-     * @author Michael Baylis
+     *  
      *
      */
     public enum Event {

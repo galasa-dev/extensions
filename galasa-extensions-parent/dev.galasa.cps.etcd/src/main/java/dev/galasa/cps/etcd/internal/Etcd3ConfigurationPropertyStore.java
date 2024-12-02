@@ -31,7 +31,7 @@ import io.etcd.jetcd.options.GetOption;
 /**
  * This class impletements the CPS for etcd using the JETCD client.
  * 
- * @author James Davies
+ *  
  * @author Matthew Chivers
  */
 public class Etcd3ConfigurationPropertyStore implements IConfigurationPropertyStore {

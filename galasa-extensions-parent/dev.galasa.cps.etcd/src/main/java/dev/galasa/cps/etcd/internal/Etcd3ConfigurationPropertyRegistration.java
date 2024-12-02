@@ -20,7 +20,7 @@ import dev.galasa.framework.spi.IFrameworkInitialisation;
  * This Class is a small OSGI bean that registers the CPS store as a ETCD
  * cluster or quietly fails.
  * 
- * @author James Davies
+ *  
  */
 @Component(service = { IConfigurationPropertyStoreRegistration.class })
 public class Etcd3ConfigurationPropertyRegistration implements IConfigurationPropertyStoreRegistration {
